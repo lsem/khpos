@@ -39,13 +39,6 @@ class PosterProxyService {
     }, 1000)
   }
 
-  tryConnectToPoster() {
-    console.log('trying connect to poster ..')
-    setTimeout(()=>{
-      this.tryConnectToPoster()
-    }, RECONNECT_TIMEOUT)
-  }
-
   start() {
     this.scheduleConnectIfNeeded()
   }
@@ -76,17 +69,13 @@ class KultHlibaPointOfSaleService {
 class KultHlibaWebApp {
   constructor(){
     this.app = express()
-    this.app.get('/', this.helloWorld )
+    this.app.get('/', this.getStock )
     this.app.get('/stock', this.getStock )
-    this.app.get('/plan', this.plan)
+    this.app.get('/plan', this.getPlan)
   }
 
   start() {
     this.app.listen(3000, () => console.log('Example app listening on port 3000!'))
-  }
-
-  helloWorld(req, res) {
-    res.send('Hello World!')
   }
 
   getStock(req, res) {
@@ -94,9 +83,25 @@ class KultHlibaWebApp {
     })
   }
 
-  plan(req, res) {
+  getPlan(req, res) {
     res.send({
     })
+  }
+}
+
+/////////////////////////////////////////////////////////
+
+class StorageService {
+  constructor() {
+  }
+
+  start() {
+  }
+
+  planItem() {
+  }
+
+  getPlan() {
   }
 }
 
@@ -107,6 +112,7 @@ class KultHlinaPOSApplicationService {
     this.posterProxy = new PosterProxyService()
     this.kuktHliba = new KultHlibaPointOfSaleService()
     this.webApp = new KultHlibaWebApp()
+    this.storage = new StorageService()
     this.posterProxy.onConnectedToPoster(()=> this.kuktHliba.connectedToPoster())
     this.posterProxy.onDisconnectedToPoster(()=> this.kuktHliba.disconnectedToPoster())
   }
@@ -115,8 +121,11 @@ class KultHlinaPOSApplicationService {
     this.posterProxy.start()
     this.kuktHliba.start()
     this.webApp.start()
+    this.storage.start()
   }
 }
+
+/////////////////////////////////////////////////////////
 
 var app = new KultHlinaPOSApplicationService()
 app.start()
