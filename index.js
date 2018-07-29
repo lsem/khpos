@@ -77,6 +77,8 @@ class KultHlibaWebApp {
   constructor(){
     this.app = express()
     this.app.get('/', this.helloWorld )
+    this.app.get('/stock', this.getStock )
+    this.app.get('/plan', this.plan)
   }
 
   start() {
@@ -85,6 +87,16 @@ class KultHlibaWebApp {
 
   helloWorld(req, res) {
     res.send('Hello World!')
+  }
+
+  getStock(req, res) {
+    res.send({
+    })
+  }
+
+  plan(req, res) {
+    res.send({
+    })
   }
 }
 
