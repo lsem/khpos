@@ -106,6 +106,10 @@ class StorageService {
 
   getPlan() {
   }
+
+  initialize() {
+    console.log('storage: Initialized');
+  }
 }
 
 /////////////////////////////////////////////////////////
@@ -121,6 +125,10 @@ class KultHlinaPOSApplicationService {
     this.posterProxy.onDisconnectedToPoster(() => this.kuktHliba.disconnectedToPoster())
   }
 
+  initialize() {
+    this.storage.initialize()
+  }
+
   start() {
     this.posterProxy.start()
     this.kuktHliba.start()
@@ -130,6 +138,28 @@ class KultHlinaPOSApplicationService {
 }
 
 /////////////////////////////////////////////////////////
+
+function parseCommandOrDie(args) {
+  if (args.length == 0) {
+    return null;
+  } else if ( args[0] === '--init') {
+    return 'init';
+  } else {
+    console.log('unrecognized options: ' + JSON.stringify(args))
+    process.exit(1)
+  }
+  return null;
+}
+
+switch(parseCommandOrDie(process.argv.slice(2))) {
+  case 'init': {
+    console.log('recognized command: init')
+    var app = new KultHlinaPOSApplicationService(config)
+    app.initialize()
+    console.log('Initialized. Exiting..')
+    return;
+  }
+}
 
 var app = new KultHlinaPOSApplicationService(config)
 app.start()
