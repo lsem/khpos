@@ -11,11 +11,18 @@ class StorageService {
     console.log('storage: mongo port: ' + this.mongoPort)
   }
 
+  onConnected(cb) {
+    this.onConnectedCb = cb;
+  }
+
   start() {
     this._initiateConnect();
   }
 
-  planItem() {
+  async planItem() {
+    return await this.db.collection('plan').insertOne({
+      'bread': 1
+    });
   }
 
   getPlan() {
@@ -27,18 +34,24 @@ class StorageService {
 
   _initiateConnect() {
     console.log('_initiateConnect');
-    const url = 'mongodb://localhost:' + this.port + '/myproject';
-    const dbName = 'myproject';
+    // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/
+    const url = 'mongodb://localhost:' + this.port + '/myproject?connectTimeoutMS=1000';
     console.log('storage: url: ' + url)
-    this.client = MongoClient.connect(url, (err, db) => {
-      if (!err && db) {
+    MongoClient.connect(url, (err, client) => {
+      if (!err && client) {
         console.log('storage: connected to mongo')
         this.state = STATE_CONNECTED;
-        db.on('close', () => this.handleClose);
-        db.on('authenticated', () => this.handleAuthenticated);
-        db.on('error', () => this.handleError);
-        db.on('reconnect', () => this.handleReconnect);
-        db.on('timeout', () => this.handleTimeout);
+        client.on('close', () => this.handleClose());
+        client.on('authenticated', () => this.handleAuthenticated());
+        client.on('error', () => this.handleError());
+        client.on('reconnect', () => this.handleReconnect());
+        client.on('timeout', () => this.handleTimeout());
+        let db = client.db("mydb");
+        if (db) {
+          this.db = db;
+          this.onConnectedCb();
+        }
+        this.client = client;
       } else {
         console.log('storage: error connection to mongo')
         setTimeout(() => this._initiateConnect(), 1000);

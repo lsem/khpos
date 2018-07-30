@@ -7,12 +7,13 @@ let KultHlibaWebApp = require('./kultHlibaWebApp.js');
 class KultHlinaPOSApplicationService {
   constructor(config) {
     this.config = config
-    this.posterProxy = new PosterProxyService()
-    this.kuktHliba = new KultHlibaPointOfSaleService()
-    this.webApp = new KultHlibaWebApp(this.config.web)
-    this.storage = new StorageService(this.config.storage)
-    this.posterProxy.onConnectedToPoster(() => this.kuktHliba.connectedToPoster())
-    this.posterProxy.onDisconnectedToPoster(() => this.kuktHliba.disconnectedToPoster())
+    this.posterProxy = new PosterProxyService();
+    this.storage = new StorageService(this.config.storage);
+    this.kuktHliba = new KultHlibaPointOfSaleService(this.storage);
+    this.webApp = new KultHlibaWebApp(this.config.web);
+    this.storage.onConnected(() => this.kuktHliba.connectedToStorage())
+    this.posterProxy.onConnectedToPoster(() => this.kuktHliba.connectedToPoster());
+    this.posterProxy.onDisconnectedToPoster(() => this.kuktHliba.disconnectedToPoster());
   }
 
   initialize() {
