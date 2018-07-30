@@ -25,7 +25,8 @@ class StorageService {
     });
   }
 
-  getPlan() {
+  async getPlan() {
+    return await this.db.collection('plan').find({}, {fields:{_id: 0}}).toArray();
   }
 
   initialize() {

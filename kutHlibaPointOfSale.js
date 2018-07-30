@@ -22,6 +22,11 @@ class KultHlibaPointOfSaleService {
   start() {
   }
 
+  async getPlan() {
+    console.log('kh: requested plan');
+    return await this.storage.getPlan();
+  }
+
 }
 
 

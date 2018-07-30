@@ -9,11 +9,11 @@ class KultHlinaPOSApplicationService {
     this.config = config
     this.posterProxy = new PosterProxyService();
     this.storage = new StorageService(this.config.storage);
-    this.kuktHliba = new KultHlibaPointOfSaleService(this.storage);
-    this.webApp = new KultHlibaWebApp(this.config.web);
-    this.storage.onConnected(() => this.kuktHliba.connectedToStorage())
-    this.posterProxy.onConnectedToPoster(() => this.kuktHliba.connectedToPoster());
-    this.posterProxy.onDisconnectedToPoster(() => this.kuktHliba.disconnectedToPoster());
+    this.kultHliba = new KultHlibaPointOfSaleService(this.storage);
+    this.webApp = new KultHlibaWebApp(this.config.web, this.kultHliba);
+    this.storage.onConnected(() => this.kultHliba.connectedToStorage())
+    this.posterProxy.onConnectedToPoster(() => this.kultHliba.connectedToPoster());
+    this.posterProxy.onDisconnectedToPoster(() => this.kultHliba.disconnectedToPoster());
   }
 
   initialize() {
@@ -22,7 +22,7 @@ class KultHlinaPOSApplicationService {
 
   start() {
     this.posterProxy.start()
-    this.kuktHliba.start()
+    this.kultHliba.start()
     this.webApp.start()
     this.storage.start()
   }
