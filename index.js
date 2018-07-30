@@ -1,4 +1,6 @@
-const express = require('express')
+const express = require('express');
+
+const config = require('./config/index.js');
 
 STATE_CONNECTED = 'connected';
 STATE_NOTCONNECTED = 'not-connected';
@@ -44,7 +46,7 @@ class PosterProxyService {
   }
 }
 
- //////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 
 class KultHlibaPointOfSaleService {
   constructor() {
@@ -67,15 +69,16 @@ class KultHlibaPointOfSaleService {
 /////////////////////////////////////////////////////////
 
 class KultHlibaWebApp {
-  constructor(){
+  constructor(config) {
+    this.listeningPort = config.server.port
     this.app = express()
-    this.app.get('/', this.getStock )
-    this.app.get('/stock', this.getStock )
+    this.app.get('/', this.getStock)
+    this.app.get('/stock', this.getStock)
     this.app.get('/plan', this.getPlan)
   }
 
   start() {
-    this.app.listen(3000, () => console.log('Example app listening on port 3000!'))
+    this.app.listen(this.listeningPort, () => console.log('Example app listening on port 3000!'))
   }
 
   getStock(req, res) {
@@ -108,13 +111,14 @@ class StorageService {
 /////////////////////////////////////////////////////////
 
 class KultHlinaPOSApplicationService {
-  constructor() {
+  constructor(config) {
+    this.config = config
     this.posterProxy = new PosterProxyService()
     this.kuktHliba = new KultHlibaPointOfSaleService()
-    this.webApp = new KultHlibaWebApp()
+    this.webApp = new KultHlibaWebApp(this.config)
     this.storage = new StorageService()
-    this.posterProxy.onConnectedToPoster(()=> this.kuktHliba.connectedToPoster())
-    this.posterProxy.onDisconnectedToPoster(()=> this.kuktHliba.disconnectedToPoster())
+    this.posterProxy.onConnectedToPoster(() => this.kuktHliba.connectedToPoster())
+    this.posterProxy.onDisconnectedToPoster(() => this.kuktHliba.disconnectedToPoster())
   }
 
   start() {
@@ -127,7 +131,7 @@ class KultHlinaPOSApplicationService {
 
 /////////////////////////////////////////////////////////
 
-var app = new KultHlinaPOSApplicationService()
+var app = new KultHlinaPOSApplicationService(config)
 app.start()
 
 
