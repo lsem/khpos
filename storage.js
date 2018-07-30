@@ -32,13 +32,19 @@ class StorageService {
     console.log('storage: url: ' + url)
     this.client = MongoClient.connect(url, (err, db) => {
       if (!err && db) {
-        console.log('storage: connected to mongo: ' + JSON.stringify(db))
+        console.log('storage: connected to mongo')
         this.state = STATE_CONNECTED;
+        db.on('close', ()=> this.handleClose);
       } else {
         console.log('storage: error connection to mongo')
         setTimeout(() => this._initiateConnect(), 1000);
       }
     });
+  }
+
+  handleClose() {
+    console.log('storage: connection closed, reconnecting..');
+    this._initiateConnect();
   }
 }
 
