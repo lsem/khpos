@@ -34,7 +34,11 @@ class StorageService {
       if (!err && db) {
         console.log('storage: connected to mongo')
         this.state = STATE_CONNECTED;
-        db.on('close', ()=> this.handleClose);
+        db.on('close', () => this.handleClose);
+        db.on('authenticated', () => this.handleAuthenticated);
+        db.on('error', () => this.handleError);
+        db.on('reconnect', () => this.handleReconnect);
+        db.on('timeout', () => this.handleTimeout);
       } else {
         console.log('storage: error connection to mongo')
         setTimeout(() => this._initiateConnect(), 1000);
@@ -45,6 +49,18 @@ class StorageService {
   handleClose() {
     console.log('storage: connection closed, reconnecting..');
     this._initiateConnect();
+  }
+
+  handleAuthenticated() {
+    console.log('storage: authenticated');
+  }
+
+  handleReconnect() {
+    console.log('storage: reconnect');
+  }
+
+  handleTimeout() {
+    console.log('storage: timeout');
   }
 }
 
