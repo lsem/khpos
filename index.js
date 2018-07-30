@@ -2,9 +2,9 @@ const express = require('express');
 
 const config = require('./config/index.js');
 
-STATE_CONNECTED = 'connected';
-STATE_NOTCONNECTED = 'not-connected';
-RECONNECT_TIMEOUT = 5000
+const STATE_CONNECTED = 'connected';
+const STATE_NOTCONNECTED = 'not-connected';
+const RECONNECT_TIMEOUT = 5000;
 
 //////////////////////////////////////////////////////////////////
 
@@ -142,16 +142,16 @@ class KultHlinaPOSApplicationService {
 function parseCommandOrDie(args) {
   if (args.length == 0) {
     return null;
-  } else if ( args[0] === '--init') {
+  } else if (args[0] === '--init') {
     return 'init';
   } else {
-    console.log('unrecognized options: ' + JSON.stringify(args))
+    console.log('Unrecognized options: ' + JSON.stringify(args) + '. Exitting.')
     process.exit(1)
   }
   return null;
 }
 
-switch(parseCommandOrDie(process.argv.slice(2))) {
+switch (parseCommandOrDie(process.argv.slice(2))) {
   case 'init': {
     console.log('recognized command: init')
     var app = new KultHlinaPOSApplicationService(config)
