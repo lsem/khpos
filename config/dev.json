@@ -1,0 +1,9 @@
+{
+  "web": {
+    "port": 3000
+  },
+  "storage": {
+    "port": 4000,
+    "host": "localhost"
+  }
+}
