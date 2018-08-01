@@ -14,7 +14,10 @@ class Products extends Component {
     axios.get('http://localhost:5000/products')
     .then(json => json.data.response.map(result => (
       {
-        name: result.product_name
+        name: result.product_name,
+        category_name: result.category_name,
+        category_id: result.menu_category_id,
+        cost: result.cost
       })))
     .then(products => {
       this.setState({products: products})
@@ -24,11 +27,11 @@ class Products extends Component {
 
   render() {
     const productItems = this.state.products.map((product) =>
-      <li> {product.name} </li>
+      <li> {product.name} ({product.category_name}) -- {product.cost}₴ </li>
     );
     return (
       <div className="Products">
-        <p> Products rendered here ({this.state.products.length} items) </p>
+        <p> Продукти ({this.state.products.length} одиниць): </p>
         <ul> {productItems} </ul>
       </div>
     )
