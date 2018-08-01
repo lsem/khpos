@@ -1,5 +1,13 @@
 {
   "server": {
     "port": 80
+  },
+  "storage": {
+    "port": 4000,
+    "host": "localhost"
+  },
+  "poster": {
+    "apiLink" : "",
+    "securityToken" : ""
   }
 }
