@@ -2,6 +2,14 @@ import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
 
+function ProductListItem(props) {
+  return (
+    <li className="ProductListItem">
+      {props.name} ({props.category_name}) -- {props.cost}₴{" "}
+    </li>
+  );
+}
+
 class Products extends Component {
   constructor(props) {
     super(props);
@@ -30,10 +38,11 @@ class Products extends Component {
 
   render() {
     const productItems = this.state.products.map(product => (
-      <li key={product.id}>
-        {" "}
-        {product.name} ({product.category_name}) -- {product.cost}₴{" "}
-      </li>
+      <ProductListItem
+        name={product.name}
+        category_name={product.category_name}
+        cost={product.cost}
+      />
     ));
     return (
       <div className="Products">
