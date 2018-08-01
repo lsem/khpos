@@ -1,4 +1,5 @@
 const express = require("express");
+var cors = require('cors');
 
 class KultHlibaWebApp {
   constructor(config, khApp, posterProxyService) {
@@ -6,6 +7,7 @@ class KultHlibaWebApp {
     this.khApp = khApp;
     this.posterProxyService = posterProxyService;
     this.express = express();
+    this.express.use(cors());
     this.express.get("/", this.getStock.bind(this));
     this.express.get("/stock", this.getStock.bind(this));
     this.express.get("/products", this.getProducts.bind(this));
@@ -14,7 +16,7 @@ class KultHlibaWebApp {
 
   start() {
     this.express.listen(this.port, () =>
-      console.log("Example app listening on port 3000!")
+      console.log(`Example app listening on port ${this.port}!`)
     );
   }
 
