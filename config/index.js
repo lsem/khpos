@@ -7,14 +7,17 @@ let configBuffer = null;
 
 switch (NODE_ENV) {
   case "prod": {
+    console.log('config: loading PROD env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "prod.json"), "utf-8");
     break;
   }
   case "dev": {
+    console.log('config: loading DEV env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "dev.json"), "utf-8");
     break;
   }
   default: {
+    console.log('config: loading DEFAULT env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "default.json"), "utf-8");
     break;
   }
