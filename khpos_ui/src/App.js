@@ -18,7 +18,7 @@ class Products extends Component {
     };
   }
 
-  componentDidMount() {
+  fetchProducts() {
     axios
       .get("http://localhost:5000/products")
       .then(json =>
@@ -34,6 +34,18 @@ class Products extends Component {
         this.setState({ products: products });
       })
       .catch(err => console.log("failed fetching products: " + err));
+  }
+
+  refreshProductsAfter(after) {
+    setTimeout(() => {
+      this.fetchProducts()
+      this.refreshProductsAfter(after);
+    }, after);
+  }
+
+  componentDidMount() {
+    this.fetchProducts()
+    this.refreshProductsAfter(3000);
   }
 
   render() {
