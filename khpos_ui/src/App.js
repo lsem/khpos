@@ -30,21 +30,19 @@ class Products extends Component {
           cost: result.cost
         }))
       )
-      .then(products => {
-        this.setState({ products: products });
-      })
+      .then(products => this.setState({ products: products }))
       .catch(err => console.log("failed fetching products: " + err));
   }
 
   refreshProductsAfter(after) {
     setTimeout(() => {
-      this.fetchProducts()
+      this.fetchProducts();
       this.refreshProductsAfter(after);
     }, after);
   }
 
   componentDidMount() {
-    this.fetchProducts()
+    this.fetchProducts();
     this.refreshProductsAfter(3000);
   }
 
