@@ -14,6 +14,7 @@ class Products extends Component {
     axios.get('http://localhost:5000/products')
     .then(json => json.data.response.map(result => (
       {
+        id: result.product_id,
         name: result.product_name,
         category_name: result.category_name,
         category_id: result.menu_category_id,
@@ -27,7 +28,7 @@ class Products extends Component {
 
   render() {
     const productItems = this.state.products.map((product) =>
-      <li> {product.name} ({product.category_name}) -- {product.cost}₴ </li>
+      <li key={product.id}> {product.name} ({product.category_name}) -- {product.cost}₴ </li>
     );
     return (
       <div className="Products">
