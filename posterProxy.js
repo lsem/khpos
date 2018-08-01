@@ -1,41 +1,29 @@
-const STATE_CONNECTED = "connected";
-const STATE_NOTCONNECTED = "not-connected";
-const RECONNECT_TIMEOUT = 5000;
+const PosterAPI = require("./PosterAPI");
+const axios     = require("axios");
 
 class PosterProxyService {
   constructor() {
-    this.onDisconnectedToPosterCb = null;
-    this.onConnectedToPosterCb = null;
-    this.connectionState = STATE_NOTCONNECTED;
-    this.reconnectRetries = 0;
+    this.posterAPI = new PosterAPI();
   }
 
-  onConnectedToPoster(cb) {
-    this.onConnectedToPosterCb = cb;
+  getStock(params, res, err) {
+    axios.get(this.posterAPI.getStorageLeftoversRequest(params))
+    .then(response => {
+      res(response.data);
+    })
+    .catch(error => {
+      err(error);
+    });
   }
 
-  onDisconnectedToPoster(cb) {
-    this.onDisconnectedToPosterCb = cb;
-  }
-
-  initiateConnect() {}
-
-  scheduleConnectIfNeeded() {
-    console.log("posproxy: reconnect");
-    setTimeout(() => {
-      this.initiateConnect();
-      this.reconnectRetries += 1;
-      if (this.reconnectRetries === 5) {
-        this.onConnectedToPosterCb();
-        this.reconnectRetries = 0;
-      } else {
-        this.scheduleConnectIfNeeded();
-      }
-    }, 1000);
-  }
-
-  start() {
-    this.scheduleConnectIfNeeded();
+  getProducts(params, res, err) {
+    axios.get(this.posterAPI.getProductsRequest(params))
+    .then(response => {
+      res(response.data);
+    })
+    .catch(error => {
+      err(error);
+    });
   }
 }
 

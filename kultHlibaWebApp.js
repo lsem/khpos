@@ -1,12 +1,14 @@
 const express = require("express");
 
 class KultHlibaWebApp {
-  constructor(config, khApp) {
+  constructor(config, khApp, posterProxyService) {
     this.port = config.port;
     this.khApp = khApp;
+    this.posterProxyService = posterProxyService;
     this.express = express();
     this.express.get("/", this.getStock.bind(this));
     this.express.get("/stock", this.getStock.bind(this));
+    this.express.get("/products", this.getProducts.bind(this));
     this.express.get("/plan", this.getPlan.bind(this));
   }
 
@@ -17,7 +19,25 @@ class KultHlibaWebApp {
   }
 
   async getStock(req, res) {
-    res.send({});
+    this.posterProxyService.getStock(
+      req.query,
+      (data) => res.send(data),
+      (error) => {
+        res.status(error.response.status);
+        res.send(error);
+      }
+    );
+  }
+
+  async getProducts(req, res) {
+    this.posterProxyService.getProducts(
+      req.query,
+      (data) => res.send(data),
+      (error) => {
+        res.status(error.response.status);
+        res.send(error);
+      }
+    );
   }
 
   async getPlan(req, res) {
