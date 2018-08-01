@@ -5,18 +5,31 @@ import axios from 'axios';
 class Products extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      products: []
+    };
   }
 
   componentDidMount() {
     axios.get('http://localhost:5000/products')
-    .then(json => console.log(json))
+    .then(json => json.data.response.map(result => (
+      {
+        name: result.product_name
+      })))
+    .then(products => {
+      this.setState({products: products})
+    })
     .catch(err => console.log('failed fetching products: ' + err));
   }
 
   render() {
+    const productItems = this.state.products.map((product) =>
+      <li> {product.name} </li>
+    );
     return (
       <div className="Products">
-        <p> Products rendered here </p>
+        <p> Products rendered here ({this.state.products.length} items) </p>
+        <ul> {productItems} </ul>
       </div>
     )
   }
