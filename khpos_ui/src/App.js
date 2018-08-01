@@ -42,6 +42,7 @@ class Products extends Component {
         name={product.name}
         category_name={product.category_name}
         cost={product.cost}
+        key={product.id}
       />
     ));
     return (
