@@ -24,9 +24,8 @@ class KultHlibaWebApp {
       .getStock()
       .then(data => res.send(data))
       .catch(err => {
-        console.log("caught error: " + err);
-        res.status(501);
-        res.send(error);
+        res.status(500);
+        res.send({error: err});
       });
   }
 
@@ -35,14 +34,12 @@ class KultHlibaWebApp {
       .getProducts()
       .then(data => res.send(data))
       .catch(err => {
-        console.log("caught error: " + err);
-        res.status(501);
-        res.send(error);
+        res.status(500);
+        res.send({error: err});
       });
   }
 
   getPlan(req, res) {
-    console.log("web: getting plan");
     res.status(501);
     res.send({})
   }
