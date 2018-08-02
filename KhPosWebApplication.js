@@ -1,7 +1,7 @@
 const express = require("express");
 var cors = require("cors");
 
-class KultHlibaWebApp {
+class KhPosWebApplication {
   constructor(config, khApp) {
     this.port = config.port;
     this.khApp = khApp;
@@ -44,4 +44,4 @@ class KultHlibaWebApp {
     res.send({})
   }
 }
-module.exports = KultHlibaWebApp;
+module.exports = KhPosWebApplication;

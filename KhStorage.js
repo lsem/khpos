@@ -4,7 +4,7 @@ const assert = require("assert");
 const STATE_CONNECTED = "state-connected";
 const STATE_DISCONNECTED = "state-disconnected";
 
-class StorageService {
+class KhStorage {
   constructor(config) {
     this.port = config.port;
     this.state = STATE_DISCONNECTED;
@@ -84,4 +84,4 @@ class StorageService {
   }
 }
 
-module.exports = StorageService;
+module.exports = KhStorage;

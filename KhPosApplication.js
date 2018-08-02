@@ -1,6 +1,6 @@
 
 
-class KultHlibaPointOfSaleService {
+class KhPosApplication {
   constructor(storage, posterProxyService) {
     this.storage = storage;
     this.posterProxyService = posterProxyService;
@@ -37,4 +37,4 @@ class KultHlibaPointOfSaleService {
   }
 }
 
-module.exports = KultHlibaPointOfSaleService;
+module.exports = KhPosApplication;

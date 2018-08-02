@@ -1,19 +1,19 @@
 const config = require('./config/index');
-let StorageService = require('./storage');
 let PosterProxyService = require('./posterProxy');
-let KultHlibaPointOfSaleService = require('./kutHlibaPointOfSale');
-let KultHlibaWebApp = require('./kultHlibaWebApp');
-let StockService = require('./StockService')
+let KhStorage = require('./KhStorage');
+let KhPosApplication = require('./KhPosApplication');
+let KhPosWebApplication = require('./KhPosWebApplication');
+let KhStockService = require('./KhStockService')
 
-class KultHlinaPOSApplicationService {
+class KhPosNodeApp {
   constructor(config) {
-    this.config = config
+    this.config = config;
     this.posterProxy = new PosterProxyService();
-    this.storage = new StorageService(this.config.storage);
-    this.kultHliba = new KultHlibaPointOfSaleService(this.storage, this.posterProxy);
-    this.webApp = new KultHlibaWebApp(this.config.web, this.kultHliba);
-    this.stockService = new StockService(this.config.stock);
-    this.storage.onConnected(() => this.kultHliba.connectedToStorage())
+    this.khStorage = new KhStorage(this.config.storage);
+    this.khApp = new KhPosApplication(this.khStorage, this.posterProxy);
+    this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp);
+    this.KhStockService = new KhStockService(this.config.stock);
+    this.khStorage.onConnected(() => this.khApp.connectedToStorage())
   }
 
   initialize() {
@@ -21,10 +21,10 @@ class KultHlinaPOSApplicationService {
   }
 
   start() {
-    this.kultHliba.start()
-    this.webApp.start()
-    this.storage.start()
-    this.stockService.start();
+    this.khApp.start()
+    this.khWebApp.start()
+    this.khStorage.start()
+    this.KhStockService.start();
   }
 }
 
@@ -52,5 +52,5 @@ switch (parseCommandOrDie(process.argv.slice(2))) {
   }
 }
 
-var app = new KultHlinaPOSApplicationService(config)
+var app = new KhPosNodeApp(config)
 app.start()
