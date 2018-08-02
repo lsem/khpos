@@ -32,10 +32,6 @@ class KhStorage {
       .toArray();
   }
 
-  initialize() {
-    console.log("storage: Initialized");
-  }
-
   _initiateConnect() {
     console.log("_initiateConnect");
     // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/

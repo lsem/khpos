@@ -16,10 +16,6 @@ class KhPosNodeApp {
     this.khStorage.onConnected(() => this.khApp.connectedToStorage())
   }
 
-  initialize() {
-    this.storage.initialize()
-  }
-
   start() {
     this.khApp.start()
     this.khWebApp.start()
