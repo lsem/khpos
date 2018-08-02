@@ -41,9 +41,7 @@ function parseCommandOrDie(args) {
 switch (parseCommandOrDie(process.argv.slice(2))) {
   case 'init': {
     console.log('recognized command: init')
-    var app = new KultHlinaPOSApplicationService(config)
-    app.initialize()
-    console.log('Initialized. Exiting..')
+    console.log('Initialized. Exiting..');
     return;
   }
 }
