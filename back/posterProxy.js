@@ -1,5 +1,6 @@
 const PosterAPI = require("./PosterAPI");
 const axios     = require("axios");
+var debug = require('debug')('khposterproxy');
 
 class PosterProxyService {
   constructor() {
@@ -9,6 +10,7 @@ class PosterProxyService {
   getStock(params, res, err) {
     axios.get(this.posterAPI.getStorageLeftoversRequest(params))
     .then(response => {
+      debug("stock data: %o", response.data);
       res(response.data);
     })
     .catch(error => {
@@ -19,6 +21,7 @@ class PosterProxyService {
   getProducts(params, res, err) {
     axios.get(this.posterAPI.getProductsRequest(params))
     .then(response => {
+      debug("products data: %o", response.data);
       res(response.data);
     })
     .catch(error => {

@@ -4,6 +4,7 @@ let KhStorage = require('./KhStorage');
 let KhPosApplication = require('./KhPosApplication');
 let KhPosWebApplication = require('./KhPosWebApplication');
 let KhStock = require('./KhStock')
+var debug = require('debug')('khapp');
 
 class KhPosNodeApp {
   constructor(config) {
@@ -32,7 +33,7 @@ function parseCommandOrDie(args) {
   } else if (args[0] === '--init') {
     return 'init';
   } else {
-    console.log('Unrecognized options: ' + JSON.stringify(args) + '. Exitting.')
+    console.error('Unrecognized options: %o. Exiting', args);
     process.exit(1)
   }
   return null;
@@ -40,8 +41,8 @@ function parseCommandOrDie(args) {
 
 switch (parseCommandOrDie(process.argv.slice(2))) {
   case 'init': {
-    console.log('recognized command: init')
-    console.log('Initialized. Exiting..');
+    debug('recognized command: init')
+    debug('Initialized. Exiting..');
     return;
   }
 }

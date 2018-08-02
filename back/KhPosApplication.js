@@ -1,4 +1,4 @@
-
+let debug = require('debug')('khapp');
 
 class KhPosApplication {
   constructor(storage, posterProxyService) {
@@ -7,7 +7,7 @@ class KhPosApplication {
   }
 
   connectedToStorage() {
-    console.log("kh: Connected to Storage");
+    debug("Connected to Storage");
   }
 
   start() {}

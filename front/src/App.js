@@ -45,7 +45,7 @@ class ProductList extends Component {
 
   componentDidMount() {
     this.fetchProducts();
-    this.refreshProductsAfter(3000);
+    this.refreshProductsAfter(5000);
   }
 
   render() {

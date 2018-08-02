@@ -1,5 +1,7 @@
 const express = require("express");
 var cors = require("cors");
+var morgan = require('morgan');
+var debug = require('debug')('khweb');
 
 class KhPosWebApplication {
   constructor(config, khApp) {
@@ -7,6 +9,7 @@ class KhPosWebApplication {
     this.khApp = khApp;
     this.express = express();
     this.express.use(cors());
+    this.express.use(morgan('tiny'));
     this.express.get("/", this.getStock.bind(this));
     this.express.get("/stock", this.getStock.bind(this));
     this.express.get("/products", this.getProducts.bind(this));
@@ -30,6 +33,7 @@ class KhPosWebApplication {
   }
 
   async getProducts(req, res) {
+    debug("getting products");
     this.khApp
       .getProducts()
       .then(data => res.send(data))

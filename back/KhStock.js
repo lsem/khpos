@@ -1,3 +1,4 @@
+let debug = require('debug')('khstock');
 
 // Stock service is responsible for providing
 // stock internal API on back-end.
@@ -7,7 +8,7 @@ class KhStock {
   }
 
   start() {
-    console.log("stock: service started")
+    debug("service started")
   }
 };
 

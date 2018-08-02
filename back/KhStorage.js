@@ -1,5 +1,6 @@
 const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
+let debug = require('debug')('khstorage');
 
 const STATE_CONNECTED = "state-connected";
 const STATE_DISCONNECTED = "state-disconnected";
@@ -8,7 +9,7 @@ class KhStorage {
   constructor(config) {
     this.port = config.port;
     this.state = STATE_DISCONNECTED;
-    console.log("storage: mongo port: " + this.mongoPort);
+    debug("storage: mongo port: %d", this.port);
   }
 
   onConnected(cb) {
@@ -33,15 +34,15 @@ class KhStorage {
   }
 
   _initiateConnect() {
-    console.log("_initiateConnect");
+    debug("_initiateConnect");
     // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/
     const url = "mongodb://localhost:" + this.port + "/myproject?connectTimeoutMS=1000";
-    console.log("storage: url: " + url);
+    debug("url: %s", url);
     MongoClient.connect(
       url,
       (err, client) => {
         if (!err && client) {
-          console.log("storage: connected to mongo");
+          debug("connected to mongo");
           this.state = STATE_CONNECTED;
           client.on("close", () => this.handleClose());
           client.on("authenticated", () => this.handleAuthenticated());
@@ -55,7 +56,7 @@ class KhStorage {
           }
           this.client = client;
         } else {
-          console.log("storage: error connection to mongo");
+          debug("error connection to mongo");
           setTimeout(() => this._initiateConnect(), 1000);
         }
       }
@@ -63,20 +64,20 @@ class KhStorage {
   }
 
   handleClose() {
-    console.log("storage: connection closed, reconnecting..");
+    debug("connection closed, reconnecting..");
     this._initiateConnect();
   }
 
   handleAuthenticated() {
-    console.log("storage: authenticated");
+    debug("authenticated");
   }
 
   handleReconnect() {
-    console.log("storage: reconnect");
+    debug("reconnect");
   }
 
   handleTimeout() {
-    console.log("storage: timeout");
+    debug("timeout");
   }
 }
 

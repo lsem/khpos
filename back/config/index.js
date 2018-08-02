@@ -2,22 +2,24 @@
 
 const fs = require("fs");
 const path = require("path");
+var debug = require('debug')('khconfig');
+
 const NODE_ENV = process.env.NODE_ENV;
 let configBuffer = null;
 
 switch (NODE_ENV) {
   case "prod": {
-    console.log('config: loading PROD env')
+    debug('loading PROD env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "prod.json"), "utf-8");
     break;
   }
   case "dev": {
-    console.log('config: loading DEV env')
+    debug('loading DEV env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "dev.json"), "utf-8");
     break;
   }
   default: {
-    console.log('config: loading DEFAULT env')
+    debug('loading DEFAULT env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "default.json"), "utf-8");
     break;
   }
@@ -42,6 +44,8 @@ function expandEnvVars(config) {
   }
   return config;
 }
+// WARNING: do not log config after expaning.
+debug("effective config: %O", JSON.parse(configBuffer));
 
 let config = expandEnvVars(JSON.parse(configBuffer));
 module.exports = config;
