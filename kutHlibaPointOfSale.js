@@ -8,10 +8,6 @@ class KultHlibaPointOfSaleService {
 
   connectedToStorage() {
     console.log("kh: Connected to Storage");
-    (async () => {
-      await this.storage.planItem();
-      console.log("kh: planned something");
-    })();
   }
 
   start() {}

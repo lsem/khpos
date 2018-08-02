@@ -15,7 +15,7 @@ class KultHlibaWebApp {
 
   start() {
     this.express.listen(this.port, () =>
-      console.log(`Example app listening on port ${this.port}!`)
+      console.log(`web: listening on port ${this.port}!`)
     );
   }
 
