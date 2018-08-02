@@ -3,7 +3,7 @@ let PosterProxyService = require('./posterProxy');
 let KhStorage = require('./KhStorage');
 let KhPosApplication = require('./KhPosApplication');
 let KhPosWebApplication = require('./KhPosWebApplication');
-let KhStockService = require('./KhStockService')
+let KhStock = require('./KhStock')
 
 class KhPosNodeApp {
   constructor(config) {
@@ -12,7 +12,7 @@ class KhPosNodeApp {
     this.khStorage = new KhStorage(this.config.storage);
     this.khApp = new KhPosApplication(this.khStorage, this.posterProxy);
     this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp);
-    this.KhStockService = new KhStockService(this.config.stock);
+    this.KhStock = new KhStock(this.config.stock);
     this.khStorage.onConnected(() => this.khApp.connectedToStorage())
   }
 

@@ -1,7 +1,7 @@
 
 // Stock service is responsible for providing
 // stock internal API on back-end.
-class KhStockService {
+class KhStock {
   constructor(config) {
     this.config = config;
   }
@@ -11,4 +11,4 @@ class KhStockService {
   }
 };
 
-module.exports = KhStockService;
+module.exports = KhStock;
