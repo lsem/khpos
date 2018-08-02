@@ -24,7 +24,7 @@ class KhPosNodeApp {
     this.khApp.start()
     this.khWebApp.start()
     this.khStorage.start()
-    this.KhStockService.start();
+    this.KhStock.start();
   }
 }
 
