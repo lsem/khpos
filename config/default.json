@@ -9,5 +9,7 @@
   "poster": {
     "apiLink" : "$POSTER_API_LINK",
     "securityToken" : "$POSTER_SECURITY_TOKEN"
+  },
+  "stock": {
   }
 }

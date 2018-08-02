@@ -1,11 +1,10 @@
 const express = require("express");
-var cors = require('cors');
+var cors = require("cors");
 
 class KultHlibaWebApp {
-  constructor(config, khApp, posterProxyService) {
+  constructor(config, khApp) {
     this.port = config.port;
     this.khApp = khApp;
-    this.posterProxyService = posterProxyService;
     this.express = express();
     this.express.use(cors());
     this.express.get("/", this.getStock.bind(this));
@@ -20,32 +19,32 @@ class KultHlibaWebApp {
     );
   }
 
-  async getStock(req, res) {
-    this.posterProxyService.getStock(
-      req.query,
-      (data) => res.send(data),
-      (error) => {
-        res.status(error.response.status);
+  getStock(req, res) {
+    this.khApp
+      .getStock()
+      .then(data => res.send(data))
+      .catch(err => {
+        console.log("caught error: " + err);
+        res.status(501);
         res.send(error);
-      }
-    );
+      });
   }
 
   async getProducts(req, res) {
-    this.posterProxyService.getProducts(
-      req.query,
-      (data) => res.send(data),
-      (error) => {
-        res.status(error.response.status);
+    this.khApp
+      .getProducts()
+      .then(data => res.send(data))
+      .catch(err => {
+        console.log("caught error: " + err);
+        res.status(501);
         res.send(error);
-      }
-    );
+      });
   }
 
-  async getPlan(req, res) {
+  getPlan(req, res) {
     console.log("web: getting plan");
-    var plan = await this.khApp.getPlan();
-    res.send(plan);
+    res.status(501);
+    res.send({})
   }
 }
 module.exports = KultHlibaWebApp;

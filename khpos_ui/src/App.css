@@ -25,3 +25,13 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.App > .ProductList {
+  /* outline: solid black 1px; */
+  margin-bottom: 50px;
+}
+
+.App > .StockList {
+  /* outline: solid black 1px; */
+  margin-bottom: 50px;
+}

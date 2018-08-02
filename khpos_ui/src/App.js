@@ -1,3 +1,5 @@
+// https://code.tutsplus.com/tutorials/introduction-to-api-calls-with-react-and-axios--cms-21027
+
 import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
@@ -10,7 +12,7 @@ function ProductListItem(props) {
   );
 }
 
-class Products extends Component {
+class ProductList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -56,9 +58,50 @@ class Products extends Component {
       />
     ));
     return (
-      <div className="Products">
-        <p> Продукти ({this.state.products.length} одиниць): </p>
+      <div className="ProductList">
+        <h1>Продукти</h1>
         <ul> {productItems} </ul>
+      </div>
+    );
+  }
+}
+
+class Api {
+  getStock(dataCb, errCb) {
+    axios
+      .get("http://localhost:5000/stock")
+      .then(json =>
+        json.data.response.map(result => console.log(result))
+        // json.data.response.map(result => ({
+        //   id: result.product_id,
+        //   name: result.product_name,
+        //   category_name: result.category_name,
+        //   category_id: result.menu_category_id,
+        //   cost: result.cost
+        // }))
+      )
+      .then(products => dataCb(products))
+      .catch(err => errCb(err));
+  }
+}
+
+class StockList extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
+    (new Api()).getStock((data) => {
+      console.log('Got stock')
+    }, (err) => {
+      console.log('Cannot get stock')
+    });
+  }
+
+  render() {
+    return (
+      <div className="StockList">
+        <h1>Наявність</h1>
       </div>
     );
   }
@@ -70,9 +113,10 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           {/* <img src={logo} className="App-logo" alt="logo" /> */}
-          <h1 className="App-title">Welcome to KH POS</h1>
+          <h1 className="App-title">Культ Хліба</h1>
         </header>
-        <Products />
+        <ProductList />
+        <StockList />
       </div>
     );
   }

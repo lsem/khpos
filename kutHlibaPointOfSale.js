@@ -1,6 +1,9 @@
+
+
 class KultHlibaPointOfSaleService {
-  constructor(storage) {
+  constructor(storage, posterProxyService) {
     this.storage = storage;
+    this.posterProxyService = posterProxyService;
   }
 
   connectedToStorage() {
@@ -13,8 +16,27 @@ class KultHlibaPointOfSaleService {
 
   start() {}
 
+  async getProducts() {
+    return new Promise((resolve, reject) => {
+      this.posterProxyService.getProducts(
+        null,
+        data => resolve(data),
+        error => reject(error)
+      );
+    });
+  }
+
+  async getStock() {
+    return new Promise((resolve, reject) => {
+      this.posterProxyService.getStock(
+        null,
+        data => resolve(data),
+        error => reject(error)
+      );
+    });
+  }
+
   async getPlan() {
-    console.log("kh: requested plan");
     return await this.storage.getPlan();
   }
 }
