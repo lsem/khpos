@@ -64,25 +64,19 @@ class KhPosWebApplication {
     );
   }
 
-  getStock(req, res) {
+  getStock(req, res, next) {
     this.khApp
       .getStock()
       .then(data => res.send(data))
-      .catch(err => {
-        res.status(500);
-        res.send({ error: err });
-      });
+      .catch(err => next(err));
   }
 
-  async getProducts(req, res) {
+  getProducts(req, res, next) {
     debug("getting products");
     this.khApp
       .getProducts()
       .then(data => res.send(data))
-      .catch(err => {
-        res.status(500);
-        res.send({ error: err.message });
-      });
+      .catch(err => next(err));
   }
 
   getPlan(req, res, next) {
