@@ -98,7 +98,9 @@ class KhPosWebApplication {
       .catch(err => next(err));
   }
 
-  // arguments: fromDate, endDate: UnixTimeStamp | ISO8601TS
+  //
+  // GET /plan
+  //
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
@@ -110,12 +112,9 @@ class KhPosWebApplication {
       .catch(err => next(err));
   }
 
-  // Accepts Plan JSON as a body:
-  // {
-  //   "from": TimeStamp,
-  //   "to": TimeStamp,
-  //   "data": [Product]
-  // }
+  //
+  // POST /plan
+  //
   postPlan(req, res, next) {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
@@ -129,6 +128,9 @@ class KhPosWebApplication {
       .catch(err => next(err));
   }
 
+  //
+  // PATCH /plan
+  //
   patchPlan(req, res, next) {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
