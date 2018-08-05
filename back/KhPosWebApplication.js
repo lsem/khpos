@@ -40,6 +40,7 @@ function tryParseTimeStamp(value) {
       return unixts;
     }
   }
+  return undefined;
 }
 
 function errorHandler(err, req, res, next) {
@@ -50,6 +51,9 @@ function errorHandler(err, req, res, next) {
     res.status(400).send(err.message);
   } else if (err instanceof appErrors.NotImplementedError) {
     debug("appErrors.NotImplementedError");
+    res.status(501).send(err.message);
+  } else if (err instanceof appErrors.KhApplicationError) {
+    debug("appErrors.KhApplicationError");
     res.status(501).send(err.message);
   } else {
     if (!err.statusCode) err.statusCode = 500;
@@ -114,16 +118,22 @@ class KhPosWebApplication {
   // {
   //   "from": TimeStamp,
   //   "to": TimeStamp,
-  //   "products": [Product]
+  //   "data": [Product]
   // }
   postPlan(req, res, next) {
-    debug('body: %O', req.body);
-    throw new appErrors.NotImplementedError("postPlan");
+    debug("body: %O", req.body);
+    this.khApp
+      .setPlan(req.body.from, req.body.to, req.body.data)
+      .then(newPlan => res.status(204))
+      .catch(err => next(err));
   }
 
   patchPlan(req, res, next) {
-    debug('body: %O', req.body);
-    throw new appErrors.NotImplementedError("patchPlan");
+    debug("body: %O", req.body);
+    this.khApp
+      .updatePlan(req.body.from, req.body.to, req.body.data)
+      .then(newPlan => res.status(204))
+      .catch(err => next(err));
   }
 }
 module.exports = KhPosWebApplication;

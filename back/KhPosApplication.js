@@ -37,6 +37,13 @@ class KhPosApplication {
     throw new appErrors.NotImplementedError('getPlan');
     return await this.storage.getPlan();
   }
+  async setPlan(fromDate, toDate, plan) {
+    debug("fromDate: %o, toDate: %o, plan: %O", fromDate, toDate, plan);
+    throw new appErrors.NotImplementedError('setPlan');
+  }
+  async updatePlan(fromDate, toDate, partialPlan) {
+    throw new appErrors.NotImplementedError('updatePlan');
+  }
 }
 
 module.exports = KhPosApplication;
