@@ -1,6 +1,6 @@
 class NotImplementedError extends Error {
   constructor(what) {
-    super(`${what ? what : "Method"} not implemented`);
+    super(`${what ? what : "Requested method"} is not implemented`);
   }
 }
 

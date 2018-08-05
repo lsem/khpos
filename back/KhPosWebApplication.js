@@ -2,7 +2,7 @@ const express = require("express");
 var cors = require("cors");
 var morgan = require("morgan");
 var debug = require("debug")("khweb");
-let appErrors = require('./AppErrors')
+let appErrors = require("./AppErrors");
 
 class BadRequestError extends Error {
   constructor(message) {
@@ -24,7 +24,6 @@ class InvalidArgumentError extends BadRequestError {
   }
 }
 
-
 function asDate(value) {
   return new Date(value);
 }
@@ -45,12 +44,12 @@ function tryParseTimeStamp(value) {
 
 function errorHandler(err, req, res, next) {
   // https://www.restapitutorial.com/httpstatuscodes.html
-  console.error(err.message); // Log error message in our server's console
+  console.error(err.message);
   if (err instanceof BadRequestError) {
-    debug("appErrors.BadRequestError")
+    debug("appErrors.BadRequestError");
     res.status(400).send(err.message);
-  } else if ( err instanceof appErrors.NotImplementedError) {
-    debug("appErrors.NotImplementedError")
+  } else if (err instanceof appErrors.NotImplementedError) {
+    debug("appErrors.NotImplementedError");
     res.status(501).send(err.message);
   } else {
     if (!err.statusCode) err.statusCode = 500;
@@ -62,21 +61,22 @@ class KhPosWebApplication {
   constructor(config, khApp) {
     this.port = config.port;
     this.khApp = khApp;
-    this.express = express();
-    this.express.use(cors());
-    this.express.use(morgan("tiny"));
-    this.express.get("/", this.getStock.bind(this));
-    this.express.get("/stock", this.getStock.bind(this));
-    this.express.get("/products", this.getProducts.bind(this));
-    this.express.get("/plan", this.getPlan.bind(this));
+    this.app = express();
+    this.app.use(cors());
+    this.app.use(morgan("tiny"));
+    this.app.use(express.json());
+    this.app.get("/", this.getStock.bind(this));
+    this.app.get("/stock", this.getStock.bind(this));
+    this.app.get("/products", this.getProducts.bind(this));
+    this.app.get("/plan", this.getPlan.bind(this));
+    this.app.post("/plan", this.postPlan.bind(this));
+    this.app.patch("/plan", this.patchPlan.bind(this));
     // Warning: Error handler must go after everything else.
-    this.express.use(errorHandler);
+    this.app.use(errorHandler);
   }
 
   start() {
-    this.express.listen(this.port, () =>
-      console.log(`web: listening on port ${this.port}!`)
-    );
+    this.app.listen(this.port, () => console.log(`web: listening on port ${this.port}!`));
   }
 
   getStock(req, res, next) {
@@ -94,19 +94,36 @@ class KhPosWebApplication {
       .catch(err => next(err));
   }
 
+  // arguments: fromDate, endDate: UnixTimeStamp | ISO8601TS
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) {
-      throw new InvalidArgumentError('fromDate', req.query.fromDate);
+      throw new InvalidArgumentError("fromDate", req.query.fromDate);
     }
     let toDate = tryParseTimeStamp(req.query.toDate);
     if (!toDate) {
-      throw new InvalidArgumentError('toDate', req.query.toDate);
+      throw new InvalidArgumentError("toDate", req.query.toDate);
     }
     this.khApp
       .getPlan(fromDate, toDate)
       .then(data => res.send(data))
       .catch(err => next(err));
+  }
+
+  // Accepts Plan JSON as a body:
+  // {
+  //   "from": TimeStamp,
+  //   "to": TimeStamp,
+  //   "products": [Product]
+  // }
+  postPlan(req, res, next) {
+    debug('body: %O', req.body);
+    throw new appErrors.NotImplementedError("postPlan");
+  }
+
+  patchPlan(req, res, next) {
+    debug('body: %O', req.body);
+    throw new appErrors.NotImplementedError("patchPlan");
   }
 }
 module.exports = KhPosWebApplication;
