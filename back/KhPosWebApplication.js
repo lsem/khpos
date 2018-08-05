@@ -10,7 +10,7 @@ class BadRequestError extends Error {
   }
 }
 
-class InvalidArgumentError extends BadRequestError {
+class InvalidArgError extends BadRequestError {
   constructor(argName, argValue) {
     let message;
     if (argName && argValue) {
@@ -102,11 +102,11 @@ class KhPosWebApplication {
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) {
-      throw new InvalidArgumentError("fromDate", req.query.fromDate);
+      throw new InvalidArgError("fromDate", req.query.fromDate);
     }
     let toDate = tryParseTimeStamp(req.query.toDate);
     if (!toDate) {
-      throw new InvalidArgumentError("toDate", req.query.toDate);
+      throw new InvalidArgError("toDate", req.query.toDate);
     }
     this.khApp
       .getPlan(fromDate, toDate)
@@ -124,11 +124,11 @@ class KhPosWebApplication {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
     if (!fromDate) {
-      throw new InvalidArgumentError("from", req.body.from);
+      throw new InvalidArgError("from", req.body.from);
     }
     let toDate = tryParseTimeStamp(req.body.to);
     if (!toDate) {
-      throw new InvalidArgumentError("to", req.body.to);
+      throw new InvalidArgError("to", req.body.to);
     }
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
@@ -141,11 +141,11 @@ class KhPosWebApplication {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
     if (!fromDate) {
-      throw new InvalidArgumentError("from", req.body.from);
+      throw new InvalidArgError("from", req.body.from);
     }
     let toDate = tryParseTimeStamp(req.body.to);
     if (!toDate) {
-      throw new InvalidArgumentError("to", req.body.to);
+      throw new InvalidArgError("to", req.body.to);
     }
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
