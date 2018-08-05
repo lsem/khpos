@@ -125,7 +125,7 @@ class KhPosWebApplication {
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .setPlan(fromDate, toDate, req.body.data)
-      .then(newPlan => res.status(204))
+      .then(() => res.status(204))
       .catch(err => next(err));
   }
 
@@ -138,7 +138,7 @@ class KhPosWebApplication {
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .updatePlan(fromDate, toDate, req.body.data)
-      .then(newPlan => res.status(204))
+      .then(() => res.status(204))
       .catch(err => next(err));
   }
 }
