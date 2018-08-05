@@ -1,8 +1,3 @@
-class InconsistentPlanDateError extends Error {
-  constructor(message) {
-    super(message);
-  }
-}
 class NotImplementedError extends Error {
   constructor(what) {
     super(`${what ? what : "Method"} not implemented`);
@@ -16,7 +11,6 @@ class NotFoundError extends Error {
 }
 
 module.exports = {
-  InconsistentPlanDateError,
   NotImplementedError,
   NotFoundError,
 };

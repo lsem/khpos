@@ -17,12 +17,12 @@ function asDate(value) {
 function tryParseTimeStamp(value) {
   let iso8601ts = new Date(value);
   if (!isNaN(iso8601ts.getTime())) {
-    console.log("parsed as iso8601: " + value);
+    debug("parsed as iso8601: " + value);
     return iso8601ts;
   } else {
     let unixts = new Date(parseInt(value));
     if (unixts.getTime() > 0) {
-      console.log("parsed as unix timestamp: " + value);
+      debug("parsed as unix timestamp: " + value);
       return unixts;
     }
   }
@@ -32,10 +32,10 @@ function errorHandler(err, req, res, next) {
   // https://www.restapitutorial.com/httpstatuscodes.html
   console.error(err.message); // Log error message in our server's console
   if (err instanceof BadRequestError) {
+    debug("appErrors.BadRequestError")
     res.status(400).send(err.message);
   } else if ( err instanceof appErrors.NotImplementedError) {
-    res.status(501).send(err.message);
-  } else if ( err instanceof appErrors.InconsistentPlanDateError) {
+    debug("appErrors.NotImplementedError")
     res.status(501).send(err.message);
   } else {
     if (!err.statusCode) err.statusCode = 500; // If err has no specified error code, set error code to 'Internal Server Error (500)'
