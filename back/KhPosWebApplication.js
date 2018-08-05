@@ -101,13 +101,9 @@ class KhPosWebApplication {
   // arguments: fromDate, endDate: UnixTimeStamp | ISO8601TS
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
-    if (!fromDate) {
-      throw new InvalidArgError("fromDate", req.query.fromDate);
-    }
+    if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
     let toDate = tryParseTimeStamp(req.query.toDate);
-    if (!toDate) {
-      throw new InvalidArgError("toDate", req.query.toDate);
-    }
+    if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
     this.khApp
       .getPlan(fromDate, toDate)
       .then(data => res.send(data))
