@@ -123,13 +123,9 @@ class KhPosWebApplication {
   postPlan(req, res, next) {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
-    if (!fromDate) {
-      throw new InvalidArgError("from", req.body.from);
-    }
+    if (!fromDate) throw new InvalidArgError("from", req.body.from);
     let toDate = tryParseTimeStamp(req.body.to);
-    if (!toDate) {
-      throw new InvalidArgError("to", req.body.to);
-    }
+    if (!toDate) throw new InvalidArgError("to", req.body.to);
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .setPlan(fromDate, toDate, req.body.data)
@@ -140,13 +136,9 @@ class KhPosWebApplication {
   patchPlan(req, res, next) {
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
-    if (!fromDate) {
-      throw new InvalidArgError("from", req.body.from);
-    }
+    if (!fromDate) throw new InvalidArgError("from", req.body.from);
     let toDate = tryParseTimeStamp(req.body.to);
-    if (!toDate) {
-      throw new InvalidArgError("to", req.body.to);
-    }
+    if (!toDate) throw new InvalidArgError("to", req.body.to);
     // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .updatePlan(fromDate, toDate, req.body.data)
