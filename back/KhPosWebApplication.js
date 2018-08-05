@@ -130,6 +130,7 @@ class KhPosWebApplication {
     if (!toDate) {
       throw new InvalidArgumentError("to", req.body.to);
     }
+    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .setPlan(fromDate, toDate, req.body.data)
       .then(newPlan => res.status(204))
@@ -146,6 +147,7 @@ class KhPosWebApplication {
     if (!toDate) {
       throw new InvalidArgumentError("to", req.body.to);
     }
+    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
       .updatePlan(fromDate, toDate, req.body.data)
       .then(newPlan => res.status(204))
