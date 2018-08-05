@@ -14,7 +14,7 @@ class InvalidArgumentError extends BadRequestError {
   constructor(argName, argValue) {
     let message;
     if (argName && argValue) {
-      message = `${argName}=${argValue} is not valid argument `;
+      message = `'${argValue}' is not valid value for argument '${argName}'`;
     } else if (argName) {
       message = `${argName} argument value is not valid`;
     } else {
@@ -122,16 +122,32 @@ class KhPosWebApplication {
   // }
   postPlan(req, res, next) {
     debug("body: %O", req.body);
+    let fromDate = tryParseTimeStamp(req.body.from);
+    if (!fromDate) {
+      throw new InvalidArgumentError("from", req.body.from);
+    }
+    let toDate = tryParseTimeStamp(req.body.to);
+    if (!toDate) {
+      throw new InvalidArgumentError("to", req.body.to);
+    }
     this.khApp
-      .setPlan(req.body.from, req.body.to, req.body.data)
+      .setPlan(fromDate, toDate, req.body.data)
       .then(newPlan => res.status(204))
       .catch(err => next(err));
   }
 
   patchPlan(req, res, next) {
     debug("body: %O", req.body);
+    let fromDate = tryParseTimeStamp(req.body.from);
+    if (!fromDate) {
+      throw new InvalidArgumentError("from", req.body.from);
+    }
+    let toDate = tryParseTimeStamp(req.body.to);
+    if (!toDate) {
+      throw new InvalidArgumentError("to", req.body.to);
+    }
     this.khApp
-      .updatePlan(req.body.from, req.body.to, req.body.data)
+      .updatePlan(fromDate, toDate, req.body.data)
       .then(newPlan => res.status(204))
       .catch(err => next(err));
   }
