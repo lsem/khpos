@@ -10,6 +10,21 @@ class BadRequestError extends Error {
   }
 }
 
+class InvalidArgumentError extends BadRequestError {
+  constructor(argName, argValue) {
+    let message;
+    if (argName && argValue) {
+      message = `${argName}=${argValue} is not valid argument `;
+    } else if (argName) {
+      message = `${argName} argument value is not valid`;
+    } else {
+      message = `argument is invalid`;
+    }
+    super(message);
+  }
+}
+
+
 function asDate(value) {
   return new Date(value);
 }
@@ -82,11 +97,11 @@ class KhPosWebApplication {
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) {
-      throw new BadRequestError(`fromDate '${req.query.fromDate}' is not valid date`);
+      throw new InvalidArgumentError('fromDate', req.query.fromDate);
     }
     let toDate = tryParseTimeStamp(req.query.toDate);
     if (!toDate) {
-      throw new BadRequestError(`toDate '${req.query.toDate}' is not valid date`);
+      throw new InvalidArgumentError('toDate', req.query.toDate);
     }
     this.khApp
       .getPlan(fromDate, toDate)
