@@ -1,4 +1,5 @@
 let debug = require('debug')('khapp');
+let appErrors = require('./AppErrors')
 
 class KhPosApplication {
   constructor(storage, posterProxyService) {
@@ -32,7 +33,8 @@ class KhPosApplication {
     });
   }
 
-  async getPlan() {
+  async getPlan(fromDate, toDate) {
+    throw new appErrors.NotImplementedError('getPlan');
     return await this.storage.getPlan();
   }
 }
