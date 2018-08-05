@@ -88,11 +88,11 @@ class KhPosWebApplication {
   getPlan(req, res, next) {
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) {
-      throw new BadRequestError(`fromDate ${req.query.fromDate} is not valid date`);
+      throw new BadRequestError(`fromDate '${req.query.fromDate}' is not valid date`);
     }
     let toDate = tryParseTimeStamp(req.query.toDate);
     if (!toDate) {
-      throw new BadRequestError(`toDate ${req.query.toDate} is not valid date`);
+      throw new BadRequestError(`toDate '${req.query.toDate}' is not valid date`);
     }
     this.khApp
       .getPlan(fromDate, toDate)
