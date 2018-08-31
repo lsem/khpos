@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
+import autoLayout from "./layout";
 
 function ProductListItem(props) {
   return (
@@ -174,6 +175,34 @@ class SchedulerTimeline extends React.Component {
     const heightFor = j => {
       return j.durationHours * this.props.durationScalingFator;
     };
+
+    const items = [
+      {
+        vOffset: 100,// (starts at 100)
+        vHeight: 900 // (ends at 1000)
+      },
+      {
+        vOffset: 400,// (starts at 400)
+        vHeight: 300 // (ends at 700)
+      },
+      {
+        vOffset: 200,// (starts at 200)
+        vHeight: 300 // (ends at 500)
+      },
+      {
+        vOffset: 510,// (starts at 510)
+        vHeight: 300 // (ends at 810)
+      },
+      {
+        vOffset: 1500,// (starts at 1500)
+        vHeight: 100  // (ends at 1600)
+      }
+    ];
+    const layout = autoLayout(items, {
+      vbegin: x => x.vOffset,
+      vend: x => x.vHeight
+    });
+    console.log("layout: ", layout);
 
     const columnNumberFor = (j, index) => {
       // Primitive layout, currently is not taking into account
