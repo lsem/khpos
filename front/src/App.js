@@ -240,18 +240,21 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
         </header>
-        <ProductList />
-        <StockList />
 
-        <h1> SchedulerTimeline Demo </h1>
-        <div className="SchedulerTimeline_Container">
-          <SchedulerTimeline
-            durationScalingFator={100}
-            jobWidth={100}
-            horizontalPadding={15}
-            beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
-            endTime={Date.parse("03 Jan 1970 00:00:00 GMT")}
-          />
+        <div className="AppBody">
+          <ProductList />
+          <StockList />
+
+          <h1> SchedulerTimeline Demo </h1>
+          <div className="SchedulerTimeline_Container">
+            <SchedulerTimeline
+              durationScalingFator={100}
+              jobWidth={100}
+              horizontalPadding={15}
+              beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
+              endTime={Date.parse("03 Jan 1970 00:00:00 GMT")}
+            />
+          </div>
         </div>
       </div>
     );
