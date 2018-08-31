@@ -35,3 +35,28 @@
   /* outline: solid black 1px; */
   margin-bottom: 50px;
 }
+
+.App > .SchedulerTimeline_Container {
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+}
+
+.SchedulerTimeline {
+  /* outline: solid black 1px; */
+  position: relative;
+  height: 800px;
+}
+
+.SchedulerTimeline > .TechMapView {
+  /* outline: solid black 1px; */
+  position: absolute;
+  border-radius: 15px;
+  /* centering content horizontally and vertically*/
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* width: 500px; */
+  /* left: 100px; */
+}

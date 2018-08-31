@@ -70,8 +70,8 @@ class Api {
   getStock(dataCb, errCb) {
     axios
       .get("http://localhost:5000/stock")
-      .then(json =>
-        json.data.response.map(result => console.log(result))
+      .then(
+        json => json.data.response.map(result => console.log(result))
         // json.data.response.map(result => ({
         //   id: result.product_id,
         //   name: result.product_name,
@@ -91,11 +91,14 @@ class StockList extends Component {
   }
 
   componentDidMount() {
-    (new Api()).getStock((data) => {
-      console.log('Got stock')
-    }, (err) => {
-      console.log('Cannot get stock')
-    });
+    new Api().getStock(
+      data => {
+        console.log("Got stock");
+      },
+      err => {
+        console.log("Cannot get stock");
+      }
+    );
   }
 
   render() {
@@ -107,16 +110,149 @@ class StockList extends Component {
   }
 }
 
+class TechMapView extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const techMapStyle = {
+      width: this.props.width + "px",
+      height: this.props.height + "px",
+      backgroundColor: this.props.tintColor,
+      left: this.props.left + "px",
+      top: this.props.top + "px"
+    };
+    return (
+      <div className="TechMapView" style={techMapStyle}>
+        {this.props.title}
+      </div>
+    );
+  }
+}
+
+class SchedulerTimeline extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      jobs: [
+        {
+          title: "1",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 2.5,
+          startTime: Date.parse("01 Jan 1970 00:00:00 GMT")
+        },
+        {
+          title: "2",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 1.5,
+          startTime: Date.parse("01 Jan 1970 02:00:00 GMT")
+        },
+        {
+          title: "3",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 3.5,
+          startTime: Date.parse("01 Jan 1970 01:00:00 GMT")
+        },
+        {
+          title: "4",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 0.7,
+          startTime: Date.parse("01 Jan 1970 1:30:00 GMT")
+        },
+        {
+          title: "5",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 0.7,
+          startTime: Date.parse("01 Jan 1970 6:30:00 GMT")
+        }
+      ]
+    };
+  }
+
+  render() {
+    const heightFor = j => {
+      return j.durationHours * this.props.durationScalingFator;
+    };
+
+    const columnNumberFor = (j, index) => {
+      // Primitive layout, currently is not taking into account
+      // previously allocated ones.
+      for (let idx = 0; idx < this.state.jobs.length; ++idx) {
+        const thisJob = this.state.jobs[idx];
+        const thisJobEndTime =
+          thisJob.startTime + thisJob.durationHours * 60 * 60 * 1000;
+        if (j.startTime > thisJobEndTime) {
+          // slot is free
+          return idx;
+        }
+      }
+      // all occupied
+      return index;
+    };
+
+    const horizontalOffsetFor = (j, index) => {
+      return (
+        columnNumberFor(j, index) *
+        (this.props.jobWidth + this.props.horizontalPadding)
+      );
+    };
+
+    const topFor = j => {
+      // j.startTime contains a number of milliseconds from epoch start
+      const pixelsOfMs = ms => {
+        const hours = ms / (1000 * 60 * 60);
+        const PIXELS_IN_HOUR = 50;
+        return hours * PIXELS_IN_HOUR;
+      };
+      const offsetMs = j.startTime - this.props.beginTime;
+      return pixelsOfMs(offsetMs);
+    };
+
+    const techMaps = this.state.jobs.map((job, idx) => (
+      <TechMapView
+        title={job.title}
+        tintColor={job.tintColor}
+        height={heightFor(job)}
+        left={horizontalOffsetFor(job, idx)}
+        width={this.props.jobWidth}
+        top={topFor(job)}
+      />
+    ));
+
+    // Style ovverides
+    const style = {
+      // position: 'relative'
+    };
+
+    return (
+      <div className="SchedulerTimeline" style={style}>
+        {techMaps}
+      </div>
+    );
+  }
+}
+
 class App extends Component {
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          {/* <img src={logo} className="App-logo" alt="logo" /> */}
           <h1 className="App-title">Культ Хліба</h1>
         </header>
         <ProductList />
         <StockList />
+
+        <h1> SchedulerTimeline Demo </h1>
+        <div className="SchedulerTimeline_Container">
+          <SchedulerTimeline
+            durationScalingFator={100}
+            jobWidth={100}
+            horizontalPadding={15}
+            beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
+            endTime={Date.parse("03 Jan 1970 00:00:00 GMT")}
+          />
+        </div>
       </div>
     );
   }
