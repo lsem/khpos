@@ -200,7 +200,7 @@ class SchedulerTimeline extends React.Component {
     ];
     const layout = autoLayout(items, {
       vbegin: x => x.vOffset,
-      vend: x => x.vHeight
+      vend: x => x.vHeight + x.vOffset
     });
     console.log("layout: ", layout);
 
