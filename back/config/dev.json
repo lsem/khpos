@@ -4,7 +4,8 @@
   },
   "storage": {
     "port": 4000,
-    "host": "localhost"
+    "host": "localhost",
+    "reconnect_timeout": 5000
   },
   "poster": {
     "apiLink" : "$POSTER_API_LINK",

@@ -54,7 +54,7 @@ function errorHandler(err, req, res, next) {
     res.status(501).send(err.message);
   } else if (err instanceof appErrors.KhApplicationError) {
     debug("appErrors.KhApplicationError");
-    res.status(501).send(err.message);
+    res.status(500).send(err.message);
   } else {
     if (!err.statusCode) err.statusCode = 500;
     res.status(err.statusCode).send(err.message);
@@ -65,6 +65,9 @@ class KhPosWebApplication {
   constructor(config, khApp) {
     this.port = config.port;
     this.khApp = khApp;
+    this.khApp.onError(what => {
+      this.error = what;
+    });
     this.app = express();
     this.app.use(cors());
     this.app.use(morgan("tiny"));

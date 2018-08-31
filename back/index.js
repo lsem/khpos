@@ -4,7 +4,7 @@ let KhStorage = require('./KhStorage');
 let KhPosApplication = require('./KhPosApplication');
 let KhPosWebApplication = require('./KhPosWebApplication');
 let KhStock = require('./KhStock')
-var debug = require('debug')('khapp');
+
 
 class KhPosNodeApp {
   constructor(config) {
@@ -15,6 +15,7 @@ class KhPosNodeApp {
     this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp);
     this.KhStock = new KhStock(this.config.stock);
     this.khStorage.onConnected(() => this.khApp.connectedToStorage())
+    this.khStorage.onDisconnected(() => this.khApp.disconnectedFromStorge());
   }
 
   start() {

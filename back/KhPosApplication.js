@@ -5,10 +5,23 @@ class KhPosApplication {
   constructor(storage, posterProxyService) {
     this.storage = storage;
     this.posterProxyService = posterProxyService;
+    this._storageConnected = false;
   }
 
   connectedToStorage() {
     debug("Connected to Storage");
+    this._storageConnected = true;
+    this.onErrorCb(null);
+  }
+
+  disconnectedFromStorge() {
+    debug("Disconnected to Storage");
+    this._storageConnected = false;
+    this.onErrorCb("No storage");
+  }
+
+  onError(cb) {
+    this.onErrorCb = cb;
   }
 
   start() {}
@@ -33,14 +46,31 @@ class KhPosApplication {
     });
   }
 
+  validatePlan(plan) {
+    return plan.one === 1;
+  }
   async getPlan(fromDate, toDate) {
-    throw new appErrors.NotImplementedError('getPlan');
+    const plan = { "one": 10, "two": 2 };
+    return new Promise((resolve, reject) => {
+      resolve({
+        "from": fromDate,
+        "to": toDate,
+        "isValid": this.validatePlan(plan),
+        "data": {
+        }
+      });
+    });
     return await this.storage.getPlan();
   }
+
   async setPlan(fromDate, toDate, plan) {
     debug("fromDate: %o, toDate: %o, plan: %O", fromDate, toDate, plan);
+    if (!this._storageConnected) {
+      throw new appErrors.KhApplicationError("Storage error");
+    }
     throw new appErrors.NotImplementedError('setPlan');
   }
+
   async updatePlan(fromDate, toDate, partialPlan) {
     throw new appErrors.NotImplementedError('updatePlan');
   }
