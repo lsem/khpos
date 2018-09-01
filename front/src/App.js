@@ -3,7 +3,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
-import autoLayout from "./layout";
+import { autoLayout, autoLayout_dumb } from "./layout";
+import _ from 'lodash';
 
 function ProductListItem(props) {
   return (
@@ -71,26 +72,22 @@ class Api {
   getStock(dataCb, errCb) {
     axios
       .get("http://localhost:5000/stock")
-      .then(
-        json => json.data.response.map(result => console.log(result))
-        // json.data.response.map(result => ({
-        //   id: result.product_id,
-        //   name: result.product_name,
-        //   category_name: result.category_name,
-        //   category_id: result.menu_category_id,
-        //   cost: result.cost
-        // }))
-      )
+      // .then(
+      //   json => json.data.response.map(result => console.log(result))
+      //   // json.data.response.map(result => ({
+      //   //   id: result.product_id,
+      //   //   name: result.product_name,
+      //   //   category_name: result.category_name,
+      //   //   category_id: result.menu_category_id,
+      //   //   cost: result.cost
+      //   // }))
+      // )
       .then(products => dataCb(products))
       .catch(err => errCb(err));
   }
 }
 
 class StockList extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount() {
     new Api().getStock(
       data => {
@@ -112,10 +109,6 @@ class StockList extends Component {
 }
 
 class TechMapView extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const techMapStyle = {
       width: this.props.width + "px",
@@ -141,31 +134,71 @@ class SchedulerTimeline extends React.Component {
           title: "1",
           tintColor: "rgb(216, 216, 216)",
           durationHours: 2.5,
-          startTime: Date.parse("01 Jan 1970 00:00:00 GMT")
+          startTime: Date.parse("01 Jan 1970 00:00:00 GMT"),
+          id: '1'
         },
         {
           title: "2",
           tintColor: "rgb(216, 216, 216)",
           durationHours: 1.5,
-          startTime: Date.parse("01 Jan 1970 02:00:00 GMT")
+          startTime: Date.parse("01 Jan 1970 02:00:00 GMT"),
+          id: '2'
         },
         {
           title: "3",
           tintColor: "rgb(216, 216, 216)",
           durationHours: 3.5,
-          startTime: Date.parse("01 Jan 1970 01:00:00 GMT")
+          startTime: Date.parse("01 Jan 1970 01:00:00 GMT"),
+          id: '3'
         },
         {
           title: "4",
           tintColor: "rgb(216, 216, 216)",
           durationHours: 0.7,
-          startTime: Date.parse("01 Jan 1970 1:30:00 GMT")
+          startTime: Date.parse("01 Jan 1970 1:30:00 GMT"),
+          id: '4'
         },
         {
           title: "5",
           tintColor: "rgb(216, 216, 216)",
           durationHours: 0.7,
-          startTime: Date.parse("01 Jan 1970 6:30:00 GMT")
+          startTime: Date.parse("01 Jan 1970 6:30:00 GMT"),
+          id: '5'
+        },
+        {
+          title: "6",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 0.4,
+          startTime: Date.parse("01 Jan 1970 7:00:00 GMT"),
+          id: '6'
+        },
+        {
+          title: "7",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 1.2,
+          startTime: Date.parse("01 Jan 1970 7:35:00 GMT"),
+          id: '7'
+        },
+        {
+          title: "8",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 1.2,
+          startTime: Date.parse("01 Jan 1970 6:30:00 GMT"),
+          id: '8'
+        },
+        {
+          title: "9",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 1.2,
+          startTime: Date.parse("01 Jan 1970 7:00:00 GMT"),
+          id: '9'
+        },
+        {
+          title: "10",
+          tintColor: "rgb(216, 216, 216)",
+          durationHours: 1.2,
+          startTime: Date.parse("01 Jan 1970 7:30:00 GMT"),
+          id: '10'
         }
       ]
     };
@@ -175,49 +208,22 @@ class SchedulerTimeline extends React.Component {
     const heightFor = j => {
       return j.durationHours * this.props.durationScalingFator;
     };
-
-    const items = [
-      {
-        vOffset: 100,// (starts at 100)
-        vHeight: 900 // (ends at 1000)
-      },
-      {
-        vOffset: 400,// (starts at 400)
-        vHeight: 300 // (ends at 700)
-      },
-      {
-        vOffset: 200,// (starts at 200)
-        vHeight: 300 // (ends at 500)
-      },
-      {
-        vOffset: 510,// (starts at 510)
-        vHeight: 300 // (ends at 810)
-      },
-      {
-        vOffset: 1500,// (starts at 1500)
-        vHeight: 100  // (ends at 1600)
-      }
-    ];
-    const layout = autoLayout(items, {
-      vbegin: x => x.vOffset,
-      vend: x => x.vHeight + x.vOffset
-    });
-    console.log("layout: ", layout);
+    // allows autoLayout to know start jobs dimensions.
+    const jobLayoutMapper = {
+      vbegin: x => x.startTime,
+      vend: x => x.startTime + x.durationHours * 60 * 60 * 1000,
+      identity: x => x.title
+    };
+    const layout = autoLayout(this.state.jobs, jobLayoutMapper);
+    //const layout = autoLayout_dumb(this.state.jobs, jobLayoutMapper);
 
     const columnNumberFor = (j, index) => {
-      // Primitive layout, currently is not taking into account
-      // previously allocated ones.
-      for (let idx = 0; idx < this.state.jobs.length; ++idx) {
-        const thisJob = this.state.jobs[idx];
-        const thisJobEndTime =
-          thisJob.startTime + thisJob.durationHours * 60 * 60 * 1000;
-        if (j.startTime > thisJobEndTime) {
-          // slot is free
-          return idx;
-        }
+      const job_layout = _.find(layout, x => x.item.id === j.id );
+      if (job_layout) {
+        return job_layout.col;
+      } else {
+        console.assert(false);
       }
-      // all occupied
-      return index;
     };
 
     const horizontalOffsetFor = (j, index) => {
@@ -231,8 +237,7 @@ class SchedulerTimeline extends React.Component {
       // j.startTime contains a number of milliseconds from epoch start
       const pixelsOfMs = ms => {
         const hours = ms / (1000 * 60 * 60);
-        const PIXELS_IN_HOUR = 50;
-        return hours * PIXELS_IN_HOUR;
+        return hours * this.props.durationScalingFator;
       };
       const offsetMs = j.startTime - this.props.beginTime;
       return pixelsOfMs(offsetMs);
@@ -246,6 +251,7 @@ class SchedulerTimeline extends React.Component {
         left={horizontalOffsetFor(job, idx)}
         width={this.props.jobWidth}
         top={topFor(job)}
+        key={job.id}
       />
     ));
 
