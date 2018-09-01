@@ -281,6 +281,7 @@ class App extends Component {
           <StockList />
 
           <h1> SchedulerTimeline Demo </h1>
+          <p> Please note it is scrollable </p>
           <div className="SchedulerTimeline_Container">
             <SchedulerTimeline
               durationScalingFator={100}
