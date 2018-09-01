@@ -52,6 +52,7 @@
   height: 600px;
   width: 800px;
   overflow: scroll;
+  background-color: rgba(100, 100, 100, 0.03);
 }
 
 /* ::-webkit-scrollbar {
