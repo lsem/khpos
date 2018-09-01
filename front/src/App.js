@@ -210,13 +210,14 @@ class SchedulerTimeline2 extends React.Component {
 
   render() {
     const msToHours = ms => ms / (1000 * 60 * 60);
+    const hoursToMs = h => h * 1000 * 60 * 60;
     const pixelsOfMs = ms => msToHours(ms) * this.props.durationScalingFator;
-    const jobHeight = j => j.durationHours * this.props.durationScalingFator;
+    const jobHeight = j => pixelsOfMs(hoursToMs(j.durationHours));
     const jobTop = j => pixelsOfMs(j.startTime - this.props.beginTime);
 
     const jobLayoutMapper = {
       vbegin: x => x.startTime,
-      vend: x => x.startTime + x.durationHours * 60 * 60 * 1000,
+      vend: x => x.startTime + hoursToMs(x.durationHours),
       identity: x => x.title
     };
     const layout = autoLayout(this.state.jobs, jobLayoutMapper);
@@ -351,13 +352,13 @@ class App extends Component {
           <h1> SchedulerTimeline Demo </h1>
           <p> Please note it is scrollable </p>
           <div className="SchedulerTimeline_Container">
-            {/* <SchedulerTimeline
+            <SchedulerTimeline
               durationScalingFator={100}
               jobWidth={100}
               horizontalPadding={15}
               beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
               endTime={Date.parse("03 Jan 1970 00:00:00 GMT")}
-            /> */}
+            />
 
             <div className="ColumnBasedTimeline_Container">
               <h1> Column aware SchedulerTimeline Demo </h1>
