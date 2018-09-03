@@ -26,8 +26,12 @@
 }
 
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ProductList {
@@ -46,16 +50,15 @@
   padding: 30px;
 }
 
-.SchedulerTimeline {
-  /* outline: solid black 1px; */
+/* .SchedulerTimeline {
   position: relative;
   height: 600px;
   width: 800px;
   overflow: scroll;
   background-color: rgba(100, 100, 100, 0.03);
-}
+} */
 
-.SchedulerTimeline2 {
+.SchedulerTimeline {
   position: relative;
   /* height: 600px; */
   width: 800px;
@@ -70,7 +73,7 @@
 .SchedulerTimelineColumn_Inner {
   position: relative;
   width: 100%;
-  height: 100%; 
+  height: 100%;
   background-color: rgba(100, 100, 100, 0.02);
 }
 
@@ -104,4 +107,12 @@
 .ColumnBasedTimeline_Container {
   position: relative;
   margin-top: 100px;
+}
+
+.SchedulerTimeline--highlighted {
+  background-color: rgba(100, 100, 0, 0.1);
+}
+
+.SchedulerTimelineColumn_Inner--hovered {
+  background-color: plum;
 }

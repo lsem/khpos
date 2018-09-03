@@ -23,7 +23,6 @@ function autoLayout(items, mapper) {
 
   const startsAt = mapper.vbegin;
   const endsAt = mapper.vend;
-  const edentity = mapper.identity;
 
   const layout = [];
   items.forEach((item, item_idx) => {
@@ -36,27 +35,13 @@ function autoLayout(items, mapper) {
       let testedLayout = layout.slice();
       testedLayout.push({ col: c, item: item });
 
-      const columnItems = _.sortBy(_.filter(testedLayout, x => x.col == c), x =>
-        startsAt(x.item)
+      const columnItems = _.sortBy(
+        _.filter(testedLayout, x => x.col === c),
+        x => startsAt(x.item)
       );
 
       const overlaped = (a1, b1, a2, b2) => {
-        // console.log("testing: " + `(${a1},${b1}) and (${a2},${b2})`);
-        if (b1 < a2) {
-          // console.log(
-          //   "do not overlap, difference: " + (a2 - b1) / (1000 * 60 * 60)
-          // );
-          return false;
-        } else if (a1 > b2) {
-          // // handle reverse order case
-          // console.log(
-          //   "do not overlap, difference: " + (a1 - b2) / (1000 * 60 * 60)
-          // );
-          return false;
-        } else {
-          //console.log('overlap!');
-          return true;
-        }
+        return !(b1 < a2) && !(a1 > b2);
       };
 
       // todo: make functional?
@@ -72,7 +57,6 @@ function autoLayout(items, mapper) {
             endsAt(q.item)
           )
         ) {
-          //console.log("DETECTED OVERLAP in column " + c + "!!!");
           hasSpaceForItem = false;
           break;
         }
@@ -85,7 +69,6 @@ function autoLayout(items, mapper) {
     } else {
       layout.push({ col: layout.length, item: item });
     }
-    //console.log("\n\n\n");
   });
   return layout;
 }
