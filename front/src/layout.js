@@ -1,5 +1,18 @@
 import _ from "lodash";
 
+/*jslint unparam: true, node: true */
+function dumpLayout(l, vbegin, vend) {
+  return JSON.stringify(
+    l.map(x => {
+      return {
+        col: x.col,
+        starts: vbegin(x.item) / 1000 / 60 / 60,
+        ends: vend(x.item) / 1000 / 60 / 60
+      };
+    })
+  );
+}
+
 function autoLayout_dumb(items, mapper) {
   const layout = [];
   items.forEach((item, item_idx) => {
@@ -8,22 +21,10 @@ function autoLayout_dumb(items, mapper) {
   return layout;
 }
 
-function autoLayout(items, mapper) {
-  function dumpLayout(l) {
-    return JSON.stringify(
-      l.map(x => {
-        return {
-          col: x.col,
-          starts: mapper.vbegin(x.item) / 1000 / 60 / 60,
-          ends: mapper.vend(x.item) / 1000 / 60 / 60
-        };
-      })
-    );
-  }
 
+function autoLayout(items, mapper) {
   const startsAt = mapper.vbegin;
   const endsAt = mapper.vend;
-
   const layout = [];
   items.forEach((item, item_idx) => {
     // console.log("Trying to place: " + edentity(item));

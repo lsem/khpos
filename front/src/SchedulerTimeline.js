@@ -158,8 +158,7 @@ class SchedulerTimeline extends React.Component {
     // Style ovverides
     const style = {
       left: this.props.left,
-      height: this.props.height,
-      highlighted
+      height: this.props.height
     };
 
     console.log(columnViews);

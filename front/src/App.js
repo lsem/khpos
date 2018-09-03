@@ -3,9 +3,7 @@
 import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
-import classNames from "classnames";
 import SchedulerTimeline from "./SchedulerTimeline";
-import TechMapView from "./TechMapView";
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
 
