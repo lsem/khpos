@@ -66,13 +66,13 @@ function getItemTransform(props) {
 // To further improve drag layer performance, consider making as in an article:
 // https://habr.com/company/macte/blog/344368/
 class CustomDragLayer extends React.PureComponent {
-  renderMaterializedTechMap() {
+  renderMaterializedTechMap(itemProps) {
     return (
       <div className="CustomDragLayer" style={getItemTransform(this.props)}>
         <TechMapView
           title={"Drag layer"}
-          tintColor={"grey"}
-          height={100}
+          tintColor={itemProps.tintColor}
+          height={itemProps.height}
           left={0}
           width={100}
           top={0}
@@ -94,10 +94,14 @@ class CustomDragLayer extends React.PureComponent {
       return null;
     }
     if (componentType == "techmap") {
-      return this.renderMaterializedTechMap();
+      return this.renderMaterializedTechMap(itemBeingDragged);
     } else if (componentType == "techmap-panel-item") {
       if (canDrop) {
-        return this.renderMaterializedTechMap();
+        return this.renderMaterializedTechMap({
+          // temporarly hard coded value
+          tintColor: "rgba(100, 200, 100)",
+          height: 200
+        });
       } else {
         return this.renderUnmaterializedTechMap();
       }

@@ -33,7 +33,7 @@ class TechMapView extends React.Component {
       backgroundColor: this.props.tintColor,
       left: this.props.left,
       top: this.props.top,
-      opacity: isDragging ? 0.5 : 1
+      opacity: isDragging ? 0.3 : 1
     };
     return connectDragSource(
       <div className="TechMapView" style={techMapStyle}>
