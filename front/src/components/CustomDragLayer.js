@@ -63,6 +63,8 @@ function getItemTransform(props) {
   };
 }
 
+// To further improve drag layer performance, consider making as in an article:
+// https://habr.com/company/macte/blog/344368/
 class CustomDragLayer extends React.PureComponent {
   renderMaterializedTechMap() {
     return (
