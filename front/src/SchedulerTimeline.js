@@ -163,12 +163,12 @@ class SchedulerTimeline extends React.Component {
 
     console.log(columnViews);
 
-    const { highlighted, hovered, connectDropTarget } = this.props;
+    const { highlighted, isOver, connectDropTarget } = this.props;
 
     let className = classNames({
       SchedulerTimeline: true,
-      "SchedulerTimeline--highlighted": highlighted,
-      "SchedulerTimeline--hovered": hovered
+      // "SchedulerTimeline--highlighted": highlighted,
+      "SchedulerTimeline--hovered": isOver
     });
     return connectDropTarget(
       <div className={className} style={style}>

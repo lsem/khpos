@@ -110,9 +110,21 @@
 }
 
 .SchedulerTimeline--highlighted {
-  background-color: rgba(100, 100, 0, 0.1);
-}
-
-.SchedulerTimelineColumn_Inner--hovered {
   background-color: plum;
 }
+
+.SchedulerTimeline--hovered {
+  background-color: rgba(100, 100, 0, 0.1);
+}
+.CustomDragLayer {
+  background-color: "red";
+  width: 50;
+  height: 50;
+}
+
+.TechMapCatalog {
+  background-color: plum;
+  width: 300px;
+  height: 400px;
+}
+

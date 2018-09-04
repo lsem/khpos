@@ -3,6 +3,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { DragSource } from "react-dnd";
 
+
 const techMapViewSource = {
   beginDrag(props) {
     return {};
@@ -12,13 +13,15 @@ const techMapViewSource = {
 function collect(connect, monitor) {
   return {
     connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
+    isDragging: monitor.isDragging(),
+    connectDragPreview: connect.dragPreview(),
   };
 }
 
 class TechMapView extends React.Component {
+
   render() {
-    const { connectDragSource, isDragging } = this.props;
+    const { connectDragSource, isDragging} = this.props;
     const techMapStyle = {
       width: this.props.width + "px",
       height: this.props.height + "px",

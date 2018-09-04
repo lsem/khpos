@@ -4,8 +4,11 @@ import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
 import SchedulerTimeline from "./SchedulerTimeline";
+import TechMapCatalog from './TechMapCatalog';
+import TechMapView from './TechMapView'
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
+import CustomDragLayer from './CustomDragLayer'
 
 function ProductListItem(props) {
   return (
@@ -113,6 +116,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+      {/* <CustomDragLayer/> */}
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
         </header>
@@ -120,6 +124,9 @@ class App extends Component {
         <div className="AppBody">
           <ProductList />
           <StockList />
+          <h1> Tech Map Catalog </h1>
+          <TechMapCatalog />
+
           <div className="SchedulerTimeline_Container">
             <div className="ColumnBasedTimeline_Container">
               <h1> Column aware SchedulerTimeline Demo </h1>
