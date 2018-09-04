@@ -1,0 +1,28 @@
+.SchedulerTimeline {
+  position: relative;
+  /* height: 600px; */
+  width: 800px;
+  overflow: scroll;
+  background-color: rgba(100, 100, 100, 0.03);
+}
+
+.SchedulerTimelineColumn {
+  position: absolute;
+}
+
+.SchedulerTimelineColumn_spacing {
+  width: 100px;
+}
+
+.ColumnBasedTimeline_Container {
+  position: relative;
+  margin-top: 100px;
+}
+
+.SchedulerTimeline--highlighted {
+  background-color: plum;
+}
+
+.SchedulerTimeline--hovered {
+  background-color: rgba(100, 100, 0, 0.1);
+}

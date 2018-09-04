@@ -1,0 +1,14 @@
+.TimelineScreen {
+  display: flex;
+}
+
+.TimelineScreenSideContainer {
+  display: flex;
+  flex-direction: column;
+  /* debug: */
+  background-color: oldlace;
+}
+
+.TimelineScreen > .TimelineScreenSideContainer > .TechMapCatalogPanel {
+  margin-bottom: 50px;
+}

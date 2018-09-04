@@ -3,12 +3,9 @@
 import React, { Component } from "react";
 import "./App.css";
 import axios from "axios";
-import SchedulerTimeline from "./SchedulerTimeline";
-import TechMapCatalog from './TechMapCatalog';
-import TechMapView from './TechMapView'
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
-import CustomDragLayer from './CustomDragLayer'
+import TimelineScreen from './components/TimeLineScreen';
 
 function ProductListItem(props) {
   return (
@@ -116,31 +113,14 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-      {/* <CustomDragLayer/> */}
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
         </header>
-
         <div className="AppBody">
           <ProductList />
           <StockList />
-          <h1> Tech Map Catalog </h1>
-          <TechMapCatalog />
-
-          <div className="SchedulerTimeline_Container">
-            <div className="ColumnBasedTimeline_Container">
-              <h1> Column aware SchedulerTimeline Demo </h1>
-              <SchedulerTimeline
-                height={500}
-                durationScalingFator={100}
-                jobWidth={150}
-                horizontalPadding={15}
-                beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
-                endTime={Date.parse("02 Jan 1970 00:00:00 GMT")}
-                left={0}
-              />
-            </div>
-          </div>
+          <h1> TineLine Screen </h1>
+          <TimelineScreen />
         </div>
       </div>
     );

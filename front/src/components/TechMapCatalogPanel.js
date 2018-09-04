@@ -1,14 +1,12 @@
-import "./App.css";
+import "../App.css";
 import React from "react";
 import PropTypes from "prop-types";
 import { DragSource } from "react-dnd";
-import { DragLayer } from "react-dnd";
-import { getEmptyImage } from 'react-dnd-html5-backend';
-import CustomDragLayer from "./CustomDragLayer"
-import { DragDropContext } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
+import TimelinePanelListItem from "./TimelinePanelListItem";
+import TimelinePanel from "./TimelinePanel";
 
 //https://habr.com/company/macte/blog/344368/
-
 
 class TechMapCatalogItem extends React.Component {
   componentDidMount() {
@@ -21,11 +19,11 @@ class TechMapCatalogItem extends React.Component {
     super(props);
   }
   render() {
-    const { connectDragPreview, connectDragSource, isDragging } = this.props;
-    const style = { backgroundColor: 'green', width: '50%', height: 30};
+    const { connectDragSource } = this.props;
+    const style = { height: 30 };
     return connectDragSource(
       <div className="TechMapCatalogItem" style={style}>
-        {this.props.displayName}
+        <li>{this.props.displayName}</li>
       </div>
     );
   }
@@ -56,17 +54,16 @@ const DaggableTechMapCatalogItem = DragSource(
   collect
 )(TechMapCatalogItem);
 
-class TechMapCatalog extends React.Component {
+export default class TechMapCatalogPanel extends React.Component {
   render() {
     return (
-      <div className="TechMapCatalog">
-          <CustomDragLayer/>
-          <DaggableTechMapCatalogItem displayName="Хліб" />
-          <DaggableTechMapCatalogItem displayName="Круасан" />
-          <DaggableTechMapCatalogItem displayName="Багет" />
+      <div className="TechMapCatalogPanel">
+        <TimelinePanel listName="Технологічні карти">
+          <TimelinePanelListItem itemDisplayName="Хліб" />
+          <TimelinePanelListItem itemDisplayName="Круасан" />
+          <TimelinePanelListItem itemDisplayName="Багет" />
+        </TimelinePanel>
       </div>
     );
   }
 }
-
-export default TechMapCatalog;

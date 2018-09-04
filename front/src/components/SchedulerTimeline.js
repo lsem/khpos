@@ -1,10 +1,11 @@
-import { DropTarget } from "react-dnd";
-import PropTypes from "prop-types";
-import TechMapView from "./TechMapView";
 import React from "react";
-import { autoLayout } from "./layout";
+import PropTypes from "prop-types";
 import classNames from "classnames";
+import { DropTarget } from "react-dnd";
+import TechMapView from "./TechMapView";
+import { autoLayout } from "../helpers/layout";
 import _ from "lodash";
+import "./SchedulerTimeline.css";
 
 function getSampleJobs() {
   return [
@@ -185,4 +186,3 @@ SchedulerTimeline.propTypes = {
 export default DropTarget("techmap", techMapViewColumnTarget, collect)(
   SchedulerTimeline
 );
-//export default  SchedulerTimeline;

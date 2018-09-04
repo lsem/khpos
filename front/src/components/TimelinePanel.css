@@ -1,0 +1,7 @@
+.TimelinePanel > .TimelinePanel_ListName {
+  margin-bottom: 10px;
+}
+
+.TimelinePanel > .AddButton {
+  color: blue;
+}
