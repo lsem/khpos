@@ -1,0 +1,33 @@
+.techMap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+}
+
+.techMap:hover {
+  z-index: 1000;
+}
+
+.techMapHeaderContainer {
+  width: 25px;
+  background-color: #222222;
+  padding: 5px 0px;
+  margin: 0;
+  writing-mode: vertical-rl;
+  text-orientation: "mixed";
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 25px;
+  cursor: default;
+}
+
+.techMapTasksContainer {
+  width: 100%;
+}
