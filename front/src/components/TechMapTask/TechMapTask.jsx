@@ -31,7 +31,7 @@ function TechMapTask(props) {
 
   return (
     <div style={ taskStyle } title={ name }>
-      { badges } { name }
+      { badges }
     </div>
   )
 }
