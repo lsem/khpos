@@ -12,7 +12,7 @@ export default class TimelineScreen extends React.Component {
         <SchedulerTimeline
           height={500}
           durationScalingFator={100}
-          jobWidth={150}
+          jobWidth={100}
           horizontalPadding={15}
           beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
           endTime={Date.parse("02 Jan 1970 00:00:00 GMT")}

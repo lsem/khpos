@@ -117,8 +117,8 @@ class App extends Component {
           <h1 className="App-title">Культ Хліба</h1>
         </header>
         <div className="AppBody">
-          <ProductList />
-          <StockList />
+          {/* <ProductList />
+          <StockList /> */}
           <h1> TineLine Screen </h1>
           <TimelineScreen />
         </div>

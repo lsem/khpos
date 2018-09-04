@@ -74,7 +74,7 @@ class CustomDragLayer extends React.PureComponent {
           tintColor={"grey"}
           height={100}
           left={0}
-          width={150}
+          width={100}
           top={0}
           key={"Drag layer"}
         />
