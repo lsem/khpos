@@ -63,7 +63,7 @@ function getItemTransform(props) {
   };
 }
 
-class CustomDragLayer extends React.Component {
+class CustomDragLayer extends React.PureComponent {
   renderMaterializedTechMap() {
     return (
       <div className="CustomDragLayer" style={getItemTransform(this.props)}>
