@@ -2,7 +2,8 @@ import React from "react";
 import SchedulerTimeline from "./SchedulerTimeline";
 import TechMapCatalogPanel from "./TechMapCatalogPanel";
 import WorkersPanel from "./WorkersPanel";
-import './TimeLineScreen.css'
+import CustomDragLayer from "./CustomDragLayer";
+import "./TimeLineScreen.css";
 
 export default class TimelineScreen extends React.Component {
   render() {
@@ -21,6 +22,9 @@ export default class TimelineScreen extends React.Component {
           <TechMapCatalogPanel />
           <WorkersPanel />
         </div>
+        {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
+        Our of drag and drop context it must not affect rendering. */}
+        <CustomDragLayer />
       </div>
     );
   }

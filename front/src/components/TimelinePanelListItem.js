@@ -1,12 +1,51 @@
-import React from "react";
 import "./TimelinePanelListItem.css";
+import React from "react";
+import { DragSource } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
 
-export default class TimelinePanelListItem extends React.Component {
+class TimelinePanelListItem extends React.Component {
+  // Needed for react-dnd
+  componentDidMount() {
+    // Use empty image as a drag preview so browsers don't draw it
+    // and we can draw whatever we want on the custom drag layer instead
+    this.props.connectDragPreview(getEmptyImage());
+  }
   render() {
-    return (
-      <ul className="TimelinePanelListItem"> {this.props.itemDisplayName} </ul>
-    )
+    const style = {
+      opacity: this.props.isDragging ? 0 : 1 // todo: seems like this not neded, but needs to be checked
+    };
+    // TODO: refactor this (consider having identity decorator).
+    if ( this.props.isDraggableItem ) {
+      return this.props.connectDragSource(
+        <ul className="TimelinePanelListItem" style={style}>
+          {this.props.itemDisplayName}
+        </ul>
+      );
+    } else {
+      return (
+        <ul className="TimelinePanelListItem" style={style}>
+          {this.props.itemDisplayName}
+        </ul>
+      )
+    }
   }
 }
 
-
+// Needed for react-dnd
+export default DragSource(
+  "techmap-panel-item",
+  // source:
+  {
+    beginDrag(props) {
+      //return {};
+      return props;
+    }
+  }, // collect:
+  (connect, monitor) => {
+    return {
+      connectDragSource: connect.dragSource(),
+      isDragging: monitor.isDragging(),
+      connectDragPreview: connect.dragPreview()
+    };
+  }
+)(TimelinePanelListItem);

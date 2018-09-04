@@ -130,7 +130,7 @@ class SchedulerTimeline extends React.Component {
     const groupedByCols = _.groupBy(layout, x => x.col);
     const columnViews = _.keys(groupedByCols).map((x, x_idx) => {
       const columnJobIds = _.map(groupedByCols[x], x => x.item.id);
-      console.log("columnJobIds: ", columnJobIds);
+      //console.log("columnJobIds: ", columnJobIds);
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
@@ -162,8 +162,6 @@ class SchedulerTimeline extends React.Component {
       height: this.props.height
     };
 
-    console.log(columnViews);
-
     const { highlighted, isOver, connectDropTarget } = this.props;
 
     let className = classNames({
@@ -183,6 +181,6 @@ SchedulerTimeline.propTypes = {
   isOver: PropTypes.bool.isRequired
 };
 
-export default DropTarget("techmap", techMapViewColumnTarget, collect)(
+export default DropTarget(["techmap", "techmap-panel-item"], techMapViewColumnTarget, collect)(
   SchedulerTimeline
 );

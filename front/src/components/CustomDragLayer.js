@@ -6,33 +6,31 @@ import PropTypes from "prop-types";
 import { DragSource } from "react-dnd";
 import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMapView";
+import TimelinePanelListItem from "./TimelinePanelListItem";
 
-let updates = 0;
 function collect(monitor) {
-  if (updates++ % 1 === 0) {
-    return {
-      currentOffset: monitor.getSourceClientOffset(),
-      clientOffset: monitor.getClientOffset(),
-      initialClientOffset: monitor.getInitialClientOffset(),
-      diffFromInitialOffset: monitor.getDifferenceFromInitialOffset(),
-      isDragging: monitor.isDragging(),
-      itemBeingDragged: monitor.getItem(),
-      componentType: monitor.getItemType(),
-      canDrop: (() => {
-        // Seems like it is the only way now to tell if we avobe drop target.
-        // https://github.com/react-dnd/react-dnd/issues/448
-        const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
-        for (let i = targetIds.length - 1; i >= 0; i--) {
-          if (monitor.isOverTarget(targetIds[i])) {
-            return monitor.canDropOnTarget(targetIds[i]);
-          }
+  return {
+    currentOffset: monitor.getSourceClientOffset(),
+    clientOffset: monitor.getClientOffset(),
+    initialClientOffset: monitor.getInitialClientOffset(),
+    diffFromInitialOffset: monitor.getDifferenceFromInitialOffset(),
+    isDragging: monitor.isDragging(),
+    itemBeingDragged: monitor.getItem(),
+    componentType: monitor.getItemType(),
+    canDrop: (() => {
+      // Seems like it is the only way now to tell if we avobe drop target.
+      // Here we inject "artificial" canDrop query to props which allows us
+      // to know if draged item is hovering drop target.
+      // https://github.com/react-dnd/react-dnd/issues/448
+      const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
+      for (let i = targetIds.length - 1; i >= 0; i--) {
+        if (monitor.isOverTarget(targetIds[i])) {
+          return monitor.canDropOnTarget(targetIds[i]);
         }
-        return false;
-      })()
-    };
-  } else {
-    return {};
-  }
+      }
+      return false;
+    })()
+  };
 }
 
 function getItemTransform(props) {
@@ -46,13 +44,6 @@ function getItemTransform(props) {
     componentType,
     canDrop
   } = props;
-  // console.log("currentOffset: ", currentOffset);
-  // console.log("clientOffset: ", clientOffset);
-  // console.log("diffFromInitialOffset: ", diffFromInitialOffset);
-  // console.log("isDragging: ", isDragging);
-  // console.log("itemBeingDragged: ", itemBeingDragged);
-  // console.log("componentType: ", componentType);
-  // console.log("!!!!!!! canDrop !!!!!!!: ", canDrop);
   if (!currentOffset) {
     return {
       display: "none"
@@ -72,55 +63,44 @@ function getItemTransform(props) {
   };
 }
 
-class CustomDragLayer extends React.PureComponent {
+class CustomDragLayer extends React.Component {
+  renderMaterializedTechMap() {
+    return (
+      <div className="CustomDragLayer" style={getItemTransform(this.props)}>
+        <TechMapView
+          title={"Drag layer"}
+          tintColor={"grey"}
+          height={100}
+          left={0}
+          width={150}
+          top={0}
+          key={"Drag layer"}
+        />
+      </div>
+    );
+  }
+  renderUnmaterializedTechMap() {
+    return (
+      <div className="CustomDragLayer" style={getItemTransform(this.props)}>
+        <TimelinePanelListItem itemDisplayName="Dray layer (panel item)" />
+      </div>
+    );
+  }
   render() {
     const { isDragging, itemBeingDragged, componentType, canDrop } = this.props;
     if (!isDragging) {
       return null;
     }
     if (componentType == "techmap") {
+      return this.renderMaterializedTechMap();
+    } else if (componentType == "techmap-panel-item") {
       if (canDrop) {
-        // Materialized TechMapView
-        const style = Object.assign({}, getItemTransform(this.props), {
-          //backgroundColor: "black",
-          // width: 50,
-          // height: 50
-        });
-        console.log('CAN DROP!')
-
-        return (
-          <div className="CustomDragLayer" style={style}>
-            <TechMapView
-              title={"New one"}
-              tintColor={"grey"}
-              height={100}
-              left={0}
-              width={150}
-              top={0}
-              key={"New one"}
-            />
-            ));
-          </div>
-        );
+        return this.renderMaterializedTechMap();
       } else {
-        // Regular view, not TechMapView yet.
-        console.log('CANNOT DROP')
-        const style = Object.assign({}, getItemTransform(this.props), {
-          backgroundColor: "red",
-          width: 50,
-          height: 50
-        });
-        return <div className="CustomDragLayer" style={style} />;
+        return this.renderUnmaterializedTechMap();
       }
     }
   }
 }
-CustomDragLayer.propTypes = {
-  isDragging: PropTypes.bool.isRequired,
-  currentOffset: PropTypes.shape({
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired
-  })
-};
 
 export default DragLayer(collect)(CustomDragLayer);

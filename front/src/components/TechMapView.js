@@ -6,7 +6,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 
 const techMapViewSource = {
   beginDrag(props) {
-    return {}
+    return props;
   }
 };
 
@@ -20,20 +20,19 @@ function collect(connect, monitor) {
 
 class TechMapView extends React.Component {
   componentDidMount() {
-    const { connectDragPreview } = this.props;
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
-    connectDragPreview(getEmptyImage());
+    this.props.connectDragPreview(getEmptyImage());
   }
 
   render() {
     const { connectDragSource, isDragging} = this.props;
     const techMapStyle = {
-      width: this.props.width + "px",
-      height: this.props.height + "px",
+      width: this.props.width ,
+      height: this.props.height,
       backgroundColor: this.props.tintColor,
-      left: this.props.left + "px",
-      top: this.props.top + "px",
+      left: this.props.left,
+      top: this.props.top,
       opacity: isDragging ? 0.5 : 1
     };
     return connectDragSource(
@@ -44,11 +43,4 @@ class TechMapView extends React.Component {
   }
 }
 
-TechMapView.propTypes = {
-  connectDragSource: PropTypes.func.isRequired,
-  isDragging: PropTypes.bool.isRequired
-};
-
-//
 export default DragSource("techmap", techMapViewSource, collect)(TechMapView);
-//export default TechMapView;
