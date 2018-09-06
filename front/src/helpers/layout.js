@@ -1,17 +1,16 @@
 import _ from "lodash";
 
-/*jslint unparam: true, node: true */
-function dumpLayout(l, vbegin, vend) {
-  return JSON.stringify(
-    l.map(x => {
-      return {
-        col: x.col,
-        starts: vbegin(x.item) / 1000 / 60 / 60,
-        ends: vend(x.item) / 1000 / 60 / 60
-      };
-    })
-  );
-}
+// function dumpLayout(l, vbegin, vend) {
+//   return JSON.stringify(
+//     l.map(x => {
+//       return {
+//         col: x.col,
+//         starts: vbegin(x.item) / 1000 / 60 / 60,
+//         ends: vend(x.item) / 1000 / 60 / 60
+//       };
+//     })
+//   );
+// }
 
 function autoLayout_dumb(items, mapper) {
   const layout = [];

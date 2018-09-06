@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
@@ -93,22 +94,138 @@ function getSampleJobs() {
 
 function collect(connect, monitor) {
   return {
-    highlighted: monitor.canDrop(),
+    canDrop: monitor.canDrop(),
     isOver: monitor.isOver(),
-    connectDropTarget: connect.dropTarget()
+    connectDropTarget: connect.dropTarget(),
+    initialClientOffset: monitor.getInitialClientOffset(),
+    initialSourceClientOffset: monitor.getInitialSourceClientOffset(),
+    item: monitor.getItem(),
+    sourceClientOffset: monitor.getSourceClientOffset(),
+    clientOffset: monitor.getClientOffset()
   };
 }
-const techMapViewColumnTarget = {
+// Spec
+const SchedulerTimelineDndSpec = {
   drop(props, monitor) {
-    // /moveKnight(props.x, props.y);
+    // moveKnight(props.x, props.y);
+  },
+  hover(props, monitor, component) {
+    if (!monitor.isOver()) {
+      return;
+    }
+    if (!monitor.canDrop()) return;
+    // TODO: Why this does not work? it must be working.
+    //const timeLine = component.getDecoratedComponentInstance();
+    if (component.state.dndState === "over") {
+      if (component.state.clientOffset !== monitor.getClientOffset()) {
+        const newState = Object.assign({}, component.state, {
+          // todo: check, client should already have this offset
+          clientOffset: monitor.getClientOffset()
+        });
+        component.setStateDebounced(newState);
+      }
+    } else {
+      console.log("NOT OVER!!!!!!!!!!!!!");
+    }
   }
 };
 
 class SchedulerTimeline extends React.Component {
   constructor(props) {
     super(props);
+    this.selfBoundingRect = null;
+    this.setSelfDomRef = element => {
+      this.selfDomRef = element;
+      this.selfDomNode = ReactDOM.findDOMNode(element);
+    };
     this.state = {
-      jobs: getSampleJobs()
+      jobs: getSampleJobs(),
+      dndEvents: {
+        type: "nothing"
+      }
+    };
+    this.frameNum = 0;
+  }
+
+  // https://stackoverflow.com/questions/23123138/perform-debounce-in-react-js
+  setStateDebounced = _.debounce(newState => this.setState(newState), 0);
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.isOver && nextProps.isOver) {
+      console.log("SchedulerTimeline: Drag layer entered");
+      // Now we can query size of rect and update own state accordingly
+      const dragLayerrect = nextProps.item.querySize();
+      this.setState({
+        dndState: "over",
+        dragLayerRect: {
+          width: dragLayerrect.width,
+          height: dragLayerrect.height,
+          top: dragLayerrect.top,
+          left: dragLayerrect.left
+        }
+      });
+    }
+
+    if (this.props.isOver && !nextProps.isOver) {
+      console.log("SchedulerTimeline: Drag layer left");
+      this.setState({
+        dndState: "out",
+        dragLayerRect: null
+      });
+    }
+
+    if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
+      // You can be more specific and track enter/leave
+      // shallowly, not including nested targets
+    }
+  }
+
+  isInHoveredState() {
+    return (
+      this.state.dndEvents &&
+      this.state.dndEvents.type === "hovered-by-external-item"
+    );
+  }
+
+  effectiveTimelineTop() {
+    return this.selfDomNode.scrollTop;
+  }
+
+  getDraggedViewRect() {
+    console.assert(this.state.dndState === "over");
+    if (this.state.dndState !== "over") {
+      return null;
+    }
+    // Returns a rect to indicate we have access
+    // to correct dragged layer dimensions to be able to communicate
+    // user drop position via UI. Rect is translated to SchedulerTimeline
+    // rect area.
+    const dragRect = this.state.dragLayerRect;
+    const diffX =
+      this.props.initialSourceClientOffset.x - this.props.initialClientOffset.x;
+    const diffY =
+      this.props.initialSourceClientOffset.y - this.props.initialClientOffset.y;
+    dragRect.left = this.state.clientOffset.x + diffX;
+    dragRect.top = this.state.clientOffset.y + diffY;
+    return {
+      left: dragRect.left - this.selfBoundingRect.left,
+      top:
+        dragRect.top - this.selfBoundingRect.top + this.effectiveTimelineTop(),
+      width: dragRect.width,
+      height: dragRect.height
+    };
+  }
+
+  // When component did mount we can access DOM.
+  // https://twitter.com/dan_abramov/status/981712092611989509
+  componentDidMount() {
+    console.assert(this.selfDomNode);
+    const rect = this.selfDomNode.getBoundingClientRect();
+    this.selfBoundingRect = {
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom
     };
   }
 
@@ -130,7 +247,7 @@ class SchedulerTimeline extends React.Component {
     const groupedByCols = _.groupBy(layout, x => x.col);
     const columnViews = _.keys(groupedByCols).map((x, x_idx) => {
       const columnJobIds = _.map(groupedByCols[x], x => x.item.id);
-      //console.log("columnJobIds: ", columnJobIds);
+      //co  nsole.log("columnJobIds: ", columnJobIds);
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
@@ -159,28 +276,99 @@ class SchedulerTimeline extends React.Component {
     // Style ovverides
     const style = {
       left: this.props.left,
-      height: this.props.height
+      height: this.props.height,
+      width: this.props.width
     };
+    const { canDrop, isOver, connectDropTarget } = this.props;
+    if (!this.selfNodeBoundigClientRect && this.selfDomNode) {
+      this.selfNodeBoundigClientRect = this.selfDomNode.getBoundingClientRect();
+    }
 
-    const { highlighted, isOver, connectDropTarget } = this.props;
+    //console.log("SchedulerTimeLine: render: ", this.frameNum++);
 
     let className = classNames({
       SchedulerTimeline: true,
-      // "SchedulerTimeline--highlighted": highlighted,
+      "SchedulerTimeline--highlighted": canDrop,
       "SchedulerTimeline--hovered": isOver
     });
-    return connectDropTarget(
-      <div className={className} style={style}>
-        {columnViews}
-      </div>
-    );
+
+    const doTimelineRendering = () => {
+      // Dirty fix of problem that sometimes rendering is performing
+      // with state == 'over' but initialSourceClientOffset
+      // or/and initialClientOffset not available
+      const dirtyFixConditions =
+        !this.props.initialSourceClientOffset ||
+        !this.props.initialClientOffset;
+      if (dirtyFixConditions) {
+        console.warn("WARNING: SchedulerTimeline: dirtyFixConditions");
+      }
+      if (
+        this.state.dndState !== "over" ||
+        !this.state.clientOffset ||
+        dirtyFixConditions
+      ) {
+        // Rendering of scene without drag layer tracking
+        return (
+          <div className={className} style={style} ref={this.setSelfDomRef}>
+            {columnViews}
+          </div>
+        );
+      }
+
+      const draggedViewRect = this.getDraggedViewRect();
+      const topLineY = draggedViewRect.top + draggedViewRect.height - 1;
+      const bottomLineY = draggedViewRect.top;
+      const leftLineX = draggedViewRect.left;
+      const rightLineX = draggedViewRect.left + draggedViewRect.width - 1;
+      const hLineStyle = top => {
+        return {
+          position: "absolute",
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          width: this.props.width,
+          height: 1,
+          left: 0,
+          top: top
+        };
+      };
+
+      const vLineStyle = left => {
+        return {
+          position: "absolute",
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          width: 1,
+          height: this.props.height,
+          left: left,
+          top: this.effectiveTimelineTop()
+        };
+      };
+      return (
+        <div className={className} style={style} ref={this.setSelfDomRef}>
+          <div
+            className={className + "-dnd-special"}
+            style={hLineStyle(topLineY)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={hLineStyle(bottomLineY)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={vLineStyle(leftLineX)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={vLineStyle(rightLineX)}
+          />
+          {columnViews}
+        </div>
+      );
+    };
+    return connectDropTarget(doTimelineRendering());
   }
 }
-SchedulerTimeline.propTypes = {
-  connectDropTarget: PropTypes.func.isRequired,
-  isOver: PropTypes.bool.isRequired
-};
 
-export default DropTarget(["techmap", "techmap-panel-item"], techMapViewColumnTarget, collect)(
-  SchedulerTimeline
-);
+export default DropTarget(
+  ["techmap", "techmap-panel-item"],
+  SchedulerTimelineDndSpec,
+  collect
+)(SchedulerTimeline);

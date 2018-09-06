@@ -1,8 +1,5 @@
 import "../App.css";
 import React from "react";
-import PropTypes from "prop-types";
-import { DragSource } from "react-dnd";
-import { getEmptyImage } from "react-dnd-html5-backend";
 import TimelinePanelListItem from "./TimelinePanelListItem";
 import TimelinePanel from "./TimelinePanel";
 

@@ -15,7 +15,7 @@ class TimelinePanelListItem extends React.Component {
       opacity: this.props.isDragging ? 0 : 1 // todo: seems like this not neded, but needs to be checked
     };
     // TODO: refactor this (consider having identity decorator).
-    if ( this.props.isDraggableItem ) {
+    if (this.props.isDraggableItem) {
       return this.props.connectDragSource(
         <ul className="TimelinePanelListItem" style={style}>
           {this.props.itemDisplayName}
@@ -26,7 +26,7 @@ class TimelinePanelListItem extends React.Component {
         <ul className="TimelinePanelListItem" style={style}>
           {this.props.itemDisplayName}
         </ul>
-      )
+      );
     }
   }
 }
@@ -36,9 +36,15 @@ export default DragSource(
   "techmap-panel-item",
   // source:
   {
-    beginDrag(props) {
-      //return {};
-      return props;
+    beginDrag(props, monitor, component) {
+      let cb = () => {};
+      const result = {
+        ...props,
+        component,
+        setQuerySize: x => (cb = x),
+        querySize: () => cb()
+      };
+      return result;
     }
   }, // collect:
   (connect, monitor) => {

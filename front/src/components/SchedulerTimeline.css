@@ -1,7 +1,6 @@
 .SchedulerTimeline {
   position: relative;
   /* height: 600px; */
-  width: 800px;
   overflow: scroll;
   background-color: rgba(100, 100, 100, 0.03);
 }
@@ -20,7 +19,7 @@
 }
 
 .SchedulerTimeline--highlighted {
-  background-color: plum;
+  background-color: rgba(100, 100, 100, 0.08);
 }
 
 .SchedulerTimeline--hovered {
