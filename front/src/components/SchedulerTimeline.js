@@ -141,7 +141,7 @@ class SchedulerTimeline extends React.Component {
     this.setRef = el => (this.ref = el);
     this.state = {
       jobs: getSampleJobs(),
-      dndState: "over",
+      dndState: "out",
       dragLayerRect: null,
       draggedLayerOffset: 0,
       scrollTop: 0
@@ -288,7 +288,7 @@ class SchedulerTimeline extends React.Component {
       const dirtyFixConditions =
         !this.props.initialSourceClientOffset ||
         !this.props.initialClientOffset;
-      if (dirtyFixConditions) {
+      if (this.state.dndState === "over" && dirtyFixConditions) {
         console.warn("WARNING: SchedulerTimeline: dirtyFixConditions");
       }
       if (
