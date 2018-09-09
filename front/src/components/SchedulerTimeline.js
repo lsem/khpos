@@ -92,6 +92,11 @@ function getSampleJobs() {
   ];
 }
 
+const DndStateName = {
+  IN: "IN",
+  OUT: "OUT"
+};
+
 function collect(connect, monitor) {
   return {
     canDrop: monitor.canDrop(),
@@ -110,19 +115,20 @@ const SchedulerTimelineDndSpec = {
     // moveKnight(props.x, props.y);
   },
   hover(props, monitor, component) {
+    // It looks like hover() is the only method we can constant
+    // flow of dragging events so this is good place to
+    // propagate signal to timeline about cursor position changes.
     if (!monitor.isOver()) {
       return;
     }
     if (!monitor.canDrop()) return;
-    // TODO: Why this does not work? it must be working.
+    // TODO: Why this does not work? it must be working according to the docs.
     //const timeLine = component.getDecoratedComponentInstance();
-    if (component.state.dndState === "over") {
+    if (component.state.dndState === DndStateName.IN) {
       if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
-        const newState = Object.assign({}, component.state, {
-          // todo: check, client should already have this offset
+        component.setStateDebouncedHighRate({
           draggedLayerOffset: monitor.getClientOffset()
         });
-        component.setStateDebouncedHighRate(newState);
       }
     } else {
       console.log("SchedulerTimeline: hover: not over; do nothing");
@@ -141,9 +147,9 @@ class SchedulerTimeline extends React.Component {
     this.setRef = el => (this.ref = el);
     this.state = {
       jobs: getSampleJobs(),
-      dndState: "out",
+      dndState: DndStateName.OUT,
       dragLayerRect: null,
-      draggedLayerOffset: 0,
+      draggedLayerOffset: { x: -1, y: -1 },
       scrollTop: 0
     };
     this.frameNum = 0;
@@ -167,39 +173,85 @@ class SchedulerTimeline extends React.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!this.props.isOver && nextProps.isOver) {
-      console.log("SchedulerTimeline: Drag layer entered");
-      // Now we can query size of rect and update own state accordingly
-      const dragLayerrect = nextProps.item.querySize();
-      this.setState({
-        dndState: "over",
+  static getDerivedStateFromProps(props, state) {
+    //console.log('getDerivedStateFromProps');
+    if (state.dndState !== DndStateName.IN && props.isOver) {
+      console.log("SchedulerTimeline(2): Drag layer entered");
+      const diffX =
+        props.initialSourceClientOffset.x - props.initialClientOffset.x;
+      const diffY =
+        props.initialSourceClientOffset.y - props.initialClientOffset.y;
+      const dragLayerrect = props.item.querySize();
+      return {
+        dndState: DndStateName.IN,
         dragLayerRect: {
           width: dragLayerrect.width,
           height: dragLayerrect.height,
-          top: dragLayerrect.top,
-          left: dragLayerrect.left
-        }
-      });
+          top: -1, // not used
+          left: -1 // not used
+        },
+        diffX: diffX,
+        diffY: diffY
+      };
+    } else if (state.dndState === DndStateName.IN && !props.isOver) {
+      console.log("SchedulerTimeline(2): Drag layer left");
+      return {
+        dndState: DndStateName.OUT,
+        dragLayerRect: null,
+        diffX: null,
+        diffY: null,
+        draggedLayerOffset: { x: -1, y: -1 }
+      };
     }
-
-    if (this.props.isOver && !nextProps.isOver) {
-      console.log("SchedulerTimeline: Drag layer left");
-      this.setState({
-        dndState: "out",
-        dragLayerRect: null
-      });
-    }
-
-    if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
-      // You can be more specific and track enter/leave
-      // shallowly, not including nested targets
-    }
+    return null;
   }
 
+  // TODO: Will be removed recently.
+  // componentWillReceiveProps(nextProps) {
+  //   return;
+  //   // TODO: Find other place to do this logic.
+  //   //  Changing state in this method is not recommended,
+  //   //  and that is why we can sometimes observe different inconsistencies.
+  //   // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+  //   // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+  //   if (!this.props.isOver && nextProps.isOver) {
+  //     console.log("SchedulerTimeline: Drag layer entered");
+  //     const diffX = nextProps.initialSourceClientOffset.x - nextProps.initialClientOffset.x;
+  //     const diffY = nextProps.initialSourceClientOffset.y - nextProps.initialClientOffset.y;
+  //     // Now we can query size of rect and update own state accordingly
+  //     const dragLayerrect = nextProps.item.querySize();
+  //     this.setState({
+  //       dndState: "over",
+  //       dragLayerRect: {
+  //         width: dragLayerrect.width,
+  //         height: dragLayerrect.height,
+  //         top: -1, // not used
+  //         left: -1 // not used
+  //       },
+  //       diffX: diffX,
+  //       diffY: diffY
+  //     });
+  //   }
+
+  //   if (this.props.isOver && !nextProps.isOver) {
+  //     console.log("SchedulerTimeline: Drag layer left");
+  //     this.setState({
+  //       dndState: "out",
+  //       dragLayerRect: null,
+  //       diffX: null,
+  //       diffY: null
+  //     });
+  //   }
+
+  //   if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
+  //     // You can be more specific and track enter/leave
+  //     // shallowly, not including nested targets
+  //   }
+  // }
+
   getDraggedViewRect() {
-    console.assert(this.state.dndState === "over");
-    if (this.state.dndState !== "over") {
+    console.assert(this.state.dndState === DndStateName.IN);
+    if (this.state.dndState !== DndStateName.IN) {
       return null;
     }
     // Returns a rect to indicate we have access
@@ -207,12 +259,8 @@ class SchedulerTimeline extends React.Component {
     // user drop position via UI. Rect is translated to SchedulerTimeline
     // rect area.
     const dragRect = this.state.dragLayerRect;
-    const diffX =
-      this.props.initialSourceClientOffset.x - this.props.initialClientOffset.x;
-    const diffY =
-      this.props.initialSourceClientOffset.y - this.props.initialClientOffset.y;
-    dragRect.left = this.state.draggedLayerOffset.x + diffX;
-    dragRect.top = this.state.draggedLayerOffset.y + diffY;
+    dragRect.left = this.state.draggedLayerOffset.x + this.state.diffX;
+    dragRect.top = this.state.draggedLayerOffset.y + this.state.diffY;
     return {
       left: dragRect.left - this.selfBoundingRect.left,
       top: dragRect.top - this.selfBoundingRect.top + this.state.scrollTop,
@@ -282,20 +330,7 @@ class SchedulerTimeline extends React.Component {
     });
 
     const doTimelineRendering = () => {
-      // Dirty fix of problem that sometimes rendering is performing
-      // with state == 'over' but initialSourceClientOffset
-      // or/and initialClientOffset not available
-      const dirtyFixConditions =
-        !this.props.initialSourceClientOffset ||
-        !this.props.initialClientOffset;
-      if (this.state.dndState === "over" && dirtyFixConditions) {
-        console.warn("WARNING: SchedulerTimeline: dirtyFixConditions");
-      }
-      if (
-        this.state.dndState !== "over" ||
-        !this.state.draggedLayerOffset ||
-        dirtyFixConditions
-      ) {
+      if (this.state.dndState !== DndStateName.IN) {
         // Rendering of scene without drag layer tracking
         return (
           <div className={className} style={style} ref={this.setRef}>

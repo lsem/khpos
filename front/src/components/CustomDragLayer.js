@@ -5,6 +5,7 @@ import React from "react";
 import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMapView";
 import TimelinePanelListItem from "./TimelinePanelListItem";
+import memoizeOne from 'memoize-one';
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
 // http://rafaelquintanilha.com/sortable-targets-with-react-dnd/
@@ -33,13 +34,17 @@ function collect(monitor, props) {
       // Here we inject "artificial" canDrop query to props which allows us
       // to know if draged item is hovering drop target.
       // https://github.com/react-dnd/react-dnd/issues/448
-      const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
-      for (let i = targetIds.length - 1; i >= 0; i--) {
-        if (monitor.isOverTarget(targetIds[i])) {
-          return monitor.canDropOnTarget(targetIds[i]);
-        }
+      const queryCanDrop = (monitor) => {
+        const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
+        for (let i = targetIds.length - 1; i >= 0; i--) {
+          if (monitor.isOverTarget(targetIds[i])) {
+            return monitor.canDropOnTarget(targetIds[i]);
+          }
+        };
+        return false;
       }
-      return false;
+      const memoizedCanDrop = memoizeOne(queryCanDrop);
+      return memoizedCanDrop(monitor);
     })()
   };
 }
