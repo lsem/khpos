@@ -117,38 +117,55 @@ const SchedulerTimelineDndSpec = {
     // TODO: Why this does not work? it must be working.
     //const timeLine = component.getDecoratedComponentInstance();
     if (component.state.dndState === "over") {
-      if (component.state.clientOffset !== monitor.getClientOffset()) {
+      if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
         const newState = Object.assign({}, component.state, {
           // todo: check, client should already have this offset
-          clientOffset: monitor.getClientOffset()
+          draggedLayerOffset: monitor.getClientOffset()
         });
-        component.setStateDebounced(newState);
+        component.setStateDebouncedHighRate(newState);
       }
     } else {
-      console.log("NOT OVER!!!!!!!!!!!!!");
+      console.log("SchedulerTimeline: hover: not over; do nothing");
     }
   }
 };
 
 class SchedulerTimeline extends React.Component {
+  // https://stackoverflow.com/questions/23123138/perform-debounce-in-react-js
+  setStateDebouncedHighRate = _.debounce(s => this.setState(s), 10);
+  setStateDebouncedLowRate = _.debounce(s => this.setState(s), 100);
+
   constructor(props) {
     super(props);
     this.selfBoundingRect = null;
-    this.setSelfDomRef = element => {
-      this.selfDomRef = element;
-      this.selfDomNode = ReactDOM.findDOMNode(element);
-    };
+    this.setRef = el => (this.ref = el);
     this.state = {
       jobs: getSampleJobs(),
-      dndEvents: {
-        type: "nothing"
-      }
+      dndState: "over",
+      dragLayerRect: null,
+      draggedLayerOffset: 0,
+      scrollTop: 0
     };
     this.frameNum = 0;
   }
 
-  // https://stackoverflow.com/questions/23123138/perform-debounce-in-react-js
-  setStateDebounced = _.debounce(newState => this.setState(newState), 0);
+  // When component did mount we can access DOM.
+  // https://twitter.com/dan_abramov/status/981712092611989509
+  componentDidMount() {
+    // Query own bounding rect, not part of state
+    console.assert(this.ref);
+    const rect = this.ref.getBoundingClientRect();
+    this.selfBoundingRect = {
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom
+    };
+    // subscribe to scroll updates to make scroll position part of state
+    this.ref.addEventListener("scroll", e => {
+      this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
+    });
+  }
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.isOver && nextProps.isOver) {
@@ -180,17 +197,6 @@ class SchedulerTimeline extends React.Component {
     }
   }
 
-  isInHoveredState() {
-    return (
-      this.state.dndEvents &&
-      this.state.dndEvents.type === "hovered-by-external-item"
-    );
-  }
-
-  effectiveTimelineTop() {
-    return this.selfDomNode.scrollTop;
-  }
-
   getDraggedViewRect() {
     console.assert(this.state.dndState === "over");
     if (this.state.dndState !== "over") {
@@ -205,27 +211,13 @@ class SchedulerTimeline extends React.Component {
       this.props.initialSourceClientOffset.x - this.props.initialClientOffset.x;
     const diffY =
       this.props.initialSourceClientOffset.y - this.props.initialClientOffset.y;
-    dragRect.left = this.state.clientOffset.x + diffX;
-    dragRect.top = this.state.clientOffset.y + diffY;
+    dragRect.left = this.state.draggedLayerOffset.x + diffX;
+    dragRect.top = this.state.draggedLayerOffset.y + diffY;
     return {
       left: dragRect.left - this.selfBoundingRect.left,
-      top:
-        dragRect.top - this.selfBoundingRect.top + this.effectiveTimelineTop(),
+      top: dragRect.top - this.selfBoundingRect.top + this.state.scrollTop,
       width: dragRect.width,
       height: dragRect.height
-    };
-  }
-
-  // When component did mount we can access DOM.
-  // https://twitter.com/dan_abramov/status/981712092611989509
-  componentDidMount() {
-    console.assert(this.selfDomNode);
-    const rect = this.selfDomNode.getBoundingClientRect();
-    this.selfBoundingRect = {
-      left: rect.left,
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom
     };
   }
 
@@ -280,9 +272,6 @@ class SchedulerTimeline extends React.Component {
       width: this.props.width
     };
     const { canDrop, isOver, connectDropTarget } = this.props;
-    if (!this.selfNodeBoundigClientRect && this.selfDomNode) {
-      this.selfNodeBoundigClientRect = this.selfDomNode.getBoundingClientRect();
-    }
 
     //console.log("SchedulerTimeLine: render: ", this.frameNum++);
 
@@ -304,12 +293,12 @@ class SchedulerTimeline extends React.Component {
       }
       if (
         this.state.dndState !== "over" ||
-        !this.state.clientOffset ||
+        !this.state.draggedLayerOffset ||
         dirtyFixConditions
       ) {
         // Rendering of scene without drag layer tracking
         return (
-          <div className={className} style={style} ref={this.setSelfDomRef}>
+          <div className={className} style={style} ref={this.setRef}>
             {columnViews}
           </div>
         );
@@ -338,11 +327,11 @@ class SchedulerTimeline extends React.Component {
           width: 1,
           height: this.props.height,
           left: left,
-          top: this.effectiveTimelineTop()
+          top: this.state.scrollTop
         };
       };
       return (
-        <div className={className} style={style} ref={this.setSelfDomRef}>
+        <div className={className} style={style} ref={this.setRef}>
           <div
             className={className + "-dnd-special"}
             style={hLineStyle(topLineY)}
