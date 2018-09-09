@@ -6,6 +6,12 @@
   src: url('./fonts/FiraSans-Regular.otf');
 }
 
+@font-face {
+  font-family: 'Fira Sans Bold';
+  font-style: normal;
+  src: url('./fonts/FiraSans-Bold.otf');
+}
+
 * {
   font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
 }
@@ -39,4 +45,8 @@ ul {
 .StockList {
   /* outline: solid black 1px; */
   margin-bottom: 50px;
+}
+
+.TimelineH1 {
+  margin-left: 10px;
 }

@@ -5,10 +5,15 @@
 .TimelineScreenSideContainer {
   display: flex;
   flex-direction: column;
+  margin-left: 20px;
   /* debug: */
-  background-color: oldlace;
+  /* background-color: oldlace; */
 }
 
 .TimelineScreen > .TimelineScreenSideContainer > .TechMapCatalogPanel {
   margin-bottom: 50px;
+}
+
+.TimelineScreen > .SchedulerTimeline {
+  margin-left: 10px;
 }

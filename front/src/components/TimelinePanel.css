@@ -1,5 +1,6 @@
 .TimelinePanel > .TimelinePanel_ListName {
   margin-bottom: 10px;
+  font-family: 'Fira Sans Bold', Arial, Helvetica, sans-serif;
 }
 
 .TimelinePanel > .AddButton {

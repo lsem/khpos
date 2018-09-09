@@ -2,7 +2,7 @@
   position: relative;
   /* height: 600px; */
   overflow: scroll;
-  background-color: rgba(100, 100, 100, 0.03);
+  /* background-color: rgba(100, 100, 100, 0.03); */
 }
 
 .SchedulerTimelineColumn {

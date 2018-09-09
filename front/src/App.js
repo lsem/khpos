@@ -119,7 +119,7 @@ class App extends Component {
         <div className="AppBody">
           {/* <ProductList />
           <StockList /> */}
-          <h1> TineLine Screen </h1>
+          <h1 className="TimelineH1"> Timeline </h1>
           <TimelineScreen />
         </div>
       </div>
