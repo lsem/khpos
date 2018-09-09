@@ -40,10 +40,11 @@ const SchedulerTimelineDndSpec = {
     }
     if (!monitor.canDrop()) return;
     // TODO: Why this does not work? it must be working according to the docs.
-    //const timeLine = component.getDecoratedComponentInstance();
+    // const timeLine = component.getDecoratedComponentInstance();
     if (component.state.dndState === DndStateName.IN) {
       if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
         component.setStateDebouncedHighRate({
+        //component.setState({
           draggedLayerOffset: monitor.getClientOffset()
         });
       }
@@ -55,7 +56,7 @@ const SchedulerTimelineDndSpec = {
 
 class SchedulerTimeline extends React.Component {
   // https://stackoverflow.com/questions/23123138/perform-debounce-in-react-js
-  setStateDebouncedHighRate = _.debounce(s => this.setState(s), 10);
+  setStateDebouncedHighRate = _.debounce(s => this.setState(s), 3);
   setStateDebouncedLowRate = _.debounce(s => this.setState(s), 100);
 
   constructor(props) {
@@ -315,10 +316,10 @@ const mapStateToProps = (state) => {
 }
 
 export default _.flow(
-  connect(mapStateToProps),
   DropTarget(
   ["techmap", "techmap-panel-item"],
   SchedulerTimelineDndSpec,
   collect
-  )
+  ),
+  connect(mapStateToProps)
 )(SchedulerTimeline);
