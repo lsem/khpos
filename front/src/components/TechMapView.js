@@ -4,7 +4,6 @@ import { DragSource, DropTarget } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
-import TechMapViewContent from "./TechMapViewContent";
 
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
@@ -32,14 +31,36 @@ class TechMapView extends React.Component {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
-    this.ref = null;
+    this.nodeRef = null;
   }
 
   render() {
-    return this.props.connectDropTarget(
-      this.props.connectDragSource(
-        <div className="TechMapView">
-          <TechMapViewContent {...this.props} ref={r => (this.ref = r)} />
+    const { connectDropTarget, connectDragSource, isDragging } = this.props;
+    const techMapStyle = {
+      width: this.props.width,
+      height: this.props.height,
+      backgroundColor: this.props.isOver ? "red" : this.props.tintColor,
+      left: this.props.left,
+      top: this.props.top,
+      opacity: isDragging ? 0.3 : 1,
+      display: this.props.hidden ? "none" : "flex"
+    };
+
+    let className = classNames({
+      TechMapView: true,
+      "TechMapView-isOver": this.props.isOver
+    });
+
+    return connectDropTarget(
+      connectDragSource(
+        <div
+          className={className}
+          style={techMapStyle}
+          ref={x => {
+            this.nodeRef = x;
+          }}
+        >
+          {this.props.title}
         </div>
       )
     );
