@@ -5,7 +5,6 @@ import React from "react";
 import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMapView";
 import TimelinePanelListItem from "./TimelinePanelListItem";
-import memoizeOne from 'memoize-one';
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
 // http://rafaelquintanilha.com/sortable-targets-with-react-dnd/
