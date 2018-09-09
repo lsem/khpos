@@ -1,3 +1,15 @@
+/* https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-images-fonts-and-files */
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./fonts/FiraSans-Regular.otf');
+}
+
+* {
+  font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
+}
+
 ul {
   margin: 0;
   padding: 0;
