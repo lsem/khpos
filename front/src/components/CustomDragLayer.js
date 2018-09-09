@@ -83,7 +83,6 @@ class CustomDragLayer extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
     if ((+new Date() - this.lastUpdate) > (1000 / 60) /*60 fps*/) {
       this.lastUpdate = +new Date();
       clearTimeout(this.updateTimer);
