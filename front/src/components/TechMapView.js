@@ -12,7 +12,9 @@ const techMapViewSource = {
       ...props,
       component,
       setQuerySize: x => (cb = x),
-      querySize: () => cb()
+      querySize: () => cb(),
+      colIndex: props.colIndex, // index of source component
+      rowIndex: props.rowIndex // index of source component
     };
     return result;
   }
@@ -27,11 +29,17 @@ function collect(connect, monitor) {
 }
 
 class TechMapView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.ref = null;
+    this.setRef = r => (this.ref = r);
+    //console.log('TechMapView: constructor: this.props.moveTechMap:', this.props.moveTechMap);
+  }
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
-    this.nodeRef = null;
+    //console.log('TechMapView: componentDidMount: ref: ', this.ref)
   }
 
   render() {
@@ -53,13 +61,7 @@ class TechMapView extends React.Component {
 
     return connectDropTarget(
       connectDragSource(
-        <div
-          className={className}
-          style={techMapStyle}
-          ref={x => {
-            this.nodeRef = x;
-          }}
-        >
+        <div className={className} style={techMapStyle} ref={this.setRef}>
           {this.props.title}
         </div>
       )
@@ -69,12 +71,47 @@ class TechMapView extends React.Component {
 
 const techMapDropTargetSpec = {
   hover(props, monitor, component) {
-    // todo: not needed anymore?
-    if (monitor.isOver()) {
-      // const draggedTechMapView = component.getDecoratedComponentInstance();
-      // const hoverBoundingRect = draggedTechMapView.nodeRef.getBoundingClientRect();
-      //console.log(draggedTechMapView.nodeRef.getBoundingClientRect());
+    if (!component) {
+      return;
     }
+    const dragColIndex = monitor.getItem().colIndex
+    const hoverColIndex = props.colIndex
+    const dragRowIndex = monitor.getItem().rowIndex
+    const hoverRowIndex = props.rowIndex
+
+    // console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
+    // console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
+
+    // Don't replace items with themselves
+    if ((dragColIndex === hoverColIndex) && (dragRowIndex === hoverRowIndex)) {
+      return;
+    }
+
+    if (monitor.isOver() || true) {
+      const techMapComponent = component.getDecoratedComponentInstance();
+      const targetRect = techMapComponent.ref.getBoundingClientRect();
+      //const containerRect = props.getContainerRect();
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - targetRect.top;
+      const hoverMiddleY = (targetRect.bottom - targetRect.top) / 2;
+      console.log(
+        "hoverClientY > hoverMiddleY: " + (hoverClientY > hoverMiddleY)
+      );
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      // if (/*dragIndex < hoverIndex &&*/ hoverClientY < hoverClientY) {
+      //   return
+      // }
+
+      // // Dragging upwards
+      // if (/*dragIndex > hoverIndex &&*/ hoverClientY > hoverMiddleY) {
+      //   return
+      // }
+    }
+
+    //props.moveTechMap();
   }
 };
 function techMapDropCollect(connect, monitor) {

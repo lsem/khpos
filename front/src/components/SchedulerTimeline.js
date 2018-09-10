@@ -71,6 +71,16 @@ class SchedulerTimeline extends React.Component {
       scrollTop: 0
     };
     this.frameNum = 0;
+    this.moveTechMap = this.moveTechMap.bind(this);
+    this.getContainerRect = this.getContainerRect.bind(this);
+  }
+
+  getContainerRect() {
+    return this.ref.getBoundingClientRect();
+  }
+
+  moveTechMap() {
+    console.log('SchedulerTimeline: moveTechMap()');
   }
 
   // When component did mount we can access DOM.
@@ -218,6 +228,10 @@ class SchedulerTimeline extends React.Component {
           width={this.props.jobWidth}
           top={jobTop(job)}
           key={job.id}
+          moveTechMap={this.moveTechMap}
+          getContainerRect={this.getContainerRect}
+          colIndex={idx}
+          rowIndex={x_idx}
         />
       ));
       const style = {
