@@ -70,20 +70,22 @@ class TechMapView extends React.Component {
 }
 
 const techMapDropTargetSpec = {
+  // This code utilizes approach taken from dnd card example:
+  // https://github.com/react-dnd/react-dnd/blob/master/packages/documentation/examples/04%20Sortable/Simple/Card.tsx
   hover(props, monitor, component) {
     if (!component) {
       return;
     }
-    const dragColIndex = monitor.getItem().colIndex
-    const hoverColIndex = props.colIndex
-    const dragRowIndex = monitor.getItem().rowIndex
-    const hoverRowIndex = props.rowIndex
+    const dragColIndex = monitor.getItem().colIndex;
+    const hoverColIndex = props.colIndex;
+    const dragRowIndex = monitor.getItem().rowIndex;
+    const hoverRowIndex = props.rowIndex;
 
     // console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
     // console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
 
     // Don't replace items with themselves
-    if ((dragColIndex === hoverColIndex) && (dragRowIndex === hoverRowIndex)) {
+    if (dragColIndex === hoverColIndex && dragRowIndex === hoverRowIndex) {
       return;
     }
 
