@@ -31,25 +31,44 @@ const SchedulerTimelineDndSpec = {
   drop(props, monitor) {
     // moveKnight(props.x, props.y);
   },
+  // component: SchedulerTimeline
+  // monitor.getItem(): TimelinePanelListItem
+  // props: Properties of target (SchedulerTimeline)
   hover(props, monitor, component) {
+    //console.log('hover.props: ', props);
+    // console.log('hover.monitor.getItem(): ', monitor.getItem());
+    // props.onDndTechMapItemHover(monitor.getItem())
+    // return;
+    //console.log('v: ', monitor.getItem())
     // It looks like hover() is the only method we can constant
     // flow of dragging events so this is good place to
     // propagate signal to timeline about cursor position changes.
     if (!monitor.isOver()) {
+      console.log('cannot over')
+      props.onHover(false);
       return;
     }
-    if (!monitor.canDrop()) return;
+    if (!monitor.canDrop()) {
+      console.log('cannot drop')
+      props.onHover(false);
+      return;
+    }
+
+    console.log('ca over')
+
+    props.onHover(true);
     // TODO: Why this does not work? it must be working according to the docs.
     // const timeLine = component.getDecoratedComponentInstance();
     if (component.state.dndState === DndStateName.IN) {
-      if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
-        component.setStateDebouncedHighRate({
-        //component.setState({
-          draggedLayerOffset: monitor.getClientOffset()
-        });
-      }
+      //console.log('[query size]: ', monitor.getItem());
+      // if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
+      //   component.setStateDebouncedHighRate({
+      //   //component.setState({
+      //     draggedLayerOffset: monitor.getClientOffset()
+      //   });
+      // }
     } else {
-      console.log("SchedulerTimeline: hover: not over; do nothing");
+      //console.log("SchedulerTimeline: hover: not over; do nothing");
     }
   }
 };
@@ -73,6 +92,20 @@ class SchedulerTimeline extends React.Component {
     this.frameNum = 0;
     this.moveTechMap = this.moveTechMap.bind(this);
     this.getContainerRect = this.getContainerRect.bind(this);
+    this.getDimensionResolver = this.getDimensionResolver.bind(this);
+    this.props.setUpDimensionsResolver(() => this.getDimensionResolver());
+  }
+
+  getDimensionResolver() {
+    console.log('queried dimensions resolver')
+    const msToHours = ms => ms / (1000 * 60 * 60);
+    const hoursToMs = h => h * 1000 * 60 * 60;
+    const msToPixels = ms => msToHours(ms) * this.props.durationScalingFator;
+    const minToPixels = min => msToPixels(min * 60 * 1000);
+    console.log(minToPixels)
+    return {
+      minToPixels: minToPixels
+    };
   }
 
   getContainerRect() {
@@ -95,6 +128,7 @@ class SchedulerTimeline extends React.Component {
       right: rect.right,
       bottom: rect.bottom
     };
+    //console.log('other size: ', otherSize);
     // subscribe to scroll updates to make scroll position part of state
     this.ref.addEventListener("scroll", e => {
       this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
@@ -102,37 +136,48 @@ class SchedulerTimeline extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    //console.log('getDerivedStateFromProps');
-    if (state.dndState !== DndStateName.IN && props.isOver) {
-      console.log("SchedulerTimeline(2): Drag layer entered");
-      const diffX =
-        props.initialSourceClientOffset.x - props.initialClientOffset.x;
-      const diffY =
-        props.initialSourceClientOffset.y - props.initialClientOffset.y;
-      const dragLayerrect = props.item.querySize();
-      return {
-        dndState: DndStateName.IN,
-        dragLayerRect: {
-          width: dragLayerrect.width,
-          height: dragLayerrect.height,
-          top: -1, // not used
-          left: -1 // not used
-        },
-        diffX: diffX,
-        diffY: diffY
-      };
-    } else if (state.dndState === DndStateName.IN && !props.isOver) {
-      console.log("SchedulerTimeline(2): Drag layer left");
-      return {
-        dndState: DndStateName.OUT,
-        dragLayerRect: null,
-        diffX: null,
-        diffY: null,
-        draggedLayerOffset: { x: -1, y: -1 }
-      };
-    }
-    return null;
+    return {
+      dndState: DndStateName.OUT,
+      dragLayerRect: null,
+      draggedLayerOffset: { x: -1, y: -1 },
+      scrollTop: 0
+    };
   }
+
+  // static getDerivedStateFromProps(props, state) {
+  //   //console.log('getDerivedStateFromProps');
+  //   if (state.dndState !== DndStateName.IN && props.isOver) {
+  //     //console.log('[query size]', props.item.queryLayerSize)
+  //     console.log("SchedulerTimeline(2): Drag layer entered");
+  //     const diffX =
+  //       props.initialSourceClientOffset.x - props.initialClientOffset.x;
+  //     const diffY =
+  //       props.initialSourceClientOffset.y - props.initialClientOffset.y;
+
+  //     const dragLayerrect = props.item.querySize();
+  //     return {
+  //       dndState: DndStateName.IN,
+  //       dragLayerRect: {
+  //         width: dragLayerrect.width,
+  //         height: dragLayerrect.height,
+  //         top: -1, // not used
+  //         left: -1 // not used
+  //       },
+  //       diffX: diffX,
+  //       diffY: diffY
+  //     };
+  //   } else if (state.dndState === DndStateName.IN && !props.isOver) {
+  //     console.log("SchedulerTimeline(2): Drag layer left");
+  //     return {
+  //       dndState: DndStateName.OUT,
+  //       dragLayerRect: null,
+  //       diffX: null,
+  //       diffY: null,
+  //       draggedLayerOffset: { x: -1, y: -1 }
+  //     };
+  //   }
+  //   return null;
+  // }
 
   // TODO: Will be removed recently.
   // componentWillReceiveProps(nextProps) {

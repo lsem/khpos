@@ -79,7 +79,15 @@ class CustomDragLayer extends React.Component {
     this.techMapViewRef = null;
     this.lastUpdate = +new Date();
     this.updateTimer = null;
+    this.queryLayerSize = this.queryLayerSize.bind(this);
   }
+
+  // static getDerivedStateFromProps(props, state) {
+  //   console.log(props)
+  //   return {
+  //     x: '1'
+  //   }
+  // }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
@@ -135,10 +143,16 @@ class CustomDragLayer extends React.Component {
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
+          queryLayerSize={this.queryLayerSize}
         />
       </div>
     );
   }
+
+  queryLayerSize() {
+    return {width: 100, height: 200}
+  }
+
   renderUnmaterializedTechMap(itemProps) {
     const techMapViewWidth = 100; // TODO: get from model via props
     const layerStyle = getItemTransform(this.props);
@@ -164,6 +178,7 @@ class CustomDragLayer extends React.Component {
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
+          queryLayerSize={this.queryLayerSize}
         />
 
         <TimelinePanelListItem itemDisplayName="Dray layer (panel item)" />
@@ -180,6 +195,8 @@ class CustomDragLayer extends React.Component {
       // as static.
       return null;
     }
+
+    //console.log(this.props)
 
     if (componentType === "techmap") {
       return this.renderMaterializedTechMap(itemBeingDragged);

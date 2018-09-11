@@ -14,7 +14,8 @@ const techMapViewSource = {
       setQuerySize: x => (cb = x),
       querySize: () => cb(),
       colIndex: props.colIndex, // index of source component
-      rowIndex: props.rowIndex // index of source component
+      rowIndex: props.rowIndex, // index of source component,
+      queryLayerSize: props.queryLayerSize
     };
     return result;
   }
