@@ -4,7 +4,8 @@ const initialState = [
     tintColor: "rgb(216, 216, 216)",
     durationHours: 2.5,
     startTime: Date.parse("01 Jan 1970 00:30:00 GMT"),
-    id: "1"
+    id: "1",
+    taskIds: ["1", "2", "3", "4"]
   },
   {
     title: "2",

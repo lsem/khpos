@@ -219,11 +219,15 @@ class SchedulerTimeline extends React.Component {
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
-      const columnTechMaps = columnJobs.map((job, idx) => (
+      const columnTechMaps = columnJobs.map((job, idx) => { 
+        const tasks = _.map(job.taskIds, id => this.props.techMapTasks.find(t => t.id === id));
+
+        return (
         <TechMapView
           title={job.title}
           tintColor={job.tintColor}
           height={jobHeight(job)}
+          msToPixels={msToPixels}
           left={0}
           width={this.props.jobWidth}
           top={jobTop(job)}
@@ -232,8 +236,9 @@ class SchedulerTimeline extends React.Component {
           getContainerRect={this.getContainerRect}
           colIndex={idx}
           rowIndex={x_idx}
+          tasks={tasks}
         />
-      ));
+      )});
       const style = {
         left: x_idx * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
@@ -325,7 +330,8 @@ class SchedulerTimeline extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    techMapsTimeLine: state.techMapsTimeLine
+    techMapsTimeLine: state.techMapsTimeLine,
+    techMapTasks: state.techMapTasks
   }
 }
 

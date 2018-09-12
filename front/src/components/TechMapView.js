@@ -5,6 +5,8 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
 
+import TechMapTaskView from "./TechMapTaskView"
+
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
     let cb;
@@ -51,7 +53,7 @@ class TechMapView extends React.Component {
       left: this.props.left,
       top: this.props.top,
       opacity: isDragging ? 0.3 : 1,
-      display: this.props.hidden ? "none" : "flex"
+      display: this.props.hidden ? "none" : "block"
     };
 
     let className = classNames({
@@ -59,10 +61,20 @@ class TechMapView extends React.Component {
       "TechMapView-isOver": this.props.isOver
     });
 
+    const minsToMs = (mins) => mins * 60 * 1000;
+
+    const tasks = _.map(this.props.tasks, t => (
+      <TechMapTaskView
+        height={this.props.msToPixels(minsToMs(t.durationMins))}
+        color={t.bgColor}
+        name={t.name}
+        key={t.id}/>
+    ));
+
     return connectDropTarget(
       connectDragSource(
         <div className={className} style={techMapStyle} ref={this.setRef}>
-          {this.props.title}
+          {tasks}
         </div>
       )
     );

@@ -1,8 +1,5 @@
 .TechMapView {
   position: absolute;
   border-radius: 15px;
-  /* centering content horizontally and vertically*/
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden; /* avoid overflowing rounded corners */
 }
