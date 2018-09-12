@@ -199,14 +199,15 @@ class SchedulerTimeline extends React.Component {
 
   render() {
     const msToHours = ms => ms / (1000 * 60 * 60);
-    const hoursToMs = h => h * 1000 * 60 * 60;
+    const minutesToMs = m => m * 1000 * 60;
     const msToPixels = ms => msToHours(ms) * this.props.durationScalingFator;
-    const jobHeight = j => msToPixels(hoursToMs(j.durationHours));
     const jobTop = j => msToPixels(j.startTime - this.props.beginTime);
+    const jobDurationMins = j => 
+      j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
 
     const jobLayoutMapper = {
       vbegin: x => x.startTime,
-      vend: x => x.startTime + hoursToMs(x.durationHours),
+      vend: x => x.startTime + minutesToMs(jobDurationMins(x)),
       identity: x => x.title
     };
     const layout = autoLayout(this.state.jobs, jobLayoutMapper);
@@ -219,14 +220,12 @@ class SchedulerTimeline extends React.Component {
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
-      const columnTechMaps = columnJobs.map((job, idx) => { 
-        const tasks = _.map(job.taskIds, id => this.props.techMapTasks.find(t => t.id === id));
-
+      const columnTechMaps = columnJobs.map((job, idx) => {
+        console.log(jobDurationMins(job));
         return (
         <TechMapView
-          title={job.title}
-          tintColor={job.tintColor}
-          height={jobHeight(job)}
+          title={job.techMap.name}
+          tintColor={job.techMap.tintColor}
           msToPixels={msToPixels}
           left={0}
           width={this.props.jobWidth}
@@ -236,7 +235,7 @@ class SchedulerTimeline extends React.Component {
           getContainerRect={this.getContainerRect}
           colIndex={idx}
           rowIndex={x_idx}
-          tasks={tasks}
+          tasks={job.techMap.tasks}
         />
       )});
       const style = {

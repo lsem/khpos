@@ -48,7 +48,6 @@ class TechMapView extends React.Component {
     const { connectDropTarget, connectDragSource, isDragging } = this.props;
     const techMapStyle = {
       width: this.props.width,
-      height: this.props.height,
       backgroundColor: this.props.isOver ? "red" : this.props.tintColor,
       left: this.props.left,
       top: this.props.top,
