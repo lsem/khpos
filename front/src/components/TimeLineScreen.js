@@ -4,6 +4,7 @@ import TechMapCatalogPanel from "./TechMapCatalogPanel";
 import WorkersPanel from "./WorkersPanel";
 import CustomDragLayer from "./CustomDragLayer";
 import "./TimeLineScreen.css";
+import _ from "lodash";
 
 export default class TimelineScreen extends React.Component {
   constructor(props) {
@@ -36,9 +37,15 @@ export default class TimelineScreen extends React.Component {
       techMapPreviewHoverRect: null,
       techMapPreviewHoverTranslatedRect: null,
       schedulerTimelineRect: null,
-      initialOffset: null
+      initialOffset: null,
+      scrollTop: 0
     };
   }
+
+  setScrollTopPositionDebounced = _.debounce(
+    pos => this.setState({ scrollTop: pos }),
+    30
+  );
 
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
@@ -47,9 +54,9 @@ export default class TimelineScreen extends React.Component {
       );
       // subscribe to scroll updates to make scroll position part of state
       // todo: fix back scrolling
-      // this.ref.addEventListener("scroll", e => {
-      //   this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
-      // });
+      ref.addEventListener("scroll", e => {
+        this.setScrollTopPositionDebounced(ref.scrollTop);
+      });
     } else {
       //console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
     }
@@ -79,7 +86,7 @@ export default class TimelineScreen extends React.Component {
       const haveRectAndInTimeline =
         prevState.techMapPreviewHoverRect !== null &&
         /*prevState.isTechMapHoveringTimeline*/ true;
-      console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
+      console.log("DEBUG: haveRectAndInTimeline: ", haveRectAndInTimeline);
       return {
         isTechMapOverTimeline: true,
         isTechMapHoveringTimeline: haveRectAndInTimeline,
@@ -137,15 +144,6 @@ export default class TimelineScreen extends React.Component {
     }
   }
 
-  translateRectWithOffset(rect, offset) {
-    return {
-      top: rect.top + offset.y,
-      left: rect.left + offset.x,
-      width: rect.width,
-      height: rect.height
-    };
-  }
-
   // Returns rect in respect to otherRect. Both expected to be in world coordinates.
   translateRectToOtherRect(rect, otherRect) {
     return {
@@ -164,10 +162,10 @@ export default class TimelineScreen extends React.Component {
         console.warn("DEBUG: not actual any more");
       }
 
-      const effectivRect = this.translateRectToOtherRect(
+      let effectivRect = this.translateRectToOtherRect(
         {
           left: offset.x - this.state.initialOffset.x,
-          top: offset.y - this.state.initialOffset.y,
+          top: offset.y - this.state.initialOffset.y + this.state.scrollTop,
           width: this.state.techMapPreviewHoverRect.width,
           height: this.state.techMapPreviewHoverRect.height
         },
@@ -193,6 +191,7 @@ export default class TimelineScreen extends React.Component {
           onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
           onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
           onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
+          scrollTop={this.state.scrollTop}
           minsToPixels={this.minsToPixels}
           height={500}
           width={800}

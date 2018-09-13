@@ -57,7 +57,11 @@ class SchedulerTimeline extends React.Component {
   onOffsetChanged(offset, diffOffset, initialOffset) {
     if (this.lastOffset !== offset) {
       this.lastOffset = offset;
-      this.props.onTechMapPreviewOffsetChanged(offset, diffOffset, initialOffset);
+      this.props.onTechMapPreviewOffsetChanged(
+        offset,
+        diffOffset,
+        initialOffset
+      );
     }
   }
 
@@ -75,7 +79,6 @@ class SchedulerTimeline extends React.Component {
     console.log("SchedulerTimeline: moveTechMap()");
   }
 
-  // TODO: Will be removed recently.
   componentWillReceiveProps(nextProps) {
     // TODO: Find other place to do this logic.
     //  Changing state in this method is not recommended,
@@ -83,11 +86,13 @@ class SchedulerTimeline extends React.Component {
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
     // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
     if (!this.props.isOver && nextProps.isOver) {
-      console.log(this.props)
-      const diffX = this.props.initialClientOffset.x - this.props.initialSourceClientOffset.x;
-      const diffY = this.props.initialClientOffset.y - this.props.initialSourceClientOffset.y;
-      console.log({x: diffX, y: diffY})
-      this.props.onTechMapPreviewEnteredTimeline({x: diffX, y: diffY});
+      const diffX =
+        this.props.initialClientOffset.x -
+        this.props.initialSourceClientOffset.x;
+      const diffY =
+        this.props.initialClientOffset.y -
+        this.props.initialSourceClientOffset.y;
+      this.props.onTechMapPreviewEnteredTimeline({ x: diffX, y: diffY });
     }
     if (this.props.isOver && !nextProps.isOver) {
       this.props.onTechMapPreviewLeftTimeline();
@@ -154,7 +159,7 @@ class SchedulerTimeline extends React.Component {
     const style = {
       left: this.props.left,
       height: this.props.height,
-      width: this.props.width,
+      width: this.props.width
     };
     const { canDrop, isOver, connectDropTarget } = this.props;
 
@@ -181,14 +186,14 @@ class SchedulerTimeline extends React.Component {
       }
 
       const draggedViewRect = this.props.techMapPreviewHoverRect;
-      const topLineY = draggedViewRect.top + draggedViewRect.height - 1;
-      const bottomLineY = draggedViewRect.top;
+      const topLineY = draggedViewRect.top;
+      const bottomLineY = draggedViewRect.top + draggedViewRect.height - 1;
       const leftLineX = draggedViewRect.left;
       const rightLineX = draggedViewRect.left + draggedViewRect.width - 1;
       const hLineStyle = top => {
         return {
           position: "absolute",
-          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
           width: this.props.width,
           height: 1,
           left: 0,
@@ -199,11 +204,11 @@ class SchedulerTimeline extends React.Component {
       const vLineStyle = left => {
         return {
           position: "absolute",
-          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
           width: 1,
           height: this.props.height,
           left: left,
-          top: this.state.scrollTop
+          top: this.props.scrollTop
         };
       };
       return (
