@@ -9,11 +9,6 @@ import { autoLayout } from "../helpers/layout";
 import _ from "lodash";
 import "./SchedulerTimeline.css";
 
-const DndStateName = {
-  IN: "IN",
-  OUT: "OUT"
-};
-
 function collect(connect, monitor) {
   return {
     canDrop: monitor.canDrop(),
@@ -51,58 +46,30 @@ class SchedulerTimeline extends React.Component {
   setStateDebouncedLowRate = _.debounce(s => this.setState(s), 100);
 
   offsetChangeDebounced = _.debounce(
-    offs => this.props.onTechMapPreviewOffsetChanged(offs),
+    offset => this.props.onTechMapPreviewOffsetChanged(offset),
     1000 / 30 /*must yield to X fps*/
   );
 
   onOffsetChanged(offset) {
-    if ( this.lastOffset !== offset ) {
+    if (this.lastOffset !== offset) {
       this.lastOffset = offset;
-      this.offsetChangeDebounced(offset);
+      //this.offsetChangeDebounced(offset);
+      this.props.onTechMapPreviewOffsetChanged(offset);
     }
   }
 
   constructor(props) {
     super(props);
     this.lastOffset = null;
-    this.selfBoundingRect = null;
-    this.setRef = el => (this.ref = el);
     this.state = {
-      jobs: props.techMapsTimeLine,
-      dndState: DndStateName.OUT,
-      dragLayerRect: null,
-      draggedLayerOffset: { x: -1, y: -1 },
-      scrollTop: 0
+      jobs: props.techMapsTimeLine
     };
     this.frameNum = 0;
     this.moveTechMap = this.moveTechMap.bind(this);
-    this.getContainerRect = this.getContainerRect.bind(this);
-  }
-
-  getContainerRect() {
-    return this.ref.getBoundingClientRect();
   }
 
   moveTechMap() {
     console.log("SchedulerTimeline: moveTechMap()");
-  }
-
-  // When component did mount we can access DOM.
-  // https://twitter.com/dan_abramov/status/981712092611989509
-  componentDidMount() {
-    // Query own bounding rect, not part of state
-    console.assert(this.ref);
-    const rect = this.ref.getBoundingClientRect();
-    this.selfBoundingRect = {
-      left: rect.left,
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom
-    };
-    // subscribe to scroll updates to make scroll position part of state
-    this.ref.addEventListener("scroll", e => {
-      this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
-    });
   }
 
   // TODO: Will be removed recently.
@@ -125,28 +92,28 @@ class SchedulerTimeline extends React.Component {
     }
   }
 
-  getDraggedViewRect() {
-    console.assert(this.state.dndState === DndStateName.IN);
-    if (this.state.dndState !== DndStateName.IN) {
-      return null;
-    }
-    // Returns a rect to indicate we have access
-    // to correct dragged layer dimensions to be able to communicate
-    // user drop position via UI. Rect is translated to SchedulerTimeline
-    // rect area.
-    const dragRect = this.state.dragLayerRect;
-    dragRect.left = this.state.draggedLayerOffset.x + this.state.diffX;
-    dragRect.top = this.state.draggedLayerOffset.y + this.state.diffY;
-    return {
-      left: dragRect.left - this.selfBoundingRect.left,
-      top: dragRect.top - this.selfBoundingRect.top + this.state.scrollTop,
-      width: dragRect.width,
-      height: dragRect.height
-    };
-  }
+  // getDraggedViewRect() {
+  //   console.assert(this.state.dndState === DndStateName.IN);
+  //   if (this.state.dndState !== DndStateName.IN) {
+  //     return null;
+  //   }
+  //   // Returns a rect to indicate we have access
+  //   // to correct dragged layer dimensions to be able to communicate
+  //   // user drop position via UI. Rect is translated to SchedulerTimeline
+  //   // rect area.
+  //   const dragRect = this.state.dragLayerRect;
+  //   dragRect.left = this.state.draggedLayerOffset.x + this.state.diffX;
+  //   dragRect.top = this.state.draggedLayerOffset.y + this.state.diffY;
+  //   return {
+  //     left: dragRect.left - this.selfBoundingRect.left,
+  //     top: dragRect.top - this.selfBoundingRect.top + this.state.scrollTop,
+  //     width: dragRect.width,
+  //     height: dragRect.height
+  //   };
+  // }
 
   render() {
-    console.log(this.props.techMapPreviewHoverRect);
+    //console.log(this.props.techMapPreviewHoverRect);
     const minutesToMs = min => min * 1000 * 60;
     const msToMins = ms => ms / (1000 * 60);
     const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
@@ -217,16 +184,28 @@ class SchedulerTimeline extends React.Component {
     });
 
     const doTimelineRendering = () => {
-      if (this.state.dndState !== DndStateName.IN) {
+      console.log(
+        "DEBUG: this.props.presentTechMapHover: ",
+        this.props.presentTechMapHover
+      );
+      if (!this.props.presentTechMapHover) {
         // Rendering of scene without drag layer tracking
         return (
-          <div className={className} style={style} ref={this.setRef}>
+          <div
+            className={className}
+            style={style}
+            ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
+          >
             {columnViews}
           </div>
         );
       }
 
-      const draggedViewRect = this.getDraggedViewRect();
+      console.log(
+        "DEBUG: this.props.techMapPreviewHoverRect: ",
+        this.props.techMapPreviewHoverRect
+      );
+      const draggedViewRect = this.props.techMapPreviewHoverRect;
       const topLineY = draggedViewRect.top + draggedViewRect.height - 1;
       const bottomLineY = draggedViewRect.top;
       const leftLineX = draggedViewRect.left;
@@ -253,7 +232,11 @@ class SchedulerTimeline extends React.Component {
         };
       };
       return (
-        <div className={className} style={style} ref={this.setRef}>
+        <div
+          className={className}
+          style={style}
+          ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
+        >
           <div
             className={className + "-dnd-special"}
             style={hLineStyle(topLineY)}

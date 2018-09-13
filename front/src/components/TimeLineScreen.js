@@ -24,12 +24,34 @@ export default class TimelineScreen extends React.Component {
     this.onTechMapPreviewDomNodeRefUpdate = this.onTechMapPreviewDomNodeRefUpdate.bind(
       this
     );
-    this.onTechMapPreviewOffsetChanged = this.onTechMapPreviewOffsetChanged.bind(this);
+    this.onTechMapPreviewOffsetChanged = this.onTechMapPreviewOffsetChanged.bind(
+      this
+    );
+    this.onSchedulerTimelineDomNodeRefUpdate = this.onSchedulerTimelineDomNodeRefUpdate.bind(
+      this
+    );
     this.state = {
       isTechMapOverTimeline: false,
       isTechMapHoveringTimeline: false,
-      techMapPreviewHoverRect: null
+      techMapPreviewHoverRect: null,
+      techMapPreviewHoverTranslatedRect: null,
+      schedulerTimelineDomNodeRefUpdateRect: null
     };
+  }
+
+  onSchedulerTimelineDomNodeRefUpdate(ref) {
+    if (ref) {
+      this.state.schedulerTimelineDomNodeRefUpdateRect = this.domRectToInternalRect(
+        ref.getBoundingClientRect()
+      );
+      // subscribe to scroll updates to make scroll position part of state
+      // todo: fix back scrolling
+      // this.ref.addEventListener("scroll", e => {
+      //   this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
+      // });
+    } else {
+      console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
+    }
   }
 
   minsToPixels(mins) {
@@ -70,7 +92,7 @@ export default class TimelineScreen extends React.Component {
     });
   }
 
-  domRectToHoverRect(domRect) {
+  domRectToInternalRect(domRect) {
     return {
       top: domRect.top,
       left: domRect.left,
@@ -92,10 +114,12 @@ export default class TimelineScreen extends React.Component {
           /*techMapPreviewHoverRect !== null*/ true &&
           prevState.isTechMapHoveringTimeline;
         console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
+        const internalRect = this.domRectToInternalRect(
+          ref.getBoundingClientRect()
+        );
         return {
-          techMapPreviewHoverRect: this.domRectToHoverRect(
-            ref.getBoundingClientRect()
-          ),
+          techMapPreviewHoverRect: internalRect,
+          techMapPreviewHoverTranslatedRect: internalRect,
           isTechMapHoveringTimeline: haveRectAndInTimeline
         };
       });
@@ -107,21 +131,45 @@ export default class TimelineScreen extends React.Component {
       console.log("DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached");
       this.setState({
         techMapPreviewHoverRect: null,
+        techMapPreviewHoverTranslatedRect: null,
         isTechMapHoveringTimeline: false
       });
     }
   }
 
+  translateRectWithOffset(rect, offset) {
+    return {
+      top: rect.top + offset.y,
+      left: rect.left + offset.x
+    };
+  }
+
   onTechMapPreviewOffsetChanged(offset) {
-    console.log('DEBUG: onTechMapPreviewOffsetChanged', offset)
+    console.log("DEBUG: onTechMapPreviewOffsetChanged", offset);
+    //console.log('DEBUG: translated: ', this.translateRectWithOffset(this.state.techMapPreviewHoverRect, offset))
+    this.setState(prevState => {
+      const stillActual = prevState.isTechMapHoveringTimeline;
+      if (!stillActual) {
+        console.log("DEBUG: not actual any more");
+      }
+      return {
+        techMapPreviewHoverTranslatedRect: stillActual
+          ? this.translateRectWithOffset(
+              prevState.techMapPreviewHoverRect, // actual static
+              offset
+            )
+          : null
+      };
+    });
   }
 
   render() {
     return (
       <div className="TimelineScreen">
         <SchedulerTimeline
+          onSchedulerTimelineDomNodeRefUpdate={this.onSchedulerTimelineDomNodeRefUpdate}
           presentTechMapHover={this.state.isTechMapHoveringTimeline}
-          techMapPreviewHoverRect={this.state.techMapPreviewHoverRect}
+          techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
           onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
           onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
           onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
