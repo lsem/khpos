@@ -1,6 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";

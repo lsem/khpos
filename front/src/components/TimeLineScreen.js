@@ -52,9 +52,11 @@ export default class TimelineScreen extends React.Component {
 
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
-      this.state.schedulerTimelineRect = this.domRectToInternalRect(
-        ref.getBoundingClientRect()
-      );
+      this.setState({
+        schedulerTimelineRect: this.domRectToInternalRect(
+          ref.getBoundingClientRect()
+        )
+      });
       // subscribe to scroll updates to make scroll position part of state
       // todo: fix back scrolling
       ref.addEventListener("scroll", e => {
