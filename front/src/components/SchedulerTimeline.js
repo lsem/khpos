@@ -45,23 +45,23 @@ const SchedulerTimelineDndSpec = {
 };
 
 class SchedulerTimeline extends React.Component {
-  // https://stackoverflow.com/questions/23123138/perform-debounce-in-react-js
-  setStateDebouncedHighRate = _.debounce(s => this.setState(s), 3);
-  setStateDebouncedLowRate = _.debounce(s => this.setState(s), 100);
-
+  // to Taras: try paling by changing throttle to debounce if you are not aware
+  // about this stuff.
   offsetChangeDebounced = _.debounce(
-    offset => this.props.onTechMapPreviewOffsetChanged(offset),
-    1000 / 30 /*must yield to X fps*/
+    (offset, diffOffset, initialOffset) =>
+      this.props.onTechMapPreviewOffsetChanged(
+        offset,
+        diffOffset,
+        initialOffset
+      ),
+    1000 / 15 /*in combination with throttling must yield to X fps*/
   );
 
   onOffsetChanged(offset, diffOffset, initialOffset) {
     if (this.lastOffset !== offset) {
       this.lastOffset = offset;
-      this.props.onTechMapPreviewOffsetChanged(
-        offset,
-        diffOffset,
-        initialOffset
-      );
+      // this.props.onTechMapPreviewOffsetChanged(
+      this.offsetChangeDebounced(offset, diffOffset, initialOffset);
     }
   }
 

@@ -158,8 +158,18 @@ export default class TimelineScreen extends React.Component {
     this.setState(prevState => {
       const stillActual = prevState.isTechMapHoveringTimeline;
       if (!stillActual) {
-        // todo: it might be not needed in the end.
+        // todo: this is known to occur for example in following scenario:
+        // Reproducible with trhrotteling this event at rate 1000 / 30
+        // in combination with throtelling.
+        //   onTechMapPreviewEnteredTimeline
+        //   haveRectAndInTimeline:  true
+        //   onTechMapPreviewDomNodeRefUpdate: dom detached
+        //   onTechMapPreviewLeftTimeline!
+        //   onTechMapPreviewFinishedDragging
+        //   <this> "not actual any more"
+        // Then techMapPreviewHoverRect is null and cannot be used
         console.warn("DEBUG: not actual any more");
+        return {};
       }
 
       let effectivRect = this.translateRectToOtherRect(
