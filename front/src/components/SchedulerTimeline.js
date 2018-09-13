@@ -198,11 +198,11 @@ class SchedulerTimeline extends React.Component {
   }
 
   render() {
-    const msToHours = ms => ms / (1000 * 60 * 60);
-    const minutesToMs = m => m * 1000 * 60;
-    const msToPixels = ms => msToHours(ms) * this.props.durationScalingFator;
+    const minutesToMs = min => min * 1000 * 60;
+    const msToMins = ms => ms / (1000 * 60);
+    const msToPixels = ms => this.props.minsToPixels(msToMins(ms))
     const jobTop = j => msToPixels(j.startTime - this.props.beginTime);
-    const jobDurationMins = j => 
+    const jobDurationMins = j =>
       j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
 
     const jobLayoutMapper = {

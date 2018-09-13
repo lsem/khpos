@@ -120,7 +120,7 @@ class App extends Component {
           {/* <ProductList />
           <StockList /> */}
           <h1 className="TimelineH1"> Timeline </h1>
-          <TimelineScreen />
+          <TimelineScreen pixelsPerMinute={2}/>
         </div>
       </div>
     );

@@ -6,10 +6,19 @@ import CustomDragLayer from "./CustomDragLayer";
 import "./TimeLineScreen.css";
 
 export default class TimelineScreen extends React.Component {
+  constructor(props) {
+    super(props);
+    this.minsToPixels = this.minsToPixels.bind(this);
+  }
+
+  minsToPixels(mins) {
+    return this.props.pixelsPerMinute * mins;
+  }
   render() {
     return (
       <div className="TimelineScreen">
         <SchedulerTimeline
+          minsToPixels={this.minsToPixels}
           height={500}
           width={800}
           durationScalingFator={100}
