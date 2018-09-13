@@ -9,12 +9,9 @@ import TechMapTaskView from "./TechMapTaskView"
 
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
-    let cb;
     const result = {
       ...props,
       component,
-      setQuerySize: x => (cb = x),
-      querySize: () => cb(),
       colIndex: props.colIndex, // index of source component
       rowIndex: props.rowIndex // index of source component
     };

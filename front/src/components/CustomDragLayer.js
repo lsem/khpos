@@ -13,14 +13,6 @@ import TimelinePanelListItem from "./TimelinePanelListItem";
 
 function collect(monitor, props) {
   return {
-    setQuerySize: cb => {
-      if (monitor.getItem() && monitor.getItem().setQuerySize) {
-        console.log("DragLayer: setting query size handler");
-        monitor.getItem().setQuerySize(cb);
-      } else {
-        console.log("DragLayer: ERROR: failed setting query size handler");
-      }
-    },
     currentOffset: monitor.getSourceClientOffset(),
     clientOffset: monitor.getClientOffset(),
     initialClientOffset: monitor.getInitialClientOffset(),
@@ -96,18 +88,10 @@ class CustomDragLayer extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // lets check if component entered dragging context
-    //  and if so then register query since its only from
-    // now this.techMapViewRef can be used.
     if (!this.props.isDragging && nextProps.isDragging) {
-      console.log("DragLayer: entered dragging context");
-      this.props.setQuerySize(() => {
-        console.log("DragLayer: Queried bounding rect");
-        return this.techMapViewRef.getBoundingClientRect();
-      });
+      this.props.onTechMapPreviewStartedDragging()
     } else if (this.props.isDragging && !nextProps.isDragging) {
-      console.log("DragLayer: left dragging context");
-      // todo: unregister?
+      this.props.onTechMapPreviewFinishedDragging()
     }
   }
 

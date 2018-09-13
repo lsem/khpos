@@ -37,12 +37,9 @@ export default DragSource(
   // source:
   {
     beginDrag(props, monitor, component) {
-      let cb = () => {};
       const result = {
         ...props,
         component,
-        setQuerySize: x => (cb = x),
-        querySize: () => cb()
       };
       return result;
     }

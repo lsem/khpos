@@ -49,7 +49,7 @@ const SchedulerTimelineDndSpec = {
         });
       }
     } else {
-      console.log("SchedulerTimeline: hover: not over; do nothing");
+      //console.log("SchedulerTimeline: hover: not over; do nothing");
     }
   }
 };
@@ -101,81 +101,26 @@ class SchedulerTimeline extends React.Component {
     });
   }
 
-  static getDerivedStateFromProps(props, state) {
-    //console.log('getDerivedStateFromProps');
-    if (state.dndState !== DndStateName.IN && props.isOver) {
-      console.log("SchedulerTimeline(2): Drag layer entered");
-      const diffX =
-        props.initialSourceClientOffset.x - props.initialClientOffset.x;
-      const diffY =
-        props.initialSourceClientOffset.y - props.initialClientOffset.y;
-      const dragLayerrect = props.item.querySize();
-      return {
-        dndState: DndStateName.IN,
-        dragLayerRect: {
-          width: dragLayerrect.width,
-          height: dragLayerrect.height,
-          top: -1, // not used
-          left: -1 // not used
-        },
-        diffX: diffX,
-        diffY: diffY
-      };
-    } else if (state.dndState === DndStateName.IN && !props.isOver) {
-      console.log("SchedulerTimeline(2): Drag layer left");
-      return {
-        dndState: DndStateName.OUT,
-        dragLayerRect: null,
-        diffX: null,
-        diffY: null,
-        draggedLayerOffset: { x: -1, y: -1 }
-      };
-    }
-    return null;
-  }
 
   // TODO: Will be removed recently.
-  // componentWillReceiveProps(nextProps) {
-  //   return;
-  //   // TODO: Find other place to do this logic.
-  //   //  Changing state in this method is not recommended,
-  //   //  and that is why we can sometimes observe different inconsistencies.
-  //   // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
-  //   // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
-  //   if (!this.props.isOver && nextProps.isOver) {
-  //     console.log("SchedulerTimeline: Drag layer entered");
-  //     const diffX = nextProps.initialSourceClientOffset.x - nextProps.initialClientOffset.x;
-  //     const diffY = nextProps.initialSourceClientOffset.y - nextProps.initialClientOffset.y;
-  //     // Now we can query size of rect and update own state accordingly
-  //     const dragLayerrect = nextProps.item.querySize();
-  //     this.setState({
-  //       dndState: "over",
-  //       dragLayerRect: {
-  //         width: dragLayerrect.width,
-  //         height: dragLayerrect.height,
-  //         top: -1, // not used
-  //         left: -1 // not used
-  //       },
-  //       diffX: diffX,
-  //       diffY: diffY
-  //     });
-  //   }
+  componentWillReceiveProps(nextProps) {
+    // TODO: Find other place to do this logic.
+    //  Changing state in this method is not recommended,
+    //  and that is why we can sometimes observe different inconsistencies.
+    // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+    // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+    if (!this.props.isOver && nextProps.isOver) {
+      this.props.onTechMapPreviewEnteredTimeline()
+    }
+    if (this.props.isOver && !nextProps.isOver) {
+      this.props.onTechMapPreviewLeftTimeline()
+    }
 
-  //   if (this.props.isOver && !nextProps.isOver) {
-  //     console.log("SchedulerTimeline: Drag layer left");
-  //     this.setState({
-  //       dndState: "out",
-  //       dragLayerRect: null,
-  //       diffX: null,
-  //       diffY: null
-  //     });
-  //   }
-
-  //   if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
-  //     // You can be more specific and track enter/leave
-  //     // shallowly, not including nested targets
-  //   }
-  // }
+    if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
+      // You can be more specific and track enter/leave
+      // shallowly, not including nested targets
+    }
+  }
 
   getDraggedViewRect() {
     console.assert(this.state.dndState === DndStateName.IN);
@@ -221,7 +166,6 @@ class SchedulerTimeline extends React.Component {
         _.includes(columnJobIds, x.id)
       );
       const columnTechMaps = columnJobs.map((job, idx) => {
-        console.log(jobDurationMins(job));
         return (
         <TechMapView
           title={job.techMap.name}

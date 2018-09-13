@@ -9,15 +9,38 @@ export default class TimelineScreen extends React.Component {
   constructor(props) {
     super(props);
     this.minsToPixels = this.minsToPixels.bind(this);
+    this.onTechMapPreviewEnteredTimeline = this.onTechMapPreviewEnteredTimeline.bind(this);
+    this.onTechMapPreviewLeftTimeline = this.onTechMapPreviewLeftTimeline.bind(this);
+    this.onTechMapPreviewStartedDragging = this.onTechMapPreviewStartedDragging.bind(this);
+    this.onTechMapPreviewFinishedDragging = this.onTechMapPreviewFinishedDragging.bind(this);
   }
 
   minsToPixels(mins) {
     return this.props.pixelsPerMinute * mins;
   }
+
+  onTechMapPreviewStartedDragging() {
+    console.log('DEBUG: onTechMapPreviewStartedDragging')
+  }
+
+  onTechMapPreviewFinishedDragging() {
+    console.log('DEBUG: onTechMapPreviewFinishedDragging')
+  }
+
+  onTechMapPreviewEnteredTimeline() {
+    console.log('DEBUG: onTechMapPreviewEnteredTimeline')
+  }
+
+  onTechMapPreviewLeftTimeline() {
+    console.log('DEBUG: onTechMapPreviewLeftTimeline')
+  }
+
   render() {
     return (
       <div className="TimelineScreen">
         <SchedulerTimeline
+          onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
+          onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
           minsToPixels={this.minsToPixels}
           height={500}
           width={800}
@@ -35,7 +58,10 @@ export default class TimelineScreen extends React.Component {
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
         Our of drag and drop context it must not affect rendering. */}
-        <CustomDragLayer/>
+        <CustomDragLayer
+          onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
+          onTechMapPreviewFinishedDragging={this.onTechMapPreviewFinishedDragging}
+        />
       </div>
     );
   }
