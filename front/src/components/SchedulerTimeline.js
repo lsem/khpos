@@ -27,7 +27,6 @@ const SchedulerTimelineDndSpec = {
     // moveKnight(props.x, props.y);
   },
   hover(props, monitor, component) {
-    //console.log('DIFF: ', monitor.getDifferenceFromInitialOffset());
     // It looks like hover() is the only method we can constant
     // flow of dragging events so this is good place to
     // propagate signal to timeline about cursor position changes.
@@ -39,7 +38,8 @@ const SchedulerTimelineDndSpec = {
     // const timeLine = component.getDecoratedComponentInstance();
     component.onOffsetChanged(
       monitor.getClientOffset(),
-      monitor.getDifferenceFromInitialOffset()
+      monitor.getDifferenceFromInitialOffset(),
+      monitor.getInitialClientOffset()
     );
   }
 };
@@ -54,11 +54,10 @@ class SchedulerTimeline extends React.Component {
     1000 / 30 /*must yield to X fps*/
   );
 
-  onOffsetChanged(offset, diffOffset) {
+  onOffsetChanged(offset, diffOffset, initialOffset) {
     if (this.lastOffset !== offset) {
       this.lastOffset = offset;
-      //this.offsetChangeDebounced(offset);
-      this.props.onTechMapPreviewOffsetChanged(offset, diffOffset);
+      this.props.onTechMapPreviewOffsetChanged(offset, diffOffset, initialOffset);
     }
   }
 
@@ -84,7 +83,11 @@ class SchedulerTimeline extends React.Component {
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
     // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
     if (!this.props.isOver && nextProps.isOver) {
-      this.props.onTechMapPreviewEnteredTimeline();
+      console.log(this.props)
+      const diffX = this.props.initialClientOffset.x - this.props.initialSourceClientOffset.x;
+      const diffY = this.props.initialClientOffset.y - this.props.initialSourceClientOffset.y;
+      console.log({x: diffX, y: diffY})
+      this.props.onTechMapPreviewEnteredTimeline({x: diffX, y: diffY});
     }
     if (this.props.isOver && !nextProps.isOver) {
       this.props.onTechMapPreviewLeftTimeline();
@@ -96,28 +99,7 @@ class SchedulerTimeline extends React.Component {
     }
   }
 
-  // getDraggedViewRect() {
-  //   console.assert(this.state.dndState === DndStateName.IN);
-  //   if (this.state.dndState !== DndStateName.IN) {
-  //     return null;
-  //   }
-  //   // Returns a rect to indicate we have access
-  //   // to correct dragged layer dimensions to be able to communicate
-  //   // user drop position via UI. Rect is translated to SchedulerTimeline
-  //   // rect area.
-  //   const dragRect = this.state.dragLayerRect;
-  //   dragRect.left = this.state.draggedLayerOffset.x + this.state.diffX;
-  //   dragRect.top = this.state.draggedLayerOffset.y + this.state.diffY;
-  //   return {
-  //     left: dragRect.left - this.selfBoundingRect.left,
-  //     top: dragRect.top - this.selfBoundingRect.top + this.state.scrollTop,
-  //     width: dragRect.width,
-  //     height: dragRect.height
-  //   };
-  // }
-
   render() {
-    //console.log(this.props.techMapPreviewHoverRect);
     const minutesToMs = min => min * 1000 * 60;
     const msToMins = ms => ms / (1000 * 60);
     const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
@@ -185,10 +167,6 @@ class SchedulerTimeline extends React.Component {
     });
 
     const doTimelineRendering = () => {
-      // console.log(
-      //   "DEBUG: this.props.presentTechMapHover: ",
-      //   this.props.presentTechMapHover
-      // );
       if (!this.props.presentTechMapHover) {
         // Rendering of scene without drag layer tracking
         return (
@@ -202,10 +180,6 @@ class SchedulerTimeline extends React.Component {
         );
       }
 
-      // console.log(
-      //   "DEBUG: this.props.techMapPreviewHoverRect: ",
-      //   this.props.techMapPreviewHoverRect
-      // );
       const draggedViewRect = this.props.techMapPreviewHoverRect;
       const topLineY = draggedViewRect.top + draggedViewRect.height - 1;
       const bottomLineY = draggedViewRect.top;

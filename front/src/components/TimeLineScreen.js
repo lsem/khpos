@@ -35,7 +35,8 @@ export default class TimelineScreen extends React.Component {
       isTechMapHoveringTimeline: false,
       techMapPreviewHoverRect: null,
       techMapPreviewHoverTranslatedRect: null,
-      schedulerTimelineRect: null
+      schedulerTimelineRect: null,
+      initialOffset: null
     };
   }
 
@@ -70,7 +71,9 @@ export default class TimelineScreen extends React.Component {
     });
   }
 
-  onTechMapPreviewEnteredTimeline() {
+  onTechMapPreviewEnteredTimeline(initialOffset) {
+    // initialOffset indicated an offset between cusrsor position and top left corner
+    // of drag layer DOM rect at the moment of entering.
     console.log("DEBUG: onTechMapPreviewEnteredTimeline");
     this.setState(prevState => {
       const haveRectAndInTimeline =
@@ -79,7 +82,8 @@ export default class TimelineScreen extends React.Component {
       console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
       return {
         isTechMapOverTimeline: true,
-        isTechMapHoveringTimeline: haveRectAndInTimeline
+        isTechMapHoveringTimeline: haveRectAndInTimeline,
+        initialOffset: initialOffset
       };
     });
   }
@@ -123,10 +127,6 @@ export default class TimelineScreen extends React.Component {
           isTechMapHoveringTimeline: haveRectAndInTimeline
         };
       });
-      // console.log(
-      //   "DEBUG: onTechMapPreviewDomNodeRefUpdate: ",
-      //   ref.getBoundingClientRect()
-      // );
     } else {
       console.log("DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached");
       this.setState({
@@ -140,7 +140,9 @@ export default class TimelineScreen extends React.Component {
   translateRectWithOffset(rect, offset) {
     return {
       top: rect.top + offset.y,
-      left: rect.left + offset.x
+      left: rect.left + offset.x,
+      width: rect.width,
+      height: rect.height
     };
   }
 
@@ -154,46 +156,24 @@ export default class TimelineScreen extends React.Component {
     };
   }
 
-  onTechMapPreviewOffsetChanged(offset, diffOffset) {
-    //console.log("DEBUG: onTechMapPreviewOffsetChanged", offset, diffOffset);
-    //console.log('DEBUG: translated: ', this.translateRectWithOffset(this.state.techMapPreviewHoverRect, offset))
+  onTechMapPreviewOffsetChanged(offset, diffOffset, initialOffset) {
     this.setState(prevState => {
       const stillActual = prevState.isTechMapHoveringTimeline;
       if (!stillActual) {
-        console.log("DEBUG: not actual any more");
+        // todo: it might be not needed in the end.
+        console.warn("DEBUG: not actual any more");
       }
 
-      //console.log('techMapPreviewHoverRect: ', this.state.techMapPreviewHoverRect)
+      const effectivRect = this.translateRectToOtherRect(
+        {
+          left: offset.x - this.state.initialOffset.x,
+          top: offset.y - this.state.initialOffset.y,
+          width: this.state.techMapPreviewHoverRect.width,
+          height: this.state.techMapPreviewHoverRect.height
+        },
+        prevState.schedulerTimelineRect
+      );
 
-      console.log(diffOffset.x - offset.x)
-      const effectivRect = {
-        left: offset.x,
-        top: offset.y,
-        width: this.state.techMapPreviewHoverRect.width,
-        height: this.state.techMapPreviewHoverRect.height
-      };
-
-      effectivRect.left = effectivRect.left - prevState.schedulerTimelineRect.left;
-      effectivRect.top =  effectivRect.top - prevState.schedulerTimelineRect.top;
-
-      console.log(effectivRect)
-
-      // The problem is that diffOffset is always in respect to first appearence of
-      // drag layer even though rect has changed. Theoretically
-      // not takinginto account newly reented techMapPreviewHoverRect would solve the issue
-      // but it may be fixed in better way.
-
-      //console.log(diffOffset, prevState.techMapPreviewHoverRect )
-      //console.log('rect WORLD: ', {x: X, y: Y}, prevState.techMapPreviewHoverRect )
-      // const finalRect = this.translateRectToOtherRect(
-      //   this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset),
-      //   prevState.schedulerTimelineRect
-      // );
-      //const finalRect = this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset);
-      //console.log('!! finalRect: ', finalRect)
-      //console.log('offset: ', offset)
-      //console.log('prevState.schedulerTimelineRect: ', prevState.schedulerTimelineRect)
-      //console.log('prevState.techMapPreviewHoverRect: ', prevState.techMapPreviewHoverRect)
       return {
         // actually both must be static, can be optimized
         techMapPreviewHoverTranslatedRect: stillActual ? effectivRect : null
