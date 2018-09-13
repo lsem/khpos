@@ -41,16 +41,7 @@ const SchedulerTimelineDndSpec = {
     if (!monitor.canDrop()) return;
     // TODO: Why this does not work? it must be working according to the docs.
     // const timeLine = component.getDecoratedComponentInstance();
-    if (component.state.dndState === DndStateName.IN) {
-      if (component.state.draggedLayerOffset !== monitor.getClientOffset()) {
-        component.setStateDebouncedHighRate({
-        //component.setState({
-          draggedLayerOffset: monitor.getClientOffset()
-        });
-      }
-    } else {
-      //console.log("SchedulerTimeline: hover: not over; do nothing");
-    }
+    component.onOffsetChanged(monitor.getClientOffset());
   }
 };
 
@@ -59,8 +50,21 @@ class SchedulerTimeline extends React.Component {
   setStateDebouncedHighRate = _.debounce(s => this.setState(s), 3);
   setStateDebouncedLowRate = _.debounce(s => this.setState(s), 100);
 
+  offsetChangeDebounced = _.debounce(
+    offs => this.props.onTechMapPreviewOffsetChanged(offs),
+    1000 / 30 /*must yield to X fps*/
+  );
+
+  onOffsetChanged(offset) {
+    if ( this.lastOffset !== offset ) {
+      this.lastOffset = offset;
+      this.offsetChangeDebounced(offset);
+    }
+  }
+
   constructor(props) {
     super(props);
+    this.lastOffset = null;
     this.selfBoundingRect = null;
     this.setRef = el => (this.ref = el);
     this.state = {
@@ -80,7 +84,7 @@ class SchedulerTimeline extends React.Component {
   }
 
   moveTechMap() {
-    console.log('SchedulerTimeline: moveTechMap()');
+    console.log("SchedulerTimeline: moveTechMap()");
   }
 
   // When component did mount we can access DOM.
@@ -101,7 +105,6 @@ class SchedulerTimeline extends React.Component {
     });
   }
 
-
   // TODO: Will be removed recently.
   componentWillReceiveProps(nextProps) {
     // TODO: Find other place to do this logic.
@@ -110,10 +113,10 @@ class SchedulerTimeline extends React.Component {
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
     // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
     if (!this.props.isOver && nextProps.isOver) {
-      this.props.onTechMapPreviewEnteredTimeline()
+      this.props.onTechMapPreviewEnteredTimeline();
     }
     if (this.props.isOver && !nextProps.isOver) {
-      this.props.onTechMapPreviewLeftTimeline()
+      this.props.onTechMapPreviewLeftTimeline();
     }
 
     if (this.props.isOverCurrent && !nextProps.isOverCurrent) {
@@ -143,10 +146,10 @@ class SchedulerTimeline extends React.Component {
   }
 
   render() {
-    console.log(this.props.techMapPreviewHoverRect)
+    console.log(this.props.techMapPreviewHoverRect);
     const minutesToMs = min => min * 1000 * 60;
     const msToMins = ms => ms / (1000 * 60);
-    const msToPixels = ms => this.props.minsToPixels(msToMins(ms))
+    const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
     const jobTop = j => msToPixels(j.startTime - this.props.beginTime);
     const jobDurationMins = j =>
       j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
@@ -167,21 +170,22 @@ class SchedulerTimeline extends React.Component {
       );
       const columnTechMaps = columnJobs.map((job, idx) => {
         return (
-        <TechMapView
-          title={job.techMap.name}
-          tintColor={job.techMap.tintColor}
-          msToPixels={msToPixels}
-          left={0}
-          width={this.props.jobWidth}
-          top={jobTop(job)}
-          key={job.id}
-          moveTechMap={this.moveTechMap}
-          getContainerRect={this.getContainerRect}
-          colIndex={idx}
-          rowIndex={x_idx}
-          tasks={job.techMap.tasks}
-        />
-      )});
+          <TechMapView
+            title={job.techMap.name}
+            tintColor={job.techMap.tintColor}
+            msToPixels={msToPixels}
+            left={0}
+            width={this.props.jobWidth}
+            top={jobTop(job)}
+            key={job.id}
+            moveTechMap={this.moveTechMap}
+            getContainerRect={this.getContainerRect}
+            colIndex={idx}
+            rowIndex={x_idx}
+            tasks={job.techMap.tasks}
+          />
+        );
+      });
       const style = {
         left: x_idx * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
@@ -198,7 +202,9 @@ class SchedulerTimeline extends React.Component {
       left: this.props.left,
       height: this.props.height,
       width: this.props.width,
-      backgroundColor:  this.props.presentTechMapHover ? 'yellow' : 'rgba(0,0,0,0)'
+      backgroundColor: this.props.presentTechMapHover
+        ? "yellow"
+        : "rgba(0,0,0,0)"
     };
     const { canDrop, isOver, connectDropTarget } = this.props;
 
@@ -272,18 +278,18 @@ class SchedulerTimeline extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     techMapsTimeLine: state.techMapsTimeLine,
     techMapTasks: state.techMapTasks
-  }
-}
+  };
+};
 
 export default _.flow(
   DropTarget(
-  ["techmap", "techmap-panel-item"],
-  SchedulerTimelineDndSpec,
-  collect
+    ["techmap", "techmap-panel-item"],
+    SchedulerTimelineDndSpec,
+    collect
   ),
   connect(mapStateToProps)
 )(SchedulerTimeline);

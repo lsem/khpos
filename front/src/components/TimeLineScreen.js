@@ -24,6 +24,7 @@ export default class TimelineScreen extends React.Component {
     this.onTechMapPreviewDomNodeRefUpdate = this.onTechMapPreviewDomNodeRefUpdate.bind(
       this
     );
+    this.onTechMapPreviewOffsetChanged = this.onTechMapPreviewOffsetChanged.bind(this);
     this.state = {
       isTechMapOverTimeline: false,
       isTechMapHoveringTimeline: false,
@@ -111,6 +112,10 @@ export default class TimelineScreen extends React.Component {
     }
   }
 
+  onTechMapPreviewOffsetChanged(offset) {
+    console.log('DEBUG: onTechMapPreviewOffsetChanged', offset)
+  }
+
   render() {
     return (
       <div className="TimelineScreen">
@@ -119,6 +124,7 @@ export default class TimelineScreen extends React.Component {
           techMapPreviewHoverRect={this.state.techMapPreviewHoverRect}
           onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
           onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
+          onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
           minsToPixels={this.minsToPixels}
           height={500}
           width={800}
