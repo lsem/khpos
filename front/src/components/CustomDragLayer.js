@@ -11,35 +11,33 @@ import TimelinePanelListItem from "./TimelinePanelListItem";
 // https://github.com/react-dnd/react-dnd/issues/591
 // https://github.com/react-dnd/react-dnd/issues/151
 
-    // todo: get it from global state for current item
-    const sampleTasks = [
-      {
-        id: "1",
-        name: "task 1",
-        durationMins: 30,
-        bgColor: "rgb(216, 216, 216)"
-      },
-      {
-        id: "2",
-        name: "task 2",
-        durationMins: 40,
-        bgColor: "rgb(200, 200, 200)"
-      },
-      {
-        id: "3",
-        name: "task 3",
-        durationMins: 30,
-        bgColor: "rgb(216, 216, 216)"
-      },
-      {
-        id: "4",
-        name: "task 4",
-        durationMins: 20,
-        bgColor: "rgb(200, 200, 200)"
-      }
-    ];
-
-
+// todo: get it from global state for current item
+const sampleTasks = [
+  {
+    id: "1",
+    name: "task 1",
+    durationMins: 30,
+    bgColor: "rgb(216, 216, 216)"
+  },
+  {
+    id: "2",
+    name: "task 2",
+    durationMins: 40,
+    bgColor: "rgb(200, 200, 200)"
+  },
+  {
+    id: "3",
+    name: "task 3",
+    durationMins: 30,
+    bgColor: "rgb(216, 216, 216)"
+  },
+  {
+    id: "4",
+    name: "task 4",
+    durationMins: 20,
+    bgColor: "rgb(200, 200, 200)"
+  }
+];
 
 function collect(monitor, props) {
   return {
@@ -95,7 +93,7 @@ function getItemTransform(props) {
 
 // To further improve drag layer performance, consider making as in an article:
 // https://habr.com/company/macte/blog/344368/
-class CustomDragLayer extends React.Component {
+class CustomDragLayer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.lastUpdate = +new Date();
@@ -103,18 +101,21 @@ class CustomDragLayer extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-      // todo: fix this if needed.
+    // This improves perforamnce but for some reason
+    // in combination with PureComponent it in most cases leads to missing entering event
+    // in current state of DND state management. Do not remove this
+    // code until we fix this.
     return true;
-    if (+new Date() - this.lastUpdate > 1000 / 60 /*60 fps*/) {
-      this.lastUpdate = +new Date();
-      clearTimeout(this.updateTimer);
-      return true;
-    } else {
-      this.updateTimer = setTimeout(() => {
-        this.forceUpdate();
-      }, 50);
-    }
-    return false;
+    //if ((new Date() - this.lastUpdate) > (1000 / 60) /*60 fps*/) {
+    //   this.lastUpdate = new Date();
+    //   clearTimeout(this.updateTimer);
+    //   return true;
+    // } else {
+    //   this.updateTimer = setTimeout(() => {
+    //     this.forceUpdate();
+    //   }, 50);
+    // }
+    // return false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -166,10 +167,7 @@ class CustomDragLayer extends React.Component {
     });
 
     return (
-      <div
-        className="CustomDragLayer"
-        style={dragLayerStyle}
-      >
+      <div className="CustomDragLayer" style={dragLayerStyle}>
         <TimelinePanelListItem itemDisplayName="Dray layer (panel item)" />
       </div>
     );

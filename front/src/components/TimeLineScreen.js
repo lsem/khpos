@@ -43,7 +43,10 @@ export default class TimelineScreen extends React.Component {
   }
 
   setScrollTopPositionDebounced = _.debounce(
-    pos => this.setState({ scrollTop: pos }),
+    pos =>
+      this.setState({
+        scrollTop: pos
+      }),
     30
   );
 
@@ -85,7 +88,8 @@ export default class TimelineScreen extends React.Component {
     this.setState(prevState => {
       const haveRectAndInTimeline =
         prevState.techMapPreviewHoverRect !== null &&
-        /*prevState.isTechMapHoveringTimeline*/ true;
+        /*prevState.isTechMapHoveringTimeline*/
+        true;
       console.log("DEBUG: haveRectAndInTimeline: ", haveRectAndInTimeline);
       return {
         isTechMapOverTimeline: true,
@@ -122,8 +126,8 @@ export default class TimelineScreen extends React.Component {
         );
         // Reduce state
         const haveRectAndInTimeline =
-          /*techMapPreviewHoverRect !== null*/ true &&
-          prevState.isTechMapHoveringTimeline;
+          /*techMapPreviewHoverRect !== null*/
+          true && prevState.isTechMapHoveringTimeline;
         console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
         const internalRect = this.domRectToInternalRect(
           ref.getBoundingClientRect()
@@ -212,13 +216,13 @@ export default class TimelineScreen extends React.Component {
           endTime={Date.parse("02 Jan 1970 00:00:00 GMT")}
           left={0}
           ref={this.timelineRef}
-        />
+        />{" "}
         <div className="TimelineScreenSideContainer">
           <TechMapCatalogPanel />
           <WorkersPanel />
-        </div>
+        </div>{" "}
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
-        Our of drag and drop context it must not affect rendering. */}
+          Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
@@ -228,7 +232,7 @@ export default class TimelineScreen extends React.Component {
           onTechMapPreviewDomNodeRefUpdate={
             this.onTechMapPreviewDomNodeRefUpdate
           }
-        />
+        />{" "}
       </div>
     );
   }
