@@ -161,7 +161,6 @@ class SchedulerTimeline extends React.Component {
     const groupedByCols = _.groupBy(layout, x => x.col);
     const columnViews = _.keys(groupedByCols).map((x, x_idx) => {
       const columnJobIds = _.map(groupedByCols[x], x => x.item.id);
-      //co  nsole.log("columnJobIds: ", columnJobIds);
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );

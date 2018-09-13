@@ -11,6 +11,36 @@ import TimelinePanelListItem from "./TimelinePanelListItem";
 // https://github.com/react-dnd/react-dnd/issues/591
 // https://github.com/react-dnd/react-dnd/issues/151
 
+    // todo: get it from global state for current item
+    const sampleTasks = [
+      {
+        id: "1",
+        name: "task 1",
+        durationMins: 30,
+        bgColor: "rgb(216, 216, 216)"
+      },
+      {
+        id: "2",
+        name: "task 2",
+        durationMins: 40,
+        bgColor: "rgb(200, 200, 200)"
+      },
+      {
+        id: "3",
+        name: "task 3",
+        durationMins: 30,
+        bgColor: "rgb(216, 216, 216)"
+      },
+      {
+        id: "4",
+        name: "task 4",
+        durationMins: 20,
+        bgColor: "rgb(200, 200, 200)"
+      }
+    ];
+
+
+
 function collect(monitor, props) {
   return {
     currentOffset: monitor.getSourceClientOffset(),
@@ -28,15 +58,15 @@ function collect(monitor, props) {
       // TODO: Find a way to optimize this part since for now it called
       // every render function.
       // https://github.com/react-dnd/react-dnd/issues/448
-      const queryCanDrop = (monitor) => {
+      const queryCanDrop = monitor => {
         const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
         for (let i = targetIds.length - 1; i >= 0; i--) {
           if (monitor.isOverTarget(targetIds[i])) {
             return monitor.canDropOnTarget(targetIds[i]);
           }
-        };
+        }
         return false;
-      }
+      };
       return queryCanDrop(monitor);
     })()
   };
@@ -68,14 +98,14 @@ function getItemTransform(props) {
 class CustomDragLayer extends React.Component {
   constructor(props) {
     super(props);
-    this.techMapViewRef = null;
     this.lastUpdate = +new Date();
     this.updateTimer = null;
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+      // todo: fix this if needed.
     return true;
-    if ((+new Date() - this.lastUpdate) > (1000 / 60) /*60 fps*/) {
+    if (+new Date() - this.lastUpdate > 1000 / 60 /*60 fps*/) {
       this.lastUpdate = +new Date();
       clearTimeout(this.updateTimer);
       return true;
@@ -89,9 +119,9 @@ class CustomDragLayer extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.isDragging && nextProps.isDragging) {
-      this.props.onTechMapPreviewStartedDragging()
+      this.props.onTechMapPreviewStartedDragging();
     } else if (this.props.isDragging && !nextProps.isDragging) {
-      this.props.onTechMapPreviewFinishedDragging()
+      this.props.onTechMapPreviewFinishedDragging();
     }
   }
 
@@ -105,11 +135,13 @@ class CustomDragLayer extends React.Component {
       height: itemProps.height,
       width: techMapViewWidth
     });
+    const msToMins = ms => ms / (1000 * 60);
+    const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
     return (
       <div
         className="CustomDragLayer"
         style={dragLayerStyle}
-        ref={x => (this.techMapViewRef = x)}
+        ref={this.props.onTechMapPreviewDomNodeRefUpdate}
       >
         <TechMapView
           title={"Drag layer"}
@@ -119,6 +151,8 @@ class CustomDragLayer extends React.Component {
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
+          msToPixels={msToPixels}
+          tasks={sampleTasks}
         />
       </div>
     );
@@ -134,22 +168,8 @@ class CustomDragLayer extends React.Component {
     return (
       <div
         className="CustomDragLayer"
-        // style={getItemTransform(this.props)}
         style={dragLayerStyle}
-        ref={x => (this.techMapViewRef = x)}
       >
-        {/*Render hidden view to have rect*/}
-        <TechMapView
-          hidden={true}
-          title={"Drag layer"}
-          tintColor={itemProps.tintColor}
-          height={itemProps.height}
-          left={0}
-          width={techMapViewWidth}
-          top={0}
-          key={"Drag layer"}
-        />
-
         <TimelinePanelListItem itemDisplayName="Dray layer (panel item)" />
       </div>
     );
@@ -183,6 +203,7 @@ class CustomDragLayer extends React.Component {
         });
       }
     } else {
+      // todo: what does it mean? what should be a message
       console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
   }

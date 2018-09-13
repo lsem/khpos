@@ -13,6 +13,7 @@ export default class TimelineScreen extends React.Component {
     this.onTechMapPreviewLeftTimeline = this.onTechMapPreviewLeftTimeline.bind(this);
     this.onTechMapPreviewStartedDragging = this.onTechMapPreviewStartedDragging.bind(this);
     this.onTechMapPreviewFinishedDragging = this.onTechMapPreviewFinishedDragging.bind(this);
+    this.onTechMapPreviewDomNodeRefUpdate = this.onTechMapPreviewDomNodeRefUpdate.bind(this);
   }
 
   minsToPixels(mins) {
@@ -33,6 +34,14 @@ export default class TimelineScreen extends React.Component {
 
   onTechMapPreviewLeftTimeline() {
     console.log('DEBUG: onTechMapPreviewLeftTimeline')
+  }
+
+  onTechMapPreviewDomNodeRefUpdate(ref) {
+    if (ref) {
+      console.log('DEBUG: onTechMapPreviewDomNodeRefUpdate: ', ref.getBoundingClientRect())
+    } else {
+      console.log('DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached')
+    }
   }
 
   render() {
@@ -59,8 +68,10 @@ export default class TimelineScreen extends React.Component {
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
         Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
+          minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={this.onTechMapPreviewFinishedDragging}
+          onTechMapPreviewDomNodeRefUpdate={this.onTechMapPreviewDomNodeRefUpdate}
         />
       </div>
     );
