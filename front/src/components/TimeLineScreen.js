@@ -35,13 +35,13 @@ export default class TimelineScreen extends React.Component {
       isTechMapHoveringTimeline: false,
       techMapPreviewHoverRect: null,
       techMapPreviewHoverTranslatedRect: null,
-      schedulerTimelineDomNodeRefUpdateRect: null
+      schedulerTimelineRect: null
     };
   }
 
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
-      this.state.schedulerTimelineDomNodeRefUpdateRect = this.domRectToInternalRect(
+      this.state.schedulerTimelineRect = this.domRectToInternalRect(
         ref.getBoundingClientRect()
       );
       // subscribe to scroll updates to make scroll position part of state
@@ -50,7 +50,7 @@ export default class TimelineScreen extends React.Component {
       //   this.setStateDebouncedLowRate({ scrollTop: this.ref.scrollTop });
       // });
     } else {
-      console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
+      //console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
     }
   }
 
@@ -144,21 +144,43 @@ export default class TimelineScreen extends React.Component {
     };
   }
 
-  onTechMapPreviewOffsetChanged(offset) {
-    console.log("DEBUG: onTechMapPreviewOffsetChanged", offset);
+  // Returns rect in respect to otherRect. Both expected to be in world coordinates.
+  translateRectToOtherRect(rect, otherRect) {
+    return {
+      top: rect.top - otherRect.top,
+      left: rect.left - otherRect.left,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  onTechMapPreviewOffsetChanged(offset, diffOffset) {
+    //console.log("DEBUG: onTechMapPreviewOffsetChanged", offset, diffOffset);
     //console.log('DEBUG: translated: ', this.translateRectWithOffset(this.state.techMapPreviewHoverRect, offset))
     this.setState(prevState => {
       const stillActual = prevState.isTechMapHoveringTimeline;
       if (!stillActual) {
         console.log("DEBUG: not actual any more");
       }
+
+      //console.log('techMapPreviewHoverRect: ', this.state.techMapPreviewHoverRect)
+
+      const X = prevState.techMapPreviewHoverRect.left + diffOffset.x;
+      const Y = prevState.techMapPreviewHoverRect.top + diffOffset.y;
+
+      console.log('rect WORLD: ', {x: X, y: Y} )
+      // const finalRect = this.translateRectToOtherRect(
+      //   this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset),
+      //   prevState.schedulerTimelineRect
+      // );
+      const finalRect = this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset);
+      //console.log('!! finalRect: ', finalRect)
+      //console.log('offset: ', offset)
+      //console.log('prevState.schedulerTimelineRect: ', prevState.schedulerTimelineRect)
+      //console.log('prevState.techMapPreviewHoverRect: ', prevState.techMapPreviewHoverRect)
       return {
-        techMapPreviewHoverTranslatedRect: stillActual
-          ? this.translateRectWithOffset(
-              prevState.techMapPreviewHoverRect, // actual static
-              offset
-            )
-          : null
+        // actually both must be static, can be optimized
+        techMapPreviewHoverTranslatedRect: stillActual ? finalRect : null
       };
     });
   }
@@ -167,7 +189,9 @@ export default class TimelineScreen extends React.Component {
     return (
       <div className="TimelineScreen">
         <SchedulerTimeline
-          onSchedulerTimelineDomNodeRefUpdate={this.onSchedulerTimelineDomNodeRefUpdate}
+          onSchedulerTimelineDomNodeRefUpdate={
+            this.onSchedulerTimelineDomNodeRefUpdate
+          }
           presentTechMapHover={this.state.isTechMapHoveringTimeline}
           techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
           onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}

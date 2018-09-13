@@ -27,6 +27,7 @@ const SchedulerTimelineDndSpec = {
     // moveKnight(props.x, props.y);
   },
   hover(props, monitor, component) {
+    //console.log('DIFF: ', monitor.getDifferenceFromInitialOffset());
     // It looks like hover() is the only method we can constant
     // flow of dragging events so this is good place to
     // propagate signal to timeline about cursor position changes.
@@ -36,7 +37,10 @@ const SchedulerTimelineDndSpec = {
     if (!monitor.canDrop()) return;
     // TODO: Why this does not work? it must be working according to the docs.
     // const timeLine = component.getDecoratedComponentInstance();
-    component.onOffsetChanged(monitor.getClientOffset());
+    component.onOffsetChanged(
+      monitor.getClientOffset(),
+      monitor.getDifferenceFromInitialOffset()
+    );
   }
 };
 
@@ -50,11 +54,11 @@ class SchedulerTimeline extends React.Component {
     1000 / 30 /*must yield to X fps*/
   );
 
-  onOffsetChanged(offset) {
+  onOffsetChanged(offset, diffOffset) {
     if (this.lastOffset !== offset) {
       this.lastOffset = offset;
       //this.offsetChangeDebounced(offset);
-      this.props.onTechMapPreviewOffsetChanged(offset);
+      this.props.onTechMapPreviewOffsetChanged(offset, diffOffset);
     }
   }
 
@@ -184,10 +188,10 @@ class SchedulerTimeline extends React.Component {
     });
 
     const doTimelineRendering = () => {
-      console.log(
-        "DEBUG: this.props.presentTechMapHover: ",
-        this.props.presentTechMapHover
-      );
+      // console.log(
+      //   "DEBUG: this.props.presentTechMapHover: ",
+      //   this.props.presentTechMapHover
+      // );
       if (!this.props.presentTechMapHover) {
         // Rendering of scene without drag layer tracking
         return (
@@ -201,10 +205,10 @@ class SchedulerTimeline extends React.Component {
         );
       }
 
-      console.log(
-        "DEBUG: this.props.techMapPreviewHoverRect: ",
-        this.props.techMapPreviewHoverRect
-      );
+      // console.log(
+      //   "DEBUG: this.props.techMapPreviewHoverRect: ",
+      //   this.props.techMapPreviewHoverRect
+      // );
       const draggedViewRect = this.props.techMapPreviewHoverRect;
       const topLineY = draggedViewRect.top + draggedViewRect.height - 1;
       const bottomLineY = draggedViewRect.top;
