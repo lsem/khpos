@@ -165,22 +165,38 @@ export default class TimelineScreen extends React.Component {
 
       //console.log('techMapPreviewHoverRect: ', this.state.techMapPreviewHoverRect)
 
-      const X = prevState.techMapPreviewHoverRect.left + diffOffset.x;
-      const Y = prevState.techMapPreviewHoverRect.top + diffOffset.y;
+      console.log(diffOffset.x - offset.x)
+      const effectivRect = {
+        left: offset.x,
+        top: offset.y,
+        width: this.state.techMapPreviewHoverRect.width,
+        height: this.state.techMapPreviewHoverRect.height
+      };
 
-      console.log('rect WORLD: ', {x: X, y: Y} )
+      effectivRect.left = effectivRect.left - prevState.schedulerTimelineRect.left;
+      effectivRect.top =  effectivRect.top - prevState.schedulerTimelineRect.top;
+
+      console.log(effectivRect)
+
+      // The problem is that diffOffset is always in respect to first appearence of
+      // drag layer even though rect has changed. Theoretically
+      // not takinginto account newly reented techMapPreviewHoverRect would solve the issue
+      // but it may be fixed in better way.
+
+      //console.log(diffOffset, prevState.techMapPreviewHoverRect )
+      //console.log('rect WORLD: ', {x: X, y: Y}, prevState.techMapPreviewHoverRect )
       // const finalRect = this.translateRectToOtherRect(
       //   this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset),
       //   prevState.schedulerTimelineRect
       // );
-      const finalRect = this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset);
+      //const finalRect = this.translateRectWithOffset(prevState.techMapPreviewHoverRect, diffOffset);
       //console.log('!! finalRect: ', finalRect)
       //console.log('offset: ', offset)
       //console.log('prevState.schedulerTimelineRect: ', prevState.schedulerTimelineRect)
       //console.log('prevState.techMapPreviewHoverRect: ', prevState.techMapPreviewHoverRect)
       return {
         // actually both must be static, can be optimized
-        techMapPreviewHoverTranslatedRect: stillActual ? finalRect : null
+        techMapPreviewHoverTranslatedRect: stillActual ? effectivRect : null
       };
     });
   }

@@ -173,9 +173,6 @@ class SchedulerTimeline extends React.Component {
       left: this.props.left,
       height: this.props.height,
       width: this.props.width,
-      backgroundColor: this.props.presentTechMapHover
-        ? "yellow"
-        : "rgba(0,0,0,0)"
     };
     const { canDrop, isOver, connectDropTarget } = this.props;
 
