@@ -143,6 +143,7 @@ class SchedulerTimeline extends React.Component {
   }
 
   render() {
+    console.log(this.props.techMapPreviewHoverRect)
     const minutesToMs = min => min * 1000 * 60;
     const msToMins = ms => ms / (1000 * 60);
     const msToPixels = ms => this.props.minsToPixels(msToMins(ms))
@@ -196,7 +197,8 @@ class SchedulerTimeline extends React.Component {
     const style = {
       left: this.props.left,
       height: this.props.height,
-      width: this.props.width
+      width: this.props.width,
+      backgroundColor:  this.props.presentTechMapHover ? 'yellow' : 'rgba(0,0,0,0)'
     };
     const { canDrop, isOver, connectDropTarget } = this.props;
 

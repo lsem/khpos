@@ -9,11 +9,26 @@ export default class TimelineScreen extends React.Component {
   constructor(props) {
     super(props);
     this.minsToPixels = this.minsToPixels.bind(this);
-    this.onTechMapPreviewEnteredTimeline = this.onTechMapPreviewEnteredTimeline.bind(this);
-    this.onTechMapPreviewLeftTimeline = this.onTechMapPreviewLeftTimeline.bind(this);
-    this.onTechMapPreviewStartedDragging = this.onTechMapPreviewStartedDragging.bind(this);
-    this.onTechMapPreviewFinishedDragging = this.onTechMapPreviewFinishedDragging.bind(this);
-    this.onTechMapPreviewDomNodeRefUpdate = this.onTechMapPreviewDomNodeRefUpdate.bind(this);
+    this.onTechMapPreviewEnteredTimeline = this.onTechMapPreviewEnteredTimeline.bind(
+      this
+    );
+    this.onTechMapPreviewLeftTimeline = this.onTechMapPreviewLeftTimeline.bind(
+      this
+    );
+    this.onTechMapPreviewStartedDragging = this.onTechMapPreviewStartedDragging.bind(
+      this
+    );
+    this.onTechMapPreviewFinishedDragging = this.onTechMapPreviewFinishedDragging.bind(
+      this
+    );
+    this.onTechMapPreviewDomNodeRefUpdate = this.onTechMapPreviewDomNodeRefUpdate.bind(
+      this
+    );
+    this.state = {
+      isTechMapOverTimeline: false,
+      isTechMapHoveringTimeline: false,
+      techMapPreviewHoverRect: null
+    };
   }
 
   minsToPixels(mins) {
@@ -21,26 +36,78 @@ export default class TimelineScreen extends React.Component {
   }
 
   onTechMapPreviewStartedDragging() {
-    console.log('DEBUG: onTechMapPreviewStartedDragging')
+    console.log("DEBUG: onTechMapPreviewStartedDragging");
   }
 
   onTechMapPreviewFinishedDragging() {
-    console.log('DEBUG: onTechMapPreviewFinishedDragging')
+    console.log("DEBUG: onTechMapPreviewFinishedDragging");
+    this.setState({
+      isTechMapOverTimeline: false,
+      isTechMapHoveringTimeline: false
+    });
   }
 
   onTechMapPreviewEnteredTimeline() {
-    console.log('DEBUG: onTechMapPreviewEnteredTimeline')
+    console.log("DEBUG: onTechMapPreviewEnteredTimeline");
+    this.setState(prevState => {
+      const haveRectAndInTimeline =
+        prevState.techMapPreviewHoverRect !== null &&
+        /*prevState.isTechMapHoveringTimeline*/ true;
+      console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
+      return {
+        isTechMapOverTimeline: true,
+        isTechMapHoveringTimeline: haveRectAndInTimeline
+      };
+    });
   }
 
   onTechMapPreviewLeftTimeline() {
-    console.log('DEBUG: onTechMapPreviewLeftTimeline')
+    console.log("DEBUG: onTechMapPreviewLeftTimeline!");
+    this.setState({
+      isTechMapOverTimeline: false,
+      isTechMapHoveringTimeline: false
+    });
+  }
+
+  domRectToHoverRect(domRect) {
+    return {
+      top: domRect.top,
+      left: domRect.left,
+      width: domRect.width,
+      height: domRect.height
+    };
   }
 
   onTechMapPreviewDomNodeRefUpdate(ref) {
     if (ref) {
-      console.log('DEBUG: onTechMapPreviewDomNodeRefUpdate: ', ref.getBoundingClientRect())
+      this.setState(prevState => {
+        // update state only when we have rect and prev state was isTechMapOverTimeline
+        console.log(
+          "isTechMapHoveringTimeline: pevState.isTechMapOverTimeline: ",
+          prevState.isTechMapOverTimeline
+        );
+        // Reduce state
+        const haveRectAndInTimeline =
+          /*techMapPreviewHoverRect !== null*/ true &&
+          prevState.isTechMapHoveringTimeline;
+        console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
+        return {
+          techMapPreviewHoverRect: this.domRectToHoverRect(
+            ref.getBoundingClientRect()
+          ),
+          isTechMapHoveringTimeline: haveRectAndInTimeline
+        };
+      });
+      // console.log(
+      //   "DEBUG: onTechMapPreviewDomNodeRefUpdate: ",
+      //   ref.getBoundingClientRect()
+      // );
     } else {
-      console.log('DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached')
+      console.log("DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached");
+      this.setState({
+        techMapPreviewHoverRect: null,
+        isTechMapHoveringTimeline: false
+      });
     }
   }
 
@@ -48,6 +115,8 @@ export default class TimelineScreen extends React.Component {
     return (
       <div className="TimelineScreen">
         <SchedulerTimeline
+          presentTechMapHover={this.state.isTechMapHoveringTimeline}
+          techMapPreviewHoverRect={this.state.techMapPreviewHoverRect}
           onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
           onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
           minsToPixels={this.minsToPixels}
@@ -70,8 +139,12 @@ export default class TimelineScreen extends React.Component {
         <CustomDragLayer
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
-          onTechMapPreviewFinishedDragging={this.onTechMapPreviewFinishedDragging}
-          onTechMapPreviewDomNodeRefUpdate={this.onTechMapPreviewDomNodeRefUpdate}
+          onTechMapPreviewFinishedDragging={
+            this.onTechMapPreviewFinishedDragging
+          }
+          onTechMapPreviewDomNodeRefUpdate={
+            this.onTechMapPreviewDomNodeRefUpdate
+          }
         />
       </div>
     );
