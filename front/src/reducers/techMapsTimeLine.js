@@ -30,7 +30,7 @@ const initialState = [
           id: "4",
           name: "task 4",
           durationMins: 20,
-          bgColor: "rgb(200, 200, 200)"
+          bgColor: "rgb(255, 149, 0)"
         },
       ]
     }
@@ -66,7 +66,7 @@ const initialState = [
           id: "4",
           name: "task 4",
           durationMins: 20,
-          bgColor: "rgb(200, 200, 200)"
+          bgColor: "rgb(255, 149, 0)"
         },
       ]
     }
@@ -102,7 +102,7 @@ const initialState = [
           id: "4",
           name: "task 4",
           durationMins: 10,
-          bgColor: "rgb(200, 200, 200)"
+          bgColor: "rgb(255, 149, 0)"
         },
       ]
     }
@@ -138,7 +138,7 @@ const initialState = [
           id: "4",
           name: "task 4",
           durationMins: 10,
-          bgColor: "rgb(200, 200, 200)"
+          bgColor: "rgb(255, 149, 0)"
         },
       ]
     }
