@@ -151,6 +151,10 @@ class SchedulerTimeline extends React.Component {
       const columnTechMaps = columnJobs.map((job, rowIndex) => {
         return (
           <TechMapView
+            // TODO: WARNING: this refers to techMapId but in fact it should not,
+            // because it will be inconsistent at some moment with currently
+            // available tech maps registry
+            techMapId={job.techMap.id}
             title={job.techMap.name}
             tintColor={job.techMap.tintColor}
             minsToPixels={this.props.minsToPixels}

@@ -9,13 +9,11 @@ import TechMapTaskView from "./TechMapTaskView";
 
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
-    const result = {
-      ...props,
-      component,
+    return {
+      techMapId: props.techMapId,
       colIndex: props.colIndex, // index of source component
       rowIndex: props.rowIndex // index of source component
-    };
-    return result;
+    }
   }
 };
 

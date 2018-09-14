@@ -37,10 +37,9 @@ export default DragSource(
   // source:
   {
     beginDrag(props, monitor, component) {
-      const result = {
+      return {
         techMapId: props.techMapId
       };
-      return result;
     }
   }, // collect:
   (connect, monitor) => {

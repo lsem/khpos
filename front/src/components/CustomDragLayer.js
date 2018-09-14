@@ -161,7 +161,11 @@ class CustomDragLayer extends React.PureComponent {
       this.props.techMapRegistry,
       x => x.id === item.techMapId
     );
+
     // TODO: handle not found case
+    if (!techMapSpec) {
+      console.error('Failed to find tech map spec')
+    }
 
     if (itemType === "techmap") {
       return this.renderMaterializedTechMap(techMapSpec);
