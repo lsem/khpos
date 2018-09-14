@@ -51,18 +51,14 @@ class SchedulerTimelineColumns extends React.Component {
       width: this.props.width
     };
     const { canDrop, isOver } = this.props;
-    let className = classNames({
-      SchedulerTimeline: true,
-      "SchedulerTimeline--highlighted": canDrop,
-      "SchedulerTimeline--hovered": isOver
-    });
+    //let className = classNames({
+    //   SchedulerTimeline: true,
+    //   "SchedulerTimeline--highlighted": canDrop,
+    //   "SchedulerTimeline--hovered": isOver
+    // });
 
     return (
-      <div
-        className={className}
-        style={style}
-        ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
-      >
+      <div style={style} ref={this.props.onSchedulerTimelineDomNodeRefUpdate}>
         {this.props.children}
       </div>
     );
@@ -88,6 +84,7 @@ function withTrackingHoveredTechMap(WrapperSchedulerTimeline, className) {
         };
       };
 
+      console.log('this.props.scrollTop: ', this.props.scrollTop)
       const vLineStyle = left => {
         return {
           position: "absolute",
@@ -101,22 +98,10 @@ function withTrackingHoveredTechMap(WrapperSchedulerTimeline, className) {
 
       return (
         <WrapperSchedulerTimeline {...this.props}>
-          <div
-            className={className + "-dnd-special"}
-            style={hLineStyle(topLineY)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={hLineStyle(bottomLineY)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={vLineStyle(leftLineX)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={vLineStyle(rightLineX)}
-          />
+          <div style={hLineStyle(topLineY)} />
+          <div style={hLineStyle(bottomLineY)} />
+          <div style={vLineStyle(leftLineX)} />
+          <div style={vLineStyle(rightLineX)} />
           {this.props.children}
         </WrapperSchedulerTimeline>
       );
@@ -222,7 +207,11 @@ class SchedulerTimeline extends React.Component {
         height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
-        <div className="SchedulerTimelineColumn" style={columnStyle} key={columnIndex}>
+        <div
+          className="SchedulerTimelineColumn"
+          style={columnStyle}
+          key={columnIndex}
+        >
           {columnTechMaps}
         </div>
       );
