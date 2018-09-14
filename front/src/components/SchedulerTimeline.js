@@ -10,7 +10,6 @@ import "./SchedulerTimeline.css";
 const minutesToMs = min => min * 1000 * 60;
 const msToMins = ms => ms / (1000 * 60);
 
-
 function collect(connect, monitor) {
   return {
     canDrop: monitor.canDrop(),
@@ -192,7 +191,8 @@ class SchedulerTimeline extends React.Component {
   }
 
   render() {
-    const jobTop = j => this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
+    const jobTop = j =>
+      this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
     const jobDurationMins = j =>
       j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
 
@@ -261,7 +261,10 @@ class SchedulerTimeline extends React.Component {
     };
 
     // React DND accepts only "native" components so <div> is necessary here.
-    return connectDropTarget(<div> {renderColumns()} </div>);
+    // todo: div class=SchedulerTimeline is currently needed here, otherwise flexbox breaks
+    return connectDropTarget(
+      <div className="SchedulerTimeline">{renderColumns()}</div>
+    );
   }
 }
 
