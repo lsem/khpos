@@ -2,6 +2,7 @@ const initialState = [
   {
   startTime: Date.parse("01 Jan 1970 00:30:00 GMT"),
     id: "1",
+    column: 0,
     techMap: {
       id:"1",
       name:"1",
@@ -37,6 +38,7 @@ const initialState = [
   {
     startTime: Date.parse("01 Jan 1970 01:30:00 GMT"),
     id: "2",
+    column: 1,
     techMap: {
       id:"2",
       name:"2",
@@ -72,6 +74,7 @@ const initialState = [
   {
     startTime: Date.parse("01 Jan 1970 03:30:00 GMT"),
     id: "3",
+    column: 2,
     techMap: {
       id:"3",
       name:"3",

@@ -3,11 +3,9 @@ import { connect } from "react-redux";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
 import TechMapView from "./TechMapView";
-import { autoLayout } from "../helpers/layout";
 import _ from "lodash";
 import "./SchedulerTimeline.css";
 
-const minutesToMs = min => min * 1000 * 60;
 const msToMins = ms => ms / (1000 * 60);
 
 function collect(connect, monitor) {
@@ -52,7 +50,7 @@ class SchedulerTimelineColumns extends React.Component {
       height: this.props.height,
       width: this.props.width
     };
-    const { canDrop, isOver, connectDropTarget } = this.props;
+    const { canDrop, isOver } = this.props;
     let className = classNames({
       SchedulerTimeline: true,
       "SchedulerTimeline--highlighted": canDrop,
@@ -193,24 +191,13 @@ class SchedulerTimeline extends React.Component {
   render() {
     const jobTop = j =>
       this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
-    const jobDurationMins = j =>
-      j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
-
-    const jobLayoutMapper = {
-      vbegin: x => x.startTime,
-      vend: x => x.startTime + minutesToMs(jobDurationMins(x)),
-      identity: x => x.title
-    };
-    const layout = autoLayout(this.state.jobs, jobLayoutMapper);
-    //const layout = autoLayout_dumb(this.state.jobs, jobLayoutMapper);
-
-    const groupedByCols = _.groupBy(layout, x => x.col);
-    const columnViews = _.keys(groupedByCols).map((x, x_idx) => {
-      const columnJobIds = _.map(groupedByCols[x], x => x.item.id);
+    const jobsByCols = _.groupBy(this.state.jobs, job => job.column);
+    const columnViews = _.keys(jobsByCols).map((column, rowIndex) => {
+      const columnJobIds = _.map(jobsByCols[column], x => x.id);
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
-      const columnTechMaps = columnJobs.map((job, idx) => {
+      const columnTechMaps = columnJobs.map((job, columnIndex) => {
         return (
           <TechMapView
             title={job.techMap.name}
@@ -222,25 +209,23 @@ class SchedulerTimeline extends React.Component {
             key={job.id}
             moveTechMap={this.moveTechMap}
             getContainerRect={this.getContainerRect}
-            colIndex={idx}
-            rowIndex={x_idx}
+            colIndex={columnIndex}
+            rowIndex={rowIndex}
             tasks={job.techMap.tasks}
           />
         );
       });
-      const style = {
-        left: x_idx * (this.props.jobWidth + 10),
+      const columnStyle = {
+        left: rowIndex * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
         height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
-        <div className="SchedulerTimelineColumn" style={style}>
+        <div className="SchedulerTimelineColumn" style={columnStyle}>
           {columnTechMaps}
         </div>
       );
     });
-
-    const { canDrop, isOver, connectDropTarget } = this.props;
 
     //console.log("SchedulerTimeLine: render: ", this.frameNum++);
 
@@ -262,7 +247,7 @@ class SchedulerTimeline extends React.Component {
 
     // React DND accepts only "native" components so <div> is necessary here.
     // todo: div class=SchedulerTimeline is currently needed here, otherwise flexbox breaks
-    return connectDropTarget(
+    return this.props.connectDropTarget(
       <div className="SchedulerTimeline">{renderColumns()}</div>
     );
   }
