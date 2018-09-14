@@ -14,6 +14,7 @@
 
 * {
   font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
+  font-size: 13px;
 }
 
 ul {
@@ -48,5 +49,6 @@ ul {
 }
 
 .TimelineH1 {
+  font-size: 20px;
   margin-left: 10px;
 }
