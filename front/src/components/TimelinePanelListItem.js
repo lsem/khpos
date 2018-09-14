@@ -38,8 +38,7 @@ export default DragSource(
   {
     beginDrag(props, monitor, component) {
       const result = {
-        ...props,
-        component,
+        techMapId: props.techMapId
       };
       return result;
     }

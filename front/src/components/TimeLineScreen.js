@@ -5,6 +5,7 @@ import WorkersPanel from "./WorkersPanel";
 import CustomDragLayer from "./CustomDragLayer";
 import "./TimeLineScreen.css";
 import _ from "lodash";
+import techMapRegistry from "../TechMapRegistry";
 
 export default class TimelineScreen extends React.Component {
   constructor(props) {
@@ -218,14 +219,15 @@ export default class TimelineScreen extends React.Component {
           endTime={Date.parse("02 Jan 1970 00:00:00 GMT")}
           left={0}
           ref={this.timelineRef}
-        />{" "}
+        />
         <div className="TimelineScreenSideContainer">
-          <TechMapCatalogPanel />
+          <TechMapCatalogPanel techMapRegistry={techMapRegistry}/>
           <WorkersPanel />
-        </div>{" "}
+        </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
+          techMapRegistry={techMapRegistry}
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={
@@ -234,7 +236,7 @@ export default class TimelineScreen extends React.Component {
           onTechMapPreviewDomNodeRefUpdate={
             this.onTechMapPreviewDomNodeRefUpdate
           }
-        />{" "}
+        />
       </div>
     );
   }

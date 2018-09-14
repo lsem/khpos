@@ -5,7 +5,7 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
 
-import TechMapTaskView from "./TechMapTaskView"
+import TechMapTaskView from "./TechMapTaskView";
 
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
@@ -27,7 +27,15 @@ function collect(connect, monitor) {
   };
 }
 
+const minsToMs = mins => mins * 60 * 1000;
+
 class TechMapView extends React.Component {
+  static calcHeight(props, minsToPixels) {
+    const tasksMinutes = _.map(props.tasks, t => t.durationMins);
+    const total = _.reduce(tasksMinutes, (x, sum) => x + sum, 0);
+    return minsToPixels(total);
+  }
+
   constructor(props) {
     super(props);
     this.ref = null;
@@ -57,14 +65,15 @@ class TechMapView extends React.Component {
       "TechMapView-isOver": this.props.isOver
     });
 
-    const minsToMs = (mins) => mins * 60 * 1000;
+    const minsToMs = mins => mins * 60 * 1000;
 
     const tasks = _.map(this.props.tasks, t => (
       <TechMapTaskView
         height={this.props.msToPixels(minsToMs(t.durationMins))}
         color={t.bgColor}
         name={t.name}
-        key={t.id}/>
+        key={t.id}
+      />
     ));
 
     return connectDropTarget(

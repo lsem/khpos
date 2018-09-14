@@ -5,39 +5,12 @@ import React from "react";
 import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMapView";
 import TimelinePanelListItem from "./TimelinePanelListItem";
+import _ from "lodash";
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
 // http://rafaelquintanilha.com/sortable-targets-with-react-dnd/
 // https://github.com/react-dnd/react-dnd/issues/591
 // https://github.com/react-dnd/react-dnd/issues/151
-
-// todo: get it from global state for current item
-const sampleTasks = [
-  {
-    id: "1",
-    name: "task 1",
-    durationMins: 30,
-    bgColor: "rgb(216, 216, 216)"
-  },
-  {
-    id: "2",
-    name: "task 2",
-    durationMins: 40,
-    bgColor: "rgb(200, 200, 200)"
-  },
-  {
-    id: "3",
-    name: "task 3",
-    durationMins: 30,
-    bgColor: "rgb(216, 216, 216)"
-  },
-  {
-    id: "4",
-    name: "task 4",
-    durationMins: 20,
-    bgColor: "rgb(200, 200, 200)"
-  }
-];
 
 function collect(monitor, props) {
   return {
@@ -46,8 +19,8 @@ function collect(monitor, props) {
     initialClientOffset: monitor.getInitialClientOffset(),
     diffFromInitialOffset: monitor.getDifferenceFromInitialOffset(),
     isDragging: monitor.isDragging(),
-    itemBeingDragged: monitor.getItem(),
-    componentType: monitor.getItemType(),
+    item: monitor.getItem(),
+    itemType: monitor.getItemType(),
     canDrop: (() => {
       //console.log('can drop called')
       // Seems like it is the only way now to tell if we avobe drop target.
@@ -126,55 +99,57 @@ class CustomDragLayer extends React.PureComponent {
     }
   }
 
-  renderMaterializedTechMap(itemProps) {
+  renderMaterializedTechMap(techMap) {
     // Manually specify dimensions related style attributes
     // to be the same as in chld TechMapView to be able request
     // this properties later by DOM element reference.
     const techMapViewWidth = 100; // TODO: get from model via props
     const layerStyle = getItemTransform(this.props);
-    const dragLayerStyle = Object.assign({}, layerStyle, {
-      height: itemProps.height,
-      width: techMapViewWidth
-    });
+    layerStyle.height = TechMapView.calcHeight(
+      techMap,
+      this.props.minsToPixels
+    );
+    layerStyle.width = techMapViewWidth;
     const msToMins = ms => ms / (1000 * 60);
     const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
     return (
       <div
         className="CustomDragLayer"
-        style={dragLayerStyle}
+        style={layerStyle}
         ref={this.props.onTechMapPreviewDomNodeRefUpdate}
       >
         <TechMapView
           title={"Drag layer"}
-          tintColor={itemProps.tintColor}
-          height={itemProps.height}
+          tintColor={techMap.tintColor}
           left={0}
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
           msToPixels={msToPixels}
-          tasks={sampleTasks}
+          tasks={techMap.tasks}
         />
       </div>
     );
   }
-  renderUnmaterializedTechMap(itemProps) {
-    const techMapViewWidth = 100; // TODO: get from model via props
+  renderUnmaterializedTechMap(techMap) {
     const layerStyle = getItemTransform(this.props);
-    const dragLayerStyle = Object.assign({}, layerStyle, {
-      height: itemProps.height,
-      width: techMapViewWidth
-    });
-
+    // todo: this does not work, needs to be removed/fixed.
+    layerStyle.height = TechMapView.calcHeight(
+      techMap,
+      this.props.minsToPixels
+    );
+    layerStyle.width = 100; // TODO: get from model via props
+    // TODO: in general it may not me TimelinePanelListItem but some other view representing
+    // small item but in drag state.
     return (
-      <div className="CustomDragLayer" style={dragLayerStyle}>
-        <TimelinePanelListItem itemDisplayName="Dray layer (panel item)" />
+      <div className="CustomDragLayer" style={layerStyle}>
+        <TimelinePanelListItem itemDisplayName={techMap.name} />
       </div>
     );
   }
 
   render() {
-    const { isDragging, itemBeingDragged, componentType, canDrop } = this.props;
+    const { isDragging, item, itemType, canDrop } = this.props;
 
     if (!isDragging) {
       // Case when we instantiated DragLayer
@@ -183,28 +158,25 @@ class CustomDragLayer extends React.PureComponent {
       return null;
     }
 
-    if (componentType === "techmap") {
-      return this.renderMaterializedTechMap(itemBeingDragged);
-    } else if (componentType === "techmap-panel-item") {
+    const techMapSpec = _.find(
+      this.props.techMapRegistry,
+      x => x.id === item.techMapId
+    );
+    // TODO: handle not found case
+
+    if (itemType === "techmap") {
+      return this.renderMaterializedTechMap(techMapSpec);
+    } else if (itemType === "techmap-panel-item") {
       if (canDrop) {
-        return this.renderMaterializedTechMap({
-          // temporarly hard coded value
-          tintColor: "rgba(100, 200, 100, 1.0)",
-          height: 200
-        });
+        return this.renderMaterializedTechMap(techMapSpec);
       } else {
-        return this.renderUnmaterializedTechMap({
-          // temporarly hard coded value
-          smallView: true,
-          tintColor: "rgba(100, 200, 100, 1.0)",
-          height: 200
-        });
+        return this.renderUnmaterializedTechMap(techMapSpec);
       }
     } else {
       // todo: what does it mean? what should be a message
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      console.log("WARNING: unknown item");
     }
   }
 }
 
-export default DragLayer(collect)(CustomDragLayer);
+export default _.flow(DragLayer(collect))(CustomDragLayer);

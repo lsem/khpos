@@ -5,12 +5,18 @@ import TimelinePanel from "./TimelinePanel";
 
 export default class TechMapCatalogPanel extends React.Component {
   render() {
+    const listItems = this.props.techMapRegistry.map(techMap => (
+      <TimelinePanelListItem
+      itemDisplayName={techMap.name}
+      isDraggableItem={true}
+      techMapId={techMap.id}
+    />
+
+    ));
     return (
       <div className="TechMapCatalogPanel">
         <TimelinePanel listName="Технологічні карти">
-          <TimelinePanelListItem itemDisplayName="Хліб" isDraggableItem={true} />
-          <TimelinePanelListItem itemDisplayName="Круасан" isDraggableItem={true}/>
-          <TimelinePanelListItem itemDisplayName="Багет" isDraggableItem={true}/>
+        {listItems}
         </TimelinePanel>
       </div>
     );

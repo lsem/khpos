@@ -1,6 +1,6 @@
 const initialState = [
   {
-    startTime: Date.parse("01 Jan 1970 00:30:00 GMT"),
+  startTime: Date.parse("01 Jan 1970 00:30:00 GMT"),
     id: "1",
     techMap: {
       id:"1",
