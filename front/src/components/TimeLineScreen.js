@@ -64,7 +64,7 @@ export default class TimelineScreen extends React.Component {
         this.setScrollTopPositionDebounced(ref.scrollTop);
       });
     } else {
-      //console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
+      // console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
     }
   }
 
