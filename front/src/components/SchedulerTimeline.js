@@ -192,12 +192,13 @@ class SchedulerTimeline extends React.Component {
     const jobTop = j =>
       this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
     const jobsByCols = _.groupBy(this.state.jobs, job => job.column);
-    const columnViews = _.keys(jobsByCols).map((column, rowIndex) => {
+
+    const columnViews = _.keys(jobsByCols).map((column, columnIndex) => {
       const columnJobIds = _.map(jobsByCols[column], x => x.id);
       const columnJobs = _.filter(this.state.jobs, x =>
         _.includes(columnJobIds, x.id)
       );
-      const columnTechMaps = columnJobs.map((job, columnIndex) => {
+      const columnTechMaps = columnJobs.map((job, rowIndex) => {
         return (
           <TechMapView
             title={job.techMap.name}
@@ -216,12 +217,12 @@ class SchedulerTimeline extends React.Component {
         );
       });
       const columnStyle = {
-        left: rowIndex * (this.props.jobWidth + 10),
+        left: columnIndex * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
         height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
-        <div className="SchedulerTimelineColumn" style={columnStyle}>
+        <div className="SchedulerTimelineColumn" style={columnStyle} key={columnIndex}>
           {columnTechMaps}
         </div>
       );

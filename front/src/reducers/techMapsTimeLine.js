@@ -72,9 +72,45 @@ const initialState = [
     }
   },
   {
-    startTime: Date.parse("01 Jan 1970 03:30:00 GMT"),
+    startTime: Date.parse("01 Jan 1970 02:30:00 GMT"),
     id: "3",
     column: 2,
+    techMap: {
+      id:"3",
+      name:"3",
+      tintColor: "rgb(216, 216, 216)",
+      tasks: [
+        {
+          id: "1",
+          name: "task 1",
+          durationMins: 30,
+          bgColor: "rgb(216, 216, 216)"
+        },
+        {
+          id: "2",
+          name: "task 2",
+          durationMins: 10,
+          bgColor: "rgb(200, 200, 200)"
+        },
+        {
+          id: "3",
+          name: "task 3",
+          durationMins: 30,
+          bgColor: "rgb(216, 216, 216)"
+        },
+        {
+          id: "4",
+          name: "task 4",
+          durationMins: 10,
+          bgColor: "rgb(200, 200, 200)"
+        },
+      ]
+    }
+  },
+  {
+    startTime: Date.parse("01 Jan 1970 03:55:00 GMT"),
+    id: "4",
+    column: 1,
     techMap: {
       id:"3",
       name:"3",

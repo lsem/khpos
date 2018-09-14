@@ -73,23 +73,24 @@ class CustomDragLayer extends React.PureComponent {
     this.updateTimer = null;
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    // This improves perforamnce but for some reason
-    // in combination with PureComponent it in most cases leads to missing entering event
-    // in current state of DND state management. Do not remove this
-    // code until we fix this.
-    return true;
-    //if ((new Date() - this.lastUpdate) > (1000 / 60) /*60 fps*/) {
-    //   this.lastUpdate = new Date();
-    //   clearTimeout(this.updateTimer);
-    //   return true;
-    // } else {
-    //   this.updateTimer = setTimeout(() => {
-    //     this.forceUpdate();
-    //   }, 50);
-    // }
-    // return false;
-  }
+  // shouldComponentUpdate cannot be used with React so it is disabled.
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   // This improves perforamnce but for some reason
+  //   // in combination with PureComponent it in most cases leads to missing entering event
+  //   // in current state of DND state management. Do not remove this
+  //   // code until we fix this.
+  //   return true;
+  //   //if ((new Date() - this.lastUpdate) > (1000 / 60) /*60 fps*/) {
+  //   //   this.lastUpdate = new Date();
+  //   //   clearTimeout(this.updateTimer);
+  //   //   return true;
+  //   // } else {
+  //   //   this.updateTimer = setTimeout(() => {
+  //   //     this.forceUpdate();
+  //   //   }, 50);
+  //   // }
+  //   // return false;
+  // }
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.isDragging && nextProps.isDragging) {
