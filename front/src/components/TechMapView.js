@@ -27,8 +27,6 @@ function collect(connect, monitor) {
   };
 }
 
-const minsToMs = mins => mins * 60 * 1000;
-
 class TechMapView extends React.Component {
   static calcHeight(props, minsToPixels) {
     const tasksMinutes = _.map(props.tasks, t => t.durationMins);
@@ -65,11 +63,9 @@ class TechMapView extends React.Component {
       "TechMapView-isOver": this.props.isOver
     });
 
-    const minsToMs = mins => mins * 60 * 1000;
-
     const tasks = _.map(this.props.tasks, t => (
       <TechMapTaskView
-        height={this.props.msToPixels(minsToMs(t.durationMins))}
+        height={this.props.minsToPixels(t.durationMins)}
         color={t.bgColor}
         name={t.name}
         key={t.id}

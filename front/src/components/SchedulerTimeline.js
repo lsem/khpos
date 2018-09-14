@@ -7,6 +7,10 @@ import { autoLayout } from "../helpers/layout";
 import _ from "lodash";
 import "./SchedulerTimeline.css";
 
+const minutesToMs = min => min * 1000 * 60;
+const msToMins = ms => ms / (1000 * 60);
+
+
 function collect(connect, monitor) {
   return {
     canDrop: monitor.canDrop(),
@@ -41,6 +45,91 @@ const SchedulerTimelineDndSpec = {
     );
   }
 };
+
+class SchedulerTimelineColumns extends React.Component {
+  render() {
+    const style = {
+      left: this.props.left,
+      height: this.props.height,
+      width: this.props.width
+    };
+    const { canDrop, isOver, connectDropTarget } = this.props;
+    let className = classNames({
+      SchedulerTimeline: true,
+      "SchedulerTimeline--highlighted": canDrop,
+      "SchedulerTimeline--hovered": isOver
+    });
+
+    return (
+      <div
+        className={className}
+        style={style}
+        ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
+      >
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+function withTrackingHoveredTechMap(WrapperSchedulerTimeline, className) {
+  return class extends React.Component {
+    render() {
+      const draggedViewRect = this.props.techMapPreviewHoverRect;
+      const topLineY = draggedViewRect.top;
+      const bottomLineY = draggedViewRect.top + draggedViewRect.height - 1;
+      const leftLineX = draggedViewRect.left;
+      const rightLineX = draggedViewRect.left + draggedViewRect.width - 1;
+      const hLineStyle = top => {
+        return {
+          position: "absolute",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          width: this.props.width,
+          height: 1,
+          left: 0,
+          top: top
+        };
+      };
+
+      const vLineStyle = left => {
+        return {
+          position: "absolute",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          width: 1,
+          height: this.props.height,
+          left: left,
+          top: this.props.scrollTop
+        };
+      };
+
+      return (
+        <WrapperSchedulerTimeline {...this.props}>
+          <div
+            className={className + "-dnd-special"}
+            style={hLineStyle(topLineY)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={hLineStyle(bottomLineY)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={vLineStyle(leftLineX)}
+          />
+          <div
+            className={className + "-dnd-special"}
+            style={vLineStyle(rightLineX)}
+          />
+          {this.props.children}
+        </WrapperSchedulerTimeline>
+      );
+    }
+  };
+}
+
+const TrackingHoveredSchedulerTimelineColumns = withTrackingHoveredTechMap(
+  SchedulerTimelineColumns
+);
 
 class SchedulerTimeline extends React.Component {
   // to Taras: try paling by changing throttle to debounce if you are not aware
@@ -103,10 +192,7 @@ class SchedulerTimeline extends React.Component {
   }
 
   render() {
-    const minutesToMs = min => min * 1000 * 60;
-    const msToMins = ms => ms / (1000 * 60);
-    const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
-    const jobTop = j => msToPixels(j.startTime - this.props.beginTime);
+    const jobTop = j => this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
     const jobDurationMins = j =>
       j.techMap.tasks.reduce((result, task) => result + task.durationMins, 0);
 
@@ -129,7 +215,7 @@ class SchedulerTimeline extends React.Component {
           <TechMapView
             title={job.techMap.name}
             tintColor={job.techMap.tintColor}
-            msToPixels={msToPixels}
+            minsToPixels={this.props.minsToPixels}
             left={0}
             width={this.props.jobWidth}
             top={jobTop(job)}
@@ -145,97 +231,37 @@ class SchedulerTimeline extends React.Component {
       const style = {
         left: x_idx * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
-        height: msToPixels(this.props.endTime)
+        height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
         <div className="SchedulerTimelineColumn" style={style}>
-          <div className={className}>{columnTechMaps}</div>
+          {columnTechMaps}
         </div>
       );
     });
-    // Style ovverides
-    const style = {
-      left: this.props.left,
-      height: this.props.height,
-      width: this.props.width
-    };
+
     const { canDrop, isOver, connectDropTarget } = this.props;
 
     //console.log("SchedulerTimeLine: render: ", this.frameNum++);
 
-    let className = classNames({
-      SchedulerTimeline: true,
-      "SchedulerTimeline--highlighted": canDrop,
-      "SchedulerTimeline--hovered": isOver
-    });
-
-    const doTimelineRendering = () => {
+    const renderColumns = () => {
       if (!this.props.presentTechMapHover) {
-        // Rendering of scene without drag layer tracking
         return (
-          <div
-            className={className}
-            style={style}
-            ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
-          >
+          <SchedulerTimelineColumns {...this.props}>
             {columnViews}
-          </div>
+          </SchedulerTimelineColumns>
+        );
+      } else {
+        return (
+          <TrackingHoveredSchedulerTimelineColumns {...this.props}>
+            {columnViews}
+          </TrackingHoveredSchedulerTimelineColumns>
         );
       }
-
-      const draggedViewRect = this.props.techMapPreviewHoverRect;
-      const topLineY = draggedViewRect.top;
-      const bottomLineY = draggedViewRect.top + draggedViewRect.height - 1;
-      const leftLineX = draggedViewRect.left;
-      const rightLineX = draggedViewRect.left + draggedViewRect.width - 1;
-      const hLineStyle = top => {
-        return {
-          position: "absolute",
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
-          width: this.props.width,
-          height: 1,
-          left: 0,
-          top: top
-        };
-      };
-
-      const vLineStyle = left => {
-        return {
-          position: "absolute",
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
-          width: 1,
-          height: this.props.height,
-          left: left,
-          top: this.props.scrollTop
-        };
-      };
-      return (
-        <div
-          className={className}
-          style={style}
-          ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
-        >
-          <div
-            className={className + "-dnd-special"}
-            style={hLineStyle(topLineY)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={hLineStyle(bottomLineY)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={vLineStyle(leftLineX)}
-          />
-          <div
-            className={className + "-dnd-special"}
-            style={vLineStyle(rightLineX)}
-          />
-          {columnViews}
-        </div>
-      );
     };
-    return connectDropTarget(doTimelineRendering());
+
+    // React DND accepts only "native" components so <div> is necessary here.
+    return connectDropTarget(<div> {renderColumns()} </div>);
   }
 }
 

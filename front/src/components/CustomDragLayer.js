@@ -110,8 +110,6 @@ class CustomDragLayer extends React.PureComponent {
       this.props.minsToPixels
     );
     layerStyle.width = techMapViewWidth;
-    const msToMins = ms => ms / (1000 * 60);
-    const msToPixels = ms => this.props.minsToPixels(msToMins(ms));
     return (
       <div
         className="CustomDragLayer"
@@ -125,7 +123,7 @@ class CustomDragLayer extends React.PureComponent {
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
-          msToPixels={msToPixels}
+          minsToPixels={this.props.minsToPixels}
           tasks={techMap.tasks}
         />
       </div>
