@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
-import TechMapView from "./TechMapView";
+import TechMapView from "./TechMap";
 import _ from "lodash";
-import "./SchedulerTimeline.css";
+import "./PlanTimeline.css";
 
 function collect(connect, monitor) {
   return {
@@ -41,7 +41,7 @@ const SchedulerTimelineDndSpec = {
   }
 };
 
-class SchedulerTimeline extends React.Component {
+class PlanTimeline extends React.Component {
   // to Taras: try paling by changing throttle to debounce if you are not aware
   // about this stuff.
   offsetChangeDebounced = _.debounce(
@@ -66,14 +66,14 @@ class SchedulerTimeline extends React.Component {
     super(props);
     this.lastOffset = null;
     this.state = {
-      jobs: props.techMapsTimeLine
+      jobs: props.plan
     };
     this.frameNum = 0;
     this.moveTechMap = this.moveTechMap.bind(this);
   }
 
   moveTechMap() {
-    console.log("SchedulerTimeline: moveTechMap()");
+    console.log("PlanTimeline: moveTechMap()");
   }
 
   componentWillReceiveProps(nextProps) {
@@ -177,7 +177,7 @@ class SchedulerTimeline extends React.Component {
       };
       return (
         <div
-          className="SchedulerTimelineColumn"
+          className="PlanTimelineColumn"
           style={columnStyle}
           key={columnIndex}
         >
@@ -186,7 +186,7 @@ class SchedulerTimeline extends React.Component {
       );
     });
 
-    // console.log("SchedulerTimeLine: frame: ", this.frameNum++);
+    // console.log("PlanTimeline: frame: ", this.frameNum++);
 
     const renderColumns = () => {
       const style = {
@@ -195,9 +195,9 @@ class SchedulerTimeline extends React.Component {
         width: this.props.width
       };
       let className = classNames({
-        SchedulerTimeline: true,
-        "SchedulerTimeline--highlighted": this.props.canDrop,
-        "SchedulerTimeline--hovered": this.props.isOver
+          PlanTimeline: true,
+        "PlanTimeline--highlighted": this.props.canDrop,
+        "PlanTimeline--hovered": this.props.isOver
       });
 
       // Note, to connect to react-dnd drop target this must return native element (div)
@@ -218,7 +218,7 @@ class SchedulerTimeline extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    techMapsTimeLine: state.techMapsTimeLine
+    plan: state.plan
   };
 };
 
@@ -229,4 +229,4 @@ export default _.flow(
     collect
   ),
   connect(mapStateToProps)
-)(SchedulerTimeline);
+)(PlanTimeline);

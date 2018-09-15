@@ -1,8 +1,8 @@
 import React from "react";
 
-import "./TechMapTaskView.css";
+import "./TechMapTask.css";
 
-function TechMapTaskView(props) {
+function TechMapTask(props) {
   const { height, name, color } = props;
   let badgeColors = props.badgeColors;
 
@@ -36,4 +36,4 @@ function TechMapTaskView(props) {
   );
 }
 
-export default TechMapTaskView;
+export default TechMapTask;

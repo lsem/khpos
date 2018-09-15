@@ -1,11 +1,11 @@
 import React from "react";
-import "./TimelinePanel.css";
+import "./PlanListView.css";
 
-export default class TimelinePanel extends React.Component {
+export default class PlanListView extends React.Component {
   render() {
     return (
-      <div className="TimelinePanel">
-        <div className="TimelinePanel_ListName">
+      <div className="PlanListView">
+        <div className="PlanListView_ListName">
           {this.props.listName}
         </div>
         <ul>

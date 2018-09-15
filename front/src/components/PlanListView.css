@@ -1,8 +1,12 @@
-.TimelinePanel > .TimelinePanel_ListName {
+.PlanListView {
+  margin-bottom: 20px;
+}
+
+.PlanListView > .PlanListView_ListName {
   margin-bottom: 10px;
   font-family: 'Fira Sans Bold', Arial, Helvetica, sans-serif;
 }
 
-.TimelinePanel > .AddButton {
+.PlanListView > .AddButton {
   color: rgb(58, 149, 254);
 }

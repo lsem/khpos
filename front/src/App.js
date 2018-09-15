@@ -5,7 +5,7 @@ import "./App.css";
 import axios from "axios";
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
-import TimelineScreen from './components/TimeLineScreen';
+import TimelineScreen from './components/PlanScreen';
 
 function ProductListItem(props) {
   return (

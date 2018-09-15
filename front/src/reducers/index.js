@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
-import techMapsTimeLine from './techMapsTimeLine';
-import techMapRegistry from './techMapRegistry';
+import plan from './plan';
+import techMaps from './techMaps';
 
 export default combineReducers({
-  techMapsTimeLine,
-  techMapRegistry
+  plan,
+  techMaps
 })

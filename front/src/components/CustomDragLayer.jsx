@@ -1,10 +1,9 @@
 // https://github.com/react-dnd/react-dnd/issues/592
 
-import "./CustomDragLayer.css";
 import React from "react";
 import { DragLayer } from "react-dnd";
-import TechMapView from "./TechMapView";
-import TimelinePanelListItem from "./TimelinePanelListItem";
+import TechMapView from "./TechMap";
+import TimelinePanelListItem from "./PlanListItem";
 import _ from "lodash";
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
@@ -138,7 +137,7 @@ class CustomDragLayer extends React.PureComponent {
       this.props.minsToPixels
     );
     layerStyle.width = 100; // TODO: get from model via props
-    // TODO: in general it may not me TimelinePanelListItem but some other view representing
+    // TODO: in general it may not me PlanListItem but some other view representing
     // small item but in drag state.
     return (
       <div className="CustomDragLayer" style={layerStyle}>
@@ -158,7 +157,7 @@ class CustomDragLayer extends React.PureComponent {
     }
 
     const techMapSpec = _.find(
-      this.props.techMapRegistry,
+      this.props.techMaps,
       x => x.id === item.techMapId
     );
 

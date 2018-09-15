@@ -145,7 +145,7 @@ const initialState = [
   }
 ]
 
-export default function techMapsTimeLine(state = initialState, action) {
+export default function plan(state = initialState, action) {
   switch (action.type) {
     default:
       return state

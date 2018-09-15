@@ -1,9 +1,9 @@
-import "./TimelinePanelListItem.css";
+import "./PlanListItem.css";
 import React from "react";
 import { DragSource } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 
-class TimelinePanelListItem extends React.Component {
+class PlanListItem extends React.Component {
   // Needed for react-dnd
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
@@ -17,13 +17,13 @@ class TimelinePanelListItem extends React.Component {
     // TODO: refactor this (consider having identity decorator).
     if (this.props.isDraggableItem) {
       return this.props.connectDragSource(
-        <ul className="TimelinePanelListItem" style={style}>
+        <ul className="PlanListItem" style={style}>
           {this.props.itemDisplayName}
         </ul>
       );
     } else {
       return (
-        <ul className="TimelinePanelListItem" style={style}>
+        <ul className="PlanListItem" style={style}>
           {this.props.itemDisplayName}
         </ul>
       );
@@ -49,4 +49,4 @@ export default DragSource(
       connectDragPreview: connect.dragPreview()
     };
   }
-)(TimelinePanelListItem);
+)(PlanListItem);

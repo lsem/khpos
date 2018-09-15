@@ -1,16 +1,16 @@
 
-.SchedulerTimeline  {
+.PlanTimeline  {
   position: relative;
   /* height: 600px; */
   overflow: scroll;
   /* background-color: rgba(100, 100, 100, 0.03); */
 }
 
-.SchedulerTimelineColumn {
+.PlanTimelineColumn {
   position: absolute;
 }
 
-.SchedulerTimelineColumn_spacing {
+.PlanTimelineColumn_spacing {
   width: 100px;
 }
 
@@ -19,10 +19,10 @@
   margin-top: 100px;
 }
 
-.SchedulerTimeline--highlighted {
+.PlanTimeline--highlighted {
   background-color: rgba(100, 100, 100, 0.08);
 }
 
-.SchedulerTimeline--hovered {
+.PlanTimeline--hovered {
   /* background-color: rgba(100, 100, 0, 0.1); */
 }

@@ -126,7 +126,7 @@ const initialState = [
 ]
 
 
-export default function techMapsTimeLine(state = initialState, action) {
+export default function techMaps(state = initialState, action) {
   switch (action.type) {
     default:
       return state

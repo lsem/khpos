@@ -1,11 +1,11 @@
-import "./TechMapView.css";
+import "./TechMap.css";
 import React from "react";
 import { DragSource, DropTarget } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
 
-import TechMapTaskView from "./TechMapTaskView";
+import TechMapTask from "./TechMapTask";
 
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
@@ -25,7 +25,7 @@ function collect(connect, monitor) {
   };
 }
 
-class TechMapView extends React.Component {
+class TechMap extends React.Component {
   static calcHeight(props, minsToPixels) {
     const tasksMinutes = _.map(props.tasks, t => t.durationMins);
     const total = _.reduce(tasksMinutes, (x, sum) => x + sum, 0);
@@ -36,13 +36,13 @@ class TechMapView extends React.Component {
     super(props);
     this.ref = null;
     this.setRef = r => (this.ref = r);
-    //console.log('TechMapView: constructor: this.props.moveTechMap:', this.props.moveTechMap);
+    //console.log('TechMap: constructor: this.props.moveTechMap:', this.props.moveTechMap);
   }
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
-    //console.log('TechMapView: componentDidMount: ref: ', this.ref)
+    //console.log('TechMap: componentDidMount: ref: ', this.ref)
   }
 
   render() {
@@ -62,7 +62,7 @@ class TechMapView extends React.Component {
     });
 
     const tasks = _.map(this.props.tasks, t => (
-      <TechMapTaskView
+      <TechMapTask
         height={this.props.minsToPixels(t.durationMins)}
         color={t.bgColor}
         name={t.name}
@@ -137,4 +137,4 @@ function techMapDropCollect(connect, monitor) {
 export default _.flow(
   DragSource("techmap", techMapViewSource, collect),
   DropTarget("techmap", techMapDropTargetSpec, techMapDropCollect)
-)(TechMapView);
+)(TechMap);

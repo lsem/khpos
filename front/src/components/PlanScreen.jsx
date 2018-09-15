@@ -1,13 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import SchedulerTimeline from "./SchedulerTimeline";
-import TechMapCatalogPanel from "./TechMapCatalogPanel";
-import WorkersPanel from "./WorkersPanel";
+import PlanTimeline from "./PlanTimeline";
+import PlanTechMapsMenu from "./PlanTechMapsMenu";
+import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
-import "./TimeLineScreen.css";
+import "./PlanScreen.css";
 import _ from "lodash";
 
-class TimelineScreen extends React.Component {
+class PlanScreen extends React.Component {
   constructor(props) {
     super(props);
     this.minsToPixels = this.minsToPixels.bind(this);
@@ -37,7 +37,7 @@ class TimelineScreen extends React.Component {
       isTechMapHoveringTimeline: false,
       techMapPreviewHoverRect: null,
       techMapPreviewHoverTranslatedRect: null,
-      schedulerTimelineRect: null,
+      PlanTimelineRect: null,
       initialOffset: null,
       scrollTop: 0
     };
@@ -54,7 +54,7 @@ class TimelineScreen extends React.Component {
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
       this.setState({
-        schedulerTimelineRect: this.domRectToInternalRect(
+        PlanTimelineRect: this.domRectToInternalRect(
           ref.getBoundingClientRect()
         )
       });
@@ -186,7 +186,7 @@ class TimelineScreen extends React.Component {
           width: this.state.techMapPreviewHoverRect.width,
           height: this.state.techMapPreviewHoverRect.height
         },
-        prevState.schedulerTimelineRect
+        prevState.PlanTimelineRect
       );
 
       return {
@@ -198,8 +198,8 @@ class TimelineScreen extends React.Component {
 
   render() {
     return (
-      <div className="TimelineScreen">
-        <SchedulerTimeline
+      <div className="PlanScreen">
+        <PlanTimeline
           onSchedulerTimelineDomNodeRefUpdate={
             this.onSchedulerTimelineDomNodeRefUpdate
           }
@@ -220,14 +220,14 @@ class TimelineScreen extends React.Component {
           left={0}
           ref={this.timelineRef}
         />
-        <div className="TimelineScreenSideContainer">
-          <TechMapCatalogPanel techMapRegistry={this.props.techMapRegistry}/>
-          <WorkersPanel />
+        <div className="PlanScreenSideContainer">
+          <PlanTechMapsMenu techMaps={this.props.techMaps}/>
+          <PlanStaffMenu />
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
-          techMapRegistry={this.props.techMapRegistry}
+          techMaps={this.props.techMaps}
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={
@@ -244,8 +244,8 @@ class TimelineScreen extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    techMapRegistry: state.techMapRegistry
+    techMaps: state.techMaps
   };
 };
 
-export default connect(mapStateToProps)(TimelineScreen);
+export default connect(mapStateToProps)(PlanScreen);

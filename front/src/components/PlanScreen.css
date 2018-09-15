@@ -1,8 +1,8 @@
-.TimelineScreen {
+.PlanScreen {
   display: flex;
 }
 
-.TimelineScreenSideContainer {
+.PlanScreenSideContainer {
   display: flex;
   flex-direction: column;
   margin-left: 20px;
@@ -10,10 +10,10 @@
   /* background-color: oldlace; */
 }
 
-.TimelineScreen > .TimelineScreenSideContainer > .TechMapCatalogPanel {
+.PlanScreen > .PlanScreenSideContainer > .PlanTechMapsMenu {
   margin-bottom: 50px;
 }
 
-.TimelineScreen > .SchedulerTimeline {
+.PlanScreen > .PlanTimeline {
   margin-left: 10px;
 }
