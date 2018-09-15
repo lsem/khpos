@@ -137,7 +137,7 @@ class PlanTimeline extends React.Component {
     );
   }
 
-  renderColumnViews() {
+  renderColumns() {
     const msToMins = ms => ms / (1000 * 60);
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
@@ -196,7 +196,7 @@ class PlanTimeline extends React.Component {
         style={style}
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
-        {this.renderColumnViews()}
+        {this.renderColumns()}
         {this.props.presentTechMapHover ? this.renderHover() : null}
       </div>
     );
