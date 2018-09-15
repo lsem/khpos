@@ -218,8 +218,7 @@ class SchedulerTimeline extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    techMapsTimeLine: state.techMapsTimeLine,
-    techMapTasks: state.techMapTasks
+    techMapsTimeLine: state.techMapsTimeLine
   };
 };
 

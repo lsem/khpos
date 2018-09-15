@@ -1,13 +1,13 @@
 import React from "react";
+import { connect } from "react-redux";
 import SchedulerTimeline from "./SchedulerTimeline";
 import TechMapCatalogPanel from "./TechMapCatalogPanel";
 import WorkersPanel from "./WorkersPanel";
 import CustomDragLayer from "./CustomDragLayer";
 import "./TimeLineScreen.css";
 import _ from "lodash";
-import techMapRegistry from "../TechMapRegistry";
 
-export default class TimelineScreen extends React.Component {
+class TimelineScreen extends React.Component {
   constructor(props) {
     super(props);
     this.minsToPixels = this.minsToPixels.bind(this);
@@ -221,13 +221,13 @@ export default class TimelineScreen extends React.Component {
           ref={this.timelineRef}
         />
         <div className="TimelineScreenSideContainer">
-          <TechMapCatalogPanel techMapRegistry={techMapRegistry}/>
+          <TechMapCatalogPanel techMapRegistry={this.props.techMapRegistry}/>
           <WorkersPanel />
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
-          techMapRegistry={techMapRegistry}
+          techMapRegistry={this.props.techMapRegistry}
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={
@@ -241,3 +241,11 @@ export default class TimelineScreen extends React.Component {
     );
   }
 }
+
+const mapStateToProps = state => {
+  return {
+    techMapRegistry: state.techMapRegistry
+  };
+};
+
+export default connect(mapStateToProps)(TimelineScreen);
