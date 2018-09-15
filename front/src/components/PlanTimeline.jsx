@@ -137,82 +137,69 @@ class PlanTimeline extends React.Component {
     );
   }
 
-  render() {
+  renderColumnViews() {
     const msToMins = ms => ms / (1000 * 60);
-    const jobTop = j =>
-      this.props.minsToPixels(msToMins(j.startTime - this.props.beginTime));
+    const jobDuration = j => j.startTime - this.props.beginTime;
+    const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
     const jobsByCols = _.groupBy(this.state.jobs, job => job.column);
-
-    const columnViews = _.keys(jobsByCols).map((column, columnIndex) => {
-      const columnJobIds = _.map(jobsByCols[column], x => x.id);
-      const columnJobs = _.filter(this.state.jobs, x =>
-        _.includes(columnJobIds, x.id)
-      );
-      const columnTechMaps = columnJobs.map((job, rowIndex) => {
-        return (
-          <TechMapView
-            // TODO: WARNING: this refers to techMapId but in fact it should not,
-            // because it will be inconsistent at some moment with currently
-            // available tech maps registry
-            techMapId={job.techMap.id}
-            title={job.techMap.name}
-            tintColor={job.techMap.tintColor}
-            minsToPixels={this.props.minsToPixels}
-            left={0}
-            width={this.props.jobWidth}
-            top={jobTop(job)}
-            key={job.id}
-            moveTechMap={this.moveTechMap}
-            getContainerRect={this.getContainerRect}
-            colIndex={columnIndex}
-            rowIndex={rowIndex}
-            tasks={job.techMap.tasks}
-          />
-        );
-      });
+    return _.keys(jobsByCols).map(column => {
+      const columnTechMaps = jobsByCols[column].map((job, rowIndex) => (
+        <TechMapView
+          // TODO: WARNING: this refers to techMapId but in fact it should not,
+          // because it will be inconsistent at some moment with currently
+          // available tech maps registry
+          techMapId={job.techMap.id}
+          title={job.techMap.name}
+          tintColor={job.techMap.tintColor}
+          minsToPixels={this.props.minsToPixels}
+          left={0}
+          width={this.props.jobWidth}
+          top={jobTop(job)}
+          key={job.id}
+          moveTechMap={this.moveTechMap}
+          getContainerRect={this.getContainerRect}
+          colIndex={column}
+          rowIndex={rowIndex}
+          tasks={job.techMap.tasks}
+        />
+      ));
       const columnStyle = {
-        left: columnIndex * (this.props.jobWidth + 10),
+        left: column * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
         height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
-        <div
-          className="PlanTimelineColumn"
-          style={columnStyle}
-          key={columnIndex}
-        >
+        <div className="PlanTimelineColumn" style={columnStyle} key={column}>
           {columnTechMaps}
         </div>
       );
     });
+  }
 
+  render() {
     // console.log("PlanTimeline: frame: ", this.frameNum++);
-
-    const renderColumns = () => {
-      const style = {
-        left: this.props.left,
-        height: this.props.height,
-        width: this.props.width
-      };
-      let className = classNames({
-          PlanTimeline: true,
-        "PlanTimeline--highlighted": this.props.canDrop,
-        "PlanTimeline--hovered": this.props.isOver
-      });
-
-      // Note, to connect to react-dnd drop target this must return native element (div)
-      return (
-        <div
-          className={className}
-          style={style}
-          ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
-        >
-          {columnViews}
-          {this.props.presentTechMapHover ? this.renderHover() : null}
-        </div>
-      );
+    const style = {
+      left: this.props.left,
+      height: this.props.height,
+      width: this.props.width
     };
-    return this.props.connectDropTarget(renderColumns());
+    let className = classNames({
+      PlanTimeline: true,
+      "PlanTimeline--highlighted": this.props.canDrop,
+      "PlanTimeline--hovered": this.props.isOver
+    });
+
+    // Note, to connect to react-dnd drop target this must return native element (div)
+    return this.props.connectDropTarget(
+      <div
+        className={className}
+        style={style}
+        ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
+      >
+        {this.renderColumnViews()}
+        {this.props.presentTechMapHover ? this.renderHover() : null}
+      </div>
+    );
   }
 }
 

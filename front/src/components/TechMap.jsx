@@ -92,8 +92,8 @@ const techMapDropTargetSpec = {
     const dragRowIndex = monitor.getItem().rowIndex;
     const hoverRowIndex = props.rowIndex;
 
-    // console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
-    // console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
+    console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
+    console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
 
     // Don't replace items with themselves
     if (dragColIndex === hoverColIndex && dragRowIndex === hoverRowIndex) {
