@@ -110,7 +110,7 @@ const initialState = [
   {
     startTime: Date.parse("01 Jan 1970 03:55:00 GMT"),
     id: "4",
-    column: 1,
+    column: 7,
     techMap: {
       id:"3",
       name:"3",

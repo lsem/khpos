@@ -24,15 +24,17 @@ const SchedulerTimelineDndSpec = {
     // moveKnight(props.x, props.y);
   },
   hover(props, monitor, component) {
-    // It looks like hover() is the only method we can constant
-    // flow of dragging events so this is good place to
-    // propagate signal to timeline about cursor position changes.
-    if (!monitor.isOver()) {
-      return;
-    }
+    // In this method drop handling is basically happens.
+    // Apart from that this hover() is the only method that
+    // receives constant flow of mouse move events in react-dnd design
+    // so we propagate this events to master component to hightlight current time
+    // on PlanTimeline which are passed as props to it.
+    if (!monitor.isOver()) return;
     if (!monitor.canDrop()) return;
-    // TODO: Why this does not work? it must be working according to the docs.
-    // const timeLine = component.getDecoratedComponentInstance();
+
+    // component is instance of PlanTimeline, we pass information to there
+    // where it then be delivered to parent which knows entire picture and can
+    // change PlanTimeline accordingly.
     component.onOffsetChanged(
       monitor.getClientOffset(),
       monitor.getDifferenceFromInitialOffset(),
@@ -76,6 +78,14 @@ class PlanTimeline extends React.Component {
     console.log("PlanTimeline: moveTechMap()");
   }
 
+  columnDomAttached(column, ref) {
+    if (ref) {
+      this.props.columnAttached(column, ref.getBoundingClientRect());
+    } else {
+      this.props.columnDetached(column)
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     // TODO: Find other place to do this logic.
     //  Changing state in this method is not recommended,
@@ -89,7 +99,10 @@ class PlanTimeline extends React.Component {
       const diffY =
         this.props.initialClientOffset.y -
         this.props.initialSourceClientOffset.y;
-      this.props.onTechMapPreviewEnteredTimeline({ x: diffX, y: diffY });
+      this.props.onTechMapPreviewEnteredTimeline(nextProps.item, {
+        x: diffX,
+        y: diffY
+      });
     }
     if (this.props.isOver && !nextProps.isOver) {
       this.props.onTechMapPreviewLeftTimeline();
@@ -138,6 +151,14 @@ class PlanTimeline extends React.Component {
   }
 
   renderColumns() {
+    // todo: in current design, we have only those columns which
+    // have some tasks but in general, we need to create also
+    // placeholder colums. I would like to see this on data level
+    // so that this component has no this logic whatsoever.
+    // On the flip side, I would like to be able to create not more
+    // columns that fit into this component.
+    // We can consider employing logic when this component reports
+    // columns count it can render without horizontal scolling (or may be more).
     const msToMins = ms => ms / (1000 * 60);
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
@@ -169,7 +190,12 @@ class PlanTimeline extends React.Component {
         height: this.props.minsToPixels(msToMins(this.props.endTime))
       };
       return (
-        <div className="PlanTimelineColumn" style={columnStyle} key={column}>
+        <div
+          className="PlanTimelineColumn"
+          style={columnStyle}
+          key={column}
+          ref={this.columnDomAttached.bind(this, column)}
+        >
           {columnTechMaps}
         </div>
       );

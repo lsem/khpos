@@ -7,9 +7,38 @@ import CustomDragLayer from "./CustomDragLayer";
 import "./PlanScreen.css";
 import _ from "lodash";
 
+class DragAndDropManager {
+  constructor() {}
+
+  planTimelineAttached(rect, columns) {
+    console.log("planTimelineAttached: ", rect, columns);
+  }
+
+  columnAttached(column, rect) {
+    console.log("columnAttached: ", column, rect);
+  }
+
+  columnDetached(column) {
+    console.log("columnDetached: ", column);
+  }
+
+  hoveringTechMapEntered(id) {
+    console.log("hoveringTechMapEntered: ", id);
+  }
+
+  hoveringTechMapLeft(id) {
+    console.log("hoveringTechMapLeft: ", id);
+  }
+
+  hoveringtechMapChangedPosition(id, rect) {
+    console.log("hoveringtechMapChangedPosition: ", id, rect);
+  }
+}
+
 class PlanScreen extends React.Component {
   constructor(props) {
     super(props);
+    this.dndManager = new DragAndDropManager();
     this.minsToPixels = this.minsToPixels.bind(this);
     this.onTechMapPreviewEnteredTimeline = this.onTechMapPreviewEnteredTimeline.bind(
       this
@@ -32,6 +61,8 @@ class PlanScreen extends React.Component {
     this.onSchedulerTimelineDomNodeRefUpdate = this.onSchedulerTimelineDomNodeRefUpdate.bind(
       this
     );
+    this.columnAttached = this.columnAttached.bind(this);
+    this.columnDetached = this.columnDetached.bind(this);
     this.state = {
       isTechMapOverTimeline: false,
       isTechMapHoveringTimeline: false,
@@ -39,29 +70,41 @@ class PlanScreen extends React.Component {
       techMapPreviewHoverTranslatedRect: null,
       PlanTimelineRect: null,
       initialOffset: null,
-      scrollTop: 0
+      scrollTop: 0,
+      scollLeft: 0
     };
   }
 
-  setScrollTopPositionDebounced = _.debounce(
-    pos =>
+  columnAttached(column, domRect) {
+    // todo: translate properly
+    this.dndManager.columnAttached(column, this.domRectToInternalRect(domRect));
+  }
+
+  columnDetached(column) {
+    this.dndManager.columnDetached(column);
+  }
+
+  setScrollLeftTopPositionDebounced = _.debounce(
+    (left, top) =>
       this.setState({
-        scrollTop: pos
+        scollLeft: left,
+        scrollTop: top
       }),
     30
   );
 
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
+      this.dndManager.planTimelineAttached(
+        this.domRectToInternalRect(ref.getBoundingClientRect())
+      );
       this.setState({
         PlanTimelineRect: this.domRectToInternalRect(
           ref.getBoundingClientRect()
         )
       });
-      // subscribe to scroll updates to make scroll position part of state
-      // todo: fix back scrolling
       ref.addEventListener("scroll", e => {
-        this.setScrollTopPositionDebounced(ref.scrollTop);
+        this.setScrollLeftTopPositionDebounced(ref.scrollLeft, ref.scrollTop);
       });
     } else {
       // console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
@@ -84,10 +127,12 @@ class PlanScreen extends React.Component {
     });
   }
 
-  onTechMapPreviewEnteredTimeline(initialOffset) {
+  onTechMapPreviewEnteredTimeline(item, initialOffset) {
     // initialOffset indicated an offset between cusrsor position and top left corner
     // of drag layer DOM rect at the moment of entering.
-    console.log("DEBUG: onTechMapPreviewEnteredTimeline");
+    console.log("DEBUG: onTechMapPreviewEnteredTimeline", item);
+    this.dndManager.hoveringTechMapEntered(item);
+
     this.setState(prevState => {
       const haveRectAndInTimeline =
         prevState.techMapPreviewHoverRect !== null &&
@@ -162,6 +207,9 @@ class PlanScreen extends React.Component {
   }
 
   onTechMapPreviewOffsetChanged(offset, diffOffset, initialOffset) {
+    // To handle drop we should know geometry of columns.
+    // Or alternatively, we can get timeline decide and once drop position
+    // is detected to either make action or ask PlanScreen via callback.
     this.setState(prevState => {
       const stillActual = prevState.isTechMapHoveringTimeline;
       if (!stillActual) {
@@ -190,8 +238,7 @@ class PlanScreen extends React.Component {
       );
 
       return {
-        // actually both must be static, can be optimized
-        techMapPreviewHoverTranslatedRect: stillActual ? effectivRect : null
+        techMapPreviewHoverTranslatedRect: effectivRect
       };
     });
   }
@@ -210,6 +257,8 @@ class PlanScreen extends React.Component {
           onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
           scrollTop={this.state.scrollTop}
           minsToPixels={this.minsToPixels}
+          columnAttached={this.columnAttached}
+          columnDetached={this.columnDetached}
           height={500}
           width={800}
           durationScalingFator={100}
@@ -221,7 +270,7 @@ class PlanScreen extends React.Component {
           ref={this.timelineRef}
         />
         <div className="PlanScreenSideContainer">
-          <PlanTechMapsMenu techMaps={this.props.techMaps}/>
+          <PlanTechMapsMenu techMaps={this.props.techMaps} />
           <PlanStaffMenu />
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
