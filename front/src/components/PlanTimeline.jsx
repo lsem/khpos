@@ -1,10 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
+import moment from "moment";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
 import TechMapView from "./TechMap";
 import _ from "lodash";
 import "./PlanTimeline.css";
+import { getJobs } from "../actions/index"
 
 function collect(connect, monitor) {
   return {
@@ -67,9 +69,6 @@ class PlanTimeline extends React.Component {
   constructor(props) {
     super(props);
     this.lastOffset = null;
-    this.state = {
-      jobs: props.plan
-    };
     this.frameNum = 0;
     this.moveTechMap = this.moveTechMap.bind(this);
   }
@@ -84,6 +83,12 @@ class PlanTimeline extends React.Component {
     } else {
       this.props.columnDetached(column)
     }
+  }
+
+  componentDidMount() {
+    const fromDate = moment().startOf('day');
+    const toDate = moment().endOf('day');
+    this.props.loadPlan(fromDate, toDate);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -162,7 +167,7 @@ class PlanTimeline extends React.Component {
     const msToMins = ms => ms / (1000 * 60);
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
-    const jobsByCols = _.groupBy(this.state.jobs, job => job.column);
+    const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
     return _.keys(jobsByCols).map(column => {
       const columnTechMaps = jobsByCols[column].map((job, rowIndex) => (
         <TechMapView
@@ -231,9 +236,17 @@ class PlanTimeline extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    plan: state.plan
+    beginTime: state.plan.fromDate,
+    endTime: state.plan.toDate,
+    jobs: state.plan.jobs
   };
 };
+
+const mapDispatchToProps = dispatch => {
+  return {
+    loadPlan: (fromDate, toDate) => dispatch(getJobs(fromDate, toDate))
+  }
+}
 
 export default _.flow(
   DropTarget(
@@ -241,5 +254,5 @@ export default _.flow(
     SchedulerTimelineDndSpec,
     collect
   ),
-  connect(mapStateToProps)
+  connect(mapStateToProps, mapDispatchToProps)
 )(PlanTimeline);

@@ -1,4 +1,5 @@
 const express = require("express");
+const moment = require("moment");
 var cors = require("cors");
 var morgan = require("morgan");
 var debug = require("debug")("khweb");
@@ -29,9 +30,9 @@ function asDate(value) {
 }
 
 function tryParseTimeStamp(value) {
-  let iso8601ts = new Date(value);
-  if (!isNaN(iso8601ts.getTime())) {
-    debug("parsed as iso8601: " + value);
+  let iso8601ts = moment(value);
+  if (moment(iso8601ts).isValid(iso8601ts)) {
+    debug("parsed as iso8601: " + iso8601ts);
     return iso8601ts;
   } else {
     let unixts = new Date(parseInt(value));

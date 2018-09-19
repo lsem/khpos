@@ -264,8 +264,6 @@ class PlanScreen extends React.Component {
           durationScalingFator={100}
           jobWidth={100}
           horizontalPadding={15}
-          beginTime={Date.parse("01 Jan 1970 00:00:00 GMT")}
-          endTime={Date.parse("02 Jan 1970 00:00:00 GMT")}
           left={0}
           ref={this.timelineRef}
         />

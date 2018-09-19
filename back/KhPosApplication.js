@@ -50,7 +50,7 @@ class KhPosApplication {
     return plan.one === 1;
   }
   async getPlan(fromDate, toDate) {
-    const plan = { "one": 10, "two": 2 };
+    /*const plan = { "one": 10, "two": 2 };
     return new Promise((resolve, reject) => {
       resolve({
         "from": fromDate,
@@ -59,8 +59,8 @@ class KhPosApplication {
         "data": {
         }
       });
-    });
-    return await this.storage.getPlan();
+    });*/
+    return await this.storage.getPlan(fromDate, toDate);
   }
 
   async setPlan(fromDate, toDate, plan) {

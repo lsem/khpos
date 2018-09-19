@@ -1,6 +1,7 @@
 const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
 let debug = require("debug")("khstorage");
+const sampleData = require("./sampleData");
 
 const STATE_CONNECTED = "state-connected";
 const STATE_DISCONNECTED = "state-disconnected";
@@ -32,11 +33,12 @@ class KhStorage {
     });
   }
 
-  async getPlan() {
-    return await this.db
+  async getPlan(dateFrom, dateTo) {
+    /*return await this.db
       .collection("plan")
       .find({}, { fields: { _id: 0 } })
-      .toArray();
+      .toArray();*/
+    return sampleData.getPlan(dateFrom, dateTo)
   }
 
   _initiateConnect() {
