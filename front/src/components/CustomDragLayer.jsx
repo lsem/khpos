@@ -32,6 +32,7 @@ function collect(monitor, props) {
         const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
         for (let i = targetIds.length - 1; i >= 0; i--) {
           if (monitor.isOverTarget(targetIds[i])) {
+            console.log('CAN DROP!')
             return monitor.canDropOnTarget(targetIds[i]);
           }
         }
@@ -42,22 +43,21 @@ function collect(monitor, props) {
   };
 }
 
-function getItemTransform(props) {
-  const { currentOffset } = props;
-  if (!currentOffset) {
+function getItemTransform(offset) {
+  if (!offset) {
+    console.warn('getItemTransform: No offset')
     return {
       display: "none"
     };
   }
-  const { x, y } = currentOffset;
-  //const transform = `translate(${x}px, ${y}px) rotate(0deg)`;
-
+  // todo: get back using transform instead of left, top
+  //const transform = `translate(${offset.x}px, ${offset.y}px) rotate(0deg)`
   return {
     zIndex: 100,
     position: "fixed",
     pointerEvents: "none",
-    left: x,
-    top: y
+    left: offset.x,
+    top: offset.y
     //transform: transform,
     //WebkitTransform: transform
   };
@@ -93,18 +93,26 @@ class CustomDragLayer extends React.PureComponent {
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.isDragging && nextProps.isDragging) {
-      this.props.onTechMapPreviewStartedDragging();
+      this.props.onTechMapPreviewStartedDragging(
+        nextProps.item,
+        nextProps.itemType
+      );
     } else if (this.props.isDragging && !nextProps.isDragging) {
       this.props.onTechMapPreviewFinishedDragging();
     }
   }
 
   renderMaterializedTechMap(techMap) {
+    console.log('RENDERING TECHMAP: ', techMap);
     // Manually specify dimensions related style attributes
     // to be the same as in chld TechMapView to be able request
     // this properties later by DOM element reference.
     const techMapViewWidth = 100; // TODO: get from model via props
-    const layerStyle = getItemTransform(this.props);
+    const effectiveOffset = this.props.currentOffset;
+    if (effectiveOffset && this.props.draggedTechMapHorizontalLock) {
+      effectiveOffset.x = this.props.draggedTechMapHorizontalLock;
+    }
+    const layerStyle = getItemTransform(effectiveOffset);
     layerStyle.height = TechMapView.calcHeight(
       techMap,
       this.props.minsToPixels
@@ -125,12 +133,13 @@ class CustomDragLayer extends React.PureComponent {
           key={"Drag layer"}
           minsToPixels={this.props.minsToPixels}
           tasks={techMap.tasks}
+          innerRef={node => void 0} // todo: this can be used instand of taking node from parent native dom node
         />
       </div>
     );
   }
   renderUnmaterializedTechMap(techMap) {
-    const layerStyle = getItemTransform(this.props);
+    const layerStyle = getItemTransform(this.props.currentOffset);
     // todo: this does not work, needs to be removed/fixed.
     layerStyle.height = TechMapView.calcHeight(
       techMap,
@@ -139,11 +148,29 @@ class CustomDragLayer extends React.PureComponent {
     layerStyle.width = 100; // TODO: get from model via props
     // TODO: in general it may not me PlanListItem but some other view representing
     // small item but in drag state.
+    console.log('UNMATERIALIZED TECHMAP: ', techMap)
+    console.log('UNMATERIALIZED STYLE: ', layerStyle)
     return (
       <div className="CustomDragLayer" style={layerStyle}>
         <TimelinePanelListItem itemDisplayName={techMap.name} />
       </div>
     );
+  }
+
+  getTechMapSpec(item, itemType) {
+    if (itemType === "techmap") {
+      const job = _.find(this.props.jobs, x => x.id === item.jobId);
+      if (job) {
+        return job.techMap;
+      } else {
+        return null;
+      }
+    } else {
+      console.log('item.techMapId: ', item.techMapId)
+      console.log('this.props.techMaps: ', this.props.techMaps)
+      // panel item
+      return _.find(this.props.techMaps, x => x.id === item.techMapId);
+    }
   }
 
   render() {
@@ -156,22 +183,22 @@ class CustomDragLayer extends React.PureComponent {
       return null;
     }
 
-    const techMapSpec = _.find(
-      this.props.techMaps,
-      x => x.id === item.techMapId
-    );
+    const techMapSpec = this.getTechMapSpec(item, itemType);
 
     // TODO: handle not found case
     if (!techMapSpec) {
-      console.error('Failed to find tech map spec')
+      console.error("Failed to find tech map spec");
     }
 
     if (itemType === "techmap") {
       return this.renderMaterializedTechMap(techMapSpec);
     } else if (itemType === "techmap-panel-item") {
+      console.log("!!!");
       if (canDrop) {
+        console.log("!!! (1)");
         return this.renderMaterializedTechMap(techMapSpec);
       } else {
+        console.log("!!! (2)");
         return this.renderUnmaterializedTechMap(techMapSpec);
       }
     } else {

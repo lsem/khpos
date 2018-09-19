@@ -1,3 +1,4 @@
+import "./PlanScreen.css";
 import React from "react";
 import { connect } from "react-redux";
 import PlanTimeline from "./PlanTimeline";
@@ -5,43 +6,48 @@ import PlanDateSpanSelector from "./PlanDateSpanSelector";
 import PlanTechMapsMenu from "./PlanTechMapsMenu";
 import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
-import "./PlanScreen.css";
+import DragAndDropManager from "../DndManager/DragAndDropManager";
 import _ from "lodash";
-import { requestJobs, requestTechMaps, requestStaff } from "../actions/index"
-
-class DragAndDropManager {
-  constructor() {}
-
-  planTimelineAttached(rect, columns) {
-    console.log("planTimelineAttached: ", rect, columns);
-  }
-
-  columnAttached(column, rect) {
-    console.log("columnAttached: ", column, rect);
-  }
-
-  columnDetached(column) {
-    console.log("columnDetached: ", column);
-  }
-
-  hoveringTechMapEntered(id) {
-    console.log("hoveringTechMapEntered: ", id);
-  }
-
-  hoveringTechMapLeft(id) {
-    console.log("hoveringTechMapLeft: ", id);
-  }
-
-  hoveringtechMapChangedPosition(id, rect) {
-    console.log("hoveringtechMapChangedPosition: ", id, rect);
-  }
-}
+import {
+  getJobs,
+  requestJobs,
+  requestTechMaps,
+  requestStaff
+} from "../actions/index";
 
 class PlanScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.dndManager = new DragAndDropManager();
     this.minsToPixels = this.minsToPixels.bind(this);
+    this.pixelsToMins = this.pixelsToMins.bind(this);
+    this.setUpDnd();
+    this.setUpUI();
+  }
+
+  setUpDnd() {
+    this.dropTechMapAction = this.dropTechMapAction.bind(this);
+    this.draggedRectChangedAction = this.draggedRectChangedAction.bind(this);
+    this.draggingStartedAction = this.draggingStartedAction.bind(this);
+    this.draggingFinishedAction = this.draggingFinishedAction.bind(this);
+    this.techMapNeedsSpaceAction = this.techMapNeedsSpaceAction.bind(this);
+    this.cancelLastSpaceAllocAction = this.cancelLastSpaceAllocAction.bind(
+      this
+    );
+    this.overrideTechMapOffset = this.overrideTechMapOffset.bind(this);
+    this.lockDraggedTechMapHorizontalMove = this.lockDraggedTechMapHorizontalMove.bind(this);
+    this.dndManager = new DragAndDropManager({
+      dropTechMapAction: this.dropTechMapAction,
+      draggedRectChangedAction: this.draggedRectChangedAction,
+      draggingStartedAction: this.draggingStartedAction,
+      draggingFinishedAction: this.draggingFinishedAction,
+      techMapNeedsSpaceAction: this.techMapNeedsSpaceAction,
+      cancelLastSpaceAllocAction: this.cancelLastSpaceAllocAction,
+      overrideTechMapOffset: this.overrideTechMapOffset,
+      lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove
+    });
+  }
+
+  setUpUI() {
     this.onTechMapPreviewEnteredTimeline = this.onTechMapPreviewEnteredTimeline.bind(
       this
     );
@@ -65,6 +71,8 @@ class PlanScreen extends React.Component {
     );
     this.columnAttached = this.columnAttached.bind(this);
     this.columnDetached = this.columnDetached.bind(this);
+    this.techMapAttached = this.techMapAttached.bind(this);
+    this.techMapDetached = this.techMapDetached.bind(this);
     this.state = {
       isTechMapOverTimeline: false,
       isTechMapHoveringTimeline: false,
@@ -77,38 +85,98 @@ class PlanScreen extends React.Component {
     };
   }
 
+  //////////////////////////////////////////////////////////////
+  dropTechMapAction(techMapId, column, row, offsetInPixels) {
+    // todo: handle minus offset
+    if (offsetInPixels < 0) {
+      console.error("offsetInPixels < 0");
+      return;
+    }
+    console.log(
+      `Drop:\nTechmap: '${techMapId}'\nOffset: ${offsetInPixels}\nTime(min): ${this.pixelsToMins(
+        offsetInPixels
+      )}\nColumn: ${column}\nRow: ${row}`
+    );
+  }
+  draggedRectChangedAction(rect) {
+    this.setState({
+      techMapPreviewHoverTranslatedRect: rect,
+      isTechMapHoveringTimeline: true
+    });
+  }
+  draggingStartedAction() {
+    this.setState({
+      isTechMapHoveringTimeline: true
+    });
+  }
+  draggingFinishedAction() {
+    this.setState({
+      isTechMapHoveringTimeline: false
+    });
+  }
+  techMapNeedsSpaceAction(spaceNeededPx) {
+    console.log("techMapNeedsSpaceAction: ", spaceNeededPx);
+  }
+  cancelLastSpaceAllocAction() {
+    console.log("cancelLastSpaceAllocAction: ");
+  }
+  overrideTechMapOffset(offset) {
+    this.setState({
+      offsetOverride: offset
+    });
+  }
+  lockDraggedTechMapHorizontalMove(offsetX) {
+    this.setState({
+      draggedTechMapHorizontalLock: offsetX
+    })
+  }
+
+  //////////////////////////////////////////////////////////////
+
   columnAttached(column, domRect) {
-    // todo: translate properly
-    this.dndManager.columnAttached(column, this.domRectToInternalRect(domRect));
+    this.dndManager.onTimelineColumnAttached(
+      column,
+      this.domRectToInternalRect(domRect)
+    );
   }
 
   columnDetached(column) {
-    this.dndManager.columnDetached(column);
+    this.dndManager.onTimelineColumnDetached(column);
   }
 
-  setScrollLeftTopPositionDebounced = _.debounce(
-    (left, top) =>
-      this.setState({
-        scollLeft: left,
-        scrollTop: top
-      }),
-    30
-  );
+  techMapAttached(techMapId, jobId, domRect, column, rect) {
+    this.dndManager.onTechMapAttached(
+      techMapId,
+      jobId,
+      this.domRectToInternalRect(domRect),
+      column,
+      rect
+    );
+  }
+
+  techMapDetached(techMapId) {
+    this.dndManager.onTechMapDetached(techMapId);
+  }
+
+  setScrollLeftTopPositionDebounced = _.debounce((left, top) => {
+    // Todo: got rid of this.
+    this.setState({
+      scrollTop: top,
+      scrollLeft: left
+    });
+    this.dndManager.onTimelineScroll(left, top);
+  }, 30);
 
   onSchedulerTimelineDomNodeRefUpdate(ref) {
     if (ref) {
-      this.dndManager.planTimelineAttached(
+      this.dndManager.onTimelineAttached(
         this.domRectToInternalRect(ref.getBoundingClientRect())
       );
-      this.setState({
-        PlanTimelineRect: this.domRectToInternalRect(
-          ref.getBoundingClientRect()
-        )
-      });
       ref.addEventListener("scroll", e => {
         this.setScrollLeftTopPositionDebounced(ref.scrollLeft, ref.scrollTop);
       });
     } else {
+      this.dndManager.onTimelineDetached();
       // console.warn('onSchedulerTimelineDomNodeRefUpdate: dom detached');
     }
   }
@@ -117,44 +185,24 @@ class PlanScreen extends React.Component {
     return this.props.pixelsPerMinute * mins;
   }
 
-  onTechMapPreviewStartedDragging() {
-    console.log("DEBUG: onTechMapPreviewStartedDragging");
+  pixelsToMins(pixels) {
+    return pixels / this.props.pixelsPerMinute;
+  }
+
+  onTechMapPreviewStartedDragging(item, itemType) {
+    this.dndManager.onDraggedTechMapStartedDragging(item, itemType);
   }
 
   onTechMapPreviewFinishedDragging() {
-    console.log("DEBUG: onTechMapPreviewFinishedDragging");
-    this.setState({
-      isTechMapOverTimeline: false,
-      isTechMapHoveringTimeline: false
-    });
+    this.dndManager.onDraggedTechMapFinishedDragging();
   }
 
   onTechMapPreviewEnteredTimeline(item, initialOffset) {
-    // initialOffset indicated an offset between cusrsor position and top left corner
-    // of drag layer DOM rect at the moment of entering.
-    console.log("DEBUG: onTechMapPreviewEnteredTimeline", item);
-    this.dndManager.hoveringTechMapEntered(item);
-
-    this.setState(prevState => {
-      const haveRectAndInTimeline =
-        prevState.techMapPreviewHoverRect !== null &&
-        /*prevState.isTechMapHoveringTimeline*/
-        true;
-      console.log("DEBUG: haveRectAndInTimeline: ", haveRectAndInTimeline);
-      return {
-        isTechMapOverTimeline: true,
-        isTechMapHoveringTimeline: haveRectAndInTimeline,
-        initialOffset: initialOffset
-      };
-    });
+    this.dndManager.onDraggedTechMapEntered(item.techMapId, initialOffset);
   }
 
   onTechMapPreviewLeftTimeline() {
-    console.log("DEBUG: onTechMapPreviewLeftTimeline!");
-    this.setState({
-      isTechMapOverTimeline: false,
-      isTechMapHoveringTimeline: false
-    });
+    this.dndManager.onDraggedTechMapLeft();
   }
 
   domRectToInternalRect(domRect) {
@@ -162,39 +210,19 @@ class PlanScreen extends React.Component {
       top: domRect.top,
       left: domRect.left,
       width: domRect.width,
-      height: domRect.height
+      height: domRect.height,
+      bottom: domRect.top + domRect.height,
+      right: domRect.left + domRect.width
     };
   }
 
   onTechMapPreviewDomNodeRefUpdate(ref) {
     if (ref) {
-      this.setState(prevState => {
-        // update state only when we have rect and prev state was isTechMapOverTimeline
-        console.log(
-          "isTechMapHoveringTimeline: pevState.isTechMapOverTimeline: ",
-          prevState.isTechMapOverTimeline
-        );
-        // Reduce state
-        const haveRectAndInTimeline =
-          /*techMapPreviewHoverRect !== null*/
-          true && prevState.isTechMapHoveringTimeline;
-        console.log("haveRectAndInTimeline: ", haveRectAndInTimeline);
-        const internalRect = this.domRectToInternalRect(
-          ref.getBoundingClientRect()
-        );
-        return {
-          techMapPreviewHoverRect: internalRect,
-          techMapPreviewHoverTranslatedRect: internalRect,
-          isTechMapHoveringTimeline: haveRectAndInTimeline
-        };
-      });
+      this.dndManager.onDraggedTechMapGotRect(
+        this.domRectToInternalRect(ref.getBoundingClientRect())
+      );
     } else {
-      console.log("DEBUG: onTechMapPreviewDomNodeRefUpdate: dom detached");
-      this.setState({
-        techMapPreviewHoverRect: null,
-        techMapPreviewHoverTranslatedRect: null,
-        isTechMapHoveringTimeline: false
-      });
+      this.dndManager.onDraggedTechMapLostRect();
     }
   }
 
@@ -212,52 +240,26 @@ class PlanScreen extends React.Component {
     // To handle drop we should know geometry of columns.
     // Or alternatively, we can get timeline decide and once drop position
     // is detected to either make action or ask PlanScreen via callback.
-    this.setState(prevState => {
-      const stillActual = prevState.isTechMapHoveringTimeline;
-      if (!stillActual) {
-        // todo: this is known to occur for example in following scenario:
-        // Reproducible with trhrotteling this event at rate 1000 / 30
-        // in combination with throtelling.
-        //   onTechMapPreviewEnteredTimeline
-        //   haveRectAndInTimeline:  true
-        //   onTechMapPreviewDomNodeRefUpdate: dom detached
-        //   onTechMapPreviewLeftTimeline!
-        //   onTechMapPreviewFinishedDragging
-        //   <this> "not actual any more"
-        // Then techMapPreviewHoverRect is null and cannot be used
-        console.warn("DEBUG: not actual any more");
-        return {};
-      }
-
-      let effectivRect = this.translateRectToOtherRect(
-        {
-          left: offset.x - this.state.initialOffset.x,
-          top: offset.y - this.state.initialOffset.y + this.state.scrollTop,
-          width: this.state.techMapPreviewHoverRect.width,
-          height: this.state.techMapPreviewHoverRect.height
-        },
-        prevState.PlanTimelineRect
-      );
-
-      return {
-        techMapPreviewHoverTranslatedRect: effectivRect
-      };
-    });
+    this.dndManager.onDraggedTechMapPositionChanged(
+      offset,
+      diffOffset,
+      initialOffset
+    );
   }
 
   setPlanDateSpan = (fromDate, toDate) => {
     this.props.loadPlan(fromDate, toDate);
-  }
+  };
 
   render() {
     return (
-      
       <div className="PlanScreen">
         <div className="leftContainer">
           <PlanDateSpanSelector
             setPlanDateSpan={this.setPlanDateSpan}
             beginTime={this.props.timelineBeginTime}
-            endTime={this.props.timelineEndTime}/>
+            endTime={this.props.timelineEndTime}
+          />
 
           <div className="timelineScroll">
             <PlanTimeline
@@ -270,6 +272,9 @@ class PlanScreen extends React.Component {
               onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
               onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
               scrollTop={this.state.scrollTop}
+              scrollLeft={this.state.scrollLeft}
+              techMapAttached={this.techMapAttached}
+              techMapDetached={this.techMapDetached}
               minsToPixels={this.minsToPixels}
               columnAttached={this.columnAttached}
               columnDetached={this.columnDetached}
@@ -293,6 +298,7 @@ class PlanScreen extends React.Component {
           Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
           techMaps={this.props.techMaps}
+          jobs={this.props.jobs}
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={
@@ -301,6 +307,8 @@ class PlanScreen extends React.Component {
           onTechMapPreviewDomNodeRefUpdate={
             this.onTechMapPreviewDomNodeRefUpdate
           }
+          offsetOverride={this.state.offsetOverride}
+          draggedTechMapHorizontalLock={this.state.draggedTechMapHorizontalLock}
         />
       </div>
     );
@@ -322,7 +330,10 @@ const mapDispatchToProps = dispatch => {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestStaff: () => dispatch(requestStaff())
-  }
-}
+  };
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(PlanScreen);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PlanScreen);

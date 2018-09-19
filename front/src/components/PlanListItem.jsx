@@ -37,6 +37,7 @@ export default DragSource(
   // source:
   {
     beginDrag(props, monitor, component) {
+      console.log('DRAG STARTED!')
       return {
         techMapId: props.techMapId
       };
