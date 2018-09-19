@@ -42,22 +42,20 @@ function collect(monitor, props) {
   };
 }
 
-function getItemTransform(props) {
-  const { currentOffset } = props;
-  if (!currentOffset) {
+function getItemTransform(offset) {
+  if (!offset) {
     return {
       display: "none"
     };
   }
-  const { x, y } = currentOffset;
-  //const transform = `translate(${x}px, ${y}px) rotate(0deg)`;
-
+  // todo: get back using transform instead of left, top
+  //const transform = `translate(${offset.x}px, ${offset.y}px) rotate(0deg)`
   return {
     zIndex: 100,
     position: "fixed",
     pointerEvents: "none",
-    left: x,
-    top: y
+    left: offset.x,
+    top: offset.y
     //transform: transform,
     //WebkitTransform: transform
   };
@@ -93,7 +91,10 @@ class CustomDragLayer extends React.PureComponent {
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.isDragging && nextProps.isDragging) {
-      this.props.onTechMapPreviewStartedDragging();
+      this.props.onTechMapPreviewStartedDragging(
+        nextProps.item,
+        nextProps.itemType
+      );
     } else if (this.props.isDragging && !nextProps.isDragging) {
       this.props.onTechMapPreviewFinishedDragging();
     }
@@ -104,7 +105,11 @@ class CustomDragLayer extends React.PureComponent {
     // to be the same as in chld TechMapView to be able request
     // this properties later by DOM element reference.
     const techMapViewWidth = 100; // TODO: get from model via props
-    const layerStyle = getItemTransform(this.props);
+    const effectiveOffset = this.props.currentOffset;
+    if (effectiveOffset && this.props.draggedTechMapHorizontalLock) {
+      effectiveOffset.x = this.props.draggedTechMapHorizontalLock;
+    }
+    const layerStyle = getItemTransform(effectiveOffset);
     layerStyle.height = TechMapView.calcHeight(
       techMap,
       this.props.minsToPixels
@@ -125,6 +130,7 @@ class CustomDragLayer extends React.PureComponent {
           key={"Drag layer"}
           minsToPixels={this.props.minsToPixels}
           tasks={techMap.tasks}
+          innerRef={node => void 0} // todo: this can be used instand of taking node from parent native dom node
         />
       </div>
     );
@@ -163,7 +169,7 @@ class CustomDragLayer extends React.PureComponent {
 
     // TODO: handle not found case
     if (!techMapSpec) {
-      console.error('Failed to find tech map spec')
+      console.error("Failed to find tech map spec");
     }
 
     if (itemType === "techmap") {

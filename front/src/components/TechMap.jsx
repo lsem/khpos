@@ -11,6 +11,7 @@ const techMapViewSource = {
   beginDrag(props, monitor, component) {
     return {
       techMapId: props.techMapId,
+      jobId: props.jobId,
       colIndex: props.colIndex, // index of source component
       rowIndex: props.rowIndex // index of source component
     }
@@ -21,7 +22,8 @@ function collect(connect, monitor) {
   return {
     connectDragSource: connect.dragSource(),
     isDragging: monitor.isDragging(),
-    connectDragPreview: connect.dragPreview()
+    connectDragPreview: connect.dragPreview(),
+    itemType: monitor.getItemType()
   };
 }
 
@@ -35,9 +37,16 @@ class TechMap extends React.Component {
   constructor(props) {
     super(props);
     this.ref = null;
-    this.setRef = r => (this.ref = r);
+    this.setRef = this.setRef.bind(this)
     //console.log('TechMap: constructor: this.props.moveTechMap:', this.props.moveTechMap);
   }
+
+  setRef(ref) {
+    this.ref = ref;
+    // forward ref up
+    this.props.innerRef(ref)
+  }
+
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
@@ -52,7 +61,7 @@ class TechMap extends React.Component {
       backgroundColor: this.props.isOver ? "red" : this.props.tintColor,
       left: this.props.left,
       top: this.props.top,
-      opacity: isDragging ? 0.3 : 1,
+      opacity: isDragging ? 0.2 : 1,
       display: this.props.hidden ? "none" : "block"
     };
 
@@ -91,8 +100,8 @@ const techMapDropTargetSpec = {
     const dragRowIndex = monitor.getItem().rowIndex;
     const hoverRowIndex = props.rowIndex;
 
-    console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
-    console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
+    // console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
+    // console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
 
     // Don't replace items with themselves
     if (dragColIndex === hoverColIndex && dragRowIndex === hoverRowIndex) {
@@ -106,9 +115,9 @@ const techMapDropTargetSpec = {
       const clientOffset = monitor.getClientOffset();
       const hoverClientY = clientOffset.y - targetRect.top;
       const hoverMiddleY = (targetRect.bottom - targetRect.top) / 2;
-      console.log(
-        "hoverClientY > hoverMiddleY: " + (hoverClientY > hoverMiddleY)
-      );
+      // console.log(
+      //   "hoverClientY > hoverMiddleY: " + (hoverClientY > hoverMiddleY)
+      // );
       // Only perform the move when the mouse has crossed half of the items height
       // When dragging downwards, only move when the cursor is below 50%
       // When dragging upwards, only move when the cursor is above 50%

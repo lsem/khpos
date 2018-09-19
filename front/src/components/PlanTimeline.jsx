@@ -79,7 +79,21 @@ class PlanTimeline extends React.Component {
     if (ref) {
       this.props.columnAttached(column, ref.getBoundingClientRect());
     } else {
-      this.props.columnDetached(column)
+      this.props.columnDetached(column);
+    }
+  }
+
+  techMapDomAttached(techMapId, jobId, column, row, ref) {
+    if (ref) {
+      this.props.techMapAttached(
+        techMapId,
+        jobId,
+        ref.getBoundingClientRect(),
+        column,
+        row
+      );
+    } else {
+      this.props.techMapDetached(techMapId);
     }
   }
 
@@ -123,7 +137,7 @@ class PlanTimeline extends React.Component {
         backgroundColor: "rgba(0, 0, 0, 0.1)",
         width: this.props.width,
         height: 1,
-        left: 0,
+        left: this.props.scrollLeft,
         top: top
       };
     };
@@ -167,6 +181,7 @@ class PlanTimeline extends React.Component {
           // because it will be inconsistent at some moment with currently
           // available tech maps registry
           techMapId={job.techMap.id}
+          jobId={job.id}
           title={job.techMap.name}
           tintColor={job.techMap.tintColor}
           minsToPixels={this.props.minsToPixels}
@@ -179,12 +194,21 @@ class PlanTimeline extends React.Component {
           colIndex={column}
           rowIndex={rowIndex}
           tasks={job.techMap.tasks}
+          innerRef={this.techMapDomAttached.bind(
+            this,
+            job.techMap.id,
+            job.id,
+            column,
+            rowIndex
+          )}
         />
       ));
       const columnStyle = {
         left: column * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
-        height: this.props.minsToPixels(msToMins(this.props.endTime - this.props.beginTime))
+        height: this.props.minsToPixels(
+          msToMins(this.props.endTime - this.props.beginTime)
+        )
       };
       return (
         <div
@@ -221,7 +245,7 @@ class PlanTimeline extends React.Component {
 }
 
 export default DropTarget(
-    ["techmap", "techmap-panel-item"],
-    SchedulerTimelineDndSpec,
-    collect
-  )(PlanTimeline);
+  ["techmap", "techmap-panel-item"],
+  SchedulerTimelineDndSpec,
+  collect
+)(PlanTimeline);

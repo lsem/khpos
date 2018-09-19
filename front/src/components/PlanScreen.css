@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+.XXX {
+  /* display: flex; */
+}
+
 .PlanScreenSideContainer {
   display: flex;
   flex-direction: column;
