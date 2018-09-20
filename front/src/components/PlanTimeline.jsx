@@ -1,12 +1,10 @@
 import React from "react";
-import { connect } from "react-redux";
 import moment from "moment";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
 import TechMapView from "./TechMap";
 import _ from "lodash";
 import "./PlanTimeline.css";
-import { getJobs } from "../actions/index"
 
 function collect(connect, monitor) {
   return {
@@ -234,25 +232,8 @@ class PlanTimeline extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    beginTime: state.plan.fromDate,
-    endTime: state.plan.toDate,
-    jobs: state.plan.jobs
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    loadPlan: (fromDate, toDate) => dispatch(getJobs(fromDate, toDate))
-  }
-}
-
-export default _.flow(
-  DropTarget(
+export default DropTarget(
     ["techmap", "techmap-panel-item"],
     SchedulerTimelineDndSpec,
     collect
-  ),
-  connect(mapStateToProps, mapDispatchToProps)
-)(PlanTimeline);
+  )(PlanTimeline);

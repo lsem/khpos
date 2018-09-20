@@ -6,6 +6,7 @@ import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
 import "./PlanScreen.css";
 import _ from "lodash";
+import { getJobs } from "../actions/index"
 
 class DragAndDropManager {
   constructor() {}
@@ -264,6 +265,10 @@ class PlanScreen extends React.Component {
           durationScalingFator={100}
           jobWidth={100}
           horizontalPadding={15}
+          beginTime={this.props.timelineBeginTime}
+          endTime={this.props.timelineEndTime}
+          loadPlan={this.props.loadPlan}
+          jobs={this.props.jobs}
           left={0}
           ref={this.timelineRef}
         />
@@ -291,8 +296,17 @@ class PlanScreen extends React.Component {
 
 const mapStateToProps = state => {
   return {
+    timelineBeginTime: state.plan.fromDate,
+    timelineEndTime: state.plan.toDate,
+    jobs: state.plan.jobs,
     techMaps: state.techMaps
   };
 };
 
-export default connect(mapStateToProps)(PlanScreen);
+const mapDispatchToProps = dispatch => {
+  return {
+    loadPlan: (fromDate, toDate) => dispatch(getJobs(fromDate, toDate))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PlanScreen);
