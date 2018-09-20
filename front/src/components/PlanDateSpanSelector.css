@@ -1,0 +1,13 @@
+.planDateSpanSelectorContainer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.planDateSpanSelectorContainer > * {
+  display: inline-block;
+  line-height: 30px;
+  margin: 10px 0;
+  padding: 0 5px;
+  cursor: pointer;
+  color: rgb(58, 149, 254);
+}

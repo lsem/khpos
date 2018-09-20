@@ -6,6 +6,8 @@ import axios from "axios";
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
 import TimelineScreen from './components/PlanScreen';
+import moment from "moment";
+import 'moment/locale/uk';
 
 function ProductListItem(props) {
   return (
@@ -110,6 +112,12 @@ class StockList extends Component {
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    
+    moment.locale("uk");
+  }
+
   render() {
     return (
       <div className="App">

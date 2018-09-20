@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PlanTimeline from "./PlanTimeline";
+import PlanDateSpanSelector from "./PlanDateSpanSelector";
 import PlanTechMapsMenu from "./PlanTechMapsMenu";
 import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
@@ -244,34 +245,45 @@ class PlanScreen extends React.Component {
     });
   }
 
+  setPlanDateSpan = (fromDate, toDate) => {
+    this.props.loadPlan(fromDate, toDate);
+  }
+
   render() {
     return (
+      
       <div className="PlanScreen">
-        <PlanTimeline
-          onSchedulerTimelineDomNodeRefUpdate={
-            this.onSchedulerTimelineDomNodeRefUpdate
-          }
-          presentTechMapHover={this.state.isTechMapHoveringTimeline}
-          techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
-          onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
-          onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
-          onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
-          scrollTop={this.state.scrollTop}
-          minsToPixels={this.minsToPixels}
-          columnAttached={this.columnAttached}
-          columnDetached={this.columnDetached}
-          height={500}
-          width={800}
-          durationScalingFator={100}
-          jobWidth={100}
-          horizontalPadding={15}
-          beginTime={this.props.timelineBeginTime}
-          endTime={this.props.timelineEndTime}
-          loadPlan={this.props.loadPlan}
-          jobs={this.props.jobs}
-          left={0}
-          ref={this.timelineRef}
-        />
+        <div>
+          <PlanDateSpanSelector
+            setPlanDateSpan={this.setPlanDateSpan}
+            beginTime={this.props.timelineBeginTime}
+            endTime={this.props.timelineEndTime}/>
+
+          <PlanTimeline
+            onSchedulerTimelineDomNodeRefUpdate={
+              this.onSchedulerTimelineDomNodeRefUpdate
+            }
+            presentTechMapHover={this.state.isTechMapHoveringTimeline}
+            techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
+            onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
+            onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
+            onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
+            scrollTop={this.state.scrollTop}
+            minsToPixels={this.minsToPixels}
+            columnAttached={this.columnAttached}
+            columnDetached={this.columnDetached}
+            height={500}
+            width={800}
+            durationScalingFator={100}
+            jobWidth={100}
+            horizontalPadding={15}
+            beginTime={this.props.timelineBeginTime}
+            endTime={this.props.timelineEndTime}
+            jobs={this.props.jobs}
+            left={0}
+            ref={this.timelineRef}
+          />
+        </div>
         <div className="PlanScreenSideContainer">
           <PlanTechMapsMenu techMaps={this.props.techMaps} />
           <PlanStaffMenu />

@@ -83,12 +83,6 @@ class PlanTimeline extends React.Component {
     }
   }
 
-  componentDidMount() {
-    const fromDate = moment().startOf('day');
-    const toDate = moment().endOf('day');
-    this.props.loadPlan(fromDate, toDate);
-  }
-
   componentWillReceiveProps(nextProps) {
     // TODO: Find other place to do this logic.
     //  Changing state in this method is not recommended,
