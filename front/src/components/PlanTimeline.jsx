@@ -192,7 +192,7 @@ class PlanTimeline extends React.Component {
       const columnStyle = {
         left: column * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
-        height: this.props.minsToPixels(msToMins(this.props.endTime))
+        height: this.props.minsToPixels(msToMins(this.props.endTime - this.props.beginTime))
       };
       return (
         <div
