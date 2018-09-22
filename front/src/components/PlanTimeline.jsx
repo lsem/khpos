@@ -203,8 +203,7 @@ class PlanTimeline extends React.Component {
     // console.log("PlanTimeline: frame: ", this.frameNum++);
     const style = {
       left: this.props.left,
-      height: this.props.height,
-      width: this.props.width
+      height: this.props.height
     };
     let className = classNames({
       PlanTimeline: true,

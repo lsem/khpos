@@ -17,3 +17,7 @@
 .PlanScreen > .PlanTimeline {
   margin-left: 10px;
 }
+
+.leftContainer {
+  width: 800px;
+}
