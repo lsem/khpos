@@ -253,7 +253,7 @@ class PlanScreen extends React.Component {
     return (
       
       <div className="PlanScreen">
-        <div>
+        <div className="leftContainer">
           <PlanDateSpanSelector
             setPlanDateSpan={this.setPlanDateSpan}
             beginTime={this.props.timelineBeginTime}
@@ -273,7 +273,6 @@ class PlanScreen extends React.Component {
             columnAttached={this.columnAttached}
             columnDetached={this.columnDetached}
             height={500}
-            width={800}
             durationScalingFator={100}
             jobWidth={100}
             horizontalPadding={15}
