@@ -4,6 +4,10 @@ import TimelinePanelListItem from "./PlanListItem";
 import PlanListView from "./PlanListView";
 
 export default class PlanTechMapsMenu extends React.Component {
+  componentDidMount() {
+    this.props.requestTechMaps();
+  }
+
   render() {
     const listItems = this.props.techMaps.map((techMap, idx) => (
       <TimelinePanelListItem

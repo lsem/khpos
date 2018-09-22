@@ -7,7 +7,7 @@ import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
 import "./PlanScreen.css";
 import _ from "lodash";
-import { getJobs } from "../actions/index"
+import { requestJobs, requestTechMaps } from "../actions/index"
 
 class DragAndDropManager {
   constructor() {}
@@ -284,7 +284,7 @@ class PlanScreen extends React.Component {
           />
         </div>
         <div className="PlanScreenSideContainer">
-          <PlanTechMapsMenu techMaps={this.props.techMaps} />
+          <PlanTechMapsMenu techMaps={this.props.techMaps} requestTechMaps={this.props.requestTechMaps}/>
           <PlanStaffMenu />
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
@@ -316,7 +316,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    loadPlan: (fromDate, toDate) => dispatch(getJobs(fromDate, toDate))
+    loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
+    requestTechMaps: () => dispatch(requestTechMaps())
   }
 }
 

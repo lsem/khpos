@@ -50,17 +50,14 @@ class KhPosApplication {
     return plan.one === 1;
   }
   async getPlan(fromDate, toDate) {
-    /*const plan = { "one": 10, "two": 2 };
+    const plan = this.storage.getPlan(fromDate, toDate);
     return new Promise((resolve, reject) => {
-      resolve({
-        "from": fromDate,
-        "to": toDate,
-        "isValid": this.validatePlan(plan),
-        "data": {
-        }
-      });
-    });*/
-    return await this.storage.getPlan(fromDate, toDate);
+      if (plan) {
+        resolve(plan);
+      } else {
+        reject("Failed to retreive plan from database");
+      }
+    });
   }
 
   async setPlan(fromDate, toDate, plan) {
@@ -73,6 +70,17 @@ class KhPosApplication {
 
   async updatePlan(fromDate, toDate, partialPlan) {
     throw new appErrors.NotImplementedError('updatePlan');
+  }
+
+  async getTechMaps() {
+    const techMaps = this.storage.getTechMaps();
+    return new Promise((resolve, reject) => {
+      if (techMaps) {
+        resolve(techMaps);
+      } else {
+        reject("Failed to retreive techMaps from database");
+      }
+    });
   }
 }
 

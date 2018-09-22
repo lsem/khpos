@@ -2,7 +2,7 @@
 .PlanTimeline  {
   position: relative;
   /* height: 600px; */
-  overflow: scroll;
+  overflow: auto;
   /* background-color: rgba(100, 100, 100, 0.03); */
 }
 

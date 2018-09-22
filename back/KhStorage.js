@@ -38,7 +38,11 @@ class KhStorage {
       .collection("plan")
       .find({}, { fields: { _id: 0 } })
       .toArray();*/
-    return sampleData.getPlan(dateFrom, dateTo)
+    return await sampleData.getPlan(dateFrom, dateTo);
+  }
+
+  async getTechMaps() {
+    return await sampleData.getTechMaps();
   }
 
   _initiateConnect() {
