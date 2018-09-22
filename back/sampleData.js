@@ -310,4 +310,24 @@ function getTechMaps() {
   ]
 }
 
-module.exports = { getPlan, getTechMaps }
+function getStaff() {
+  return [
+    {
+      id: "1",
+      firstName: "Аня",
+      color: "#5AC8FA"
+    },
+    {
+      id: "2",
+      firstName: "Вітя",
+      color: "#4CD964"
+    },
+    {
+      id: "3",
+      firstName: "Настя",
+      color: "#FFCC00"
+    }
+  ]
+}
+
+module.exports = { getPlan, getTechMaps, getStaff }

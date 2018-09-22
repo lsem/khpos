@@ -45,6 +45,10 @@ class KhStorage {
     return await sampleData.getTechMaps();
   }
 
+  async getStaff() {
+    return await sampleData.getStaff();
+  }
+
   _initiateConnect() {
     debug("_initiateConnect");
     // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/

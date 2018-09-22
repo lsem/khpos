@@ -2,6 +2,10 @@
   margin-bottom: 20px;
 }
 
+.PlanListView > ul {
+  list-style-type: none;
+}
+
 .PlanListView > .PlanListView_ListName {
   margin-bottom: 10px;
   font-family: 'Fira Sans Bold', Arial, Helvetica, sans-serif;

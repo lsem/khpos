@@ -1,14 +1,21 @@
 import React from "react";
-import TimelinePanelListItem from "./PlanListItem";
+import PlanStaffListItem from "./PlanStaffListItem"
 import PlanListView from './PlanListView';
 
 export default class PlanStaffMenu extends React.Component {
+  
+  componentDidMount() {
+    this.props.requestStaff();
+  }
+  
   render() {
     return (
         <PlanListView listName="Працівники">
-          <TimelinePanelListItem itemDisplayName="Аня" />
-          <TimelinePanelListItem itemDisplayName="Вітя" />
-          <TimelinePanelListItem itemDisplayName="Настя" />
+          {
+            this.props.staff.map(worker => (
+              <PlanStaffListItem worker={worker} key={worker.id}/>
+            ))
+          }
         </PlanListView>
     );
   }

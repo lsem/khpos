@@ -82,6 +82,17 @@ class KhPosApplication {
       }
     });
   }
+
+  async getStaff() {
+    const staff = this.storage.getStaff();
+    return new Promise((resolve, reject) => {
+      if (staff) {
+        resolve(staff);
+      } else {
+        reject("Failed to retreive staff from database");
+      }
+    });
+  }
 }
 
 module.exports = KhPosApplication;

@@ -80,6 +80,7 @@ class KhPosWebApplication {
     this.app.post("/plan", this.postPlan.bind(this));
     this.app.patch("/plan", this.patchPlan.bind(this));
     this.app.get("/techmaps", this.getTechMaps.bind(this));
+    this.app.get("/staff", this.getStaff.bind(this));
     // Warning: Error handler must go after everything else.
     this.app.use(errorHandler);
   }
@@ -155,6 +156,16 @@ class KhPosWebApplication {
   getTechMaps(req, res, next) {
     this.khApp
       .getTechMaps()
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // GET /staff
+  //
+  getStaff(req, res, next) {
+    this.khApp
+      .getStaff()
       .then(data => res.send(data))
       .catch(err => next(err));
   }
