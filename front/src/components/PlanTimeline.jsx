@@ -164,6 +164,17 @@ class PlanTimeline extends React.Component {
     );
   }
 
+  getColumnsTechmaps() {
+    const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
+    // generate empty columns for which we have no data yet.
+    const availableColumns = _.map(this.props.jobs, job => job.column);
+    const maxColumn = _.max(availableColumns)
+    for (let i = 0; i < maxColumn; ++i) {
+      jobsByCols[i] = jobsByCols[i] || [];
+    }
+    return jobsByCols;
+  }
+
   renderColumns() {
     // todo: in current design, we have only those columns which
     // have some tasks but in general, we need to create also
@@ -175,7 +186,7 @@ class PlanTimeline extends React.Component {
     // columns count it can render without horizontal scolling (or may be more).
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
-    const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
+    const jobsByCols = this.getColumnsTechmaps()
     return _.keys(jobsByCols).map(column => {
       const columnTechMaps = jobsByCols[column].map((job, rowIndex) => (
         <TechMapView

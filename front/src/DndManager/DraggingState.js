@@ -143,6 +143,11 @@ export default class extends StateBase {
     }
     const column = columnHit[0];
 
+    if (!this.columnTechMaps[column]) {
+      // this column has no techmaps inside
+      console.log(`Column ${column} has no techmaps`)
+      return;
+    }
     const columnTechMaps = Object.values(this.columnTechMaps[column]);
     const foundOverlap = _.find(columnTechMaps, x => {
       return overlap(
