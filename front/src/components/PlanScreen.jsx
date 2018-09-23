@@ -34,7 +34,10 @@ class PlanScreen extends React.Component {
       this
     );
     this.overrideTechMapOffset = this.overrideTechMapOffset.bind(this);
-    this.lockDraggedTechMapHorizontalMove = this.lockDraggedTechMapHorizontalMove.bind(this);
+    this.lockDraggedTechMapHorizontalMove = this.lockDraggedTechMapHorizontalMove.bind(
+      this
+    );
+    this.swapTechMaps = this.swapTechMaps.bind(this);
     this.dndManager = new DragAndDropManager({
       dropTechMapAction: this.dropTechMapAction,
       draggedRectChangedAction: this.draggedRectChangedAction,
@@ -43,7 +46,8 @@ class PlanScreen extends React.Component {
       techMapNeedsSpaceAction: this.techMapNeedsSpaceAction,
       cancelLastSpaceAllocAction: this.cancelLastSpaceAllocAction,
       overrideTechMapOffset: this.overrideTechMapOffset,
-      lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove
+      lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove,
+      swapTechMaps: this.swapTechMaps
     });
   }
 
@@ -87,6 +91,7 @@ class PlanScreen extends React.Component {
 
   //////////////////////////////////////////////////////////////
   dropTechMapAction(techMapId, column, row, offsetInPixels) {
+    console.log(" ----- State Action ------");
     // todo: handle minus offset
     if (offsetInPixels < 0) {
       console.error("offsetInPixels < 0");
@@ -97,6 +102,7 @@ class PlanScreen extends React.Component {
         offsetInPixels
       )}\nColumn: ${column}\nRow: ${row}`
     );
+    console.log(" -----------------------");
   }
   draggedRectChangedAction(rect) {
     this.setState({
@@ -128,7 +134,14 @@ class PlanScreen extends React.Component {
   lockDraggedTechMapHorizontalMove(offsetX) {
     this.setState({
       draggedTechMapHorizontalLock: offsetX
-    })
+    });
+  }
+  swapTechMaps(column, draggedJob, existingJob) {
+    console.log(" ----- State Action ------");
+    console.log(
+      `Swapping ${draggedJob} and ${existingJob} on column ${column}`
+    );
+    console.log(" -----------------------");
   }
 
   //////////////////////////////////////////////////////////////
@@ -267,8 +280,12 @@ class PlanScreen extends React.Component {
                 this.onSchedulerTimelineDomNodeRefUpdate
               }
               presentTechMapHover={this.state.isTechMapHoveringTimeline}
-              techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
-              onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
+              techMapPreviewHoverRect={
+                this.state.techMapPreviewHoverTranslatedRect
+              }
+              onTechMapPreviewEnteredTimeline={
+                this.onTechMapPreviewEnteredTimeline
+              }
               onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
               onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
               scrollTop={this.state.scrollTop}
@@ -290,8 +307,14 @@ class PlanScreen extends React.Component {
           </div>
         </div>
         <div className="PlanScreenSideContainer">
-          <PlanStaffMenu staff={this.props.staff} requestStaff={this.props.requestStaff}/>
-          <PlanTechMapsMenu techMaps={this.props.techMaps} requestTechMaps={this.props.requestTechMaps}/>
+          <PlanStaffMenu
+            staff={this.props.staff}
+            requestStaff={this.props.requestStaff}
+          />
+          <PlanTechMapsMenu
+            techMaps={this.props.techMaps}
+            requestTechMaps={this.props.requestTechMaps}
+          />
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}

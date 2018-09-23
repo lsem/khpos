@@ -168,7 +168,7 @@ class PlanTimeline extends React.Component {
     const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
     // generate empty columns for which we have no data yet.
     const availableColumns = _.map(this.props.jobs, job => job.column);
-    const maxColumn = _.max(availableColumns)
+    const maxColumn = _.max(availableColumns);
     for (let i = 0; i < maxColumn; ++i) {
       jobsByCols[i] = jobsByCols[i] || [];
     }
@@ -186,7 +186,7 @@ class PlanTimeline extends React.Component {
     // columns count it can render without horizontal scolling (or may be more).
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
-    const jobsByCols = this.getColumnsTechmaps()
+    const jobsByCols = this.getColumnsTechmaps();
     return _.keys(jobsByCols).map(column => {
       const columnTechMaps = jobsByCols[column].map((job, rowIndex) => (
         <TechMapView

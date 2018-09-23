@@ -129,44 +129,108 @@ export default class extends StateBase {
     // or dragging existing one.
     if (this.itemType === DragItemTypes.TIMELINE_TECHMAP) {
       // ..
-    } else if (this.itemType === DragItemTypes.SIDEBAR_TECHMAP) {
-      // ..
-    }
-
-    // test for column hit (can be done in window coordinates)
-    const columnHit = _.find(
-      _.map(this.columnRects, (rect, index) => [index, rect]),
-      x => posInRect(cursorPos, x[1])
-    );
-    if (!columnHit) {
-      return;
-    }
-    const column = columnHit[0];
-
-    if (!this.columnTechMaps[column]) {
-      // special case when column has no techmaps inside
-      console.log(`Column ${column} has no techmaps`);
-      this.canDrop = true;
-      this.dropColumn = column;
-      return;
-    }
-
-    const columnTechMaps = Object.values(this.columnTechMaps[column]);
-    const foundOverlap = _.find(columnTechMaps, x => {
-      return overlap(
-        x.rect.top,
-        x.rect.bottom,
-        draggedTechMapRect.top,
-        draggedTechMapRect.bottom
+      // In this time of move the only interaction currently
+      // supported is swap with neighbour techmap
+      const columnHit = _.find(
+        _.map(this.columnRects, (rect, index) => [index, rect]),
+        x => posInRect(cursorPos, x[1])
       );
-    });
-    if (foundOverlap) {
-      console.log("overlap");
-      this.canDrop = false;
-    } else {
-      console.log("do not overalap!");
-      this.canDrop = true;
-      this.dropColumn = column;
+      if (!columnHit) {
+        return;
+      }
+      const column = columnHit[0];
+
+      // Handle trivial case when column is free
+      if (!this.columnTechMaps[column]) {
+        this.canDrop = true;
+        this.dropColumn = column;
+        return;
+      }
+
+      // Identify overlaps
+      const columnTechMaps = Object.values(this.columnTechMaps[column]);
+      const foundOverlap = _.find(columnTechMaps, x => {
+        return (
+          overlap(
+            x.rect.top,
+            x.rect.bottom,
+            draggedTechMapRect.top,
+            draggedTechMapRect.bottom
+          ) && this.item.jobId !== x.jobId
+        );
+      });
+
+      if (!foundOverlap) {
+        // no overlap drop possible
+        this.canDrop = true;
+        this.dropColumn = column;
+        return;
+      }
+
+      // Handling overlap
+      const draggedTechMap = _.find(
+        columnTechMaps,
+        x => x.jobId == this.item.jobId
+      );
+      if (!draggedTechMap) {
+        console.error('No draggedTechMap')
+        return;
+      }
+      const draggredRect = draggedTechMap.rect;
+
+      const middleY = (foundOverlap.rect.bottom + foundOverlap.rect.top) / 2;
+
+      // cut off cases when swap not needed
+      if (draggredRect.top > foundOverlap.rect.top && cursorPos.y > middleY) {
+        return;
+      }
+      if (draggredRect.top < foundOverlap.rect.top && cursorPos.y < middleY) {
+        return;
+      }
+
+      // Handle swaps
+      this.stateActions.swapTechMaps(
+        column,
+        draggedTechMap.jobId,
+        foundOverlap.jobId
+      );
+
+    } else if (this.itemType === DragItemTypes.SIDEBAR_TECHMAP) {
+      // test for column hit (can be done in window coordinates)
+      const columnHit = _.find(
+        _.map(this.columnRects, (rect, index) => [index, rect]),
+        x => posInRect(cursorPos, x[1])
+      );
+      if (!columnHit) {
+        return;
+      }
+      const column = columnHit[0];
+
+      if (!this.columnTechMaps[column]) {
+        // special case when column has no techmaps inside
+        console.log(`Column ${column} has no techmaps`);
+        this.canDrop = true;
+        this.dropColumn = column;
+        return;
+      }
+
+      const columnTechMaps = Object.values(this.columnTechMaps[column]);
+      const foundOverlap = _.find(columnTechMaps, x => {
+        return overlap(
+          x.rect.top,
+          x.rect.bottom,
+          draggedTechMapRect.top,
+          draggedTechMapRect.bottom
+        );
+      });
+      if (foundOverlap) {
+        console.log("overlap");
+        this.canDrop = false;
+      } else {
+        console.log("do not overalap!");
+        this.canDrop = true;
+        this.dropColumn = column;
+      }
     }
   }
 

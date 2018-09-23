@@ -4,7 +4,7 @@ function getPlan(fromDate, toDate) {
   console.log(fromDate);
   return [
     {
-      startTime: moment(fromDate).add(15, "minutes").valueOf(),
+      startTime: moment(fromDate).add(115, "minutes").valueOf(),
       id: "job-1",
       column: 0,
       techMap: {
@@ -15,25 +15,25 @@ function getPlan(fromDate, toDate) {
           {
             id: "1",
             name: "task 1",
-            durationMins: 30,
+            durationMins: 10,
             bgColor: "rgb(216, 216, 216)"
           },
           {
             id: "2",
             name: "task 2",
-            durationMins: 60,
+            durationMins: 20,
             bgColor: "rgb(200, 200, 200)"
           },
           {
             id: "3",
             name: "task 3",
-            durationMins: 60,
+            durationMins: 10,
             bgColor: "rgb(216, 216, 216)"
           },
           {
             id: "4",
             name: "task 4",
-            durationMins: 20,
+            durationMins: 10,
             bgColor: "rgb(255, 149, 0)"
           },
         ]
@@ -51,7 +51,7 @@ function getPlan(fromDate, toDate) {
           {
             id: "1",
             name: "task 1",
-            durationMins: 30,
+            durationMins: 20,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
@@ -64,13 +64,13 @@ function getPlan(fromDate, toDate) {
           {
             id: "2",
             name: "task 2",
-            durationMins: 40,
+            durationMins: 10,
             bgColor: "rgb(200, 200, 200)"
           },
           {
             id: "3",
             name: "task 3",
-            durationMins: 60,
+            durationMins: 20,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
