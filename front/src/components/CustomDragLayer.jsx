@@ -44,7 +44,7 @@ function collect(monitor, props) {
 
 function getItemTransform(offset) {
   if (!offset) {
-    console.warn('getItemTransform: No offset')
+    console.warn("getItemTransform: No offset");
     return {
       display: "none"
     };
@@ -138,12 +138,6 @@ class CustomDragLayer extends React.PureComponent {
   }
   renderUnmaterializedTechMap(techMap) {
     const layerStyle = getItemTransform(this.props.currentOffset);
-    // todo: this does not work, needs to be removed/fixed.
-    layerStyle.height = TechMapView.calcHeight(
-      techMap,
-      this.props.minsToPixels
-    );
-    layerStyle.width = 100; // TODO: get from model via props
     // TODO: in general it may not me PlanListItem but some other view representing
     // small item but in drag state.
     return (

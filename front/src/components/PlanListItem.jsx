@@ -12,7 +12,7 @@ class PlanListItem extends React.Component {
   }
   render() {
     const style = {
-      opacity: this.props.isDragging ? 0.7 : 1 // todo: seems like this not neded, but needs to be checked
+      opacity: this.props.isDragging ? 0.7 : 1
     };
     // TODO: refactor this (consider having identity decorator).
     if (this.props.isDraggableItem) {
@@ -37,7 +37,6 @@ export default DragSource(
   // source:
   {
     beginDrag(props, monitor, component) {
-      console.log('DRAG STARTED!')
       return {
         techMapId: props.techMapId
       };
