@@ -21,7 +21,7 @@ function getPlan(fromDate, toDate) {
           {
             id: "2",
             name: "task 2",
-            durationMins: 40,
+            durationMins: 60,
             bgColor: "rgb(200, 200, 200)"
           },
           {
@@ -40,7 +40,7 @@ function getPlan(fromDate, toDate) {
       }
     },
     {
-      startTime: moment(fromDate).add(3, "hours").valueOf(),
+      startTime: moment(fromDate).add(4, "hours").valueOf(),
       id: "job-2",
       column: 0,
       techMap: {
