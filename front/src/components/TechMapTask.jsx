@@ -3,34 +3,34 @@ import React from "react";
 import "./TechMapTask.css";
 
 function TechMapTask(props) {
-  const { height, task } = props;
-  let assigned = task.assigned;
+  const { height, name, color } = props;
+  let badgeColors = props.badgeColors;
 
-  if (!assigned) {
-    assigned = [];
+  if (!badgeColors) {
+    badgeColors = [];
   }
 
-  const badges = assigned.map(worker => {
+  const badges = badgeColors.map(badgeColor => {
     const badgeStyle = {
-      backgroundColor: worker.color
+      backgroundColor: badgeColor
     };
 
     return (
       <span
         className="techMapTaskBadgeStyle"
         style={badgeStyle}
-        key={worker.id}
+        key={badgeColors.indexOf(badgeColor)}
       />
     );
   });
 
   const taskStyle = {
-    backgroundColor: task.bgColor,
+    backgroundColor: color,
     height: height
   };
 
   return (
-    <div style={taskStyle} title={task.name} className="techMapTask">
+    <div style={taskStyle} title={name} className="techMapTaskView">
       {badges}
     </div>
   );
