@@ -137,7 +137,7 @@ class PlanTimeline extends React.Component {
       return {
         position: "absolute",
         backgroundColor: "rgba(0, 0, 0, 0.1)",
-        width: this.props.width,
+        width: '100%',
         height: 1,
         left: this.props.scrollLeft,
         top: top
@@ -148,7 +148,7 @@ class PlanTimeline extends React.Component {
         position: "absolute",
         backgroundColor: "rgba(0, 0, 0, 0.1)",
         width: 1,
-        height: this.props.height,
+        height: '100%',
         left: left,
         top: this.props.scrollTop
       };
