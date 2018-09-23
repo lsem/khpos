@@ -1,6 +1,6 @@
 import StateBase from "./StateBase";
 import _ from "lodash";
-import DragItemTypes from '../dragItemTypes';
+import DragItemTypes from "../dragItemTypes";
 
 function translateRectToOtherRect(rect, otherRect) {
   return {
@@ -129,7 +129,7 @@ export default class extends StateBase {
     // or dragging existing one.
     if (this.itemType === DragItemTypes.TIMELINE_TECHMAP) {
       // ..
-    } else if (this.itemType ===  DragItemTypes.SIDEBAR_TECHMAP) {
+    } else if (this.itemType === DragItemTypes.SIDEBAR_TECHMAP) {
       // ..
     }
 
@@ -144,10 +144,13 @@ export default class extends StateBase {
     const column = columnHit[0];
 
     if (!this.columnTechMaps[column]) {
-      // this column has no techmaps inside
-      console.log(`Column ${column} has no techmaps`)
+      // special case when column has no techmaps inside
+      console.log(`Column ${column} has no techmaps`);
+      this.canDrop = true;
+      this.dropColumn = column;
       return;
     }
+
     const columnTechMaps = Object.values(this.columnTechMaps[column]);
     const foundOverlap = _.find(columnTechMaps, x => {
       return overlap(
