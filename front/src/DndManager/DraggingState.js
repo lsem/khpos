@@ -1,5 +1,6 @@
 import StateBase from "./StateBase";
 import _ from "lodash";
+import DragItemTypes from '../dragItemTypes';
 
 function translateRectToOtherRect(rect, otherRect) {
   return {
@@ -52,7 +53,7 @@ export default class extends StateBase {
 
   onTechMapAttached(techMapId, jobId, rect, column, row) {
     super.onTechMapAttached(techMapId, jobId, rect, column, row);
-    if (this.itemType !== "techmap") {
+    if (this.itemType !== DragItemTypes.TIMELINE_TECHMAP) {
       // no lock required
       return;
     }
@@ -98,7 +99,6 @@ export default class extends StateBase {
   }
 
   lockDraggedTechMapHorizontalMove() {
-    console.log("lockDraggedTechMapHorizontalMove");
     const draggedViewInitialRect = this.getCurrentElementInitialRect();
     if (!draggedViewInitialRect) {
       console.error(
@@ -116,12 +116,22 @@ export default class extends StateBase {
   }
 
   handleDraggedTechMapMove(cursorPos, draggedTechMapRect) {
+    // Calcualte actual dragged rect cooridnates, it will be used on drop.
     this.draggedTechMapRectInTimeline = this.translateRectToPlanWindowRect(
       draggedTechMapRect
     );
+    // Yield an action about actulal dragged rect in timeline window coordinates
     this.stateActions.draggedRectChangedAction(
       this.draggedTechMapRectInTimeline
     );
+    // Teset what kind of dragging event we have
+    // it might be either dragging new item to timline
+    // or dragging existing one.
+    if (this.itemType === DragItemTypes.TIMELINE_TECHMAP) {
+      // ..
+    } else if (this.itemType ===  DragItemTypes.SIDEBAR_TECHMAP) {
+      // ..
+    }
 
     // test for column hit (can be done in window coordinates)
     const columnHit = _.find(

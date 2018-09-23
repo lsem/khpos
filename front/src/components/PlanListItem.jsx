@@ -2,6 +2,7 @@ import "./PlanListItem.css";
 import React from "react";
 import { DragSource } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
+import DragItemTypes from "../dragItemTypes";
 
 class PlanListItem extends React.Component {
   // Needed for react-dnd
@@ -33,7 +34,7 @@ class PlanListItem extends React.Component {
 
 // Needed for react-dnd
 export default DragSource(
-  "techmap-panel-item",
+  DragItemTypes.SIDEBAR_TECHMAP,
   // source:
   {
     beginDrag(props, monitor, component) {

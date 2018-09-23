@@ -4,7 +4,7 @@ import { DragSource, DropTarget } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
-
+import DragItemTypes from "../dragItemTypes";
 import TechMapTask from "./TechMapTask";
 
 const techMapViewSource = {
@@ -14,7 +14,7 @@ const techMapViewSource = {
       jobId: props.jobId,
       colIndex: props.colIndex, // index of source component
       rowIndex: props.rowIndex // index of source component
-    }
+    };
   }
 };
 
@@ -37,14 +37,14 @@ class TechMap extends React.Component {
   constructor(props) {
     super(props);
     this.ref = null;
-    this.setRef = this.setRef.bind(this)
+    this.setRef = this.setRef.bind(this);
     //console.log('TechMap: constructor: this.props.moveTechMap:', this.props.moveTechMap);
   }
 
   setRef(ref) {
     this.ref = ref;
     // forward ref up
-    this.props.innerRef(ref)
+    this.props.innerRef(ref);
   }
 
   componentDidMount() {
@@ -143,6 +143,10 @@ function techMapDropCollect(connect, monitor) {
   };
 }
 export default _.flow(
-  DragSource("techmap", techMapViewSource, collect),
-  DropTarget("techmap", techMapDropTargetSpec, techMapDropCollect)
+  DragSource(DragItemTypes.TIMELINE_TECHMAP, techMapViewSource, collect),
+  DropTarget(
+    DragItemTypes.TIMELINE_TECHMAP,
+    techMapDropTargetSpec,
+    techMapDropCollect
+  )
 )(TechMap);

@@ -5,6 +5,7 @@ import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMap";
 import TimelinePanelListItem from "./PlanListItem";
 import _ from "lodash";
+import DragItemTypes from "../dragItemTypes";
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
 // http://rafaelquintanilha.com/sortable-targets-with-react-dnd/
@@ -148,15 +149,12 @@ class CustomDragLayer extends React.PureComponent {
   }
 
   getTechMapSpec(item, itemType) {
-    if (itemType === "techmap") {
+    // Timeline techmaps use techmap attached to job
+    if (itemType === DragItemTypes.TIMELINE_TECHMAP) {
       const job = _.find(this.props.jobs, x => x.id === item.jobId);
-      if (job) {
-        return job.techMap;
-      } else {
-        return null;
-      }
-    } else {
-      // panel item
+      return job ? job.techMap : null;
+    } else if (itemType === DragItemTypes.SIDEBAR_TECHMAP) {
+      // While panel items use techmaps from current catalogue
       return _.find(this.props.techMaps, x => x.id === item.techMapId);
     }
   }
@@ -178,17 +176,16 @@ class CustomDragLayer extends React.PureComponent {
       console.error("Failed to find tech map spec");
     }
 
-    if (itemType === "techmap") {
+    if (itemType === DragItemTypes.TIMELINE_TECHMAP) {
       return this.renderMaterializedTechMap(techMapSpec);
-    } else if (itemType === "techmap-panel-item") {
+    } else if (itemType === DragItemTypes.SIDEBAR_TECHMAP) {
       if (canDrop) {
         return this.renderMaterializedTechMap(techMapSpec);
       } else {
         return this.renderUnmaterializedTechMap(techMapSpec);
       }
     } else {
-      // todo: what does it mean? what should be a message
-      console.log("WARNING: unknown item");
+      console.error("unknown item");
     }
   }
 }

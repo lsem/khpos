@@ -5,6 +5,7 @@ import { DropTarget } from "react-dnd";
 import TechMapView from "./TechMap";
 import _ from "lodash";
 import "./PlanTimeline.css";
+import DragItemTypes from "../dragItemTypes";
 
 const msToMins = ms => ms / (1000 * 60);
 
@@ -259,7 +260,7 @@ class PlanTimeline extends React.Component {
 }
 
 export default DropTarget(
-  ["techmap", "techmap-panel-item"],
+  [DragItemTypes.TIMELINE_TECHMAP, DragItemTypes.SIDEBAR_TECHMAP],
   SchedulerTimelineDndSpec,
   collect
 )(PlanTimeline);
