@@ -137,7 +137,7 @@ class PlanTimeline extends React.Component {
       return {
         position: "absolute",
         backgroundColor: "rgba(0, 0, 0, 0.1)",
-        width: '100%',
+        width: "100%",
         height: 1,
         left: this.props.scrollLeft,
         top: top
@@ -148,7 +148,7 @@ class PlanTimeline extends React.Component {
         position: "absolute",
         backgroundColor: "rgba(0, 0, 0, 0.1)",
         width: 1,
-        height: '100%',
+        height: "100%",
         left: left,
         top: this.props.scrollTop
       };
@@ -224,6 +224,11 @@ class PlanTimeline extends React.Component {
     });
   }
 
+  calcPlanWidth() {
+    const maxColumn = _.max(_.map(this.props.jobs, job => job.column));
+    return (maxColumn + 2) * (this.props.jobWidth + 10);
+  }
+
   render() {
     // console.log("PlanTimeline: frame: ", this.frameNum++);
     let className = classNames({
@@ -235,7 +240,8 @@ class PlanTimeline extends React.Component {
     const style = {
       height: this.props.minsToPixels(
         msToMins(this.props.endTime - this.props.beginTime)
-      )
+      ),
+      width: this.calcPlanWidth()
     };
 
     // Note, to connect to react-dnd drop target this must return native element (div)
