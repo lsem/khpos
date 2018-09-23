@@ -23,13 +23,28 @@ ul {
   text-indent: 0;
   list-style-type: 0;
 }
+
+#root, .App {
+  height: 100%;
+}
+
 .AppBody {
-  padding: 20px;
+  position: absolute;
+  top: 100px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
 }
 
 .App-header {
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: #222;
-  height: 60px;
+  height: 100px;
   padding: 20px;
   color: white;
 }

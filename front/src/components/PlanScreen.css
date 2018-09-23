@@ -1,11 +1,14 @@
 .PlanScreen {
+  position: relative;
   display: flex;
+  height: 100%;
 }
 
 .PlanScreenSideContainer {
   display: flex;
   flex-direction: column;
-  margin-left: 20px;
+  margin-left: 25px;
+  margin-top: 25px;
   /* debug: */
   /* background-color: oldlace; */
 }
@@ -19,5 +22,18 @@
 }
 
 .leftContainer {
+  position: relative;
+  border: solid lightgray;
+  border-width: 0 1px 0 0;
+  height: 100%;
   width: 800px;
+}
+
+.timelineScroll {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 5px;
+  bottom: 5px;
+  overflow: scroll;
 }

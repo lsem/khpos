@@ -201,10 +201,6 @@ class PlanTimeline extends React.Component {
 
   render() {
     // console.log("PlanTimeline: frame: ", this.frameNum++);
-    const style = {
-      left: this.props.left,
-      height: this.props.height
-    };
     let className = classNames({
       PlanTimeline: true,
       "PlanTimeline--highlighted": this.props.canDrop,
@@ -215,7 +211,6 @@ class PlanTimeline extends React.Component {
     return this.props.connectDropTarget(
       <div
         className={className}
-        style={style}
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
         {this.renderColumns()}
