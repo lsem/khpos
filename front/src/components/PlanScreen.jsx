@@ -278,7 +278,6 @@ class PlanScreen extends React.Component {
               minsToPixels={this.minsToPixels}
               columnAttached={this.columnAttached}
               columnDetached={this.columnDetached}
-              height={500}
               durationScalingFator={100}
               jobWidth={100}
               horizontalPadding={15}

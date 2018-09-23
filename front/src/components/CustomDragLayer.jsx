@@ -32,7 +32,6 @@ function collect(monitor, props) {
         const targetIds = monitor.isDragging() ? monitor.getTargetIds() : [];
         for (let i = targetIds.length - 1; i >= 0; i--) {
           if (monitor.isOverTarget(targetIds[i])) {
-            console.log('CAN DROP!')
             return monitor.canDropOnTarget(targetIds[i]);
           }
         }
@@ -103,7 +102,6 @@ class CustomDragLayer extends React.PureComponent {
   }
 
   renderMaterializedTechMap(techMap) {
-    console.log('RENDERING TECHMAP: ', techMap);
     // Manually specify dimensions related style attributes
     // to be the same as in chld TechMapView to be able request
     // this properties later by DOM element reference.
@@ -148,8 +146,6 @@ class CustomDragLayer extends React.PureComponent {
     layerStyle.width = 100; // TODO: get from model via props
     // TODO: in general it may not me PlanListItem but some other view representing
     // small item but in drag state.
-    console.log('UNMATERIALIZED TECHMAP: ', techMap)
-    console.log('UNMATERIALIZED STYLE: ', layerStyle)
     return (
       <div className="CustomDragLayer" style={layerStyle}>
         <TimelinePanelListItem itemDisplayName={techMap.name} />
@@ -166,8 +162,6 @@ class CustomDragLayer extends React.PureComponent {
         return null;
       }
     } else {
-      console.log('item.techMapId: ', item.techMapId)
-      console.log('this.props.techMaps: ', this.props.techMaps)
       // panel item
       return _.find(this.props.techMaps, x => x.id === item.techMapId);
     }
@@ -193,12 +187,9 @@ class CustomDragLayer extends React.PureComponent {
     if (itemType === "techmap") {
       return this.renderMaterializedTechMap(techMapSpec);
     } else if (itemType === "techmap-panel-item") {
-      console.log("!!!");
       if (canDrop) {
-        console.log("!!! (1)");
         return this.renderMaterializedTechMap(techMapSpec);
       } else {
-        console.log("!!! (2)");
         return this.renderUnmaterializedTechMap(techMapSpec);
       }
     } else {

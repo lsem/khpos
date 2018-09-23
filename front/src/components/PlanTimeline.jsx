@@ -6,6 +6,8 @@ import TechMapView from "./TechMap";
 import _ from "lodash";
 import "./PlanTimeline.css";
 
+const msToMins = ms => ms / (1000 * 60);
+
 function collect(connect, monitor) {
   return {
     canDrop: monitor.canDrop(),
@@ -170,7 +172,6 @@ class PlanTimeline extends React.Component {
     // columns that fit into this component.
     // We can consider employing logic when this component reports
     // columns count it can render without horizontal scolling (or may be more).
-    const msToMins = ms => ms / (1000 * 60);
     const jobDuration = j => j.startTime - this.props.beginTime;
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
     const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
@@ -231,10 +232,17 @@ class PlanTimeline extends React.Component {
       "PlanTimeline--hovered": this.props.isOver
     });
 
+    const style = {
+      height: this.props.minsToPixels(
+        msToMins(this.props.endTime - this.props.beginTime)
+      )
+    };
+
     // Note, to connect to react-dnd drop target this must return native element (div)
     return this.props.connectDropTarget(
       <div
         className={className}
+        style={style}
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
         {this.renderColumns()}
