@@ -127,7 +127,6 @@ class App extends Component {
         <div className="AppBody">
           {/* <ProductList />
           <StockList /> */}
-          <h1 className="TimelineH1"> Timeline </h1>
           <TimelineScreen pixelsPerMinute={2}/>
         </div>
       </div>

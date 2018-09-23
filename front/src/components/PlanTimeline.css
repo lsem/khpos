@@ -1,9 +1,9 @@
 
 .PlanTimeline  {
-  position: relative;
   /* height: 600px; */
-  overflow: auto;
   /* background-color: rgba(100, 100, 100, 0.03); */
+  position: relative;
+  margin-left: 20px;
 }
 
 .PlanTimelineColumn {

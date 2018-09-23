@@ -259,33 +259,35 @@ class PlanScreen extends React.Component {
             beginTime={this.props.timelineBeginTime}
             endTime={this.props.timelineEndTime}/>
 
-          <PlanTimeline
-            onSchedulerTimelineDomNodeRefUpdate={
-              this.onSchedulerTimelineDomNodeRefUpdate
-            }
-            presentTechMapHover={this.state.isTechMapHoveringTimeline}
-            techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
-            onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
-            onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
-            onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
-            scrollTop={this.state.scrollTop}
-            minsToPixels={this.minsToPixels}
-            columnAttached={this.columnAttached}
-            columnDetached={this.columnDetached}
-            height={500}
-            durationScalingFator={100}
-            jobWidth={100}
-            horizontalPadding={15}
-            beginTime={this.props.timelineBeginTime}
-            endTime={this.props.timelineEndTime}
-            jobs={this.props.jobs}
-            left={0}
-            ref={this.timelineRef}
-          />
+          <div className="timelineScroll">
+            <PlanTimeline
+              onSchedulerTimelineDomNodeRefUpdate={
+                this.onSchedulerTimelineDomNodeRefUpdate
+              }
+              presentTechMapHover={this.state.isTechMapHoveringTimeline}
+              techMapPreviewHoverRect={this.state.techMapPreviewHoverTranslatedRect}
+              onTechMapPreviewEnteredTimeline={this.onTechMapPreviewEnteredTimeline}
+              onTechMapPreviewLeftTimeline={this.onTechMapPreviewLeftTimeline}
+              onTechMapPreviewOffsetChanged={this.onTechMapPreviewOffsetChanged}
+              scrollTop={this.state.scrollTop}
+              minsToPixels={this.minsToPixels}
+              columnAttached={this.columnAttached}
+              columnDetached={this.columnDetached}
+              height={500}
+              durationScalingFator={100}
+              jobWidth={100}
+              horizontalPadding={15}
+              beginTime={this.props.timelineBeginTime}
+              endTime={this.props.timelineEndTime}
+              jobs={this.props.jobs}
+              left={0}
+              ref={this.timelineRef}
+            />
+          </div>
         </div>
         <div className="PlanScreenSideContainer">
-          <PlanTechMapsMenu techMaps={this.props.techMaps} requestTechMaps={this.props.requestTechMaps}/>
           <PlanStaffMenu staff={this.props.staff} requestStaff={this.props.requestStaff}/>
+          <PlanTechMapsMenu techMaps={this.props.techMaps} requestTechMaps={this.props.requestTechMaps}/>
         </div>
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}
