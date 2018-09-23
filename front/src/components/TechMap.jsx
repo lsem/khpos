@@ -64,8 +64,7 @@ class TechMap extends React.Component {
     const tasks = _.map(this.props.tasks, t => (
       <TechMapTask
         height={this.props.minsToPixels(t.durationMins)}
-        color={t.bgColor}
-        name={t.name}
+        task={t}
         key={t.id}
       />
     ));
