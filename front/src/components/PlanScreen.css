@@ -39,5 +39,6 @@
   left: 0;
   right: 5px;
   bottom: 5px;
-  overflow: scroll;
+  overflow: auto;
+  white-space: nowrap;
 }

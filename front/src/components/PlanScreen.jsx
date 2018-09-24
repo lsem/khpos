@@ -2,6 +2,7 @@ import "./PlanScreen.css";
 import React from "react";
 import { connect } from "react-redux";
 import PlanTimeline from "./PlanTimeline";
+import AssignmentsTimeline from "./AssignmentsTimeline";
 import PlanDateSpanSelector from "./PlanDateSpanSelector";
 import PlanTechMapsMenu from "./PlanTechMapsMenu";
 import PlanStaffMenu from "./PlanStaffMenu";
@@ -202,6 +203,10 @@ class PlanScreen extends React.Component {
     return pixels / this.props.pixelsPerMinute;
   }
 
+  msToPixels = (miliseconds) => {
+    return this.minsToPixels(miliseconds / 1000 / 60);
+  }
+
   onTechMapPreviewStartedDragging(item, itemType) {
     this.dndManager.onDraggedTechMapStartedDragging(item, itemType);
   }
@@ -273,8 +278,14 @@ class PlanScreen extends React.Component {
             beginTime={this.props.timelineBeginTime}
             endTime={this.props.timelineEndTime}
           />
-
           <div className="timelineScroll">
+            <AssignmentsTimeline
+              jobs={this.props.jobs}
+              columnWidth={10}
+              msToPixels={this.msToPixels}
+              beginTime={this.props.timelineBeginTime}
+              endTime={this.props.timelineEndTime}
+              />
             <PlanTimeline
               onSchedulerTimelineDomNodeRefUpdate={
                 this.onSchedulerTimelineDomNodeRefUpdate

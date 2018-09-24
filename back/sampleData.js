@@ -119,7 +119,14 @@ function getPlan(fromDate, toDate) {
             id: "3",
             name: "task 3",
             durationMins: 30,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: [
+              {
+                id: "3",
+                firstName: "Настя",
+                color: "#FFCC00"
+              }
+            ]
           },
           {
             id: "4",
@@ -143,7 +150,14 @@ function getPlan(fromDate, toDate) {
             id: "1",
             name: "task 1",
             durationMins: 30,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: [
+              {
+                id: "3",
+                firstName: "Настя",
+                color: "#FFCC00"
+              }
+            ]
           },
           {
             id: "2",

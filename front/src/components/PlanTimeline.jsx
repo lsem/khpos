@@ -217,7 +217,6 @@ class PlanTimeline extends React.Component {
         />
       ));
       const columnStyle = {
-        left: column * (this.props.jobWidth + 10),
         width: this.props.jobWidth,
         height: this.props.minsToPixels(
           msToMins(this.props.endTime - this.props.beginTime)
@@ -249,18 +248,11 @@ class PlanTimeline extends React.Component {
       "PlanTimeline--hovered": this.props.isOver
     });
 
-    const style = {
-      height: this.props.minsToPixels(
-        msToMins(this.props.endTime - this.props.beginTime)
-      ),
-      width: this.calcPlanWidth()
-    };
-
     // Note, to connect to react-dnd drop target this must return native element (div)
     return this.props.connectDropTarget(
       <div
         className={className}
-        style={style}
+        
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
         {this.renderColumns()}
