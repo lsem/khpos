@@ -176,6 +176,7 @@ export default class extends StateBase {
         console.error('No draggedTechMap')
         return;
       }
+
       const draggredRect = draggedTechMap.rect;
 
       const middleY = (foundOverlap.rect.bottom + foundOverlap.rect.top) / 2;
