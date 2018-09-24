@@ -1,0 +1,16 @@
+.assignmentsTimeline {
+  position: relative;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.assignmentsTimelineColumn {
+  position: relative;
+  display: inline-block;
+}
+
+.assignmentsTimeSpan {
+  box-sizing: border-box;
+  border: 1px solid #00000022;
+  position: absolute;
+}

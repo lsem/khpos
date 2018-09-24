@@ -1,13 +1,14 @@
 
 .PlanTimeline  {
-  /* height: 600px; */
-  /* background-color: rgba(100, 100, 100, 0.03); */
   position: relative;
-  margin-left: 20px;
+  display: inline-block;
 }
 
 .PlanTimelineColumn {
-  position: absolute;
+  position: relative;
+  display: inline-block;
+  margin-left: 10px;
+  box-sizing: border-box;
 }
 
 .PlanTimelineColumn_spacing {
