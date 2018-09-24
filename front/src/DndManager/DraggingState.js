@@ -49,6 +49,8 @@ export default class extends StateBase {
     this.canDrop = false;
     this.dropColumn = null;
     this.prevColumnRects = null;
+    this.movedJob = null;
+    this.moveSwapDragging = true;
   }
 
   onTechMapAttached(techMapId, jobId, rect, column, row) {
@@ -115,6 +117,17 @@ export default class extends StateBase {
     this.stateActions.lockDraggedTechMapHorizontalMove(null);
   }
 
+  findColumnUnderPos(pos) {
+    const columnHit = _.find(
+      _.map(this.columnRects, (rect, index) => [index, rect]),
+      x => posInRect(pos, x[1])
+    );
+    if (!columnHit) {
+      return null;
+    }
+    const column = columnHit[0];
+  }
+
   handleDraggedTechMapMove(cursorPos, draggedTechMapRect) {
     // Calcualte actual dragged rect cooridnates, it will be used on drop.
     this.draggedTechMapRectInTimeline = this.translateRectToPlanWindowRect(
@@ -128,24 +141,9 @@ export default class extends StateBase {
     // it might be either dragging new item to timline
     // or dragging existing one.
     if (this.itemType === DragItemTypes.TIMELINE_TECHMAP) {
-      // ..
-      // In this time of move the only interaction currently
-      // supported is swap with neighbour techmap
-      const columnHit = _.find(
-        _.map(this.columnRects, (rect, index) => [index, rect]),
-        x => posInRect(cursorPos, x[1])
-      );
-      if (!columnHit) {
-        return;
-      }
-      const column = columnHit[0];
+      this.moveSwapDragging = true;
 
-      // Handle trivial case when column is free
-      if (!this.columnTechMaps[column]) {
-        this.canDrop = true;
-        this.dropColumn = column;
-        return;
-      }
+      const column = this.item.colIndex;
 
       // Identify overlaps
       const columnTechMaps = Object.values(this.columnTechMaps[column]);
@@ -173,7 +171,7 @@ export default class extends StateBase {
         x => x.jobId == this.item.jobId
       );
       if (!draggedTechMap) {
-        console.error('No draggedTechMap')
+        console.error("No draggedTechMap");
         return;
       }
 
@@ -195,8 +193,9 @@ export default class extends StateBase {
         draggedTechMap.jobId,
         foundOverlap.jobId
       );
-
     } else if (this.itemType === DragItemTypes.SIDEBAR_TECHMAP) {
+      this.moveSwapDragging = false;
+
       // test for column hit (can be done in window coordinates)
       const columnHit = _.find(
         _.map(this.columnRects, (rect, index) => [index, rect]),
@@ -207,8 +206,8 @@ export default class extends StateBase {
       }
       const column = columnHit[0];
 
+      // Handle trivial case when column is free
       if (!this.columnTechMaps[column]) {
-        // special case when column has no techmaps inside
         console.log(`Column ${column} has no techmaps`);
         this.canDrop = true;
         this.dropColumn = column;
@@ -252,13 +251,21 @@ export default class extends StateBase {
 
   handleDrop() {
     if (this.canDrop) {
-      this.stateActions.dropTechMapAction(
-        this.techMapId,
-        this.dropColumn,
-        -1,
-        this.draggedTechMapRectInTimeline.top
-      );
       this.canDrop = false;
+      if (this.moveSwapDragging) {
+        this.stateActions.moveJob(
+          this.item.jobId,
+          this.dropColumn,
+          this.draggedTechMapRectInTimeline.top
+        );
+      } else {
+        this.stateActions.dropTechMapAction(
+          this.techMapId,
+          this.dropColumn,
+          -1,
+          this.draggedTechMapRectInTimeline.top
+        );
+      }
     }
   }
 }

@@ -13,8 +13,10 @@ import {
   getJobs,
   requestJobs,
   requestTechMaps,
-  requestStaff
+  requestStaff,
+  moveJob
 } from "../actions/index";
+import moment from "moment";
 
 class PlanScreen extends React.Component {
   constructor(props) {
@@ -39,6 +41,7 @@ class PlanScreen extends React.Component {
       this
     );
     this.swapTechMaps = this.swapTechMaps.bind(this);
+    this.moveJob = this.moveJob.bind(this);
     this.dndManager = new DragAndDropManager({
       dropTechMapAction: this.dropTechMapAction,
       draggedRectChangedAction: this.draggedRectChangedAction,
@@ -48,7 +51,8 @@ class PlanScreen extends React.Component {
       cancelLastSpaceAllocAction: this.cancelLastSpaceAllocAction,
       overrideTechMapOffset: this.overrideTechMapOffset,
       lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove,
-      swapTechMaps: this.swapTechMaps
+      swapTechMaps: this.swapTechMaps,
+      moveJob: this.moveJob
     });
   }
 
@@ -144,6 +148,9 @@ class PlanScreen extends React.Component {
     );
     console.log(" -----------------------");
   }
+  moveJob(jobId, column, offsetInPixels) {
+    this.props.moveJob(jobId, column, this.pixelsToMins(offsetInPixels));
+  }
 
   //////////////////////////////////////////////////////////////
 
@@ -203,9 +210,9 @@ class PlanScreen extends React.Component {
     return pixels / this.props.pixelsPerMinute;
   }
 
-  msToPixels = (miliseconds) => {
+  msToPixels = miliseconds => {
     return this.minsToPixels(miliseconds / 1000 / 60);
-  }
+  };
 
   onTechMapPreviewStartedDragging(item, itemType) {
     this.dndManager.onDraggedTechMapStartedDragging(item, itemType);
@@ -285,7 +292,7 @@ class PlanScreen extends React.Component {
               msToPixels={this.msToPixels}
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
-              />
+            />
             <PlanTimeline
               onSchedulerTimelineDomNodeRefUpdate={
                 this.onSchedulerTimelineDomNodeRefUpdate
@@ -362,7 +369,9 @@ const mapDispatchToProps = dispatch => {
   return {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
-    requestStaff: () => dispatch(requestStaff())
+    requestStaff: () => dispatch(requestStaff()),
+    moveJob: (jobId, column, timeMinutes) =>
+      dispatch(moveJob(jobId, column, timeMinutes))
   };
 };
 
