@@ -352,7 +352,6 @@ class PlanScreen extends React.Component {
           onTechMapPreviewDomNodeRefUpdate={
             this.onTechMapPreviewDomNodeRefUpdate
           }
-          offsetOverride={this.state.offsetOverride}
           draggedTechMapHorizontalLock={this.state.draggedTechMapHorizontalLock}
         />
       </div>
