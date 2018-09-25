@@ -12,8 +12,16 @@
 }
 
 .PlanTimelineColumn--hovered {
-  background-color: aliceblue;
+  background-color:rgba(255, 255, 255, 0.8);
 }
+
+.PlanTimelineColumn--isover:nth-of-type(odd) {
+  background-color:	rgba(236,236,236, 0.2);
+}
+.PlanTimelineColumn--isover:nth-of-type(even) {
+  background-color:rgba(246,246,246, 0.2);
+}
+
 
 .PlanTimelineColumn_spacing {
   width: 100px;
@@ -25,7 +33,7 @@
 }
 
 .PlanTimeline--highlighted {
-  background-color: rgba(100, 100, 100, 0.08);
+  /* background-color: rgba(100, 100, 100, 0.08); */
 }
 
 .PlanTimeline--hovered {

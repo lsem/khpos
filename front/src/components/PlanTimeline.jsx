@@ -129,6 +129,7 @@ class PlanTimeline extends React.Component {
   }
 
   renderHover() {
+    return null;
     const draggedViewRect = this.props.techMapPreviewHoverRect;
     const topLineY = draggedViewRect.top;
     const bottomLineY = draggedViewRect.top + draggedViewRect.height - 1;
@@ -224,7 +225,8 @@ class PlanTimeline extends React.Component {
       };
       let className = classNames({
         PlanTimelineColumn: true,
-        "PlanTimelineColumn--hovered": column == this.props.hoverColumn
+        "PlanTimelineColumn--isover": this.props.canDrop,
+        "PlanTimelineColumn--hovered": column == this.props.hoverColumn,
       });
       return (
         <div
