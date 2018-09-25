@@ -5,7 +5,8 @@ import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
-  INSERT_JOB
+  INSERT_JOB,
+  SWAP_JOBS
 } from "./types";
 
 export const requestJobsSucceded = jobs => {
@@ -53,6 +54,16 @@ export function insertJob(jobId, techMap, column, timeMinutes) {
       techMap: techMap,
       column: column,
       timeMinutes: timeMinutes
+    }
+  };
+}
+
+export function swapJobs(draggedJobId, neighbourJobId) {
+  return {
+    type: SWAP_JOBS,
+    payload: {
+      draggedJobId: draggedJobId,
+      neighbourJobId: neighbourJobId
     }
   };
 }

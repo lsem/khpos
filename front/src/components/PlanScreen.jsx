@@ -16,7 +16,8 @@ import {
   requestTechMaps,
   requestStaff,
   moveJob,
-  insertJob
+  insertJob,
+  swapJobs
 } from "../actions/index";
 import moment from "moment";
 
@@ -148,11 +149,7 @@ class PlanScreen extends React.Component {
     });
   }
   swapTechMaps(column, draggedJob, existingJob) {
-    console.log(" ----- State Action ------");
-    console.log(
-      `Swapping ${draggedJob} and ${existingJob} on column ${column}`
-    );
-    console.log(" -----------------------");
+    this.props.swapJobs(draggedJob, existingJob);
   }
   moveJob(jobId, column, offsetInPixels) {
     this.props.moveJob(jobId, column, this.pixelsToMins(offsetInPixels));
@@ -386,7 +383,9 @@ const mapDispatchToProps = dispatch => {
       dispatch(moveJob(jobId, column, timeMinutes)),
     // todo: consider using normalized state instead of techMap object
     insertJob: (jobId, techMap, column, timeMinutes) =>
-      dispatch(insertJob(jobId, techMap, column, timeMinutes))
+      dispatch(insertJob(jobId, techMap, column, timeMinutes)),
+    swapJobs: (draggedJob, neighbourJob) =>
+      dispatch(swapJobs(draggedJob, neighbourJob))
   };
 };
 

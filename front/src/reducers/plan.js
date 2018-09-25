@@ -5,7 +5,8 @@ import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
-  INSERT_JOB
+  INSERT_JOB,
+  SWAP_JOBS
 } from "../actions/types";
 
 const initialState = {
@@ -67,6 +68,29 @@ export default function plan(state = initialState, action) {
       return {
         ...state,
         jobs: [...state.jobs, newJob]
+      };
+    }
+    //
+    // SWAP_JOBS
+    //
+    case SWAP_JOBS: {
+      const updatedJobs = [...state.jobs];
+      const draggedJob = _.find(
+        updatedJobs,
+        j => j.id === action.payload.draggedJobId
+      );
+      console.assert(draggedJob);
+      const neighbourJob = _.find(
+        updatedJobs,
+        j => j.id === action.payload.neighbourJobId
+      );
+      console.assert(neighbourJob);
+      const t = neighbourJob.startTime;
+      neighbourJob.startTime = draggedJob.startTime;
+      draggedJob.startTime = t;
+      return {
+        ...state,
+        jobs: updatedJobs
       };
     }
 
