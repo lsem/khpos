@@ -222,9 +222,13 @@ class PlanTimeline extends React.Component {
           msToMins(this.props.endTime - this.props.beginTime)
         )
       };
+      let className = classNames({
+        PlanTimelineColumn: true,
+        "PlanTimelineColumn--hovered": column == this.props.hoverColumn
+      });
       return (
         <div
-          className="PlanTimelineColumn"
+          className={className}
           style={columnStyle}
           key={column}
           ref={this.columnDomAttached.bind(this, column)}
@@ -252,7 +256,6 @@ class PlanTimeline extends React.Component {
     return this.props.connectDropTarget(
       <div
         className={className}
-        
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
         {this.renderColumns()}

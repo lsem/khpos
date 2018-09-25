@@ -11,6 +11,10 @@
   box-sizing: border-box;
 }
 
+.PlanTimelineColumn--hovered {
+  background-color: aliceblue;
+}
+
 .PlanTimelineColumn_spacing {
   width: 100px;
 }

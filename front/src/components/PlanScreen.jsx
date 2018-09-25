@@ -42,6 +42,7 @@ class PlanScreen extends React.Component {
     );
     this.swapTechMaps = this.swapTechMaps.bind(this);
     this.moveJob = this.moveJob.bind(this);
+    this.columnHovered = this.columnHovered.bind(this);
     this.dndManager = new DragAndDropManager({
       dropTechMapAction: this.dropTechMapAction,
       draggedRectChangedAction: this.draggedRectChangedAction,
@@ -52,7 +53,8 @@ class PlanScreen extends React.Component {
       overrideTechMapOffset: this.overrideTechMapOffset,
       lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove,
       swapTechMaps: this.swapTechMaps,
-      moveJob: this.moveJob
+      moveJob: this.moveJob,
+      columnHovered: this.columnHovered
     });
   }
 
@@ -150,6 +152,11 @@ class PlanScreen extends React.Component {
   }
   moveJob(jobId, column, offsetInPixels) {
     this.props.moveJob(jobId, column, this.pixelsToMins(offsetInPixels));
+  }
+  columnHovered(column) {
+    this.setState({
+      hoverColumn: column
+    });
   }
 
   //////////////////////////////////////////////////////////////
@@ -321,6 +328,7 @@ class PlanScreen extends React.Component {
               jobs={this.props.jobs}
               left={0}
               ref={this.timelineRef}
+              hoverColumn={this.state.hoverColumn}
             />
           </div>
         </div>

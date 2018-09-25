@@ -51,6 +51,7 @@ export default class extends StateBase {
     this.prevColumnRects = null;
     this.movedJob = null;
     this.moveSwapDragging = true;
+    this.lastColumnHit = null;
   }
 
   onTechMapAttached(techMapId, jobId, rect, column, row) {
@@ -125,7 +126,7 @@ export default class extends StateBase {
     if (!columnHit) {
       return null;
     }
-    const column = columnHit[0];
+    return columnHit[0];
   }
 
   handleDraggedTechMapMove(cursorPos, draggedTechMapRect) {
@@ -137,6 +138,13 @@ export default class extends StateBase {
     this.stateActions.draggedRectChangedAction(
       this.draggedTechMapRectInTimeline
     );
+    // Track hovered column
+    const columnHit = this.findColumnUnderPos(cursorPos);
+    if (columnHit !== this.lastColumnHit) {
+      this.lastColumnHit = columnHit;
+      this.stateActions.columnHovered(columnHit);
+    }
+
     // Teset what kind of dragging event we have
     // it might be either dragging new item to timline
     // or dragging existing one.
@@ -250,6 +258,8 @@ export default class extends StateBase {
   }
 
   handleDrop() {
+    this.lastColumnHit = null;
+    this.stateActions.columnHovered(null);
     if (this.canDrop) {
       this.canDrop = false;
       if (this.moveSwapDragging) {
