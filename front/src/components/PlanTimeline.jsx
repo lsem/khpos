@@ -241,11 +241,6 @@ class PlanTimeline extends React.Component {
     });
   }
 
-  calcPlanWidth() {
-    const maxColumn = _.max(_.map(this.props.jobs, job => job.column));
-    return (maxColumn + 2) * (this.props.jobWidth + 10);
-  }
-
   render() {
     // console.log("PlanTimeline: frame: ", this.frameNum++);
     let className = classNames({

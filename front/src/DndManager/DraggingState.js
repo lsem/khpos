@@ -59,9 +59,9 @@ export default class extends StateBase {
     // this state will not be passed to constuctors but live only here
     // so after state transition happens shift will be lost.
     if (isPressed) {
-      this.lockDraggedTechMapHorizontalMove(this.horizontalLockXOffset);
+      this.lockDragHorizontalMove(this.horizontalLockXOffset);
     } else {
-      this.unlockDraggedTechMapHorizontalMove();
+      this.unlockDragHorizontalMove();
     }
   }
 
@@ -78,7 +78,7 @@ export default class extends StateBase {
     if (!_.isEqual(this.prevColumnRects, this.columnRects)) {
       // changed, needs to be relocked
       // todo: lock to column offset instead of rect left.
-      this.lockDraggedTechMapHorizontalMove(
+      this.lockDragHorizontalMove(
         this.getCurrentElementInitialRect()
           ? this.getCurrentElementInitialRect().left
           : null
@@ -125,16 +125,16 @@ export default class extends StateBase {
     return thisTechMap ? thisTechMap[this.item.jobId].rect : null;
   }
 
-  lockDraggedTechMapHorizontalMove(leftOffsetToLockTo) {
+  lockDragHorizontalMove(leftOffsetToLockTo) {
     if (!leftOffsetToLockTo) {
       console.error("lockDraggedTechMapToVerticalMove: No leftOffsetToLockTo");
       return;
     }
-    this.stateActions.lockDraggedTechMapHorizontalMove(leftOffsetToLockTo);
+    this.stateActions.lockDragHorizontalMove(leftOffsetToLockTo);
   }
 
-  unlockDraggedTechMapHorizontalMove() {
-    this.stateActions.lockDraggedTechMapHorizontalMove(null);
+  unlockDragHorizontalMove() {
+    this.stateActions.lockDragHorizontalMove(null);
   }
 
   findColumnUnderPos(pos) {

@@ -10,7 +10,9 @@ export default class {
   }
 
   toIdleState() {
-    this.nextState(this.factory.makeIdleState(this.factory, this.nextState, this.commonState));
+    this.nextState(
+      this.factory.makeIdleState(this.factory, this.nextState, this.commonState)
+    );
   }
 
   onTimelineScroll(left, top) {
@@ -22,9 +24,9 @@ export default class {
   onTimelineDetached() {}
 
   onDraggedTechMapFinishedDragging() {
-    console.log('stateBase: onDraggedTechMapFinishedDragging')
+    console.log("stateBase: onDraggedTechMapFinishedDragging");
     this.toIdleState();
-    this.stateActions.lockDraggedTechMapHorizontalMove(null);
+    this.stateActions.lockDragHorizontalMove(null);
   }
   onTimelineColumnAttached(column, rect) {
     this.columnRects[column] = rect;
@@ -39,7 +41,7 @@ export default class {
   onTechMapAttached(techMapId, jobId, rect, column, row) {
     // techMapId is not used.
     this.columnTechMaps[column] = this.columnTechMaps[column] || {};
-    this.columnTechMaps[column][jobId] = { jobId: jobId, row: row, rect: rect};
+    this.columnTechMaps[column][jobId] = { jobId: jobId, row: row, rect: rect };
     //console.log('this.columnTechMaps[column]: ', this.columnTechMaps[column])
   }
 

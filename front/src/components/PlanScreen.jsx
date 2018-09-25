@@ -52,14 +52,7 @@ class PlanScreen extends React.Component {
     this.draggedRectChangedAction = this.draggedRectChangedAction.bind(this);
     this.draggingStartedAction = this.draggingStartedAction.bind(this);
     this.draggingFinishedAction = this.draggingFinishedAction.bind(this);
-    this.techMapNeedsSpaceAction = this.techMapNeedsSpaceAction.bind(this);
-    this.cancelLastSpaceAllocAction = this.cancelLastSpaceAllocAction.bind(
-      this
-    );
-    this.overrideTechMapOffset = this.overrideTechMapOffset.bind(this);
-    this.lockDraggedTechMapHorizontalMove = this.lockDraggedTechMapHorizontalMove.bind(
-      this
-    );
+    this.lockDragHorizontalMove = this.lockDragHorizontalMove.bind(this);
     this.swapTechMaps = this.swapTechMaps.bind(this);
     this.moveJob = this.moveJob.bind(this);
     this.columnHovered = this.columnHovered.bind(this);
@@ -68,10 +61,7 @@ class PlanScreen extends React.Component {
       draggedRectChangedAction: this.draggedRectChangedAction,
       draggingStartedAction: this.draggingStartedAction,
       draggingFinishedAction: this.draggingFinishedAction,
-      techMapNeedsSpaceAction: this.techMapNeedsSpaceAction,
-      cancelLastSpaceAllocAction: this.cancelLastSpaceAllocAction,
-      overrideTechMapOffset: this.overrideTechMapOffset,
-      lockDraggedTechMapHorizontalMove: this.lockDraggedTechMapHorizontalMove,
+      lockDragHorizontalMove: this.lockDragHorizontalMove,
       swapTechMaps: this.swapTechMaps,
       moveJob: this.moveJob,
       columnHovered: this.columnHovered
@@ -117,6 +107,7 @@ class PlanScreen extends React.Component {
   }
 
   //////////////////////////////////////////////////////////////
+
   dropTechMapAction(techMapId, column, row, offsetInPixels) {
     // todo: handle minus offset
     if (offsetInPixels < 0) {
@@ -149,18 +140,7 @@ class PlanScreen extends React.Component {
       isTechMapHoveringTimeline: false
     });
   }
-  techMapNeedsSpaceAction(spaceNeededPx) {
-    console.log("techMapNeedsSpaceAction: ", spaceNeededPx);
-  }
-  cancelLastSpaceAllocAction() {
-    console.log("cancelLastSpaceAllocAction: ");
-  }
-  overrideTechMapOffset(offset) {
-    this.setState({
-      offsetOverride: offset
-    });
-  }
-  lockDraggedTechMapHorizontalMove(offsetX) {
+  lockDragHorizontalMove(offsetX) {
     this.setState({
       draggedTechMapHorizontalLock: offsetX
     });
@@ -345,7 +325,6 @@ class PlanScreen extends React.Component {
               endTime={this.props.timelineEndTime}
               jobs={this.props.jobs}
               left={0}
-              ref={this.timelineRef}
               hoverColumn={this.state.hoverColumn}
             />
           </div>
