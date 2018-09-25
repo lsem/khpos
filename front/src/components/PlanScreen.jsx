@@ -8,6 +8,7 @@ import PlanTechMapsMenu from "./PlanTechMapsMenu";
 import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
+import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
 import _ from "lodash";
 import uuid from "uuid";
 import {
@@ -28,6 +29,22 @@ class PlanScreen extends React.Component {
     this.pixelsToMins = this.pixelsToMins.bind(this);
     this.setUpDnd();
     this.setUpUI();
+    this.onModifierKeyChanged = this.onModifierKeyChanged.bind(this);
+    this.detectDragModifierKeysHelper = new DetectDragModifierKeysHelper(
+      this.onModifierKeyChanged
+    );
+  }
+
+  componentDidMount() {
+    this.detectDragModifierKeysHelper.componentDidMount();
+  }
+
+  componentWillUnmount() {
+    this.detectDragModifierKeysHelper.componentWillUnmount();
+  }
+
+  onModifierKeyChanged(state) {
+    this.dndManager.onShiftPressed(state["shiftKey"]);
   }
 
   setUpDnd() {

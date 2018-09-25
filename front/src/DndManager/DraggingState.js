@@ -52,6 +52,17 @@ export default class extends StateBase {
     this.movedJob = null;
     this.moveSwapDragging = true;
     this.lastColumnHit = null;
+    this.horizontalLockXOffset = null;
+  }
+
+  onShiftPressed(isPressed) {
+    // this state will not be passed to constuctors but live only here
+    // so after state transition happens shift will be lost.
+    if (isPressed) {
+      this.lockDraggedTechMapHorizontalMove(this.horizontalLockXOffset);
+    } else {
+      this.unlockDraggedTechMapHorizontalMove();
+    }
   }
 
   onTechMapAttached(techMapId, jobId, rect, column, row) {
@@ -60,10 +71,23 @@ export default class extends StateBase {
       // no lock required
       return;
     }
-    if (!_.isEqual(this.prevColumnRects, this.columnRects)) {
-      this.lockDraggedTechMapHorizontalMove();
+    if (!this.needsHorizontalLock) {
+      return;
     }
-    this.prevColumnRects = _.cloneDeep(this.columnRects);
+    // it was already locked before, lets check if columns did not change
+    if (!_.isEqual(this.prevColumnRects, this.columnRects)) {
+      // changed, needs to be relocked
+      // todo: lock to column offset instead of rect left.
+      this.lockDraggedTechMapHorizontalMove(
+        this.getCurrentElementInitialRect()
+          ? this.getCurrentElementInitialRect().left
+          : null
+      );
+      this.horizontalMoveLocked = true;
+    } else {
+      console.log("NO NEED TO LOCK");
+      // not changed, do nothing
+    }
   }
 
   getName() {
@@ -101,17 +125,12 @@ export default class extends StateBase {
     return thisTechMap ? thisTechMap[this.item.jobId].rect : null;
   }
 
-  lockDraggedTechMapHorizontalMove() {
-    const draggedViewInitialRect = this.getCurrentElementInitialRect();
-    if (!draggedViewInitialRect) {
-      console.error(
-        "lockDraggedTechMapToVerticalMove: No draggedViewInitialRect"
-      );
+  lockDraggedTechMapHorizontalMove(leftOffsetToLockTo) {
+    if (!leftOffsetToLockTo) {
+      console.error("lockDraggedTechMapToVerticalMove: No leftOffsetToLockTo");
       return;
     }
-    this.stateActions.lockDraggedTechMapHorizontalMove(
-      draggedViewInitialRect.left
-    );
+    this.stateActions.lockDraggedTechMapHorizontalMove(leftOffsetToLockTo);
   }
 
   unlockDraggedTechMapHorizontalMove() {
@@ -151,7 +170,23 @@ export default class extends StateBase {
     if (this.itemType === DragItemTypes.TIMELINE_TECHMAP) {
       this.moveSwapDragging = true;
 
-      const column = this.item.colIndex;
+      // Column of dragged tech map can be taken from this.item.colIndex,
+      // but could be over another column at this moment.
+      const column = this.findColumnUnderPos(cursorPos);
+      if (!column) {
+        // must be between two adjacent columns.
+        return;
+      }
+
+      const currentColumnRect = this.columnRects[columnHit];
+      this.horizontalLockXOffset = currentColumnRect.left;
+
+      // Cut off trivial case when have no tech maps in the column
+      if (!this.columnTechMaps[column]) {
+        this.canDrop = true;
+        this.dropColumn = column;
+        return;
+      }
 
       // Identify overlaps
       const columnTechMaps = Object.values(this.columnTechMaps[column]);

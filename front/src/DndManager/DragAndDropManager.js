@@ -140,4 +140,8 @@ export default class DragAndDropManager {
     );
     // todo: check if really need all these input or something is static here.
   }
+
+  onShiftPressed(isPressed) {
+    this.currentState.onShiftPressed(isPressed);
+  }
 }
