@@ -9,12 +9,14 @@ import PlanStaffMenu from "./PlanStaffMenu";
 import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
 import _ from "lodash";
+import uuid from "uuid";
 import {
   getJobs,
   requestJobs,
   requestTechMaps,
   requestStaff,
-  moveJob
+  moveJob,
+  insertJob
 } from "../actions/index";
 import moment from "moment";
 
@@ -98,18 +100,20 @@ class PlanScreen extends React.Component {
 
   //////////////////////////////////////////////////////////////
   dropTechMapAction(techMapId, column, row, offsetInPixels) {
-    console.log(" ----- State Action ------");
     // todo: handle minus offset
     if (offsetInPixels < 0) {
       console.error("offsetInPixels < 0");
       return;
     }
-    console.log(
-      `Drop:\nTechmap: '${techMapId}'\nOffset: ${offsetInPixels}\nTime(min): ${this.pixelsToMins(
-        offsetInPixels
-      )}\nColumn: ${column}\nRow: ${row}`
+    // todo: consider using techMapId instead of embedded techmap
+    const techMap = _.find(this.props.techMaps, tm => tm.id === techMapId);
+    console.assert(techMap);
+    this.props.insertJob(
+      uuid.v1(),
+      techMap,
+      column,
+      this.pixelsToMins(offsetInPixels)
     );
-    console.log(" -----------------------");
   }
   draggedRectChangedAction(rect) {
     this.setState({
@@ -379,7 +383,10 @@ const mapDispatchToProps = dispatch => {
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestStaff: () => dispatch(requestStaff()),
     moveJob: (jobId, column, timeMinutes) =>
-      dispatch(moveJob(jobId, column, timeMinutes))
+      dispatch(moveJob(jobId, column, timeMinutes)),
+    // todo: consider using normalized state instead of techMap object
+    insertJob: (jobId, techMap, column, timeMinutes) =>
+      dispatch(insertJob(jobId, techMap, column, timeMinutes))
   };
 };
 

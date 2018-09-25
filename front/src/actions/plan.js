@@ -4,7 +4,8 @@ import { getApi } from "../api";
 import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
-  MOVE_JOB
+  MOVE_JOB,
+  INSERT_JOB
 } from "./types";
 
 export const requestJobsSucceded = jobs => {
@@ -38,6 +39,18 @@ export function moveJob(jobId, column, timeMinutes) {
     type: MOVE_JOB,
     payload: {
       jobId: jobId,
+      column: column,
+      timeMinutes: timeMinutes
+    }
+  };
+}
+
+export function insertJob(jobId, techMap, column, timeMinutes) {
+  return {
+    type: INSERT_JOB,
+    payload: {
+      jobId: jobId,
+      techMap: techMap,
       column: column,
       timeMinutes: timeMinutes
     }

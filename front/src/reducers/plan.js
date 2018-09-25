@@ -4,7 +4,8 @@ import _ from "lodash";
 import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
-  MOVE_JOB
+  MOVE_JOB,
+  INSERT_JOB
 } from "../actions/types";
 
 const initialState = {
@@ -48,6 +49,24 @@ export default function plan(state = initialState, action) {
       return {
         ...state,
         jobs: updatedJobs
+      };
+    }
+    //
+    // INSERT_JOB
+    //
+    case INSERT_JOB: {
+      const startTime = moment(state.fromDate)
+        .add(action.payload.timeMinutes, "minutes")
+        .valueOf();
+      const newJob = {
+        id: action.payload.jobId,
+        column: action.payload.column,
+        startTime: startTime,
+        techMap: action.payload.techMap
+      };
+      return {
+        ...state,
+        jobs: [...state.jobs, newJob]
       };
     }
 
