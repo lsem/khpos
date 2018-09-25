@@ -56,7 +56,7 @@ class PlanTimeline extends React.Component {
         diffOffset,
         initialOffset
       ),
-    1000 / 30 /*in combination with throttling must yield to X fps*/
+    1000 / 60 /*in combination with throttling must yield to X fps*/
   );
 
   onOffsetChanged(offset, diffOffset, initialOffset) {
