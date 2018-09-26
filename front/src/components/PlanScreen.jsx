@@ -29,6 +29,16 @@ class PlanScreen extends React.Component {
     this.pixelsToMins = this.pixelsToMins.bind(this);
     this.setUpDnd();
     this.setUpUI();
+    this.state = {
+      isTechMapOverTimeline: false,
+      isTechMapHoveringTimeline: false,
+      techMapPreviewHoverRect: null,
+      techMapPreviewHoverTranslatedRect: null,
+      PlanTimelineRect: null,
+      initialOffset: null,
+      scrollTop: 0,
+      scollLeft: 0
+    };
     this.onModifierKeyChanged = this.onModifierKeyChanged.bind(this);
     this.detectDragModifierKeysHelper = new DetectDragModifierKeysHelper(
       this.onModifierKeyChanged
@@ -95,16 +105,6 @@ class PlanScreen extends React.Component {
     this.techMapAttached = this.techMapAttached.bind(this);
     this.techMapDetached = this.techMapDetached.bind(this);
     this.onDrop = this.onDrop.bind(this);
-    this.state = {
-      isTechMapOverTimeline: false,
-      isTechMapHoveringTimeline: false,
-      techMapPreviewHoverRect: null,
-      techMapPreviewHoverTranslatedRect: null,
-      PlanTimelineRect: null,
-      initialOffset: null,
-      scrollTop: 0,
-      scollLeft: 0
-    };
   }
 
   //////////////////////////////////////////////////////////////
