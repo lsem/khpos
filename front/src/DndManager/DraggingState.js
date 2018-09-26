@@ -284,17 +284,20 @@ export default class extends StateBase {
 
   onDraggedTechMapFinishedDragging() {
     super.onDraggedTechMapFinishedDragging();
-    this.handleDrop();
+    this.finalizeDndInteraction();
   }
 
   onDraggedTechMapLeft() {
     super.onDraggedTechMapLeft();
-    this.handleDrop();
+    this.finalizeDndInteraction();
+  }
+
+  finalizeDndInteraction() {
+    this.lastColumnHit = null;
+    this.stateActions.columnHovered(null);
   }
 
   handleDrop() {
-    this.lastColumnHit = null;
-    this.stateActions.columnHovered(null);
     if (this.canDrop) {
       this.canDrop = false;
       if (this.moveSwapDragging) {
@@ -312,5 +315,11 @@ export default class extends StateBase {
         );
       }
     }
+  }
+
+  onDrop(item) {
+    // item is ignored, since we know what we have been dragging.
+    this.finalizeDndInteraction();
+    this.handleDrop();
   }
 }

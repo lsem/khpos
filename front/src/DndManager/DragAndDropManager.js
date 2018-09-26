@@ -144,4 +144,8 @@ export default class DragAndDropManager {
   onShiftPressed(isPressed) {
     this.currentState.onShiftPressed(isPressed);
   }
+
+  onDrop(item) {
+    this.currentState.onDrop();
+  }
 }

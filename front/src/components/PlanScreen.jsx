@@ -94,6 +94,7 @@ class PlanScreen extends React.Component {
     this.columnDetached = this.columnDetached.bind(this);
     this.techMapAttached = this.techMapAttached.bind(this);
     this.techMapDetached = this.techMapDetached.bind(this);
+    this.onDrop = this.onDrop.bind(this);
     this.state = {
       isTechMapOverTimeline: false,
       isTechMapHoveringTimeline: false,
@@ -277,6 +278,10 @@ class PlanScreen extends React.Component {
     );
   }
 
+  onDrop(item) {
+    this.dndManager.onDrop(item);
+  }
+
   setPlanDateSpan = (fromDate, toDate) => {
     this.props.loadPlan(fromDate, toDate);
   };
@@ -326,6 +331,7 @@ class PlanScreen extends React.Component {
               jobs={this.props.jobs}
               left={0}
               hoverColumn={this.state.hoverColumn}
+              onDrop={this.onDrop}
             />
           </div>
         </div>

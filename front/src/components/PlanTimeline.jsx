@@ -23,8 +23,8 @@ function collect(connect, monitor) {
 }
 // Spec
 const SchedulerTimelineDndSpec = {
-  drop(props, monitor) {
-    // moveKnight(props.x, props.y);
+  drop(props, monitor, component) {
+    component.props.onDrop(monitor.getItem());
   },
   hover(props, monitor, component) {
     // In this method drop handling is basically happens.

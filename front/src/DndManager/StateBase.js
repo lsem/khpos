@@ -61,4 +61,5 @@ export default class {
     this.toIdleState();
   }
   onDraggedTechMapPositionChanged(offset, diffOffset, initialOffset) {}
+  onDrop(item) {}
 }
