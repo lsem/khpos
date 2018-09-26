@@ -51,7 +51,6 @@ class TechMap extends React.Component {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
-    //console.log('TechMap: componentDidMount: ref: ', this.ref)
   }
 
   render() {
@@ -78,75 +77,14 @@ class TechMap extends React.Component {
       />
     ));
 
-    return connectDropTarget(
-      connectDragSource(
-        <div className={className} style={techMapStyle} ref={this.setRef}>
-          {tasks}
-        </div>
-      )
+    return connectDragSource(
+      <div className={className} style={techMapStyle} ref={this.setRef}>
+        {tasks}
+      </div>
     );
   }
 }
 
-const techMapDropTargetSpec = {
-  // This code utilizes approach taken from dnd card example:
-  // https://github.com/react-dnd/react-dnd/blob/master/packages/documentation/examples/04%20Sortable/Simple/Card.tsx
-  hover(props, monitor, component) {
-    if (!component) {
-      return;
-    }
-    const dragColIndex = monitor.getItem().colIndex;
-    const hoverColIndex = props.colIndex;
-    const dragRowIndex = monitor.getItem().rowIndex;
-    const hoverRowIndex = props.rowIndex;
-
-    // console.log('dragIndex: ' + dragColIndex + ', ' + dragRowIndex)
-    // console.log('hoverIndex: ' + hoverColIndex + ', ' + hoverRowIndex)
-
-    // Don't replace items with themselves
-    if (dragColIndex === hoverColIndex && dragRowIndex === hoverRowIndex) {
-      return;
-    }
-
-    if (monitor.isOver() || true) {
-      const techMapComponent = component.getDecoratedComponentInstance();
-      const targetRect = techMapComponent.ref.getBoundingClientRect();
-      //const containerRect = props.getContainerRect();
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - targetRect.top;
-      const hoverMiddleY = (targetRect.bottom - targetRect.top) / 2;
-      // console.log(
-      //   "hoverClientY > hoverMiddleY: " + (hoverClientY > hoverMiddleY)
-      // );
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      // Dragging downwards
-      // if (/*dragIndex < hoverIndex &&*/ hoverClientY < hoverClientY) {
-      //   return
-      // }
-
-      // // Dragging upwards
-      // if (/*dragIndex > hoverIndex &&*/ hoverClientY > hoverMiddleY) {
-      //   return
-      // }
-    }
-
-    //props.moveTechMap();
-  }
-};
-function techMapDropCollect(connect, monitor) {
-  return {
-    canDrop: monitor.canDrop(),
-    isOver: monitor.isOver(),
-    connectDropTarget: connect.dropTarget()
-  };
-}
 export default _.flow(
-  DragSource(DragItemTypes.TIMELINE_TECHMAP, techMapViewSource, collect),
-  DropTarget(
-    DragItemTypes.TIMELINE_TECHMAP,
-    techMapDropTargetSpec,
-    techMapDropCollect
-  )
+  DragSource(DragItemTypes.TIMELINE_TECHMAP, techMapViewSource, collect)
 )(TechMap);
