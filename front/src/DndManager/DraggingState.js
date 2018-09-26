@@ -52,42 +52,16 @@ export default class extends StateBase {
     this.movedJob = null;
     this.moveSwapDragging = true;
     this.lastColumnHit = null;
-    this.horizontalLockXOffset = null;
   }
 
   onShiftPressed(isPressed) {
     // this state will not be passed to constuctors but live only here
     // so after state transition happens shift will be lost.
-    if (isPressed) {
-      this.lockDragHorizontalMove(this.horizontalLockXOffset);
-    } else {
-      this.unlockDragHorizontalMove();
-    }
+    console.log("onShiftPressed: ", isPressed);
   }
 
   onTechMapAttached(techMapId, jobId, rect, column, row) {
     super.onTechMapAttached(techMapId, jobId, rect, column, row);
-    if (this.itemType !== DragItemTypes.TIMELINE_TECHMAP) {
-      // no lock required
-      return;
-    }
-    if (!this.needsHorizontalLock) {
-      return;
-    }
-    // it was already locked before, lets check if columns did not change
-    if (!_.isEqual(this.prevColumnRects, this.columnRects)) {
-      // changed, needs to be relocked
-      // todo: lock to column offset instead of rect left.
-      this.lockDragHorizontalMove(
-        this.getCurrentElementInitialRect()
-          ? this.getCurrentElementInitialRect().left
-          : null
-      );
-      this.horizontalMoveLocked = true;
-    } else {
-      console.log("NO NEED TO LOCK");
-      // not changed, do nothing
-    }
   }
 
   getName() {
@@ -120,32 +94,8 @@ export default class extends StateBase {
     return translatedRect;
   }
 
-  getCurrentElementInitialRect() {
-    const thisTechMap = _.find(this.columnTechMaps, x => this.item.jobId in x);
-    return thisTechMap ? thisTechMap[this.item.jobId].rect : null;
-  }
-
-  lockDragHorizontalMove(leftOffsetToLockTo) {
-    if (!leftOffsetToLockTo) {
-      console.error("lockDraggedTechMapToVerticalMove: No leftOffsetToLockTo");
-      return;
-    }
-    this.stateActions.lockDragHorizontalMove(leftOffsetToLockTo);
-  }
-
-  unlockDragHorizontalMove() {
-    this.stateActions.lockDragHorizontalMove(null);
-  }
-
   findColumnUnderPos(pos) {
-    const columnHit = _.find(
-      _.map(this.columnRects, (rect, index) => [index, rect]),
-      x => posInRect(pos, x[1])
-    );
-    if (!columnHit) {
-      return null;
-    }
-    return columnHit[0];
+    return _.findKey(this.columnRects, cr => posInRect(pos, cr));
   }
 
   handleDraggedTechMapMove(cursorPos, draggedTechMapRect) {
@@ -157,8 +107,10 @@ export default class extends StateBase {
     this.stateActions.draggedRectChangedAction(
       this.draggedTechMapRectInTimeline
     );
-    // Track hovered column
+
     const columnHit = this.findColumnUnderPos(cursorPos);
+
+    // Track hovered column
     if (columnHit !== this.lastColumnHit) {
       this.lastColumnHit = columnHit;
       this.stateActions.columnHovered(columnHit);
@@ -171,25 +123,23 @@ export default class extends StateBase {
       this.moveSwapDragging = true;
 
       // Column of dragged tech map can be taken from this.item.colIndex,
-      // but could be over another column at this moment.
-      const column = this.findColumnUnderPos(cursorPos);
-      if (!column) {
+      // but we use currently hovered one to track actual column.
+      if (!columnHit) {
         // must be between two adjacent columns.
         return;
       }
 
       const currentColumnRect = this.columnRects[columnHit];
-      this.horizontalLockXOffset = currentColumnRect.left;
 
       // Cut off trivial case when have no tech maps in the column
-      if (!this.columnTechMaps[column]) {
+      if (!this.columnTechMaps[columnHit]) {
         this.canDrop = true;
-        this.dropColumn = column;
+        this.dropColumn = columnHit;
         return;
       }
 
       // Identify overlaps
-      const columnTechMaps = Object.values(this.columnTechMaps[column]);
+      const columnTechMaps = _.values(this.columnTechMaps[columnHit]);
       const foundOverlap = _.find(columnTechMaps, x => {
         return (
           overlap(
@@ -202,62 +152,45 @@ export default class extends StateBase {
       });
 
       if (!foundOverlap) {
-        // no overlap drop possible
+        // no overlap, drop possible
         this.canDrop = true;
-        this.dropColumn = column;
+        this.dropColumn = columnHit;
         return;
       }
-
-      // Handling overlap
-      const draggedTechMap = _.find(
-        columnTechMaps,
-        x => x.jobId == this.item.jobId
-      );
-      if (!draggedTechMap) {
-        console.error("No draggedTechMap");
-        return;
-      }
-
-      const draggredRect = draggedTechMap.rect;
 
       const middleY = (foundOverlap.rect.bottom + foundOverlap.rect.top) / 2;
 
       // cut off cases when swap not needed
-      if (draggredRect.top > foundOverlap.rect.top && cursorPos.y > middleY) {
+      const draggedRectTop = draggedTechMapRect.top;
+      if (draggedRectTop > foundOverlap.rect.top && cursorPos.y > middleY) {
         return;
       }
-      if (draggredRect.top < foundOverlap.rect.top && cursorPos.y < middleY) {
+      if (draggedRectTop < foundOverlap.rect.top && cursorPos.y < middleY) {
         return;
       }
 
       // Handle swaps
       this.stateActions.swapTechMaps(
-        column,
-        draggedTechMap.jobId,
+        columnHit,
+        this.item.jobId,
         foundOverlap.jobId
       );
     } else if (this.itemType === DragItemTypes.SIDEBAR_TECHMAP) {
       this.moveSwapDragging = false;
 
-      // test for column hit (can be done in window coordinates)
-      const columnHit = _.find(
-        _.map(this.columnRects, (rect, index) => [index, rect]),
-        x => posInRect(cursorPos, x[1])
-      );
       if (!columnHit) {
         return;
       }
-      const column = columnHit[0];
 
       // Handle trivial case when column is free
-      if (!this.columnTechMaps[column]) {
-        console.log(`Column ${column} has no techmaps`);
+      if (!this.columnTechMaps[columnHit]) {
+        console.log(`Column ${columnHit} has no techmaps`);
         this.canDrop = true;
-        this.dropColumn = column;
+        this.dropColumn = columnHit;
         return;
       }
 
-      const columnTechMaps = Object.values(this.columnTechMaps[column]);
+      const columnTechMaps = _.values(this.columnTechMaps[columnHit]);
       const foundOverlap = _.find(columnTechMaps, x => {
         return overlap(
           x.rect.top,
@@ -272,7 +205,7 @@ export default class extends StateBase {
       } else {
         console.log("do not overalap!");
         this.canDrop = true;
-        this.dropColumn = column;
+        this.dropColumn = columnHit;
       }
     }
   }
