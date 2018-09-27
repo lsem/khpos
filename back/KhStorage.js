@@ -27,10 +27,19 @@ class KhStorage {
     this._initiateConnect();
   }
 
+  planCollection() {
+    return this.db.collection("plan");
+  }
+
   async planItem() {
     return await this.db.collection("plan").insertOne({
       bread: 1
     });
+  }
+
+  async insertJob(jobModel) {
+    console.log('INSETING INTO STORAGE');
+    return this.db.collection("plan").insertOne(jobModel);
   }
 
   async getPlan(dateFrom, dateTo) {
