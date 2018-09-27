@@ -1,3 +1,5 @@
 BUG1: [DND] Fix bug that swap works with different columns. It should swap only in origin column.
 BUG2: [DND] Fix out of day moves
 BUG3: [DND] Fix sloppy swaps.
+
+FEATURE: Assignments dragging
