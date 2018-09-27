@@ -14,6 +14,10 @@ function newAssigneId() {
   return 'ASSIGNEE-' + uuid.v4()
 }
 
+const nastiaAssigneId = newAssigneId();
+const aniaAssigneId = newAssigneId();
+const vitiaAssigneId = newAssigneId();
+
 
 function getPlan(fromDate, toDate) {
   console.log(fromDate);
@@ -70,7 +74,7 @@ function getPlan(fromDate, toDate) {
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: newAssigneId(),
+                id: aniaAssigneId,
                 firstName: "Аня",
                 color: "#5AC8FA"
               }
@@ -89,12 +93,12 @@ function getPlan(fromDate, toDate) {
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: newAssigneId(),
+                id: aniaAssigneId,
                 firstName: "Аня",
                 color: "#5AC8FA"
               },
               {
-                id: newAssigneId(),
+                id: vitiaAssigneId,
                 firstName: "Вітя",
                 color: "#4CD964"
               }
@@ -137,7 +141,7 @@ function getPlan(fromDate, toDate) {
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: newAssigneId(),
+                id: nastiaAssigneId,
                 firstName: "Настя",
                 color: "#FFCC00"
               }
@@ -168,7 +172,7 @@ function getPlan(fromDate, toDate) {
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: newAssigneId(),
+                id: nastiaAssigneId,
                 firstName: "Настя",
                 color: "#FFCC00"
               }
