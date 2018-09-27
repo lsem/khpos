@@ -61,7 +61,6 @@ function AssignmentsTimeline(props) {
       left: -5,
       borderRadius: 3
     };
-    console.log(style);
     return <div style={style} className="assignmentsTimeSpan-overlap" />;
   };
 
