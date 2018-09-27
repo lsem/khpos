@@ -50,6 +50,9 @@ function errorHandler(err, req, res, next) {
   if (err instanceof BadRequestError) {
     debug("appErrors.BadRequestError");
     res.status(400).send(err.message);
+  } else if (err instanceof appErrors.InvalidModelError) {
+    debug("appErrors.InvalidModelError");
+    res.status(400).send(err.message);
   } else if (err instanceof appErrors.NotImplementedError) {
     debug("appErrors.NotImplementedError");
     res.status(501).send(err.message);
@@ -123,15 +126,19 @@ class KhPosWebApplication {
   //
   postPlan(req, res, next) {
     debug("body: %O", req.body);
-    let fromDate = tryParseTimeStamp(req.body.from);
-    if (!fromDate) throw new InvalidArgError("from", req.body.from);
-    let toDate = tryParseTimeStamp(req.body.to);
-    if (!toDate) throw new InvalidArgError("to", req.body.to);
-    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
-      .setPlan(fromDate, toDate, req.body.data)
-      .then(() => res.status(204))
+      .insertJob(req.body)
+      .then(() => res.status(204).send())
       .catch(err => next(err));
+    // let fromDate = tryParseTimeStamp(req.body.from);
+    // if (!fromDate) throw new InvalidArgError("from", req.body.from);
+    // let toDate = tryParseTimeStamp(req.body.to);
+    // if (!toDate) throw new InvalidArgError("to", req.body.to);
+    // // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
+    // this.khApp
+    //   .setPlan(fromDate, toDate, req.body.data)
+    //   .then(() => res.status(204))
+    //   .catch(err => next(err));
   }
 
   //

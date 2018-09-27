@@ -13,9 +13,11 @@
     "cors": "^2.8.4",
     "debug": "^3.1.0",
     "express": "^4.16.3",
+    "joi": "^13.6.0",
     "moment": "^2.22.2",
     "mongodb": "^3.1.1",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "uuid": "^3.3.2"
   },
   "prettier": {
     "printWidth": 90,

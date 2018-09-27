@@ -4,6 +4,12 @@ class KhApplicationError extends Error {
   }
 };
 
+class InvalidModelError extends KhApplicationError {
+  constructor(what) {
+    super(`Invalid model. Details: ${what}`)
+  }
+}
+
 class NotImplementedError extends KhApplicationError {
   constructor(what) {
     super(`${what ? what : "Requested method"} is not implemented`);
@@ -27,4 +33,5 @@ module.exports = {
   NotImplementedError,
   NotFoundError,
   PlanError,
+  InvalidModelError
 };

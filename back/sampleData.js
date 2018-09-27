@@ -1,37 +1,52 @@
 const moment = require("moment");
+const uuid = require('uuid');
+
+function newJobId() {
+  return 'JOB-' + uuid.v4()
+}
+function newTechMapId() {
+  return 'TM-' + uuid.v4()
+}
+function newTaskId() {
+  return 'TASK-' + uuid.v4()
+}
+function newAssigneId() {
+  return 'ASSIGNEE-' + uuid.v4()
+}
+
 
 function getPlan(fromDate, toDate) {
   console.log(fromDate);
-  return [
+  const plan = [
     {
       startTime: moment(fromDate).add(115, "minutes").valueOf(),
-      id: "job-1",
+      id: newJobId(),
       column: 0,
       techMap: {
-        id:"techmap-1",
+        id: newTechMapId(),
         name:"1",
         tintColor: "rgb(216, 216, 216)",
         tasks: [
           {
-            id: "1",
+            id: newTaskId(),
             name: "task 1",
             durationMins: 10,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "2",
+            id: newTaskId(),
             name: "task 2",
             durationMins: 20,
             bgColor: "rgb(200, 200, 200)"
           },
           {
-            id: "3",
+            id: newTaskId(),
             name: "task 3",
             durationMins: 10,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "4",
+            id: newTaskId(),
             name: "task 4",
             durationMins: 10,
             bgColor: "rgb(255, 149, 0)"
@@ -41,52 +56,52 @@ function getPlan(fromDate, toDate) {
     },
     {
       startTime: moment(fromDate).add(4, "hours").valueOf(),
-      id: "job-2",
+      id: newJobId(),
       column: 0,
       techMap: {
-        id:"techmap-1",
+        id: newTechMapId(),
         name:"1",
         tintColor: "rgb(216, 216, 216)",
         tasks: [
           {
-            id: "1",
+            id: newTaskId(),
             name: "task 1",
             durationMins: 20,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: "1",
+                id: newAssigneId(),
                 firstName: "Аня",
                 color: "#5AC8FA"
               }
             ]
           },
           {
-            id: "2",
+            id: newTaskId(),
             name: "task 2",
             durationMins: 10,
             bgColor: "rgb(200, 200, 200)"
           },
           {
-            id: "3",
+            id: newTaskId(),
             name: "task 3",
             durationMins: 20,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: "1",
+                id: newAssigneId(),
                 firstName: "Аня",
                 color: "#5AC8FA"
               },
               {
-                id: "2",
+                id: newAssigneId(),
                 firstName: "Вітя",
                 color: "#4CD964"
               }
             ]
           },
           {
-            id: "4",
+            id: newTaskId(),
             name: "task 4",
             durationMins: 20,
             bgColor: "rgb(255, 149, 0)"
@@ -96,40 +111,40 @@ function getPlan(fromDate, toDate) {
     },
     {
       startTime: moment(fromDate).add(1, "hours").add(30, "minutes").valueOf(),
-      id: "job-3",
+      id: newJobId(),
       column: 1,
       techMap: {
-        id:"techmap-2",
+        id: newTechMapId(),
         name:"2",
         tintColor: "rgb(216, 216, 216)",
         tasks: [
           {
-            id: "1",
+            id: newTaskId(),
             name: "task 1",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "2",
+            id: newTaskId(),
             name: "task 2",
             durationMins: 40,
             bgColor: "rgb(200, 200, 200)"
           },
           {
-            id: "3",
+            id: newTaskId(),
             name: "task 3",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: "3",
+                id: newAssigneId(),
                 firstName: "Настя",
                 color: "#FFCC00"
               }
             ]
           },
           {
-            id: "4",
+            id: newTaskId(),
             name: "task 4",
             durationMins: 20,
             bgColor: "rgb(255, 149, 0)"
@@ -139,40 +154,40 @@ function getPlan(fromDate, toDate) {
     },
     {
       startTime: moment(fromDate).add(2, "hours").add(30, "minutes").valueOf(),
-      id: "job-4",
+      id: newJobId(),
       column: 2,
       techMap: {
-        id:"techmap-3",
+        id: newTechMapId(),
         name:"3",
         tintColor: "rgb(216, 216, 216)",
         tasks: [
           {
-            id: "1",
+            id: newTaskId(),
             name: "task 1",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)",
             assigned: [
               {
-                id: "3",
+                id: newAssigneId(),
                 firstName: "Настя",
                 color: "#FFCC00"
               }
             ]
           },
           {
-            id: "2",
+            id: newTaskId(),
             name: "task 2",
             durationMins: 10,
             bgColor: "rgb(200, 200, 200)"
           },
           {
-            id: "3",
+            id: newTaskId(),
             name: "task 3",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "4",
+            id: newTaskId(),
             name: "task 4",
             durationMins: 10,
             bgColor: "rgb(255, 149, 0)"
@@ -182,33 +197,33 @@ function getPlan(fromDate, toDate) {
     },
     {
       startTime: moment(fromDate).add(3, "hours").add(55, "minutes").valueOf(),
-      id: "job-5",
+      id: newJobId(),
       column: 7,
       techMap: {
-        id:"techmap-3",
+        id: newTechMapId(),
         name:"3",
         tintColor: "rgb(216, 216, 216)",
         tasks: [
           {
-            id: "1",
+            id: newTaskId(),
             name: "task 1",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "2",
+            id: newTaskId(),
             name: "task 2",
             durationMins: 10,
             bgColor: "rgb(200, 200, 200)"
           },
           {
-            id: "3",
+            id: newTaskId(),
             name: "task 3",
             durationMins: 30,
             bgColor: "rgb(216, 216, 216)"
           },
           {
-            id: "4",
+            id: newTaskId(),
             name: "task 4",
             durationMins: 10,
             bgColor: "rgb(255, 149, 0)"
@@ -217,6 +232,7 @@ function getPlan(fromDate, toDate) {
       }
     }
   ]
+  return plan
 }
 
 function getTechMaps() {
