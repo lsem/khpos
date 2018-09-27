@@ -11,6 +11,10 @@ function translateRectToOtherRect(rect, otherRect) {
   };
 }
 
+function rectCenter(rect) {
+  return { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 };
+}
+
 function posInRect(pos, rect) {
   return (
     pos.x > rect.left &&
@@ -107,8 +111,7 @@ export default class extends StateBase {
     this.stateActions.draggedRectChangedAction(
       this.draggedTechMapRectInTimeline
     );
-
-    const columnHit = this.findColumnUnderPos(cursorPos);
+    const columnHit = this.findColumnUnderPos(rectCenter(draggedTechMapRect));
 
     // Track hovered column
     if (columnHit !== this.lastColumnHit) {
