@@ -1,7 +1,7 @@
 import React from "react";
-import _ from "lodash";
 import moment from "moment";
 import "./AssignmentsTimeline.css";
+import _ from "lodash";
 
 function AssignmentsTimeline(props) {
   const { jobs, columnWidth, msToPixels, beginTime, endTime } = props;
@@ -52,20 +52,56 @@ function AssignmentsTimeline(props) {
     );
   };
 
+  const renderOverlaps = overlap => {
+    const style = {
+      backgroundColor: "rgb(255,77,77)",
+      top: msToPixels(overlap.top - beginTime),
+      height: msToPixels(overlap.bottom - overlap.top),
+      width: columnWidth + 10,
+      left: -5,
+      borderRadius: 3
+    };
+    console.log(style);
+    return <div style={style} className="assignmentsTimeSpan-overlap" />;
+  };
+
+  const findOverlaps = abw => {
+    const sorted = _.sortBy(_.values(abw), r1 => r1.startTime);
+    const overlaps = [];
+    if (sorted.length > 1) {
+      for (let i = 0; i < sorted.length - 1; ++i) {
+        if (sorted[i + 1].startTime < sorted[i].endTime) {
+          const overlapTop = sorted[i + 1].startTime;
+          const overlapBottom = Math.min(
+            sorted[i + 1].endTime,
+            sorted[i].endTime
+          );
+          overlaps.push({ top: overlapTop, bottom: overlapBottom });
+        }
+      }
+    }
+    return overlaps;
+  };
+
   const renderColumns = assignmentsByWorkers => {
     let left = 0;
+
     return _.map(assignmentsByWorkers, (abw, key) => {
       const columnStyle = {
         width: columnWidth,
         height: msToPixels(endTime - beginTime)
         //left: left += columnWidth
       };
+
+      const overlaps = findOverlaps(abw);
+
       return (
         <div
           className="assignmentsTimelineColumn"
           style={columnStyle}
           key={key}
         >
+          {_.map(overlaps, o => renderOverlaps(o))}
           {_.map(abw, a => renderAssignmentTimeSpan(a))}
         </div>
       );

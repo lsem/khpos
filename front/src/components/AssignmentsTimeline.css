@@ -14,3 +14,17 @@
   border: 1px solid #00000022;
   position: absolute;
 }
+
+@-webkit-keyframes alertPulse {
+  0% {background-color: rgb(255,77,77); opacity: 1;}
+  50% {background-color: rgb(255,77,77); opacity: 0.4; }
+  100% {background-color: rgb(255,77,77); opacity: 1;}
+}
+
+.assignmentsTimeSpan-overlap {
+  box-sizing: border-box;
+  position: absolute;
+  animation: alertPulse 1s ease-out;
+  animation-iteration-count: infinite;
+}
+
