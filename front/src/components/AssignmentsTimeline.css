@@ -15,7 +15,7 @@
   position: absolute;
 }
 
-@-webkit-keyframes alertPulse {
+@keyframes alertPulse {
   0% {background-color: rgb(255,77,77); opacity: 1;}
   50% {background-color: rgb(255,77,77); opacity: 0.4; }
   100% {background-color: rgb(255,77,77); opacity: 1;}
