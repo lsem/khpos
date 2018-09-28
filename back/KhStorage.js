@@ -2,6 +2,7 @@ const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
 let debug = require("debug")("khstorage");
 const sampleData = require("./sampleData");
+let appErrors = require("./AppErrors");
 
 const STATE_CONNECTED = "state-connected";
 const STATE_DISCONNECTED = "state-disconnected";
@@ -38,8 +39,7 @@ class KhStorage {
   }
 
   async insertJob(jobModel) {
-    console.log('INSETING INTO STORAGE');
-    return this.db.collection("plan").insertOne(jobModel);
+    await this.db.collection("plan").insertOne(jobModel);
   }
 
   async getPlan(dateFrom, dateTo) {
@@ -48,6 +48,18 @@ class KhStorage {
       .find({}, { fields: { _id: 0 } })
       .toArray();*/
     return await sampleData.getPlan(dateFrom, dateTo);
+  }
+
+  async getJobs(dateFrom, dateTo) {
+    /*return await this.db
+      .collection("plan")
+      .find({}, { fields: { _id: 0 } })
+      .toArray();*/
+    return await sampleData.getPlan(dateFrom, dateTo);
+  }
+
+  async getJobById(id) {
+    return await this.db.collection("plan").findOne({id: id});
   }
 
   async getTechMaps() {
@@ -83,7 +95,10 @@ class KhStorage {
         this.onConnectedCb();
       })
       .catch(err => {
-        debug("failed connecting to mongo, reconnect in %d milliseconds", this.reconnect_timeout);
+        debug(
+          "failed connecting to mongo, reconnect in %d milliseconds",
+          this.reconnect_timeout
+        );
         setTimeout(() => this._initiateConnect(), this.reconnect_timeout);
       });
   }

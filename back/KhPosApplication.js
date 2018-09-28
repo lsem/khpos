@@ -68,6 +68,7 @@ class KhPosApplication {
     this.storage = storage;
     this.posterProxyService = posterProxyService;
     this._storageConnected = false;
+    this.onErrorCb = (err) => debug('Default error handler: %o', err);
   }
 
   connectedToStorage() {
@@ -122,18 +123,27 @@ class KhPosApplication {
     });
   }
 
+  async getJobs(fromDate, toDate) {
+    return await this.storage.getJobs(fromDate, toDate);
+  }
+
   async insertJob(jobModel) {
-    console.log("validating: ", jobModel);
-    return joi
-      .validate(jobModel, jobModelSchema)
-      .then(model => {
-        console.log("inserting: ", model);
-        return this.storage.insertJob(model);
-      })
-      .catch(err => {
-        console.log("err: ", err.message);
-        throw new appErrors.InvalidModelError(err.message);
-      });
+    const model = await joi.validate(jobModel, jobModelSchema);
+    await this.storage.insertJob(model);
+    return model.id;
+  }
+
+  async getJob(jobId) {
+    // todo: consider move to web app this validation
+    // todo: handle errors.
+    const id = await joi.validate(
+      jobId,
+      joi
+        .string()
+        .regex(jobIdRegExp)
+        .required()
+    );
+    return await this.storage.getJobById(id);
   }
 
   async setPlan(fromDate, toDate, plan) {
