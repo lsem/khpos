@@ -4,3 +4,4 @@ BUG3: [DND] Fix sloppy swaps.
 BUG4: [DND] after techmap left drop area drop becomes impossible.
 
 FEATURE: Assignments dragging
+FEATURE: Span dragging to existing jobs.
