@@ -5,9 +5,35 @@ import "./App.css";
 import axios from "axios";
 import HTML5Backend from "react-dnd-html5-backend";
 import { DragDropContext } from "react-dnd";
-import TimelineScreen from './components/PlanScreen';
+import TimelineScreen from "./components/PlanScreen";
 import moment from "moment";
-import 'moment/locale/uk';
+import "moment/locale/uk";
+import Switch from "react-switch";
+
+class InmemApiSwitch extends Component {
+  constructor() {
+    super();
+    this.state = { checked: false };
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(checked) {
+    this.setState({ checked });
+  }
+
+  render() {
+    return (
+      <label htmlFor="normal-switch">
+        <span>Switch with default style</span>
+        <Switch
+          onChange={this.handleChange}
+          checked={this.state.checked}
+          id="normal-switch"
+        />
+      </label>
+    );
+  }
+}
 
 function ProductListItem(props) {
   return (
@@ -114,8 +140,13 @@ class StockList extends Component {
 class App extends Component {
   constructor(props) {
     super(props);
-    
     moment.locale("uk");
+    this.state = { inMem: false };
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(checked) {
+    this.setState({ inMem: checked });
   }
 
   render() {
@@ -123,11 +154,25 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
+            <Switch
+              onChange={this.handleChange}
+              checked={this.state.inMem}
+              onHandleColor="#2693e6"
+              handleDiameter={20}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={20}
+              width={48}
+              className="inmem-switch"
+              id="material-switch"
+            />
         </header>
         <div className="AppBody">
           {/* <ProductList />
           <StockList /> */}
-          <TimelineScreen pixelsPerMinute={2}/>
+          <TimelineScreen pixelsPerMinute={2} />
         </div>
       </div>
     );
