@@ -66,9 +66,10 @@ function errorHandler(err, req, res, next) {
 }
 
 class KhPosWebApplication {
-  constructor(config, khApp) {
+  constructor(config, khApp, inMemApp) {
     this.port = config.port;
     this.khApp = khApp;
+    this.inMemApp = inMemApp;
     this.khApp.onError(what => {
       this.error = what;
     });
@@ -84,8 +85,29 @@ class KhPosWebApplication {
     this.app.patch("/plan", this.patchPlan.bind(this));
     this.app.get("/techmaps", this.getTechMaps.bind(this));
     this.app.get("/staff", this.getStaff.bind(this));
+    this.app.get("/jobs", this.getJobs.bind(this));
+    this.app.get("/jobs/:id", this.getJob.bind(this));
+    this.app.post("/jobs", this.postJobs.bind(this));
+    this.app.patch("/jobs", this.patchJobs.bind(this));
+
+    // TODO: Disable this router for production release.
+    this.inmemRouter = express.Router();
+    this.inmemRouter.use((req, res, next) => {
+      req.headers["inmem"] = true;
+      next();
+    });
+    this.inmemRouter.get("/jobs", this.getJobs.bind(this));
+    this.inmemRouter.get("/jobs/:id", this.getJob.bind(this));
+    this.inmemRouter.post("/jobs", this.postJobs.bind(this));
+    this.inmemRouter.patch("/jobs", this.patchJobs.bind(this));
+    this.app.use("/inmem/", this.inmemRouter);
+
     // Warning: Error handler must go after everything else.
     this.app.use(errorHandler);
+  }
+
+  getApp(req) {
+    return req.headers["inmem"] ? this.inMemApp : this.khApp;
   }
 
   start() {
@@ -108,9 +130,55 @@ class KhPosWebApplication {
   }
 
   //
+  // GET /jobs
+  //
+  getJobs(req, res, next) {
+    let fromDate = tryParseTimeStamp(req.query.fromDate);
+    if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
+    let toDate = tryParseTimeStamp(req.query.toDate);
+    if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
+    this.getApp(req)
+      .getJobs(fromDate, toDate)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+  //
+  // GET /job
+  //
+  getJob(req, res, next) {
+    debug(req.params.id);
+    this.getApp(req)
+      .getJob(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+  //
+  // POST /jobs
+  //
+  postJobs(req, res, next) {
+    debug("body: %O", req.body);
+    this.getApp(req)
+      .insertJob(req.body)
+      .then(id =>
+        res
+          .status(204)
+          .location("/jobs/" + id)
+          .send()
+      )
+      .catch(err => next(err));
+  }
+  //
+  // PATCH /jobs
+  //
+  patchJobs(req, res, next) {
+    throw new appErrors.NotImplementedError("PATCH /jobs not implemented yet");
+  }
+
+  //
   // GET /plan
   //
   getPlan(req, res, next) {
+    debug("WARNING: /plan API is deprecated. Use /jobs instead");
     let fromDate = tryParseTimeStamp(req.query.fromDate);
     if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
     let toDate = tryParseTimeStamp(req.query.toDate);
@@ -125,26 +193,24 @@ class KhPosWebApplication {
   // POST /plan
   //
   postPlan(req, res, next) {
+    debug("WARNING: /plan API is deprecated. Use /jobs instead");
     debug("body: %O", req.body);
+    let fromDate = tryParseTimeStamp(req.body.from);
+    if (!fromDate) throw new InvalidArgError("from", req.body.from);
+    let toDate = tryParseTimeStamp(req.body.to);
+    if (!toDate) throw new InvalidArgError("to", req.body.to);
+    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
     this.khApp
-      .insertJob(req.body)
-      .then(() => res.status(204).send())
+      .setPlan(fromDate, toDate, req.body.data)
+      .then(() => res.status(204))
       .catch(err => next(err));
-    // let fromDate = tryParseTimeStamp(req.body.from);
-    // if (!fromDate) throw new InvalidArgError("from", req.body.from);
-    // let toDate = tryParseTimeStamp(req.body.to);
-    // if (!toDate) throw new InvalidArgError("to", req.body.to);
-    // // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
-    // this.khApp
-    //   .setPlan(fromDate, toDate, req.body.data)
-    //   .then(() => res.status(204))
-    //   .catch(err => next(err));
   }
 
   //
   // PATCH /plan
   //
   patchPlan(req, res, next) {
+    debug("WARNING: /plan API is deprecated. Use /jobs instead");
     debug("body: %O", req.body);
     let fromDate = tryParseTimeStamp(req.body.from);
     if (!fromDate) throw new InvalidArgError("from", req.body.from);
