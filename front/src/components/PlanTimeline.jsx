@@ -169,7 +169,7 @@ class PlanTimeline extends React.Component {
     const jobsByCols = _.groupBy(this.props.jobs, job => job.column);
     // generate empty columns for which we have no data yet.
     const availableColumns = _.map(this.props.jobs, job => job.column);
-    const maxColumn = _.max([7, _.max(availableColumns)]);
+    const maxColumn = _.max([7, _.max(availableColumns) + 2]);
     for (let i = 0; i < maxColumn; ++i) {
       jobsByCols[i] = jobsByCols[i] || [];
     }
