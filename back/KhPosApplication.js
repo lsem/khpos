@@ -44,12 +44,12 @@ const jobModelSchema = joi.object().keys({
     .required(),
   startTime: [
     joi
-      .date()
-      .iso()
+      //.date()
+      //.iso()
       .required(),
     joi
-      .date()
-      .timestamp("unix")
+      //.date()
+      //.timestamp("unix")
       .required()
   ],
   column: joi

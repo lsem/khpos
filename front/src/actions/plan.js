@@ -6,6 +6,8 @@ import {
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
   INSERT_JOB,
+  INSERT_JOB_COMMIT,
+  INSERT_JOB_ROLLBACK,
   SWAP_JOBS
 } from "./types";
 
@@ -19,7 +21,7 @@ export const setTimeSpan = (fromDate, toDate) => {
 export const requestJobs = (fromDate, toDate) => {
   return dispatch => {
     axios
-      .get(`${getApi()}/plan`, {
+      .get(`${getApi()}/inmem/jobs`, {
         params: {
           fromDate: moment(fromDate).toISOString(),
           toDate: moment(toDate).toISOString()
@@ -46,14 +48,22 @@ export function moveJob(jobId, column, timeMinutes) {
   };
 }
 
-export function insertJob(jobId, techMap, column, timeMinutes) {
+export function insertJob(jobId, techMap, column, startTime) {
+  const payload = {
+    id: `JOB-${jobId}`,
+    techMap,
+    column,
+    startTime 
+  }
   return {
     type: INSERT_JOB,
-    payload: {
-      jobId: jobId,
-      techMap: techMap,
-      column: column,
-      timeMinutes: timeMinutes
+    payload,
+    meta: {
+      offline: {
+        effect: { url: `${getApi()}/inmem/jobs`, method: 'POST', data: payload },
+        commit: { type: INSERT_JOB_COMMIT },
+        rollback: { type: INSERT_JOB_ROLLBACK, meta: { id: payload.id } }
+      }
     }
   };
 }

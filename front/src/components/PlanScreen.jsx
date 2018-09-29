@@ -122,7 +122,9 @@ class PlanScreen extends React.Component {
       uuid.v1(),
       techMap,
       column,
-      this.pixelsToMins(offsetInPixels)
+      moment(this.props.timelineBeginTime)
+      .add(this.pixelsToMins(offsetInPixels), "minutes")
+      .valueOf()
     );
   }
   draggedRectChangedAction(rect) {

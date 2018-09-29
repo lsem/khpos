@@ -6,7 +6,9 @@ import {
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
   INSERT_JOB,
-  SWAP_JOBS
+  SWAP_JOBS,
+  INSERT_JOB_COMMIT,
+  INSERT_JOB_ROLLBACK
 } from "../actions/types";
 
 const initialState = {
@@ -56,19 +58,22 @@ export default function plan(state = initialState, action) {
     // INSERT_JOB
     //
     case INSERT_JOB: {
-      const startTime = moment(state.fromDate)
-        .add(action.payload.timeMinutes, "minutes")
-        .valueOf();
-      const newJob = {
-        id: action.payload.jobId,
-        column: action.payload.column,
-        startTime: startTime,
-        techMap: action.payload.techMap
-      };
       return {
         ...state,
-        jobs: [...state.jobs, newJob]
+        jobs: [...state.jobs, action.payload]
       };
+    }
+
+    case INSERT_JOB_COMMIT: {
+      console.log("JOB COMMITED");
+      return state;
+    }
+
+    case INSERT_JOB_ROLLBACK: {
+      return {
+        ...state,
+        jobs: state.jobs.filter(j => j.id != action.payload.id)
+      }
     }
     //
     // SWAP_JOBS

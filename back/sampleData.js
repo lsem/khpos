@@ -242,30 +242,30 @@ function getPlan(fromDate, toDate) {
 function getTechMaps() {
   return [
     {
-      id: "techmap-1",
+      id: newTechMapId(),
       name: "Хліб",
       tintColor: "rgb(216, 216, 216)",
       tasks: [
         {
-          id: "1",
+          id: newTaskId(),
           name: "task 1",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "2",
+          id: newTaskId(),
           name: "task 2",
           durationMins: 10,
           bgColor: "rgb(200, 200, 200)"
         },
         {
-          id: "3",
+          id: newTaskId(),
           name: "task 3",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "4",
+          id: newTaskId(),
           name: "task 4",
           durationMins: 10,
           bgColor: "rgb(255, 149, 0)"
@@ -273,30 +273,30 @@ function getTechMaps() {
       ]
     },
     {
-      id: "techmap-2",
+      id: newTechMapId(),
       name: "Круасан",
       tintColor: "rgb(216, 216, 216)",
       tasks: [
         {
-          id: "1",
+          id: newTaskId(),
           name: "task 1",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "2",
+          id: newTaskId(),
           name: "task 2",
           durationMins: 40,
           bgColor: "rgb(200, 200, 200)"
         },
         {
-          id: "3",
+          id: newTaskId(),
           name: "task 3",
           durationMins: 60,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "4",
+          id: newTaskId(),
           name: "task 4",
           durationMins: 20,
           bgColor: "rgb(255, 149, 0)"
@@ -304,30 +304,30 @@ function getTechMaps() {
       ]
     },
     {
-      id: "techmap-3",
+      id: newTechMapId(),
       name: "Багет",
       tintColor: "rgb(216, 216, 216)",
       tasks: [
         {
-          id: "1",
+          id: newTaskId(),
           name: "task 1",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "2",
+          id: newTaskId(),
           name: "task 2",
           durationMins: 40,
           bgColor: "rgb(200, 200, 200)"
         },
         {
-          id: "3",
+          id: newTaskId(),
           name: "task 3",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "4",
+          id: newTaskId(),
           name: "task 4",
           durationMins: 20,
           bgColor: "rgb(255, 149, 0)"
@@ -335,30 +335,30 @@ function getTechMaps() {
       ]
     },
     {
-      id: "techmap-4",
+      id: newTechMapId(),
       name: "Деніш",
       tintColor: "rgb(216, 216, 216)",
       tasks: [
         {
-          id: "1",
+          id: newTaskId(),
           name: "task 1",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "2",
+          id: newTaskId(),
           name: "task 2",
           durationMins: 40,
           bgColor: "rgb(200, 200, 200)"
         },
         {
-          id: "3",
+          id: newTaskId(),
           name: "task 3",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "4",
+          id: newTaskId(),
           name: "task 4",
           durationMins: 20,
           bgColor: "rgb(255, 149, 0)"
@@ -366,30 +366,30 @@ function getTechMaps() {
       ]
     },
     {
-      id: "techmap-5",
+      id: newTechMapId(),
       name: "Хліб Бородінський",
       tintColor: "rgb(216, 216, 216)",
       tasks: [
         {
-          id: "1",
+          id: newTaskId(),
           name: "task 1",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "2",
+          id: newTaskId(),
           name: "task 2",
           durationMins: 40,
           bgColor: "rgb(200, 200, 200)"
         },
         {
-          id: "3",
+          id: newTaskId(),
           name: "task 3",
           durationMins: 30,
           bgColor: "rgb(216, 216, 216)"
         },
         {
-          id: "4",
+          id: newTaskId(),
           name: "task 4",
           durationMins: 20,
           bgColor: "rgb(255, 149, 0)"
