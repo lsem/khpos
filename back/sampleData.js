@@ -402,17 +402,17 @@ function getTechMaps() {
 function getStaff() {
   return [
     {
-      id: "1",
+      id: aniaAssigneId,
       firstName: "Аня",
       color: "#5AC8FA"
     },
     {
-      id: "2",
+      id: vitiaAssigneId,
       firstName: "Вітя",
       color: "#4CD964"
     },
     {
-      id: "3",
+      id: nastiaAssigneId,
       firstName: "Настя",
       color: "#FFCC00"
     }

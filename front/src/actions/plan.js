@@ -21,7 +21,7 @@ export const setTimeSpan = (fromDate, toDate) => {
 export const requestJobs = (fromDate, toDate) => {
   return dispatch => {
     axios
-      .get(`${getApi()}/inmem/jobs`, {
+      .get(`${getApi()}/jobs`, {
         params: {
           fromDate: moment(fromDate).toISOString(),
           toDate: moment(toDate).toISOString()
@@ -60,7 +60,7 @@ export function insertJob(jobId, techMap, column, startTime) {
     payload,
     meta: {
       offline: {
-        effect: { url: `${getApi()}/inmem/jobs`, method: 'POST', data: payload },
+        effect: { url: `${getApi()}/jobs`, method: 'POST', data: payload },
         commit: { type: INSERT_JOB_COMMIT },
         rollback: { type: INSERT_JOB_ROLLBACK, meta: { id: payload.id } }
       }
