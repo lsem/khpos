@@ -8,7 +8,9 @@ import {
   INSERT_JOB,
   SWAP_JOBS,
   INSERT_JOB_COMMIT,
-  INSERT_JOB_ROLLBACK
+  INSERT_JOB_ROLLBACK,
+  TECHMAPS_REQUEST_SUCCEEDED,
+  STAFF_REQUEST_SUCCEEDED
 } from "../actions/types";
 
 const initialState = {
@@ -18,7 +20,9 @@ const initialState = {
   toDate: moment()
     .endOf("day")
     .valueOf(),
-  jobs: []
+  jobs: [],
+  techMaps: [],
+  staff: []
 };
 
 export default function plan(state = initialState, action) {
@@ -97,6 +101,22 @@ export default function plan(state = initialState, action) {
         ...state,
         jobs: updatedJobs
       };
+    }
+    
+    //
+    // TECHMAPS_REQUEST
+    //
+    case TECHMAPS_REQUEST_SUCCEEDED: return {
+      ...state, 
+      techMaps: action.techMaps
+    }
+
+    //
+    // STAFF_REQUEST
+    //
+    case STAFF_REQUEST_SUCCEEDED: return {
+      ...state,
+      staff: action.staff
     }
 
     default:

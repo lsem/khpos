@@ -371,8 +371,8 @@ const mapStateToProps = state => {
     timelineBeginTime: state.plan.fromDate,
     timelineEndTime: state.plan.toDate,
     jobs: state.plan.jobs,
-    techMaps: state.techMaps,
-    staff: state.staff
+    techMaps: state.plan.techMaps,
+    staff: state.plan.staff
   };
 };
 
