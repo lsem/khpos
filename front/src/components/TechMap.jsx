@@ -1,6 +1,6 @@
 import "./TechMap.css";
 import React from "react";
-import { DragSource, DropTarget } from "react-dnd";
+import { DragSource } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import _ from "lodash";
 import classNames from "classnames";
@@ -54,7 +54,7 @@ class TechMap extends React.Component {
   }
 
   render() {
-    const { connectDropTarget, connectDragSource, isDragging } = this.props;
+    const { connectDragSource, isDragging } = this.props;
     const techMapStyle = {
       width: this.props.width,
       backgroundColor: this.props.isOver ? "red" : this.props.tintColor,

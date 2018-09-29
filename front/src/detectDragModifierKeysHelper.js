@@ -2,8 +2,6 @@
 
 import pick from "lodash/pick";
 import bindAll from "lodash/bindAll";
-import React from "react";
-import ReactDOM from "react-dom";
 
 const MODIFIER_KEYS = ["ctrlKey", "shiftKey", "altKey", "metaKey"];
 

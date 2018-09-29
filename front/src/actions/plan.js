@@ -53,14 +53,14 @@ export function insertJob(jobId, techMap, column, startTime) {
     id: `JOB-${jobId}`,
     techMap,
     column,
-    startTime 
-  }
+    startTime
+  };
   return {
     type: INSERT_JOB,
     payload,
     meta: {
       offline: {
-        effect: { url: `${getApi()}/jobs`, method: 'POST', data: payload },
+        effect: { url: `${getApi()}/jobs`, method: "POST", data: payload },
         commit: { type: INSERT_JOB_COMMIT },
         rollback: { type: INSERT_JOB_ROLLBACK, meta: { id: payload.id } }
       }

@@ -1,5 +1,4 @@
 import React from "react";
-import moment from "moment";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
 import TechMapView from "./TechMap";
@@ -129,7 +128,6 @@ class PlanTimeline extends React.Component {
   }
 
   renderHover() {
-    return null;
     const draggedViewRect = this.props.techMapPreviewHoverRect;
     const topLineY = draggedViewRect.top;
     const bottomLineY = draggedViewRect.top + draggedViewRect.height - 1;
@@ -227,7 +225,7 @@ class PlanTimeline extends React.Component {
       let className = classNames({
         PlanTimelineColumn: true,
         "PlanTimelineColumn--isover": this.props.canDrop,
-        "PlanTimelineColumn--hovered": column == this.props.hoverColumn,
+        "PlanTimelineColumn--hovered": column === this.props.hoverColumn
       });
       return (
         <div
@@ -257,7 +255,7 @@ class PlanTimeline extends React.Component {
         ref={this.props.onSchedulerTimelineDomNodeRefUpdate}
       >
         {this.renderColumns()}
-        {this.props.presentTechMapHover ? this.renderHover() : null}
+        {this.props.presentTechMapHover && false ? this.renderHover() : null}
       </div>
     );
   }

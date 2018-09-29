@@ -12,7 +12,6 @@ import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
 import _ from "lodash";
 import uuid from "uuid";
 import {
-  getJobs,
   requestJobs,
   requestTechMaps,
   requestStaff,

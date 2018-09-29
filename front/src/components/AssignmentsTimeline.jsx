@@ -83,7 +83,6 @@ function AssignmentsTimeline(props) {
   };
 
   const renderColumns = assignmentsByWorkers => {
-    let left = 0;
 
     return _.map(assignmentsByWorkers, (abw, key) => {
       const columnStyle = {

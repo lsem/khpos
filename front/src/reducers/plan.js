@@ -72,7 +72,7 @@ export default function plan(state = initialState, action) {
     case INSERT_JOB_ROLLBACK: {
       return {
         ...state,
-        jobs: state.jobs.filter(j => j.id != action.payload.id)
+        jobs: state.jobs.filter(j => j.id !== action.payload.id)
       }
     }
     //
