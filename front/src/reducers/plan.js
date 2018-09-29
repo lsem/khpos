@@ -7,7 +7,6 @@ import {
   MOVE_JOB,
   INSERT_JOB,
   SWAP_JOBS,
-  INSERT_JOB_COMMIT,
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
   STAFF_REQUEST_SUCCEEDED
@@ -66,11 +65,6 @@ export default function plan(state = initialState, action) {
         ...state,
         jobs: [...state.jobs, action.payload]
       };
-    }
-
-    case INSERT_JOB_COMMIT: {
-      console.log("JOB COMMITED");
-      return state;
     }
 
     case INSERT_JOB_ROLLBACK: {
