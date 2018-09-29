@@ -100,6 +100,11 @@ class KhPosWebApplication {
     this.inmemRouter.get("/jobs/:id", this.getJob.bind(this));
     this.inmemRouter.post("/jobs", this.postJobs.bind(this));
     this.inmemRouter.patch("/jobs", this.patchJobs.bind(this));
+    this.inmemRouter.get("/plan", this.getPlan.bind(this));
+    this.inmemRouter.post("/plan", this.postPlan.bind(this));
+    this.inmemRouter.patch("/plan", this.patchPlan.bind(this));
+    this.inmemRouter.get("/techmaps", this.getTechMaps.bind(this));
+    this.inmemRouter.get("/staff", this.getStaff.bind(this));
     this.app.use("/inmem/", this.inmemRouter);
 
     // Warning: Error handler must go after everything else.

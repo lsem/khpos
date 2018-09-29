@@ -9,6 +9,7 @@ import TimelineScreen from "./components/PlanScreen";
 import moment from "moment";
 import "moment/locale/uk";
 import Switch from "react-switch";
+import { setApiMode } from "./api";
 
 function ProductListItem(props) {
   return (
@@ -121,6 +122,7 @@ class App extends Component {
   }
 
   handleChange(checked) {
+    setApiMode(checked);
     this.setState({ inMem: checked });
   }
 
@@ -129,29 +131,34 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
-            <Switch
-              onChange={this.handleChange}
-              checked={this.state.inMem}
-              onHandleColor="#2693e6"
-              handleDiameter={20}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={20}
-              width={48}
-              className="inmem-switch"
-              id="material-switch"
-            />
+          <Switch
+            onChange={this.handleChange}
+            checked={this.state.inMem}
+            onHandleColor="#2693e6"
+            handleDiameter={20}
+            uncheckedIcon={false}
+            checkedIcon={false}
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            height={20}
+            width={48}
+            className="inmem-switch"
+            id="material-switch"
+          />
         </header>
         <div className="AppBody">
           {/* <ProductList />
           <StockList /> */}
-          <TimelineScreen pixelsPerMinute={2} inMemApi={this.state.inMem}/>
+          <TimelineScreen
+            pixelsPerMinute={2}
+            // inMem used as a key since whenever it changes,
+            // components receive componentDidMount and can reload
+            // data from new endpoint
+            key={this.state.inMem}
+          />
         </div>
       </div>
     );
   }
 }
-
 export default DragDropContext(HTML5Backend)(App);
