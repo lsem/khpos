@@ -1,12 +1,12 @@
 import moment from "moment";
 import axios from "axios";
+import uuid from "uuid";
 import { getApi } from "../api";
 import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
   INSERT_JOB,
-  INSERT_JOB_COMMIT,
   INSERT_JOB_ROLLBACK,
   SWAP_JOBS
 } from "./types";
@@ -48,9 +48,9 @@ export function moveJob(jobId, column, timeMinutes) {
   };
 }
 
-export function insertJob(jobId, techMap, column, startTime) {
+export function insertJob(techMap, column, startTime) {
   const payload = {
-    id: `JOB-${jobId}`,
+    id: `JOB-${uuid.v1()}`,
     techMap,
     column,
     startTime
@@ -61,7 +61,6 @@ export function insertJob(jobId, techMap, column, startTime) {
     meta: {
       offline: {
         effect: { url: `${getApi()}/jobs`, method: "POST", data: payload },
-        commit: { type: INSERT_JOB_COMMIT },
         rollback: { type: INSERT_JOB_ROLLBACK, meta: { id: payload.id } }
       }
     }

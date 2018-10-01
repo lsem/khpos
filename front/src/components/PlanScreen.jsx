@@ -10,7 +10,6 @@ import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
 import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
 import _ from "lodash";
-import uuid from "uuid";
 import {
   requestJobs,
   requestTechMaps,
@@ -118,7 +117,6 @@ class PlanScreen extends React.Component {
     const techMap = _.find(this.props.techMaps, tm => tm.id === techMapId);
     console.assert(techMap);
     this.props.insertJob(
-      uuid.v1(),
       techMap,
       column,
       moment(this.props.timelineBeginTime)
@@ -371,8 +369,8 @@ const mapStateToProps = state => {
     timelineBeginTime: state.plan.fromDate,
     timelineEndTime: state.plan.toDate,
     jobs: state.plan.jobs,
-    techMaps: state.techMaps,
-    staff: state.staff
+    techMaps: state.plan.techMaps,
+    staff: state.plan.staff
   };
 };
 
@@ -384,8 +382,8 @@ const mapDispatchToProps = dispatch => {
     moveJob: (jobId, column, timeMinutes) =>
       dispatch(moveJob(jobId, column, timeMinutes)),
     // todo: consider using normalized state instead of techMap object
-    insertJob: (jobId, techMap, column, timeMinutes) =>
-      dispatch(insertJob(jobId, techMap, column, timeMinutes)),
+    insertJob: (techMap, column, startTime) =>
+      dispatch(insertJob(techMap, column, startTime)),
     swapJobs: (draggedJob, neighbourJob) =>
       dispatch(swapJobs(draggedJob, neighbourJob))
   };
