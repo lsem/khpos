@@ -39,6 +39,17 @@ class KhStorage {
       .toArray();
   }
 
+  async getAllJobs() {
+    return this.db
+      .collection("jobs")
+      .find()
+      .toArray();
+  }
+
+  async updateJobById(id, model) {
+    return await this.db.collection("jobs").update({ id: id }, model);
+  }
+
   async getJobById(id) {
     return await this.db.collection("jobs").findOne({ id: id });
   }

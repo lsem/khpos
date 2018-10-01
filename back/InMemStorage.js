@@ -29,7 +29,15 @@ class InMemStorage {
   }
 
   async getJobById(id) {
-    return _.filter(_this.jobs, job => job.id === id);
+    return _.filter(this.jobs, job => job.id === id);
+  }
+
+  async updateJobById(id, model) {
+    const index = _.findIndex(this.jobs, job => job.id === id);
+    if (index === -1) {
+      throw new appErrors.NotFoundError(id);
+    }
+    this.jobs.splice(index, 1, model);
   }
 
   async getTechMaps() {

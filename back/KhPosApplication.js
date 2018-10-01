@@ -125,6 +125,9 @@ class KhPosApplication {
   }
 
   async getJobs(fromDate, toDate) {
+    if (!fromDate || !toDate) {
+      return await this.storage.getAllJobs();
+    }
     return await this.storage.getJobs(fromDate, toDate);
   }
 
@@ -132,6 +135,11 @@ class KhPosApplication {
     const model = await joi.validate(jobModel, jobModelSchema);
     await this.storage.insertJob(model);
     return model.id;
+  }
+
+  async updateJob(id, jobModel) {
+    const model = await joi.validate(jobModel, jobModelSchema);
+    await this.storage.updateJobById(id, model);
   }
 
   async getJob(jobId) {

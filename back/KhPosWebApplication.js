@@ -30,6 +30,10 @@ function asDate(value) {
 }
 
 function tryParseTimeStamp(value) {
+  if (!value) {
+    return undefined;
+  }
+  console.log('value: ', value)
   let iso8601ts = moment(value);
   if (moment(iso8601ts).isValid(iso8601ts)) {
     debug("parsed as iso8601: " + iso8601ts);
@@ -89,6 +93,7 @@ class KhPosWebApplication {
     this.app.get("/jobs/:id", this.getJob.bind(this));
     this.app.post("/jobs", this.postJobs.bind(this));
     this.app.patch("/jobs", this.patchJobs.bind(this));
+    this.app.patch("/jobs/:id", this.patchJob.bind(this));
 
     // TODO: Disable this router for production release.
     this.inmemRouter = express.Router();
@@ -138,10 +143,14 @@ class KhPosWebApplication {
   // GET /jobs
   //
   getJobs(req, res, next) {
-    let fromDate = tryParseTimeStamp(req.query.fromDate);
-    if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
-    let toDate = tryParseTimeStamp(req.query.toDate);
-    if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
+    let fromDate = null, toDate = null;
+    // Without from and to date return all documents.
+    if (req.query.fromDate && req.query.toDate) {
+      fromDate = tryParseTimeStamp(req.query.fromDate);
+      if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
+      toDate = tryParseTimeStamp(req.query.toDate);
+      if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
+    }
     this.getApp(req)
       .getJobs(fromDate, toDate)
       .then(data => res.send(data))
@@ -177,6 +186,13 @@ class KhPosWebApplication {
   //
   patchJobs(req, res, next) {
     throw new appErrors.NotImplementedError("PATCH /jobs not implemented yet");
+  }
+
+  patchJob(req, res, next) {
+    debug(req.params.id);
+    this.getApp(req).updateJob(req.params.id, req.body)
+    .then(() => res.status(200).send())
+    .catch(err => next(err))
   }
 
   //
