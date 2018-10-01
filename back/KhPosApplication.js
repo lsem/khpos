@@ -1,6 +1,7 @@
 let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
+const moment = require('moment');
 
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -44,12 +45,12 @@ const jobModelSchema = joi.object().keys({
     .required(),
   startTime: [
     joi
-      //.date()
-      //.iso()
+      .date()
+      .iso()
       .required(),
     joi
-      //.date()
-      //.timestamp("unix")
+      .date()
+      .timestamp()
       .required()
   ],
   column: joi

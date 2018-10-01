@@ -5,6 +5,7 @@ import TechMapView from "./TechMap";
 import _ from "lodash";
 import "./PlanTimeline.css";
 import DragItemTypes from "../dragItemTypes";
+import moment from 'moment';
 
 const msToMins = ms => ms / (1000 * 60);
 
@@ -184,7 +185,7 @@ class PlanTimeline extends React.Component {
     // columns that fit into this component.
     // We can consider employing logic when this component reports
     // columns count it can render without horizontal scolling (or may be more).
-    const jobDuration = j => j.startTime - this.props.beginTime;
+    const jobDuration = j => moment(j.startTime).valueOf() - moment(this.props.beginTime).valueOf();
     const jobTop = j => this.props.minsToPixels(msToMins(jobDuration(j)));
     const jobsByCols = this.getColumnsTechmaps();
     return _.keys(jobsByCols).map(column => {

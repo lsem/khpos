@@ -10,7 +10,7 @@ function AssignmentsTimeline(props) {
     let assignmentsByWorkers = {};
 
     _.forEach(jobs, j => {
-      let startTime = j.startTime;
+      let startTime = moment(j.startTime).valueOf();
 
       _.forEach(j.techMap.tasks, t => {
         let end = moment(startTime)
@@ -69,8 +69,8 @@ function AssignmentsTimeline(props) {
     const overlaps = [];
     if (sorted.length > 1) {
       for (let i = 0; i < sorted.length - 1; ++i) {
-        if (sorted[i + 1].startTime < sorted[i].endTime) {
-          const overlapTop = sorted[i + 1].startTime;
+        if (moment(sorted[i + 1].startTime).valueOf() < moment(sorted[i].endTime).valueOf()) {
+          const overlapTop = moment(sorted[i + 1].startTime).valueOf();
           const overlapBottom = Math.min(
             sorted[i + 1].endTime,
             sorted[i].endTime

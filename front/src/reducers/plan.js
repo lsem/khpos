@@ -91,8 +91,8 @@ export default function plan(state = initialState, action) {
       );
       console.assert(neighbourJob);
       const t = neighbourJob.startTime;
-      neighbourJob.startTime = draggedJob.startTime;
-      draggedJob.startTime = t;
+      neighbourJob.startTime = moment(draggedJob.startTime).valueOf();
+      draggedJob.startTime = moment(t).valueOf();
       return {
         ...state,
         jobs: updatedJobs

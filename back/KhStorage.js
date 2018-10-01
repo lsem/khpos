@@ -28,38 +28,19 @@ class KhStorage {
     this._initiateConnect();
   }
 
-  planCollection() {
-    return this.db.collection("plan");
-  }
-
-  async planItem() {
-    return await this.db.collection("plan").insertOne({
-      bread: 1
-    });
-  }
-
   async insertJob(jobModel) {
-    await this.db.collection("plan").insertOne(jobModel);
-  }
-
-  async getPlan(dateFrom, dateTo) {
-    /*return await this.db
-      .collection("plan")
-      .find({}, { fields: { _id: 0 } })
-      .toArray();*/
-    return await sampleData.getPlan(dateFrom, dateTo);
+    await this.db.collection("jobs").insertOne(jobModel);
   }
 
   async getJobs(dateFrom, dateTo) {
-    /*return await this.db
-      .collection("plan")
-      .find({}, { fields: { _id: 0 } })
-      .toArray();*/
-    return await sampleData.getPlan(dateFrom, dateTo);
+    return await this.db
+      .collection("jobs")
+      .find({ startTime: { $gte: dateFrom.toDate(), $lte: dateTo.toDate() } })
+      .toArray();
   }
 
   async getJobById(id) {
-    return await this.db.collection("plan").findOne({id: id});
+    return await this.db.collection("jobs").findOne({ id: id });
   }
 
   async getTechMaps() {
