@@ -11,11 +11,12 @@ import { Provider } from "react-redux";
 import { composeWithDevTools } from "redux-devtools-extension/developmentOnly";
 import reducer from "./reducers/index";
 import axios from "axios";
+import multi from "redux-multi";
 
 const store = createStore(
   reducer,
   composeWithDevTools(
-    applyMiddleware(thunk),
+    applyMiddleware(thunk, multi),
     offline({ ...offlineConfig, effect: (effect, _action) => axios(effect), persist: false })
   )
 );

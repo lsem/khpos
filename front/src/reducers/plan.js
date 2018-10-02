@@ -5,11 +5,14 @@ import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
+  MOVE_JOB_ROLLBACK,
   INSERT_JOB,
   SWAP_JOBS,
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
-  STAFF_REQUEST_SUCCEEDED
+  STAFF_REQUEST_SUCCEEDED,
+  DELETE_JOB,
+  DELETE_JOB_ROLLBACK
 } from "../actions/types";
 
 const initialState = {
@@ -46,15 +49,33 @@ export default function plan(state = initialState, action) {
     // MOVE_JOB
     //
     case MOVE_JOB: {
-      const updatedJobs = [...state.jobs];
-      const jobToMove = _.find(updatedJobs, j => j.id === action.payload.jobId);
-      jobToMove.column = action.payload.column;
-      jobToMove.startTime = moment(state.fromDate)
-        .add(action.payload.timeMinutes, "minutes")
-        .valueOf();
+      const jobToMove = {
+        ...action.payload.job,
+        column: action.payload.column,
+        startTime: action.payload.startTime
+      };
+
+      const filtered = _.filter(
+        state.jobs,
+        j => j.id !== action.payload.job.id
+      );
+
+      const newJobs = [...filtered, jobToMove];
+
       return {
         ...state,
-        jobs: updatedJobs
+        jobs: newJobs
+      };
+    }
+
+    case MOVE_JOB_ROLLBACK: {
+      const filtered = _.filter(state.jobs, j => j.id !== action.meta.job.id);
+
+      const newJobs = [...filtered, action.meta.job];
+
+      return {
+        ...state,
+        jobs: newJobs
       };
     }
     //
@@ -71,47 +92,41 @@ export default function plan(state = initialState, action) {
       return {
         ...state,
         jobs: state.jobs.filter(j => j.id !== action.payload.id)
-      }
-    }
-    //
-    // SWAP_JOBS
-    //
-    case SWAP_JOBS: {
-      const updatedJobs = [...state.jobs];
-      const draggedJob = _.find(
-        updatedJobs,
-        j => j.id === action.payload.draggedJobId
-      );
-      console.assert(draggedJob);
-      const neighbourJob = _.find(
-        updatedJobs,
-        j => j.id === action.payload.neighbourJobId
-      );
-      console.assert(neighbourJob);
-      const t = neighbourJob.startTime;
-      neighbourJob.startTime = moment(draggedJob.startTime).valueOf();
-      draggedJob.startTime = moment(t).valueOf();
-      return {
-        ...state,
-        jobs: updatedJobs
       };
     }
-    
+
+    //
+    // DELETE_JOB
+    //
+    case DELETE_JOB:
+      return {
+        ...state,
+        jobs: _.filter(state.jobs, j => j.id !== action.job.id)
+      };
+
+    case DELETE_JOB_ROLLBACK:
+      return {
+        ...state,
+        jobs: [...state.jobs, action.job]
+      };
+
     //
     // TECHMAPS_REQUEST
     //
-    case TECHMAPS_REQUEST_SUCCEEDED: return {
-      ...state, 
-      techMaps: action.techMaps
-    }
+    case TECHMAPS_REQUEST_SUCCEEDED:
+      return {
+        ...state,
+        techMaps: action.techMaps
+      };
 
     //
     // STAFF_REQUEST
     //
-    case STAFF_REQUEST_SUCCEEDED: return {
-      ...state,
-      staff: action.staff
-    }
+    case STAFF_REQUEST_SUCCEEDED:
+      return {
+        ...state,
+        staff: action.staff
+      };
 
     default:
       return state;

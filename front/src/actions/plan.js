@@ -6,9 +6,11 @@ import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
   MOVE_JOB,
+  MOVE_JOB_ROLLBACK,
   INSERT_JOB,
   INSERT_JOB_ROLLBACK,
-  SWAP_JOBS
+  DELETE_JOB,
+  DELETE_JOB_ROLLBACK
 } from "./types";
 
 export const requestJobsSucceded = jobs => {
@@ -37,13 +39,24 @@ export const requestJobs = (fromDate, toDate) => {
   };
 };
 
-export function moveJob(jobId, column, timeMinutes) {
+export function moveJob(job, column, startTime) {
+  const payload = {
+    job,
+    column,
+    startTime
+  };
   return {
     type: MOVE_JOB,
-    payload: {
-      jobId: jobId,
-      column: column,
-      timeMinutes: timeMinutes
+    payload,
+    meta: {
+      offline: {
+        effect: {
+          url: `${getApi()}/jobs`,
+          method: "PATCH",
+          data: { id: payload.job.id, column, startTime }
+        },
+        rollback: { type: MOVE_JOB_ROLLBACK, meta: payload }
+      }
     }
   };
 }
@@ -67,12 +80,22 @@ export function insertJob(techMap, column, startTime) {
   };
 }
 
-export function swapJobs(draggedJobId, neighbourJobId) {
+export function deleteJob(job) {
   return {
-    type: SWAP_JOBS,
-    payload: {
-      draggedJobId: draggedJobId,
-      neighbourJobId: neighbourJobId
+    type: DELETE_JOB,
+    job,
+    meta: {
+      offline: {
+        effect: { url: `${getApi()}/jobs`, method: "DELETE", data: job.id },
+        rollback: { type: DELETE_JOB_ROLLBACK, meta: job }
+      }
     }
   };
+}
+
+export function swapJobs(draggedJob, neighbourJob) {
+  return [
+    moveJob(draggedJob, draggedJob.column, neighbourJob.startTime),
+    moveJob(neighbourJob, neighbourJob.column, draggedJob.startTime)
+  ];
 }

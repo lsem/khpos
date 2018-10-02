@@ -145,11 +145,19 @@ class PlanScreen extends React.Component {
       draggedTechMapHorizontalLock: offsetX
     });
   }
-  swapTechMaps(column, draggedJob, existingJob) {
+  swapTechMaps(column, draggedJobId, existingJobId) {
+    const draggedJob = _.find(this.props.jobs, j => j.id === draggedJobId);
+    const existingJob = _.find(this.props.jobs, j => j.id === existingJobId);
     this.props.swapJobs(draggedJob, existingJob);
   }
-  moveJob(jobId, column, offsetInPixels) {
-    this.props.moveJob(jobId, column, this.pixelsToMins(offsetInPixels));
+  moveJob(id, column, offsetInPixels) {
+    const job = _.find(this.props.jobs, j => j.id === id);
+    this.props.moveJob(
+      job, 
+      column, 
+      moment(this.props.timelineBeginTime)
+        .add(this.pixelsToMins(offsetInPixels), "minutes")
+        .valueOf());
   }
   columnHovered(column) {
     this.setState({
@@ -379,8 +387,8 @@ const mapDispatchToProps = dispatch => {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestStaff: () => dispatch(requestStaff()),
-    moveJob: (jobId, column, timeMinutes) =>
-      dispatch(moveJob(jobId, column, timeMinutes)),
+    moveJob: (job, column, startTime) =>
+      dispatch(moveJob(job, column, startTime)),
     // todo: consider using normalized state instead of techMap object
     insertJob: (techMap, column, startTime) =>
       dispatch(insertJob(techMap, column, startTime)),
