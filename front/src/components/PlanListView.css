@@ -1,9 +1,11 @@
 .PlanListView {
   margin-bottom: 20px;
+  color: #333;
 }
 
 .PlanListView > ul {
   list-style-type: none;
+  margin-left: 2px;
 }
 
 .PlanListView > .PlanListView_ListName {
@@ -12,5 +14,5 @@
 }
 
 .PlanListView > .AddButton {
-  color: rgb(58, 149, 254);
+  color: #007aff;
 }
