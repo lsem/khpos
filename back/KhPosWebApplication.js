@@ -4,6 +4,7 @@ var cors = require("cors");
 var morgan = require("morgan");
 var debug = require("debug")("khweb");
 let appErrors = require("./AppErrors");
+const http = require("http");
 
 class BadRequestError extends Error {
   constructor(message) {
@@ -33,7 +34,7 @@ function tryParseTimeStamp(value) {
   if (!value) {
     return undefined;
   }
-  console.log('value: ', value)
+  console.log("value: ", value);
   let iso8601ts = moment(value);
   if (moment(iso8601ts).isValid(iso8601ts)) {
     debug("parsed as iso8601: " + iso8601ts);
@@ -116,12 +117,26 @@ class KhPosWebApplication {
     this.app.use(errorHandler);
   }
 
+  getServer() {
+    return this.server;
+  }
+
+  close(done) {
+    this.server.close(() => {
+      done();
+    });
+  }
+
   getApp(req) {
     return req.headers["inmem"] ? this.inMemApp : this.khApp;
   }
 
   start() {
-    this.app.listen(this.port, () => console.log(`web: listening on port ${this.port}!`));
+    //this.server = this.app.listen(this.port, () => console.log(`web: listening on port ${this.port}!`));
+    this.server = http.createServer(this.app);
+    this.server.listen(this.port, () =>
+      console.log(`web: listening on port ${this.port}!`)
+    );
   }
 
   getStock(req, res, next) {
@@ -143,7 +158,8 @@ class KhPosWebApplication {
   // GET /jobs
   //
   getJobs(req, res, next) {
-    let fromDate = null, toDate = null;
+    let fromDate = null,
+      toDate = null;
     // Without from and to date return all documents.
     if (req.query.fromDate && req.query.toDate) {
       fromDate = tryParseTimeStamp(req.query.fromDate);
@@ -190,9 +206,10 @@ class KhPosWebApplication {
 
   patchJob(req, res, next) {
     debug(req.params.id);
-    this.getApp(req).updateJob(req.params.id, req.body)
-    .then(() => res.status(200).send())
-    .catch(err => next(err))
+    this.getApp(req)
+      .updateJob(req.params.id, req.body)
+      .then(() => res.status(200).send())
+      .catch(err => next(err));
   }
 
   //

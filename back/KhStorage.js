@@ -14,6 +14,23 @@ class KhStorage {
     this.reconnect_timeout = config.reconnect_timeout || 3000;
     this.state = STATE_DISCONNECTED;
     debug("storage: mongo %s : %d", this.host, this.port);
+    this.stopRequested = false;
+  }
+
+  close(done) {
+    this.stopRequested = true;
+    if (this.client) {
+      this.client.close((err) => {
+        if (err) {
+          console.err('khStorage: Close error', err);
+        } else {
+          done();
+        }
+      });
+    } else {
+      // We have not started yet, indicate this to omit processing once it is ready.
+      this.client = 'closed';
+    }
   }
 
   onConnected(cb) {
@@ -67,12 +84,17 @@ class KhStorage {
     // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/
     const url = `mongodb://${this.host}:${this.port}`;
     debug("url: %s", url);
-    MongoClient.connect(
+    const connection = MongoClient.connect(
       url,
       { useNewUrlParser: true }
     )
       .then(client => {
-        debug("connected to mongo");
+        if (this.client === 'closed') {
+          debug('Connected after close requested');
+          client.close();
+          return;
+        }
+        debug("connected to mongo", client);
         client.on("close", () => this.handleClose());
         client.on("authenticated", () => this.handleAuthenticated());
         client.on("error", () => this.handleError());
@@ -93,9 +115,14 @@ class KhStorage {
         );
         setTimeout(() => this._initiateConnect(), this.reconnect_timeout);
       });
+
   }
 
   handleClose() {
+    if (this.stopRequested) {
+      // Tests scenario.
+      return;
+    }
     debug("connection closed, reconnecting..");
     this.onDisconnected();
     this._initiateConnect();

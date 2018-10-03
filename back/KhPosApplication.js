@@ -1,7 +1,7 @@
 let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
-const moment = require('moment');
+const moment = require("moment");
 
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -69,7 +69,7 @@ class KhPosApplication {
     this.storage = storage;
     this.posterProxyService = posterProxyService;
     this._storageConnected = false;
-    this.onErrorCb = (err) => debug('Default error handler: %o', err);
+    this.onErrorCb = err => debug("Default error handler: %o", err);
   }
 
   connectedToStorage() {

@@ -53,3 +53,7 @@ switch (parseCommandOrDie(process.argv.slice(2))) {
 
 var app = new KhPosNodeApp(config)
 app.start()
+
+exports.closeServer = function(){
+  app.close();
+};

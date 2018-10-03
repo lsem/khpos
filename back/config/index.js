@@ -18,6 +18,11 @@ switch (NODE_ENV) {
     configBuffer = fs.readFileSync(path.resolve(__dirname, "dev.json"), "utf-8");
     break;
   }
+  case "test": {
+    debug('loading TEST env')
+    configBuffer = fs.readFileSync(path.resolve(__dirname, "test.json"), "utf-8");
+    break;
+  }
   default: {
     debug('loading DEFAULT env')
     configBuffer = fs.readFileSync(path.resolve(__dirname, "default.json"), "utf-8");
