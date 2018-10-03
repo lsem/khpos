@@ -305,7 +305,7 @@ class PlanScreen extends React.Component {
           <div className="timelineScroll">
             <AssignmentsTimeline
               jobs={this.props.jobs}
-              columnWidth={10}
+              columnWidth={12}
               msToPixels={this.msToPixels}
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
