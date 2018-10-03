@@ -7,7 +7,6 @@ import {
   MOVE_JOB,
   MOVE_JOB_ROLLBACK,
   INSERT_JOB,
-  SWAP_JOBS,
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
   STAFF_REQUEST_SUCCEEDED,
@@ -91,7 +90,7 @@ export default function plan(state = initialState, action) {
     case INSERT_JOB_ROLLBACK: {
       return {
         ...state,
-        jobs: state.jobs.filter(j => j.id !== action.payload.id)
+        jobs: state.jobs.filter(j => j.id !== action.meta.id)
       };
     }
 
