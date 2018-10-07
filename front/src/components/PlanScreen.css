@@ -7,10 +7,7 @@
 .PlanScreenSideContainer {
   display: flex;
   flex-direction: column;
-  margin-left: 25px;
-  margin-top: 25px;
-  /* debug: */
-  /* background-color: oldlace; */
+  flex: 0 0 256px;
 }
 
 .PlanScreen > .PlanScreenSideContainer > .PlanTechMapsMenu {
@@ -26,7 +23,7 @@
   border: solid lightgray;
   border-width: 0 1px 0 0;
   height: 100%;
-  width: 800px;
+  flex: 1 1 800px;
 }
 
 .timelineScroll {

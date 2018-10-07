@@ -1,0 +1,5 @@
+.listView {
+  list-style-type: none;
+  margin: 0;
+  user-select: none;
+}

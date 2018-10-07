@@ -1,5 +1,6 @@
-import "./PlanListItem.css";
+import "./PlanTechMapListItem.css";
 import React from "react";
+import classNames from "classnames";
 import { DragSource } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import DragItemTypes from "../dragItemTypes";
@@ -15,19 +16,22 @@ class PlanListItem extends React.Component {
     const style = {
       opacity: this.props.isDragging ? 0.7 : 1
     };
+
+    const classes = classNames("planTechMapListItem", {
+      planTechMapListItemSelected: this.props.selected
+    });
     // TODO: refactor this (consider having identity decorator).
+
+    const li = (
+      <li onClick={this.props.onClick} className={classes} style={style}>
+        <span>{this.props.itemDisplayName}</span>
+      </li>
+    );
+
     if (this.props.isDraggableItem) {
-      return this.props.connectDragSource(
-        <ul className="PlanListItem" style={style}>
-          {this.props.itemDisplayName}
-        </ul>
-      );
+      return this.props.connectDragSource(li);
     } else {
-      return (
-        <ul className="PlanListItem" style={style}>
-          {this.props.itemDisplayName}
-        </ul>
-      );
+      return li;
     }
   }
 }

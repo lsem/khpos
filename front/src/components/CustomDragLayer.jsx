@@ -3,7 +3,7 @@
 import React from "react";
 import { DragLayer } from "react-dnd";
 import TechMapView from "./TechMap";
-import TimelinePanelListItem from "./PlanListItem";
+import PlanTechMapListItem from "./PlanTechMapListItem";
 import _ from "lodash";
 import DragItemTypes from "../dragItemTypes";
 
@@ -143,7 +143,7 @@ class CustomDragLayer extends React.PureComponent {
     // small item but in drag state.
     return (
       <div className="CustomDragLayer" style={layerStyle}>
-        <TimelinePanelListItem itemDisplayName={techMap.name} />
+        <PlanTechMapListItem itemDisplayName={techMap.name} />
       </div>
     );
   }

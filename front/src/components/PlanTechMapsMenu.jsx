@@ -1,8 +1,10 @@
 import "../App.css";
 import React from "react";
-import TimelinePanelListItem from "./PlanListItem";
-import PlanListView from "./PlanListView";
+import PlanTechMapListItem from "./PlanTechMapListItem";
+import ListView from "./ListView";
+import Icon from "./Icon";
 import { ICONS } from "../constants/icons";
+import "./PlanTechMapsMenu.css";
 
 export default class PlanTechMapsMenu extends React.Component {
   componentDidMount() {
@@ -10,19 +12,27 @@ export default class PlanTechMapsMenu extends React.Component {
   }
 
   render() {
-    const listItems = this.props.techMaps.map((techMap, idx) => (
-      <TimelinePanelListItem
-      key={idx}
-      itemDisplayName={techMap.name}
-      isDraggableItem={true}
-      techMapId={techMap.id}
-    />
-
-    ));
     return (
-        <PlanListView icon={ICONS.RECIEPTS} listName="Технологічні карти">
-            {listItems}
-        </PlanListView>
+      <div className="planTechMapsMenu">
+        <div className="planTechMapsMenuHeader">
+          <Icon icon={ICONS.RECIEPTS} size={16} color="#7F7F7F" />
+          <h6>Технологічні карти</h6>
+        </div>
+        <ListView>
+          {this.props.techMaps.map(techMap => (
+            <PlanTechMapListItem
+              itemDisplayName={techMap.name}
+              isDraggableItem={true}
+              techMapId={techMap.id}
+              key={techMap.id}
+            />
+          ))}
+        </ListView>
+        <div className="planTechMapsAddButton">
+          <Icon icon={ICONS.ADD} size={16} color="#007aff" />
+          {" Додати "}
+        </div>
+      </div>
     );
   }
 }

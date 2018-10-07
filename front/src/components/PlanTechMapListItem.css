@@ -1,0 +1,15 @@
+.planTechMapListItem {
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 0 0 0 22px;
+}
+
+.planTechMapListItem span {
+  vertical-align: middle;
+}
+
+.planTechMapListItemSelected {
+  background-color: #007aff;
+  color: white;
+}
+
