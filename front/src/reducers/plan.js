@@ -10,6 +10,8 @@ import {
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
   STAFF_REQUEST_SUCCEEDED,
+  STAFF_PATCH_EMPLOYEE,
+  STAFF_PATCH_EMPLOYEE_ROLLBACK,
   DELETE_JOB,
   DELETE_JOB_ROLLBACK
 } from "../actions/types";
@@ -126,6 +128,28 @@ export default function plan(state = initialState, action) {
         ...state,
         staff: action.staff
       };
+
+    case STAFF_PATCH_EMPLOYEE: {
+      const fiilteredEmployees = state.staff.filter(
+        e => e.id !== action.payload.id
+      );
+
+      return {
+        ...state,
+        staff: [...fiilteredEmployees, action.payload]
+      };
+    }
+
+    case STAFF_PATCH_EMPLOYEE_ROLLBACK: {
+      const fiilteredEmployees = state.staff.filter(
+        e => e.id !== action.meta.id
+      );
+
+      return {
+        ...state,
+        staff: [...fiilteredEmployees, action.meta]
+      };
+    }
 
     default:
       return state;

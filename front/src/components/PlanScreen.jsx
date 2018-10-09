@@ -16,7 +16,8 @@ import {
   requestStaff,
   moveJob,
   insertJob,
-  swapJobs
+  swapJobs,
+  patchEmployee
 } from "../actions/index";
 import moment from "moment";
 
@@ -346,6 +347,7 @@ class PlanScreen extends React.Component {
           <PlanStaffMenu
             staff={this.props.staff}
             requestStaff={this.props.requestStaff}
+            patchEmployee={this.props.patchEmployee}
           />
           <PlanTechMapsMenu
             techMaps={this.props.techMaps}
@@ -387,6 +389,7 @@ const mapDispatchToProps = dispatch => {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestStaff: () => dispatch(requestStaff()),
+    patchEmployee: (employee, patch) => dispatch(patchEmployee(employee, patch)),
     moveJob: (job, column, startTime) =>
       dispatch(moveJob(job, column, startTime)),
     // todo: consider using normalized state instead of techMap object
