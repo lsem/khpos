@@ -12,6 +12,7 @@ const moment = require("moment");
 const uuid = require('uuid');
 const chaiHttp = require("chai-http");
 var chaiSubset = require('chai-subset');
+const _ = require('lodash');
 
 chai.use(chaiHttp);
 chai.use(chaiSubset);
@@ -49,6 +50,27 @@ describe("API", () => {
   beforeEach(async () => {
     await app.getApp().clearStorage()
   })
+
+  async function insertJobAutoCompleted(jobModel) {
+    const baseModel = {
+      startTime: "1970-01-02T00:00:00.000Z",
+      id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+      column: 0,
+      techMap: {
+        id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+        name: "1",
+        tintColor: "rgb(216, 216, 216)",
+        tasks: [{
+          id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
+          name: "task 1",
+          durationMins: 10,
+          bgColor: "rgb(216, 216, 216)"
+        }]
+      }
+    }
+    await app.getApp().insertJob(_.merge(baseModel, jobModel));
+    return baseModel;
+  }
 
   describe("/login", () => {
     it("Posting into login with valid credentials should return 200", done => {
@@ -234,17 +256,95 @@ describe("API", () => {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    // it("Filtering by start and from date should work", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
+    it("Filtering by start and from date should return jobs in range", async () => {
+      const oneJobId = newJobId(),
+        anotherJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const anotherJob = await insertJobAutoCompleted({
+        id: anotherJobId,
+        startTime: '1970-01-02T00:00:00.000Z'
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs?startTime=1970-01-01T00:00:00.000Z&endTime=1970-01-02T00:00:00.000Z");
+      expect(res).to.have.status(200);
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-01T00:00:00.000Z",
+        id: oneJobId
+      }, {
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: anotherJobId
+      }]);
+    });
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    // it("Filtering should not work with only start or with only end date", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
+    it("Filtering by start and from date should return not reutrn out of range left", async () => {
+      const oneJobId = newJobId(),
+        anotherJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const anotherJob = await insertJobAutoCompleted({
+        id: anotherJobId,
+        startTime: '1970-01-02T00:00:00.000Z'
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs?fromDate=1970-01-01T00:00:01.000Z&toDate=1970-01-02T00:00:00.000Z");
+      expect(res).to.have.status(200);
+      expect(res.body).to.not.containSubset([{
+        startTime: "1970-01-01T00:00:00.000Z",
+        id: oneJobId
+      }]);
+      expect(res.body).to.containSubset([, {
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: anotherJobId
+      }]);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Filtering by start and from date should return not reutrn out of range right", async () => {
+      const oneJobId = newJobId(),
+        anotherJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const anotherJob = await insertJobAutoCompleted({
+        id: anotherJobId,
+        startTime: '1970-01-02T00:00:00.000Z'
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs?fromDate=1970-01-01T00:00:00.000Z&toDate=1970-01-01T23:59:59.000Z");
+      expect(res).to.have.status(200);
+      expect(res.body).to.not.containSubset([, {
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: anotherJobId
+      }]);
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-01T00:00:00.000Z",
+        id: oneJobId
+      }]);
+    });
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Filtering should not work with only start or with only end date", async () => {
+      expect(await chai
+        .request(app.server())
+        .get("/jobs?fromDate=1970-01-01T00:00:00.000Z")).to.have.status(400);
+      expect(await chai
+        .request(app.server())
+        .get("/jobs?toDate=1970-01-01T00:00:00.000Z")).to.have.status(400);
+    });
 
     /////////////////////////////////////////////////////////////////////////////////////////
 

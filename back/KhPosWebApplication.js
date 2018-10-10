@@ -158,6 +158,12 @@ class KhPosWebApplication {
   getJobs(req, res, next) {
     let fromDate = null,
       toDate = null;
+
+    // don't ask: https://stackoverflow.com/questions/4540422/why-is-there-no-logical-xor-in-javascript
+    if (!req.query.fromDate !== !req.query.toDate) {
+      throw new InvalidArgError("Both fromDate and toDate should be specified");
+    }
+
     // Without from and to date return all documents.
     if (req.query.fromDate && req.query.toDate) {
       fromDate = tryParseTimeStamp(req.query.fromDate);
@@ -189,9 +195,9 @@ class KhPosWebApplication {
       .insertJob(req.body)
       .then(id =>
         res
-          .status(204)
-          .location("/jobs/" + id)
-          .send()
+        .status(204)
+        .location("/jobs/" + id)
+        .send()
       )
       .catch(err => next(err));
   }
