@@ -12,7 +12,15 @@ class KhPosNodeApp {
     this.config = config;
     this.posterProxy = new PosterProxyService();
     this.khStorage = new KhStorage(this.config.storage);
-    this.khApp = new KhPosApplication({storage: this.khStorage, posterProxy: this.posterProxy});
+    this.khApp = new KhPosApplication({
+      storage: this.khStorage,
+      posterProxy: this.posterProxy
+    });
+    this.inMemStorage = new InMemStorage();
+    this.khInMemApp = new KhPosApplication({
+      storage: this.inMemStorage,
+      posterProxy: this.posterProxy
+    });
     this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp, this.khInMemApp);
     this.KhStock = new KhStock(this.config.stock);
   }
@@ -40,16 +48,17 @@ function parseCommandOrDie(args) {
 }
 
 switch (parseCommandOrDie(process.argv.slice(2))) {
-  case 'init': {
-    debug('recognized command: init')
-    debug('Initialized. Exiting..');
-    return;
-  }
+  case 'init':
+    {
+      debug('recognized command: init')
+      debug('Initialized. Exiting..');
+      return;
+    }
 }
 
 var app = new KhPosNodeApp(config)
 app.start()
 
-exports.closeServer = function(){
+exports.closeServer = function() {
   app.close();
 };
