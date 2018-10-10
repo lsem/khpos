@@ -348,10 +348,71 @@ describe("API", () => {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    // it("Modyfing jobs collection should work", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
+    it("Modyfing jobs collection should work", async () => {
+      const oneJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const modifiedJob = _.merge(oneJob, {
+        id: oneJobId,
+        startTime: '2018-01-01T00:00:00.000Z'
+      });
+      const modifyRes = await chai.request(app.server()).patch(`/jobs/${oneJobId}`).type(
+        "application/json").send(
+        JSON.stringify(modifiedJob)
+      );
+      expect(modifyRes).to.have.status(200);
+
+      const jobsRes = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(jobsRes).to.have.status(200);
+      expect(jobsRes.body).to.containSubset([{
+        startTime: "2018-01-01T00:00:00.000Z",
+        id: oneJobId
+      }]);
+      expect(jobsRes.body).to.not.containSubset([{
+        startTime: "1970-01-01T00:00:00.000Z",
+        id: oneJobId
+      }]);
+    });
+
+    it("Should return 404 if unexisting job is modified", async () => {
+      const oneJobId = newJobId(),
+        unexistingJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const modifiedJob = _.merge(oneJob, {
+        id: oneJobId,
+        startTime: '2018-01-01T00:00:00.000Z'
+      });
+      const modifyRes = await chai.request(app.server()).patch(`/jobs/${unexistingJobId}`).type(
+        "application/json").send(
+        JSON.stringify(modifiedJob)
+      );
+      expect(modifyRes).to.have.status(404);
+    });
+
+    it("Modyfing jobs collection should not allow change of id", async () => {
+      const oneJobId = newJobId(),
+        unexistingJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const modifiedJob = _.merge(oneJob, {
+        id: unexistingJobId,
+        startTime: '2018-01-01T00:00:00.000Z'
+      });
+      const modifyRes = await chai.request(app.server()).patch(`/jobs/${oneJobId}`).type(
+        "application/json").send(
+        JSON.stringify(modifiedJob)
+      );
+      expect(modifyRes).to.have.status(400);
+    });
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
