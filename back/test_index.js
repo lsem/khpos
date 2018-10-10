@@ -1,4 +1,3 @@
-const config = require("./config/index");
 let PosterProxyService = require("./posterProxy");
 let KhStorage = require("./KhStorage");
 let KhPosApplication = require("./KhPosApplication");
@@ -23,19 +22,12 @@ class KhPosNodeTestApp {
     this.storage = storage;
     this.config = config;
     this.posterProxy = new PosterProxyService();
-    this.khApp = new KhPosApplication({storage: this.storage, posterProxy: this.posterProxy});
+    this.khApp = new KhPosApplication({
+      storage: this.storage,
+      posterProxy: this.posterProxy
+    });
     this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp, this.khInMemApp);
     this.KhStock = new KhStock(this.config.stock);
-    this.onConnectedToStorage = this.onConnectedToStorage.bind(this);
-    this.onFailedConnectingToStorage = this.onFailedConnectingToStorage.bind(this);
-  }
-
-  onConnectedToStorage() {
-    console.log("connected to storage!");
-  }
-
-  onFailedConnectingToStorage() {
-    console.log("failed connecting to storage!");
   }
 
   server() {
