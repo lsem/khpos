@@ -8,10 +8,28 @@ const chai = require("chai");
 var expect = require("chai").expect;
 var assert = require("chai").assert;
 var should = require("chai").should;
-
+const moment = require("moment");
+const uuid = require('uuid');
 const chaiHttp = require("chai-http");
 
 chai.use(chaiHttp);
+
+function newJobId() {
+  return 'JOB-' + uuid.v4()
+}
+
+function newTechMapId() {
+  return 'TM-' + uuid.v4()
+}
+
+function newTaskId() {
+  return 'TASK-' + uuid.v4()
+}
+
+function newAssigneId() {
+  return 'ASSIGNEE-' + uuid.v4()
+}
+
 
 // https://mherman.org/blog/testing-node-and-express/#integration-tests
 describe("API", () => {
@@ -35,17 +53,6 @@ describe("API", () => {
   });
 
   describe("/jobs", () => {
-    it("should be JSON and return 200 OK", done => {
-      chai
-        .request(app.server())
-        .get("/jobs")
-        .end((err, res) => {
-          expect(err).to.be.null;
-          expect(res).to.have.status(200);
-          expect(res.type).to.equal("application/json")
-          done();
-        });
-    });
 
     it("should provide application/json content type header", done => {
       chai
@@ -63,11 +70,51 @@ describe("API", () => {
         .request(app.server())
         .get("/jobs")
         .end((err, res) => {
+          expect(err).to.be.null;
           expect(res).to.have.header('Access-Control-Allow-Origin', '*');
           expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
           expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
         });
       done();
+    });
+
+    it("should return empty collection on empty database", done => {
+      chai
+        .request(app.server())
+        .get("/jobs")
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an('array');
+          expect(res.body.length).to.equal(0);
+          done();
+        });
+    });
+
+
+    it("should return collection of one element when one element is in the database", async () => {
+      await app.getApp().insertJob({
+        startTime: moment(123456).add(115, "minutes").valueOf(),
+        id: newJobId(),
+        column: 0,
+        techMap: {
+          id: newTechMapId(),
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: newTaskId(),
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an('array');
+      expect(res.body.length).to.equal(1);
     });
 
     // it("should return empty collection on empty database", done => {

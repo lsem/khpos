@@ -103,9 +103,6 @@ class KhStorage extends EventEmitter {
   }
 
   async getAllJobs() {
-    await this.db.collection("jobs").insertOne({
-      test: ""
-    });
     return await this.db
       .collection("jobs")
       .find()

@@ -41,6 +41,10 @@ class KhPosNodeTestApp {
     //this.KhStock.start();
   }
 
+  getApp() {
+    return this.khApp;
+  }
+
   async stop() {
     // Stop listening
     await this.khWebApp.close();
