@@ -23,6 +23,10 @@ class KhStorage extends EventEmitter {
     }
   }
 
+  async clear() {
+    this.db.collection("jobs").remove();
+  }
+
   async connectToMongoDb() {
     // todo: http://mongodb.github.io/node-mongodb-native/3.1/reference/connecting/connection-settings/
     try {

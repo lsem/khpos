@@ -94,6 +94,10 @@ class KhPosApplication {
 
   start() {}
 
+  async clearStorage() {
+    await this.storage.clear();
+  }
+
   async getProducts() {
     return new Promise((resolve, reject) => {
       this.posterProxyService.getProducts(

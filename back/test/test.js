@@ -46,6 +46,10 @@ describe("API", () => {
     await app.stop();
   });
 
+  beforeEach(async () => {
+    await app.getApp().clearStorage()
+  })
+
   describe("/login", () => {
     it("Posting into login with valid credentials should return 200", done => {
       // TODO: https://github.com/lsem/khpos/issues/11
@@ -66,6 +70,8 @@ describe("API", () => {
         });
     });
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     it("should be CORS enabled", done => {
       // TODO: https://github.com/lsem/khpos/issues/10
       chai
@@ -80,19 +86,19 @@ describe("API", () => {
       done();
     });
 
-    it("should return empty collection on empty database", done => {
-      chai
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("should return empty collection on empty database", async () => {
+      const res = await chai
         .request(app.server())
-        .get("/jobs")
-        .end((err, res) => {
-          expect(err).to.be.null;
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.an('array');
-          expect(res.body.length).to.equal(0);
-          done();
-        });
+        .get("/jobs");
+      expect(err).to.be.null;
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an('array');
+      expect(res.body.length).to.equal(0);
     });
 
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     it("should return collection of one element when one element is in the database", async () => {
       const insertedJobId = newJobId();
@@ -127,36 +133,128 @@ describe("API", () => {
       }]);
     });
 
-    // it("should return empty collection on empty database", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
+    /////////////////////////////////////////////////////////////////////////////////////////
 
-    // it("should return one collection of one element when one record in the database", done => {
-    //   assert.isOk(false, "this will fail");
+    it("should accept jobs with start time specified in ISO", async () => {
+      const insertedJobId = newJobId();
+      await app.getApp().insertJob({
+        startTime: "1970-01-01T01:57:03.456Z",
+        id: insertedJobId,
+        column: 0,
+        techMap: {
+          id: newTechMapId(),
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: newTaskId(),
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(res).to.have.status(200);
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-01T01:57:03.456Z"
+      }]);
+    });
 
-    //   done();
-    // });
+    /////////////////////////////////////////////////////////////////////////////////////////
 
-    // it("Inserted element should be equal to returned one", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
+    it("should accept jobs with start time specified as Js Time Value", async () => {
+      const insertedJobId = newJobId();
+      await app.getApp().insertJob({
+        startTime: 24 * 60 * 60 * 1000,
+        id: insertedJobId,
+        column: 0,
+        techMap: {
+          id: newTechMapId(),
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: newTaskId(),
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(res).to.have.status(200);
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-02T00:00:00.000Z"
+      }]);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Inserted element should be equal to returned one", async () => {
+      await app.getApp().insertJob({
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+        column: 0,
+        techMap: {
+          id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+      const res = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(res).to.have.status(200);
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+        column: 0,
+        techMap: {
+          id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      }]);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     // it("Filtering by start and from date should work", done => {
     //   assert.isOk(false, "this will fail");
     //   done();
     // });
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     // it("Filtering should not work with only start or with only end date", done => {
     //   assert.isOk(false, "this will fail");
     //   done();
     // });
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     // it("Modyfing jobs collection should work", done => {
     //   assert.isOk(false, "this will fail");
     //   done();
     // });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     // it("Updating existing job by id should work", done => {
     //   assert.isOk(false, "this will fail");
     //   done();
