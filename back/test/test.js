@@ -11,8 +11,10 @@ var should = require("chai").should;
 const moment = require("moment");
 const uuid = require('uuid');
 const chaiHttp = require("chai-http");
+var chaiSubset = require('chai-subset');
 
 chai.use(chaiHttp);
+chai.use(chaiSubset);
 
 function newJobId() {
   return 'JOB-' + uuid.v4()
@@ -93,9 +95,10 @@ describe("API", () => {
 
 
     it("should return collection of one element when one element is in the database", async () => {
+      const insertedJobId = newJobId();
       await app.getApp().insertJob({
         startTime: moment(123456).add(115, "minutes").valueOf(),
-        id: newJobId(),
+        id: insertedJobId,
         column: 0,
         techMap: {
           id: newTechMapId(),
@@ -115,6 +118,13 @@ describe("API", () => {
       expect(res).to.have.status(200);
       expect(res.body).to.be.an('array');
       expect(res.body.length).to.equal(1);
+
+      expect(res.body).to.containSubset([{
+        startTime: "1970-01-01T01:57:03.456Z",
+        id: insertedJobId,
+        column: 0,
+        techMap: {}
+      }]);
     });
 
     // it("should return empty collection on empty database", done => {
