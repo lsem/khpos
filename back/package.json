@@ -28,7 +28,6 @@
     "chai-http": "^4.2.0",
     "chai-subset": "^1.6.0",
     "mocha": "^5.2.0",
-    "mongo-in-memory": "0.0.5",
     "mongodb-memory-server": "^2.4.3"
   }
 }
