@@ -121,10 +121,8 @@ class KhPosWebApplication {
     return this.server;
   }
 
-  close(done) {
-    this.server.close(() => {
-      done();
-    });
+  async close() {
+    await this.server.close();
   }
 
   getApp(req) {

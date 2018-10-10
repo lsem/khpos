@@ -65,11 +65,15 @@ const jobModelSchema = joi.object().keys({
 ////////////////////////////////////////////////////////////////////////////////////
 
 class KhPosApplication {
-  constructor(storage, posterProxyService) {
-    this.storage = storage;
-    this.posterProxyService = posterProxyService;
+  constructor(deps) {
+    if (!deps.storage) throw new Error("No storage");
+    if (!deps.posterProxy) throw new Error("No posterProxy");
+    this.storage = deps.storage;
+    this.posterProxyService = deps.posterProxy;
     this._storageConnected = false;
     this.onErrorCb = err => debug("Default error handler: %o", err);
+    this.storage.on('connected', () => this.connectedToStorage() );
+    this.storage.on('disconnected', () => this.disconnectedFromStorge() );
   }
 
   connectedToStorage() {

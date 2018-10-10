@@ -12,13 +12,9 @@ class KhPosNodeApp {
     this.config = config;
     this.posterProxy = new PosterProxyService();
     this.khStorage = new KhStorage(this.config.storage);
-    this.khApp = new KhPosApplication(this.khStorage, this.posterProxy);
-    this.khInMemApp = new KhPosApplication(new InMemStorage(), this.posterProxy);
-    this.khInMemApp.connectedToStorage();
+    this.khApp = new KhPosApplication({storage: this.khStorage, posterProxy: this.posterProxy});
     this.khWebApp = new KhPosWebApplication(this.config.web, this.khApp, this.khInMemApp);
     this.KhStock = new KhStock(this.config.stock);
-    this.khStorage.onConnected(() => this.khApp.connectedToStorage())
-    this.khStorage.onDisconnected(() => this.khApp.disconnectedFromStorge());
   }
 
   start() {
