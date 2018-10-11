@@ -1,3 +1,4 @@
+const EventEmitter = require("events");
 let debug = require("debug")("khinmemstorage");
 const sampleData = require("./sampleData");
 let appErrors = require("./AppErrors");
@@ -7,10 +8,16 @@ const calcJobDurationInMinutes = job => {
   return _.reduce(job.techMap.tasks, (task, sum) => sum + task.durationMins);
 };
 
-class InMemStorage {
+class InMemStorage extends EventEmitter {
   constructor() {
+    super();
     this.jobs = [];
   }
+
+  start() {
+    this.emit("connected");
+  }
+
   async insertJob(jobModel) {
     debug('insertJob: %o', jobModel);
     this.jobs.push(jobModel);
