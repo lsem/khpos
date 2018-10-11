@@ -1,6 +1,7 @@
 // https://code.tutsplus.com/tutorials/introduction-to-api-calls-with-react-and-axios--cms-21027
 
 import React, { Component } from "react";
+import { BrowserRouter, Route, Redirect, Switch } from "react-router-dom";
 import "./App.css";
 import axios from "axios";
 import HTML5Backend from "react-dnd-html5-backend";
@@ -8,8 +9,10 @@ import { DragDropContext } from "react-dnd";
 import TimelineScreen from "./components/PlanScreen";
 import moment from "moment";
 import "moment/locale/uk";
-import Switch from "react-switch";
+import ReactSwitch from "react-switch";
 import { setApiMode } from "./api";
+import { ROUTES } from "./constants/routes";
+import TechMapEditor from "./components/TechMapEditor";
 
 function ProductListItem(props) {
   return (
@@ -131,7 +134,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Культ Хліба</h1>
-          <Switch
+          <ReactSwitch
             onChange={this.handleChange}
             checked={this.state.inMem}
             onHandleColor="#2693e6"
@@ -146,17 +149,34 @@ class App extends Component {
             id="material-switch"
           />
         </header>
-        <div className="AppBody">
-          {/* <ProductList />
-          <StockList /> */}
-          <TimelineScreen
-            pixelsPerMinute={2}
-            // inMem used as a key since whenever it changes,
-            // components receive componentDidMount and can reload
-            // data from new endpoint
-            key={this.state.inMem}
-          />
-        </div>
+        <BrowserRouter>
+          <div className="AppBody">
+            <Switch>
+              <Route
+                path={ROUTES.PLAN_SCREEN}
+                exact
+                component={() => (
+                  <TimelineScreen
+                    pixelsPerMinute={2}
+                    // inMem used as a key since whenever it changes,
+                    // components receive componentDidMount and can reload
+                    // data from new endpoint
+                    key={this.state.inMem}
+                  />
+                )}
+              />
+              <Route
+                path={`${ROUTES.EDIT_TECH_MAP}/:id`}
+                exact
+                component={TechMapEditor}
+              />
+              <Redirect from="/" exact to={ROUTES.PLAN_SCREEN} />
+              <Route component={() => "NOT FOUND"} />
+            </Switch>
+          </div>
+        </BrowserRouter>
+        {/* <ProductList />
+        <StockList /> */}
       </div>
     );
   }

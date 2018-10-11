@@ -1,15 +1,40 @@
 .planTechMapListItem {
-  line-height: 24px;
+  height: 24px;
   box-sizing: border-box;
   padding: 0 0 0 22px;
+  display: flex;
+  align-items: center;
+}
+
+.planTechMapListItem svg {
+  fill: #007aff;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.planTechMapListItem:hover svg {
+  opacity: .6;
+}
+
+.planTechMapListItem svg:hover {
+  opacity: 1;
 }
 
 .planTechMapListItem span {
-  vertical-align: middle;
+  flex: 1 1;
 }
 
 .planTechMapListItemSelected {
   background-color: #007aff;
   color: white;
+}
+
+.planTechMapListItemSelected svg, .planTechMapListItemSelected:hover svg {
+  opacity: 1;
+  fill: white;
+}
+
+.planTechMapListItemEditButton {
+  flex: 0 0 28px;
 }
 

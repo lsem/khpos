@@ -1,17 +1,26 @@
 import "./PlanTechMapListItem.css";
 import React from "react";
+import { Link } from "react-router-dom";
 import classNames from "classnames";
 import { DragSource } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import DragItemTypes from "../dragItemTypes";
+import Icon from "./Icon";
+import { ICONS } from "../constants/icons";
+import { ROUTES } from "../constants/routes";
 
 class PlanListItem extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   // Needed for react-dnd
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
   }
+
   render() {
     const style = {
       opacity: this.props.isDragging ? 0.7 : 1
@@ -25,6 +34,13 @@ class PlanListItem extends React.Component {
     const li = (
       <li onClick={this.props.onClick} className={classes} style={style}>
         <span>{this.props.itemDisplayName}</span>
+        <Link
+          to={`${ROUTES.EDIT_TECH_MAP}/${this.props.techMapId}`}
+          className="planTechMapListItemEditButton"
+          onClick={this.renameClick}
+        >
+          <Icon icon={ICONS.EDIT} size={16} />
+        </Link>
       </li>
     );
 
