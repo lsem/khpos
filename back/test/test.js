@@ -394,6 +394,20 @@ describe("API", () => {
         JSON.stringify(modifiedJob)
       );
       expect(modifyRes).to.have.status(404);
+
+      // Make sure it was not modified.
+      const jobsRes = await chai
+        .request(app.server())
+        .get("/jobs");
+      expect(jobsRes).to.have.status(200);
+      expect(jobsRes.body).to.containSubset([{
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      }]);
+      expect(jobsRes.body).to.not.containSubset([{
+        id: oneJobId,
+        startTime: '2018-01-01T00:00:00.000Z'
+      }]);
     });
 
     it("Modyfing jobs collection should not allow change of id", async () => {
