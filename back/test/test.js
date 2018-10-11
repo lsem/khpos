@@ -237,7 +237,9 @@ describe("API", () => {
         .get("/jobs");
       expect(res).to.have.status(200);
       expect(res.body.id).to.be.undefined;
-      expect(res.body).to.not.containSubset([{_id: {}}]);
+      expect(res.body).to.not.containSubset([{
+        _id: {}
+      }]);
       expect(res.body).to.containSubset([{
         startTime: "1970-01-02T00:00:00.000Z",
         id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
@@ -411,6 +413,8 @@ describe("API", () => {
       }]);
     });
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     it("Modyfing jobs collection should not allow change of id", async () => {
       const oneJobId = newJobId(),
         unexistingJobId = newJobId();
@@ -428,6 +432,73 @@ describe("API", () => {
       );
       expect(modifyRes).to.have.status(400);
     });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Inserting valid job should return new job in location and status 201", async () => {
+      const oneJobId = newJobId();
+      const oneJob = await insertJobAutoCompleted({
+        id: oneJobId,
+        startTime: '1970-01-01T00:00:00.000Z'
+      });
+      const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
+        "application/json").send(
+        JSON.stringify(oneJob)
+      );
+      expect(insertRes).to.have.status(201);
+      expect(insertRes).to.have.header('Location', '/jobs/' + oneJobId);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Posted job should be queriable and not modified ", async () => {
+      const insertedJobId = newJobId(),
+        taskId = newTaskId(),
+        tmId = newTechMapId();
+      const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
+        "application/json").send({
+        startTime: moment(123456).add(115, "minutes").valueOf(),
+        id: insertedJobId,
+        column: 0,
+        techMap: {
+          id: tmId,
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: taskId,
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+      expect(insertRes).to.have.status(201);
+
+      const getRes = await chai
+        .request(app.server())
+        .get(insertRes.header['location']);
+
+      expect(getRes).to.have.status(200);
+      expect(getRes.body).to.be.an('object');
+
+      expect(getRes.body).to.containSubset({
+        startTime: "1970-01-01T01:57:03.456Z",
+        id: insertedJobId,
+        column: 0,
+        techMap: {
+          id: tmId,
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: taskId,
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      });
+
+    })
 
     /////////////////////////////////////////////////////////////////////////////////////////
 

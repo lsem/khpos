@@ -200,7 +200,7 @@ class KhPosWebApplication {
       .insertJob(req.body)
       .then(id =>
         res
-        .status(204)
+        .status(201)
         .location("/jobs/" + id)
         .send()
       )
