@@ -35,11 +35,18 @@ class PlanError extends KhApplicationError {
   }
 };
 
+class InvalidOperationError extends KhApplicationError {
+  constructor(which) {
+    super(`Invalid operation ${which ? ": " + which : ""}`);
+  }
+}
+
 module.exports = {
   KhApplicationError,
   NotImplementedError,
   NotFoundError,
   PlanError,
   InvalidModelError,
-  StorageError
+  StorageError,
+  InvalidOperationError,
 };

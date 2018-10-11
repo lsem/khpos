@@ -34,7 +34,6 @@ function tryParseTimeStamp(value) {
   if (!value) {
     return undefined;
   }
-  console.log("value: ", value);
   let iso8601ts = moment(value);
   if (moment(iso8601ts).isValid(iso8601ts)) {
     debug("parsed as iso8601: " + iso8601ts);
@@ -51,18 +50,24 @@ function tryParseTimeStamp(value) {
 
 function errorHandler(err, req, res, next) {
   // https://www.restapitutorial.com/httpstatuscodes.html
-  console.error(err.message);
+  // WARNING: Order metters because of how catch works in regards to inheritance.
   if (err instanceof BadRequestError) {
-    debug("appErrors.BadRequestError");
+    debug("appErrors.BadRequestError: %o", err);
     res.status(400).send(err.message);
+  } else if (err instanceof appErrors.NotFoundError) {
+    debug("appErrors.NotFoundError: %o", err);
+    res.status(404).send(err.message);
   } else if (err instanceof appErrors.InvalidModelError) {
-    debug("appErrors.InvalidModelError");
+    debug("appErrors.InvalidModelError: %o", err);
     res.status(400).send(err.message);
   } else if (err instanceof appErrors.NotImplementedError) {
-    debug("appErrors.NotImplementedError");
+    debug("appErrors.NotImplementedError: %o", err);
     res.status(501).send(err.message);
+  } else if (err instanceof appErrors.InvalidOperationError) {
+    debug("appErrors.InvalidOperationError: %o", err);
+    res.status(400).send(err.message);
   } else if (err instanceof appErrors.KhApplicationError) {
-    debug("appErrors.KhApplicationError");
+    debug("appErrors.KhApplicationError: %o", err);
     res.status(500).send(err.message);
   } else {
     if (!err.statusCode) err.statusCode = 500;

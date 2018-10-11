@@ -45,13 +45,13 @@ const jobModelSchema = joi.object().keys({
     .required(),
   startTime: [
     joi
-      .date()
-      .iso()
-      .required(),
+    .date()
+    .iso()
+    .required(),
     joi
-      .date()
-      .timestamp()
-      .required()
+    .date()
+    .timestamp()
+    .required()
   ],
   column: joi
     .number()
@@ -72,8 +72,8 @@ class KhPosApplication {
     this.posterProxyService = deps.posterProxy;
     this._storageConnected = false;
     this.onErrorCb = err => debug("Default error handler: %o", err);
-    this.storage.on('connected', () => this.connectedToStorage() );
-    this.storage.on('disconnected', () => this.disconnectedFromStorge() );
+    this.storage.on('connected', () => this.connectedToStorage());
+    this.storage.on('disconnected', () => this.disconnectedFromStorge());
   }
 
   connectedToStorage() {
@@ -156,9 +156,9 @@ class KhPosApplication {
     const id = await joi.validate(
       jobId,
       joi
-        .string()
-        .regex(jobIdRegExp)
-        .required()
+      .string()
+      .regex(jobIdRegExp)
+      .required()
     );
     return await this.storage.getJobById(id);
   }

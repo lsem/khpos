@@ -236,6 +236,8 @@ describe("API", () => {
         .request(app.server())
         .get("/jobs");
       expect(res).to.have.status(200);
+      expect(res.body.id).to.be.undefined;
+      expect(res.body).to.not.containSubset([{_id: {}}]);
       expect(res.body).to.containSubset([{
         startTime: "1970-01-02T00:00:00.000Z",
         id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
@@ -333,7 +335,6 @@ describe("API", () => {
         id: oneJobId
       }]);
     });
-
 
     /////////////////////////////////////////////////////////////////////////////////////////
 

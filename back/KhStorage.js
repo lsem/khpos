@@ -114,6 +114,16 @@ class KhStorage extends EventEmitter {
   }
 
   async updateJobById(id, model) {
+    const existingModel = await this.db.collection("jobs").findOne({
+      id: id
+    });
+    if (!existingModel) {
+      throw new appErrors.NotFoundError(`Job ${id}`);
+    }
+    if (existingModel.id !== model.id) {
+      throw new appErrors.InvalidOperationError(
+        `Job modification is not allowed: ${existingModel.id} != ${model.id}`);
+    }
     return await this.db.collection("jobs").update({
         id: id
       },
