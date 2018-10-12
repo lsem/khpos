@@ -46,18 +46,16 @@ describe("API", () => {
         });
     });
 
-    it("should be CORS enabled", done => {
+    it("should be CORS enabled", async () => {
       // TODO: https://github.com/lsem/khpos/issues/10
-      chai
-        .request(app.server())
-        .get("/techmaps")
-        .end((err, res) => {
-          expect(err).to.be.null;
-          expect(res).to.have.header('Access-Control-Allow-Origin', '*');
-          expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
-          expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
-        });
-      done();
+      const checkExpectations = (res) => {
+        expect(res).to.have.header('Access-Control-Allow-Origin', '*');
+        expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
+        expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
+      };
+      checkExpectations(await chai.request(app.server()).get("/techmaps"));
+      checkExpectations(await chai.request(app.server()).post("/techmaps"));
+      checkExpectations(await chai.request(app.server()).get("/techmaps"));
     });
 
   });

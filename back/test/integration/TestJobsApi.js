@@ -95,18 +95,16 @@ describe("API", () => {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    it("should be CORS enabled", done => {
+    it("should be CORS enabled", async () => {
       // TODO: https://github.com/lsem/khpos/issues/10
-      chai
-        .request(app.server())
-        .get("/jobs")
-        .end((err, res) => {
-          expect(err).to.be.null;
-          expect(res).to.have.header('Access-Control-Allow-Origin', '*');
-          expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
-          expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
-        });
-      done();
+      const checkExpectations = (res) => {
+        expect(res).to.have.header('Access-Control-Allow-Origin', '*');
+        expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
+        expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
+      };
+      checkExpectations(await chai.request(app.server()).get("/jobs"));
+      checkExpectations(await chai.request(app.server()).post("/jobs"));
+      checkExpectations(await chai.request(app.server()).get("/jobs"));
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +451,9 @@ describe("API", () => {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Posted job should be queriable and not modified ", async () => {
-      const insertedJobId = newJobId(), taskId = newTaskId(), tmId = newTechMapId();
+      const insertedJobId = newJobId(),
+        taskId = newTaskId(),
+        tmId = newTechMapId();
       const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
         "application/json").send({
         startTime: moment(123456).add(115, "minutes").valueOf(),
