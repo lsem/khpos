@@ -1,9 +1,10 @@
 process.env.NODE_NV = "test";
+
 if (!process.env.POSTER_API_LINK || !process.env.POSTER_SECURITY_TOKEN) {
   throw new Error("No POSTER_API_LINK/POSTER_SECURITY_TOKEN env variable set");
 }
 
-const KhPosNodeTestApp = require("../KhPosNodeTestApp");
+const KhPosNodeTestApp = require("../../KhPosNodeTestApp");
 const chai = require("chai");
 var expect = require("chai").expect;
 var assert = require("chai").assert;
@@ -452,9 +453,7 @@ describe("API", () => {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Posted job should be queriable and not modified ", async () => {
-      const insertedJobId = newJobId(),
-        taskId = newTaskId(),
-        tmId = newTechMapId();
+      const insertedJobId = newJobId(), taskId = newTaskId(), tmId = newTechMapId();
       const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
         "application/json").send({
         startTime: moment(123456).add(115, "minutes").valueOf(),
@@ -499,12 +498,5 @@ describe("API", () => {
       });
 
     })
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-
-    // it("Updating existing job by id should work", done => {
-    //   assert.isOk(false, "this will fail");
-    //   done();
-    // });
   }); // jobs
 });
