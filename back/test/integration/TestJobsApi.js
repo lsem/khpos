@@ -104,7 +104,7 @@ describe("API", () => {
       };
       checkExpectations(await chai.request(app.server()).get("/jobs"));
       checkExpectations(await chai.request(app.server()).post("/jobs"));
-      checkExpectations(await chai.request(app.server()).get("/jobs"));
+      checkExpectations(await chai.request(app.server()).patch("/jobs"));
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +113,6 @@ describe("API", () => {
       const res = await chai
         .request(app.server())
         .get("/jobs");
-      expect(err).to.be.null;
       expect(res).to.have.status(200);
       expect(res.body).to.be.an('array');
       expect(res.body.length).to.equal(0);

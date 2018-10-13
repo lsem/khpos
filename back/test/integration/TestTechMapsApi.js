@@ -55,7 +55,7 @@ describe("API", () => {
       };
       checkExpectations(await chai.request(app.server()).get("/techmaps"));
       checkExpectations(await chai.request(app.server()).post("/techmaps"));
-      checkExpectations(await chai.request(app.server()).get("/techmaps"));
+      checkExpectations(await chai.request(app.server()).patch("/techmaps"));
     });
 
   });
