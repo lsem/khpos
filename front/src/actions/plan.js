@@ -45,15 +45,20 @@ export function moveJob(job, column, startTime) {
     column,
     startTime
   };
+  const patchedJob = {
+    ...job,
+    column,
+    startTime
+  }
   return {
     type: MOVE_JOB,
     payload,
     meta: {
       offline: {
         effect: {
-          url: `${getApi()}/jobs`,
+          url: `${getApi()}/jobs/${job.id}`,
           method: "PATCH",
-          data: { id: payload.job.id, column, startTime }
+          data: patchedJob
         },
         rollback: { type: MOVE_JOB_ROLLBACK, meta: payload }
       }
