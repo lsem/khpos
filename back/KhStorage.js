@@ -107,10 +107,12 @@ class KhStorage extends EventEmitter {
   }
 
   async getAllJobs() {
-    return await this.db
+    const allJobs = await this.db
       .collection("jobs")
       .find()
       .toArray();
+    allJobs.forEach(job => delete job._id);
+    return allJobs;
   }
 
   async updateJobById(id, model) {
