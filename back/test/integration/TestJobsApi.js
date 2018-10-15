@@ -214,7 +214,7 @@ describe("API", () => {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Inserted element should be equal to returned one", async () => {
-      await app.getApp().insertJob({
+      const sampleJob = {
         startTime: "1970-01-02T00:00:00.000Z",
         id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
         column: 0,
@@ -229,32 +229,42 @@ describe("API", () => {
             bgColor: "rgb(216, 216, 216)"
           }]
         }
-      });
-      const res = await chai
+      }
+
+      await app.getApp().insertJob(sampleJob);
+
+      const allJobsResult = await chai
         .request(app.server())
         .get("/jobs");
-      expect(res).to.have.status(200);
+      expect(allJobsResult).to.have.status(200);
 
-      res.body.forEach(jobNode => {
+      allJobsResult.body.forEach(jobNode => {
         expect(jobNode).to.not.have.property('_id');
       });
 
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-02T00:00:00.000Z",
-        id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
-        column: 0,
-        techMap: {
-          id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
-          }]
-        }
-      }]);
+      expect(allJobsResult.body).to.containSubset([{...sampleJob}]);
+
+      const timeSpanJobsResult = await chai
+        .request(app.server())
+        .get("/jobs?fromDate=1970-01-01T00:00:00.000Z&toDate=1970-01-03T00:00:00.000Z");
+      expect(timeSpanJobsResult).to.have.status(200);
+
+      timeSpanJobsResult.body.forEach(jobNode => {
+        expect(jobNode).to.not.have.property('_id');
+      });
+
+      expect(timeSpanJobsResult.body).to.containSubset([{...sampleJob}]);
+
+      const jobByIdResult = await chai
+        .request(app.server())
+        .get(`/jobs?id=${sampleJob.id}`);
+      expect(jobByIdResult).to.have.status(200);
+
+      jobByIdResult.body.forEach(jobNode => {
+        expect(jobNode).to.not.have.property('_id');
+      });
+
+      expect(jobByIdResult.body).to.containSubset([{...sampleJob}]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////

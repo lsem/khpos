@@ -102,17 +102,15 @@ class KhStorage extends EventEmitter {
           $gte: dateFrom.toDate(),
           $lte: dateTo.toDate()
         }
-      })
+      }, { projection: { _id: false } })
       .toArray();
   }
 
   async getAllJobs() {
-    const allJobs = await this.db
+    return await this.db
       .collection("jobs")
-      .find()
+      .find({}, { projection: { _id: false } })
       .toArray();
-    allJobs.forEach(job => delete job._id);
-    return allJobs;
   }
 
   async updateJobById(id, model) {
@@ -136,7 +134,7 @@ class KhStorage extends EventEmitter {
   async getJobById(id) {
     return await this.db.collection("jobs").findOne({
       id: id
-    });
+    }, { projection: { _id: false } });
   }
 
   async getTechMaps() {
