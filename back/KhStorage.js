@@ -161,14 +161,15 @@ class KhStorage extends EventEmitter {
   /////////////////////////////////////////////////////////////////////////////
 
   async getStaff() {
-    return await this.db
-      .collection("staff")
-      .find({}, {
-        projection: {
-          _id: false
-        }
-      })
-      .toArray();
+    return sampleData.getStaff();
+    // return await this.db
+    //   .collection("staff")
+    //   .find({}, {
+    //     projection: {
+    //       _id: false
+    //     }
+    //   })
+    //   .toArray();
   }
 
   async insertStaff(staffModel) {
