@@ -213,7 +213,7 @@ describe("API", () => {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    it("Inserted element should be equal to returned one", async () => {
+    it("All jobs request response should contain equal inserted one", async () => {
       const sampleJob = {
         startTime: "1970-01-02T00:00:00.000Z",
         id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
@@ -243,6 +243,29 @@ describe("API", () => {
       });
 
       expect(allJobsResult.body).to.containSubset([{...sampleJob}]);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Time span jobs request response should contain equal inserted one", async () => {
+      const sampleJob = {
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+        column: 0,
+        techMap: {
+          id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      }
+
+      await app.getApp().insertJob(sampleJob);
 
       const timeSpanJobsResult = await chai
         .request(app.server())
@@ -254,6 +277,29 @@ describe("API", () => {
       });
 
       expect(timeSpanJobsResult.body).to.containSubset([{...sampleJob}]);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    it("Job by id request response should contain equal inserted one", async () => {
+      const sampleJob = {
+        startTime: "1970-01-02T00:00:00.000Z",
+        id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+        column: 0,
+        techMap: {
+          id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
+            name: "task 1",
+            durationMins: 10,
+            bgColor: "rgb(216, 216, 216)"
+          }]
+        }
+      }
+
+      await app.getApp().insertJob(sampleJob);
 
       const jobByIdResult = await chai
         .request(app.server())
