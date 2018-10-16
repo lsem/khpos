@@ -31,7 +31,7 @@ const techMapTaskSchema = joi.object().keys({
     .max(24 * 60)
     .required(),
   bgColor: joi.string().required(), //.regex(/^#[A-Fa-f0-9]{6}/),
-  assigned: joi.array().items(taskAssigneeSchema).required()
+  assigned: joi.array().items(taskAssigneeSchema)
 });
 
 
