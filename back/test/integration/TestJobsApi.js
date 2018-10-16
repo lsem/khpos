@@ -31,8 +31,10 @@ function newTaskId() {
 }
 
 function newAssigneId() {
-  return 'ASSIGNEE-' + uuid.v4()
+  return 'ASS-' + uuid.v4()
 }
+
+// TODO: Test that invalid assignes are rejected and return 400!
 
 
 // https://mherman.org/blog/testing-node-and-express/#integration-tests
@@ -65,7 +67,8 @@ describe("API", () => {
           id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
           name: "task 1",
           durationMins: 10,
-          bgColor: "rgb(216, 216, 216)"
+          bgColor: "rgb(216, 216, 216)",
+          assigned: []
         }]
       }
     }
@@ -134,7 +137,8 @@ describe("API", () => {
             id: newTaskId(),
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       });
@@ -169,7 +173,8 @@ describe("API", () => {
             id: newTaskId(),
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       });
@@ -198,7 +203,8 @@ describe("API", () => {
             id: newTaskId(),
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       });
@@ -226,7 +232,8 @@ describe("API", () => {
             id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       }
@@ -260,7 +267,8 @@ describe("API", () => {
             id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       }
@@ -294,7 +302,8 @@ describe("API", () => {
             id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       }
@@ -310,7 +319,8 @@ describe("API", () => {
         expect(jobNode).to.not.have.property('_id');
       });
 
-      expect(jobByIdResult.body).to.containSubset([{...sampleJob}]);
+      expect(jobByIdResult.body).to.containSubset([{ ...sampleJob
+      }]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +446,16 @@ describe("API", () => {
       }]);
     });
 
+    it("Should return 400 if invalid job is requested", async () => {
+      const res = await chai.request(app.server()).get(`/jobs/invalid_job_id`);
+      expect(res).to.have.status(400);
+    });
+
+    it("Should return 404 if unexisting job is requested", async () => {
+      const res = await chai.request(app.server()).get(`/jobs/${newJobId()}`);
+      expect(res).to.have.status(404);
+    });
+
     it("Should return 404 if unexisting job is modified", async () => {
       const oneJobId = newJobId(),
         unexistingJobId = newJobId();
@@ -506,6 +526,38 @@ describe("API", () => {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
+    it("Should validate incoming assigne ids", async () => {
+      const oneJobId = newJobId();
+      const oneJob = {
+        startTime: '1970-01-01T00:00:00.000Z',
+        id: newJobId(),
+        column: 0,
+        techMap: {
+          id: newTechMapId(),
+          name: "1",
+          tintColor: "rgb(216, 216, 216)",
+          tasks: [{
+            id: newTaskId(),
+            name: "task 1",
+            durationMins: 20,
+            bgColor: "rgb(216, 216, 216)",
+            assigned: [{
+              id: uuid.v4(),
+              firstName: "Аня",
+              color: "#5AC8FA"
+            }]
+          }]
+        }
+      };
+      const insertRes = await chai.request(app.server()).post(`/jobs`).type(
+        "application/json").send(
+        JSON.stringify(oneJob)
+      );
+      expect(insertRes).to.have.status(400);
+    });
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     it("Posted job should be queriable and not modified ", async () => {
       const insertedJobId = newJobId(),
         taskId = newTaskId(),
@@ -523,7 +575,8 @@ describe("API", () => {
             id: taskId,
             name: "task 1",
             durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
+            bgColor: "rgb(216, 216, 216)",
+            assigned: []
           }]
         }
       });

@@ -25,6 +25,7 @@ class KhStorage extends EventEmitter {
 
   async clear() {
     this.db.collection("jobs").remove();
+    this.db.collection("staff").remove();
   }
 
   async connectToMongoDb() {
@@ -102,14 +103,22 @@ class KhStorage extends EventEmitter {
           $gte: dateFrom.toDate(),
           $lte: dateTo.toDate()
         }
-      }, { projection: { _id: false } })
+      }, {
+        projection: {
+          _id: false
+        }
+      })
       .toArray();
   }
 
   async getAllJobs() {
     return await this.db
       .collection("jobs")
-      .find({}, { projection: { _id: false } })
+      .find({}, {
+        projection: {
+          _id: false
+        }
+      })
       .toArray();
   }
 
@@ -132,18 +141,72 @@ class KhStorage extends EventEmitter {
   }
 
   async getJobById(id) {
-    return await this.db.collection("jobs").findOne({
+    const job = await this.db.collection("jobs").findOne({
       id: id
-    }, { projection: { _id: false } });
+    }, {
+      projection: {
+        _id: false
+      }
+    });
+    if (!job) {
+      throw new appErrors.NotFoundError(`Job ${id}`);
+    }
+    return job;
   }
 
   async getTechMaps() {
     return await sampleData.getTechMaps();
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+
   async getStaff() {
-    return await sampleData.getStaff();
+    return await this.db
+      .collection("staff")
+      .find({}, {
+        projection: {
+          _id: false
+        }
+      })
+      .toArray();
   }
+
+  async insertStaff(staffModel) {
+    await this.db.collection("staff").insertOne(staffModel);
+  }
+
+  async getStaffById(id) {
+    const staffEntry = await this.db.collection("staff").findOne({
+      id: id
+    }, {
+      projection: {
+        _id: false
+      }
+    });
+    if (!staffEntry) {
+      throw new appErrors.NotFoundError(`Staff ${id}`);
+    }
+    return staffEntry;
+  }
+
+  async updateStaffById(id, model) {
+    const existingModel = await this.db.collection("staff").findOne({
+      id: id
+    });
+    if (!existingModel) {
+      throw new appErrors.NotFoundError(`Staff ${id}`);
+    }
+    if (existingModel.id !== model.id) {
+      throw new appErrors.InvalidOperationError(
+        `Staff modification is not allowed: ${existingModel.id} != ${model.id}`);
+    }
+    return await this.db.collection("staff").update({
+        id: id
+      },
+      model
+    );
+  }
+
 }
 
 module.exports = KhStorage;

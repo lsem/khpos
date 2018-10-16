@@ -11,7 +11,7 @@ function newTaskId() {
   return 'TASK-' + uuid.v4()
 }
 function newAssigneId() {
-  return 'ASSIGNEE-' + uuid.v4()
+  return 'ASS-' + uuid.v4()
 }
 
 const nastiaAssigneId = newAssigneId();

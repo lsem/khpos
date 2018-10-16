@@ -6,25 +6,6 @@ var debug = require("debug")("khweb");
 let appErrors = require("./AppErrors");
 const http = require("http");
 
-class BadRequestError extends Error {
-  constructor(message) {
-    super(message);
-  }
-}
-
-class InvalidArgError extends BadRequestError {
-  constructor(argName, argValue) {
-    let message;
-    if (argName && argValue) {
-      message = `'${argValue}' is not valid value for argument '${argName}'`;
-    } else if (argName) {
-      message = `${argName} argument value is not valid`;
-    } else {
-      message = `argument is invalid`;
-    }
-    super(message);
-  }
-}
 
 function asDate(value) {
   return new Date(value);
@@ -51,10 +32,8 @@ function tryParseTimeStamp(value) {
 function errorHandler(err, req, res, next) {
   // https://www.restapitutorial.com/httpstatuscodes.html
   // WARNING: Order metters because of how catch works in regards to inheritance.
-  if (err instanceof BadRequestError) {
-    debug("appErrors.BadRequestError: %o", err);
-    res.status(400).send(err.message);
-  } else if (err instanceof appErrors.NotFoundError) {
+  //console.log(err)
+  if (err instanceof appErrors.NotFoundError) {
     debug("appErrors.NotFoundError: %o", err);
     res.status(404).send(err.message);
   } else if (err instanceof appErrors.InvalidModelError) {
@@ -65,6 +44,9 @@ function errorHandler(err, req, res, next) {
     res.status(501).send(err.message);
   } else if (err instanceof appErrors.InvalidOperationError) {
     debug("appErrors.InvalidOperationError: %o", err);
+    res.status(400).send(err.message);
+  } else if (err instanceof appErrors.BadRequestError) {
+    debug("appErrors.BadRequestError: %o", err);
     res.status(400).send(err.message);
   } else if (err instanceof appErrors.KhApplicationError) {
     debug("appErrors.KhApplicationError: %o", err);
@@ -90,34 +72,14 @@ class KhPosWebApplication {
     this.app.get("/", this.getStock.bind(this));
     this.app.get("/stock", this.getStock.bind(this));
     this.app.get("/products", this.getProducts.bind(this));
-    this.app.get("/plan", this.getPlan.bind(this));
-    this.app.post("/plan", this.postPlan.bind(this));
-    this.app.patch("/plan", this.patchPlan.bind(this));
     this.app.get("/techmaps", this.getTechMaps.bind(this));
-    this.app.get("/staff", this.getStaff.bind(this));
+    this.app.get("/staff", this.getStaffCollection.bind(this));
+    this.app.get("/staff/:id", this.getStaff.bind(this));
+    this.app.patch("/staff/:id", this.patchStaff.bind(this));
     this.app.get("/jobs", this.getJobs.bind(this));
     this.app.get("/jobs/:id", this.getJob.bind(this));
     this.app.post("/jobs", this.postJobs.bind(this));
-    this.app.patch("/jobs", this.patchJobs.bind(this));
     this.app.patch("/jobs/:id", this.patchJob.bind(this));
-
-    // TODO: Disable this router for production release.
-    this.inmemRouter = express.Router();
-    this.inmemRouter.use((req, res, next) => {
-      req.headers["inmem"] = true;
-      next();
-    });
-    this.inmemRouter.get("/jobs", this.getJobs.bind(this));
-    this.inmemRouter.get("/jobs/:id", this.getJob.bind(this));
-    this.inmemRouter.post("/jobs", this.postJobs.bind(this));
-    this.inmemRouter.patch("/jobs", this.patchJobs.bind(this));
-    this.inmemRouter.get("/plan", this.getPlan.bind(this));
-    this.inmemRouter.post("/plan", this.postPlan.bind(this));
-    this.inmemRouter.patch("/plan", this.patchPlan.bind(this));
-    this.inmemRouter.get("/techmaps", this.getTechMaps.bind(this));
-    this.inmemRouter.get("/staff", this.getStaff.bind(this));
-    this.app.use("/inmem/", this.inmemRouter);
-
     // Warning: Error handler must go after everything else.
     this.app.use(errorHandler);
   }
@@ -166,15 +128,15 @@ class KhPosWebApplication {
 
     // don't ask: https://stackoverflow.com/questions/4540422/why-is-there-no-logical-xor-in-javascript
     if (!req.query.fromDate !== !req.query.toDate) {
-      throw new InvalidArgError("Both fromDate and toDate should be specified");
+      throw new appErrors.InvalidArgError("Both fromDate and toDate should be specified");
     }
 
     // Without from and to date return all documents.
     if (req.query.fromDate && req.query.toDate) {
       fromDate = tryParseTimeStamp(req.query.fromDate);
-      if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
+      if (!fromDate) throw new appErrors.InvalidArgError("fromDate", req.query.fromDate);
       toDate = tryParseTimeStamp(req.query.toDate);
-      if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
+      if (!toDate) throw new appErrors.InvalidArgError("toDate", req.query.toDate);
     }
     this.getApp(req)
       .getJobs(fromDate, toDate)
@@ -203,14 +165,7 @@ class KhPosWebApplication {
         .status(201)
         .location("/jobs/" + id)
         .send()
-      )
-      .catch(err => next(err));
-  }
-  //
-  // PATCH /jobs
-  //
-  patchJobs(req, res, next) {
-    throw new appErrors.NotImplementedError("PATCH /jobs not implemented yet");
+      ).catch(err => next(err));
   }
 
   patchJob(req, res, next) {
@@ -218,55 +173,6 @@ class KhPosWebApplication {
     this.getApp(req)
       .updateJob(req.params.id, req.body)
       .then(() => res.status(200).send())
-      .catch(err => next(err));
-  }
-
-  //
-  // GET /plan
-  //
-  getPlan(req, res, next) {
-    debug("WARNING: /plan API is deprecated. Use /jobs instead");
-    let fromDate = tryParseTimeStamp(req.query.fromDate);
-    if (!fromDate) throw new InvalidArgError("fromDate", req.query.fromDate);
-    let toDate = tryParseTimeStamp(req.query.toDate);
-    if (!toDate) throw new InvalidArgError("toDate", req.query.toDate);
-    this.khApp
-      .getPlan(fromDate, toDate)
-      .then(data => res.send(data))
-      .catch(err => next(err));
-  }
-
-  //
-  // POST /plan
-  //
-  postPlan(req, res, next) {
-    debug("WARNING: /plan API is deprecated. Use /jobs instead");
-    debug("body: %O", req.body);
-    let fromDate = tryParseTimeStamp(req.body.from);
-    if (!fromDate) throw new InvalidArgError("from", req.body.from);
-    let toDate = tryParseTimeStamp(req.body.to);
-    if (!toDate) throw new InvalidArgError("to", req.body.to);
-    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
-    this.khApp
-      .setPlan(fromDate, toDate, req.body.data)
-      .then(() => res.status(204))
-      .catch(err => next(err));
-  }
-
-  //
-  // PATCH /plan
-  //
-  patchPlan(req, res, next) {
-    debug("WARNING: /plan API is deprecated. Use /jobs instead");
-    debug("body: %O", req.body);
-    let fromDate = tryParseTimeStamp(req.body.from);
-    if (!fromDate) throw new InvalidArgError("from", req.body.from);
-    let toDate = tryParseTimeStamp(req.body.to);
-    if (!toDate) throw new InvalidArgError("to", req.body.to);
-    // todo: validate data (https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
-    this.khApp
-      .updatePlan(fromDate, toDate, req.body.data)
-      .then(() => res.status(204))
       .catch(err => next(err));
   }
 
@@ -283,9 +189,30 @@ class KhPosWebApplication {
   //
   // GET /staff
   //
+  getStaffCollection(req, res, next) {
+    this.khApp
+      .getStaffCollection()
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // PATCH /staff
+  //
+  patchStaff(req, res, next) {
+    debug(req.params.id);
+    this.getApp(req)
+      .updateStaff(req.params.id, req.body)
+      .then(() => res.status(200).send())
+      .catch(err => next(err));
+  }
+
+  //
+  // GET /staff/:id
+  //
   getStaff(req, res, next) {
     this.khApp
-      .getStaff()
+      .getStaff(req.params.id)
       .then(data => res.send(data))
       .catch(err => next(err));
   }

@@ -11,6 +11,14 @@ const taskIdRegExp = new RegExp(uuidRegExp("TASK"), "i");
 const assigneeIdRegExp = new RegExp(uuidRegExp("ASS"), "i");
 
 ////////////////////////////////////////////////////////////////////////////////////
+
+const taskAssigneeSchema = joi.object().keys({
+  id: joi.string().regex(assigneeIdRegExp).required(),
+  firstName: joi.string().required(),
+  color: joi.string().required()
+});
+
+
 const techMapTaskSchema = joi.object().keys({
   id: joi
     .string()
@@ -22,8 +30,10 @@ const techMapTaskSchema = joi.object().keys({
     .min(1)
     .max(24 * 60)
     .required(),
-  bgColor: joi.string().required() //.regex(/^#[A-Fa-f0-9]{6}/),
+  bgColor: joi.string().required(), //.regex(/^#[A-Fa-f0-9]{6}/),
+  assigned: joi.array().items(taskAssigneeSchema).required()
 });
+
 
 const techMapSchema = joi.object().keys({
   id: joi
@@ -60,6 +70,15 @@ const jobModelSchema = joi.object().keys({
     .max(100)
     .required(),
   techMap: techMapSchema.required()
+});
+
+const staffModelSchema = joi.object().keys({
+  id: joi
+    .string()
+    .regex(assigneeIdRegExp)
+    .required(),
+  firstName: joi.string().required(),
+  color: joi.string().required()
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +127,8 @@ class KhPosApplication {
     });
   }
 
+  ///////////////////////////////////////////////////////////////////////////
+
   async getStock() {
     return new Promise((resolve, reject) => {
       this.posterProxyService.getStock(
@@ -118,19 +139,7 @@ class KhPosApplication {
     });
   }
 
-  validatePlan(plan) {
-    return plan.one === 1;
-  }
-  async getPlan(fromDate, toDate) {
-    const plan = this.storage.getPlan(fromDate, toDate);
-    return new Promise((resolve, reject) => {
-      if (plan) {
-        resolve(plan);
-      } else {
-        reject("Failed to retreive plan from database");
-      }
-    });
-  }
+  ///////////////////////////////////////////////////////////////////////////
 
   async getJobs(fromDate, toDate) {
     if (!fromDate || !toDate) {
@@ -140,9 +149,14 @@ class KhPosApplication {
   }
 
   async insertJob(jobModel) {
-    const model = await joi.validate(jobModel, jobModelSchema);
-    await this.storage.insertJob(model);
-    return model.id;
+    let modelOrNull;
+    try {
+      modelOrNull = await joi.validate(jobModel, jobModelSchema);
+    } catch (err) {
+      throw new appErrors.InvalidModelError(jobModel);
+    }
+    await this.storage.insertJob(modelOrNull);
+    return modelOrNull.id;
   }
 
   async updateJob(id, jobModel) {
@@ -152,28 +166,22 @@ class KhPosApplication {
 
   async getJob(jobId) {
     // todo: consider move to web app this validation
-    // todo: handle errors.
-    const id = await joi.validate(
-      jobId,
-      joi
-      .string()
-      .regex(jobIdRegExp)
-      .required()
-    );
-    return await this.storage.getJobById(id);
-  }
-
-  async setPlan(fromDate, toDate, plan) {
-    debug("fromDate: %o, toDate: %o, plan: %O", fromDate, toDate, plan);
-    if (!this._storageConnected) {
-      throw new appErrors.KhApplicationError("Storage error");
+    let irOrNull;
+    try {
+      irOrNull = await joi.validate(
+        jobId,
+        joi
+        .string()
+        .regex(jobIdRegExp)
+        .required()
+      );
+    } catch (err) {
+      throw new appErrors.InvalidArgError("Invalid job id: " + jobId);
     }
-    throw new appErrors.NotImplementedError("setPlan");
+    return await this.storage.getJobById(irOrNull);
   }
 
-  async updatePlan(fromDate, toDate, partialPlan) {
-    throw new appErrors.NotImplementedError("updatePlan");
-  }
+  ///////////////////////////////////////////////////////////////////////////
 
   async getTechMaps() {
     const techMaps = this.storage.getTechMaps();
@@ -186,7 +194,9 @@ class KhPosApplication {
     });
   }
 
-  async getStaff() {
+  ///////////////////////////////////////////////////////////////////////////
+
+  async getStaffCollection() {
     const staff = this.storage.getStaff();
     return new Promise((resolve, reject) => {
       if (staff) {
@@ -196,6 +206,34 @@ class KhPosApplication {
       }
     });
   }
+
+  async getStaff(id) {
+    let irOrNull;
+    try {
+      irOrNull = await joi.validate(
+        id,
+        joi
+        .string()
+        .regex(assigneeIdRegExp)
+        .required()
+      );
+    } catch (err) {
+      throw new appErrors.InvalidArgError("Invalid staff id: " + id);
+    }
+    return await this.storage.getStaffById(irOrNull);
+  }
+
+  async insertStaff(model) {
+    const validatedModel = await joi.validate(model, staffModelSchema);
+    await this.storage.insertStaff(validatedModel)
+    return validatedModel.id;
+  }
+
+  async updateStaff(id, staffModel) {
+    const model = await joi.validate(staffModel, staffModelSchema);
+    await this.storage.updateStaffById(id, model);
+  }
+
 }
 
 module.exports = KhPosApplication;
