@@ -2,6 +2,7 @@ import React from "react";
 import "./AssignmentsTimeline.css";
 import _ from "lodash";
 import classNames from "classnames";
+import moment from "moment";
 
 function AssignmentsTimeline(props) {
   const { jobs, columnWidth, msToPixels, beginTime, endTime } = props;
@@ -10,7 +11,7 @@ function AssignmentsTimeline(props) {
 
   const tasksByWorkers = _(jobs)
     .map(j => {
-      let startTime = j.startTime;
+      let startTime = moment(j.startTime).valueOf();
       return _.map(j.techMap.tasks, t => {
         const st = startTime;
         startTime += minsToMills(t.durationMins);
@@ -36,26 +37,38 @@ function AssignmentsTimeline(props) {
     .groupBy(a => a.firstName)
     .value();
 
+  var tasksByWorkersOrderedByFirstName = {};
+  _(tasksByWorkers)
+    .keys()
+    .sort()
+    .each(function(key) {
+      tasksByWorkersOrderedByFirstName[key] = tasksByWorkers[key];
+    });
+
   const tasksByColumns = [];
 
-  _.forEach(tasksByWorkers, tbw => {
+  _.forEach(tasksByWorkersOrderedByFirstName, tbw => {
     tasksByColumns.push([]);
     _.forEach(tbw, (t, i) => {
+      for (let j = 0; j < i; j++) {
+        if (t.startTime < tbw[j].endTime) {
+          t.overlaps = tbw[j].overlaps = true;
+          break;
+        }
+      }
       if (tbw[i - 1] && t.startTime < tbw[i - 1].endTime) {
-        t.overlaps = tbw[i - 1].overlaps = true;
         tasksByColumns.push([]);
       }
       tasksByColumns[tasksByColumns.length - 1].push(t);
     });
   });
 
-  const renderAssignmentTimeSpan = assignment => {
+  const renderAssignmentTimeSpan = (assignment, key) => {
     const assignmentTimeSpanStyle = {
       backgroundColor: assignment.color,
       top: msToPixels(assignment.startTime - beginTime),
       height: msToPixels(assignment.endTime - assignment.startTime),
-      width: columnWidth + 1,
-      borderRadius: columnWidth
+      borderRadius: columnWidth / 2
     };
 
     const classes = classNames("assignmentsTimeSpan", {
@@ -66,7 +79,7 @@ function AssignmentsTimeline(props) {
       <div
         style={assignmentTimeSpanStyle}
         className={classes}
-        key={assignment.key}
+        key={key}
       />
     );
   };
@@ -84,7 +97,7 @@ function AssignmentsTimeline(props) {
           style={columnStyle}
           key={key}
         >
-          {_.map(tbc, a => renderAssignmentTimeSpan(a))}
+          {_.map(tbc, (a, key) => renderAssignmentTimeSpan(a, key))}
         </div>
       );
     });
