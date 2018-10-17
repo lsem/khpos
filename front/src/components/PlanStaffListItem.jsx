@@ -3,8 +3,10 @@ import classNames from "classnames";
 import Icon from "./Icon";
 import { ICONS } from "../constants/icons";
 import "./PlanStaffListItem.css";
+import { DragSource } from "react-dnd";
+import DragItemTypes from "../dragItemTypes";
 
-export default class PlanStaffListItem extends Component {
+class PlanStaffListItem extends Component {
   constructor(props) {
     super(props);
 
@@ -50,8 +52,10 @@ export default class PlanStaffListItem extends Component {
       badgeSelected: this.props.selected
     });
 
+    var li = null;
+
     if (this.state.isEditing && this.props.selected) {
-      return (
+      li = (
         <li onClick={this.props.onClick} className={liClasses}>
           <span style={badgeStyle} className={badgeClasses} />
           <input
@@ -66,7 +70,7 @@ export default class PlanStaffListItem extends Component {
         </li>
       );
     } else {
-      return (
+      li = (
         <li onClick={this.props.onClick} className={liClasses}>
           <span style={badgeStyle} className={badgeClasses} />
           <span className="planStaffListItemText">
@@ -81,5 +85,25 @@ export default class PlanStaffListItem extends Component {
         </li>
       );
     }
+    return this.props.connectDragSource(li);
   }
 }
+
+export default DragSource(
+  DragItemTypes.SIDEBAR_STAFF,
+  // source:
+  {
+    beginDrag(props, monitor, component) {
+      return {
+        id: props.employee.id
+      };
+    }
+  }, // collect:
+  (connect, monitor) => {
+    return {
+      connectDragSource: connect.dragSource(),
+      connectDragPreview: connect.dragPreview(),
+      isDragging: monitor.isDragging()
+    };
+  }
+)(PlanStaffListItem);

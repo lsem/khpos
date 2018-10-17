@@ -17,7 +17,8 @@ import {
   moveJob,
   insertJob,
   swapJobs,
-  patchEmployee
+  patchEmployee,
+  assignJobTask
 } from "../actions/index";
 import moment from "moment";
 
@@ -42,6 +43,13 @@ class PlanScreen extends React.Component {
     this.detectDragModifierKeysHelper = new DetectDragModifierKeysHelper(
       this.onModifierKeyChanged
     );
+    this.handleJobTaskAssign = this.handleJobTaskAssign.bind(this);
+  }
+
+  handleJobTaskAssign(jobId, taskId, employeeId) {
+    const employee = _.find(this.props.staff, e => e.id === employeeId);
+
+    this.props.assignJobTask(jobId, taskId, employee);
   }
 
   componentDidMount() {
@@ -121,8 +129,8 @@ class PlanScreen extends React.Component {
       techMap,
       column,
       moment(this.props.timelineBeginTime)
-      .add(this.pixelsToMins(offsetInPixels), "minutes")
-      .valueOf()
+        .add(this.pixelsToMins(offsetInPixels), "minutes")
+        .valueOf()
     );
   }
   draggedRectChangedAction(rect) {
@@ -154,11 +162,12 @@ class PlanScreen extends React.Component {
   moveJob(id, column, offsetInPixels) {
     const job = _.find(this.props.jobs, j => j.id === id);
     this.props.moveJob(
-      job, 
-      column, 
+      job,
+      column,
       moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
-        .valueOf());
+        .valueOf()
+    );
   }
   columnHovered(column) {
     this.setState({
@@ -340,6 +349,7 @@ class PlanScreen extends React.Component {
               left={0}
               hoverColumn={this.state.hoverColumn}
               onDrop={this.onDrop}
+              handleJobTaskAssign={this.handleJobTaskAssign}
             />
           </div>
         </div>
@@ -389,14 +399,17 @@ const mapDispatchToProps = dispatch => {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestStaff: () => dispatch(requestStaff()),
-    patchEmployee: (employee, patch) => dispatch(patchEmployee(employee, patch)),
+    patchEmployee: (employee, patch) =>
+      dispatch(patchEmployee(employee, patch)),
     moveJob: (job, column, startTime) =>
       dispatch(moveJob(job, column, startTime)),
     // todo: consider using normalized state instead of techMap object
     insertJob: (techMap, column, startTime) =>
       dispatch(insertJob(techMap, column, startTime)),
     swapJobs: (draggedJob, neighbourJob) =>
-      dispatch(swapJobs(draggedJob, neighbourJob))
+      dispatch(swapJobs(draggedJob, neighbourJob)),
+    assignJobTask: (jobId, taskId, employee) =>
+      dispatch(assignJobTask(jobId, taskId, employee))
   };
 };
 

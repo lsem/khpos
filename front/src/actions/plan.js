@@ -10,7 +10,8 @@ import {
   INSERT_JOB,
   INSERT_JOB_ROLLBACK,
   DELETE_JOB,
-  DELETE_JOB_ROLLBACK
+  DELETE_JOB_ROLLBACK,
+  JOB_TASK_ASSIGN
 } from "./types";
 
 export const requestJobsSucceded = jobs => {
@@ -49,7 +50,7 @@ export function moveJob(job, column, startTime) {
     ...job,
     column,
     startTime
-  }
+  };
   return {
     type: MOVE_JOB,
     payload,
@@ -103,4 +104,11 @@ export function swapJobs(draggedJob, neighbourJob) {
     moveJob(draggedJob, draggedJob.column, neighbourJob.startTime),
     moveJob(neighbourJob, neighbourJob.column, draggedJob.startTime)
   ];
+}
+
+export function assignJobTask(jobId, taskId, employee) {
+  return {
+    type: JOB_TASK_ASSIGN,
+    payload: { jobId, taskId, employee }
+  };
 }

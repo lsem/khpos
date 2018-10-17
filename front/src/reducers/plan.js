@@ -13,7 +13,8 @@ import {
   STAFF_PATCH_EMPLOYEE,
   STAFF_PATCH_EMPLOYEE_ROLLBACK,
   DELETE_JOB,
-  DELETE_JOB_ROLLBACK
+  DELETE_JOB_ROLLBACK,
+  JOB_TASK_ASSIGN
 } from "../actions/types";
 
 const initialState = {
@@ -148,6 +149,41 @@ export default function plan(state = initialState, action) {
       return {
         ...state,
         staff: [...fiilteredEmployees, action.meta]
+      };
+    }
+
+    case JOB_TASK_ASSIGN: {
+      const affectedJob = _.find(
+        state.jobs,
+        j => j.id === action.payload.jobId
+      );
+      const affectedTask = _.find(
+        affectedJob.techMap.tasks,
+        t => t.id === action.payload.taskId
+      );
+      const newAssigns = affectedTask.assigned
+        ? [...affectedTask.assigned, action.payload.employee]
+        : [action.payload.employee];
+
+      const newTask = {
+        ...affectedTask,
+        assigned: newAssigns
+      };
+
+      const newTasks = [ ...affectedJob.techMap.tasks ];
+      newTasks[newTasks.indexOf(affectedTask)] = newTask;
+
+      const newJob = {
+        ...affectedJob,
+        techMap: {
+          ...affectedJob.techMap,
+          tasks: newTasks
+        }
+      };
+
+      return {
+        ...state,
+        jobs: [..._.filter(state.jobs, j => j.id !== affectedJob.id), newJob]
       };
     }
 

@@ -92,6 +92,8 @@ class CustomDragLayer extends React.PureComponent {
   // }
 
   componentWillReceiveProps(nextProps) {
+    if (!nextProps.itemType || nextProps.itemType === DragItemTypes.SIDEBAR_STAFF) return;
+
     if (!this.props.isDragging && nextProps.isDragging) {
       this.props.onTechMapPreviewStartedDragging(
         nextProps.item,
@@ -161,6 +163,10 @@ class CustomDragLayer extends React.PureComponent {
 
   render() {
     const { isDragging, item, itemType, canDrop } = this.props;
+
+    if (itemType === DragItemTypes.SIDEBAR_STAFF) {
+      return null;
+    }
 
     if (!isDragging) {
       // Case when we instantiated DragLayer

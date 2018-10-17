@@ -38,6 +38,7 @@ class TechMap extends React.Component {
     super(props);
     this.ref = null;
     this.setRef = this.setRef.bind(this);
+    this.handleTaskAssign = this.handleTaskAssign.bind(this);
     //console.log('TechMap: constructor: this.props.moveTechMap:', this.props.moveTechMap);
   }
 
@@ -51,6 +52,10 @@ class TechMap extends React.Component {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead
     this.props.connectDragPreview(getEmptyImage());
+  }
+
+  handleTaskAssign(taskId, employeeId) {
+    this.props.handleJobTaskAssign(this.props.jobId, taskId, employeeId);
   }
 
   render() {
@@ -74,6 +79,7 @@ class TechMap extends React.Component {
         height={this.props.minsToPixels(t.durationMins)}
         task={t}
         key={t.id}
+        assign={this.handleTaskAssign}
       />
     ));
 
