@@ -4,8 +4,6 @@ import _ from "lodash";
 import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
-  MOVE_JOB,
-  MOVE_JOB_ROLLBACK,
   INSERT_JOB,
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
@@ -14,7 +12,8 @@ import {
   STAFF_PATCH_EMPLOYEE_ROLLBACK,
   DELETE_JOB,
   DELETE_JOB_ROLLBACK,
-  JOB_TASK_ASSIGN
+  JOB_PATCH,
+  JOB_PATCH_ROLLBACK
 } from "../actions/types";
 
 const initialState = {
@@ -31,9 +30,6 @@ const initialState = {
 
 export default function plan(state = initialState, action) {
   switch (action.type) {
-    //
-    // PLAN_SET_TIMESPAN
-    //
     case PLAN_SET_TIMESPAN: {
       return {
         ...state,
@@ -41,48 +37,11 @@ export default function plan(state = initialState, action) {
         toDate: moment(action.timeSpan.toDate).valueOf()
       };
     }
-    //
-    // PLAN_REQUEST_JOBS_SUCCEEDED
-    //
+
     case PLAN_REQUEST_JOBS_SUCCEEDED: {
       return { ...state, jobs: action.jobs };
     }
-    //
-    // MOVE_JOB
-    //
-    case MOVE_JOB: {
-      const jobToMove = {
-        ...action.payload.job,
-        column: action.payload.column,
-        startTime: action.payload.startTime
-      };
 
-      const filtered = _.filter(
-        state.jobs,
-        j => j.id !== action.payload.job.id
-      );
-
-      const newJobs = [...filtered, jobToMove];
-
-      return {
-        ...state,
-        jobs: newJobs
-      };
-    }
-
-    case MOVE_JOB_ROLLBACK: {
-      const filtered = _.filter(state.jobs, j => j.id !== action.meta.job.id);
-
-      const newJobs = [...filtered, action.meta.job];
-
-      return {
-        ...state,
-        jobs: newJobs
-      };
-    }
-    //
-    // INSERT_JOB
-    //
     case INSERT_JOB: {
       return {
         ...state,
@@ -97,9 +56,6 @@ export default function plan(state = initialState, action) {
       };
     }
 
-    //
-    // DELETE_JOB
-    //
     case DELETE_JOB:
       return {
         ...state,
@@ -112,18 +68,12 @@ export default function plan(state = initialState, action) {
         jobs: [...state.jobs, action.job]
       };
 
-    //
-    // TECHMAPS_REQUEST
-    //
     case TECHMAPS_REQUEST_SUCCEEDED:
       return {
         ...state,
         techMaps: action.techMaps
       };
-
-    //
-    // STAFF_REQUEST
-    //
+      
     case STAFF_REQUEST_SUCCEEDED:
       return {
         ...state,
@@ -152,38 +102,19 @@ export default function plan(state = initialState, action) {
       };
     }
 
-    case JOB_TASK_ASSIGN: {
-      const affectedJob = _.find(
-        state.jobs,
-        j => j.id === action.payload.jobId
-      );
-      const affectedTask = _.find(
-        affectedJob.techMap.tasks,
-        t => t.id === action.payload.taskId
-      );
-      const newAssigns = affectedTask.assigned
-        ? [...affectedTask.assigned, action.payload.employee]
-        : [action.payload.employee];
-
-      const newTask = {
-        ...affectedTask,
-        assigned: newAssigns
-      };
-
-      const newTasks = [ ...affectedJob.techMap.tasks ];
-      newTasks[newTasks.indexOf(affectedTask)] = newTask;
-
-      const newJob = {
-        ...affectedJob,
-        techMap: {
-          ...affectedJob.techMap,
-          tasks: newTasks
-        }
-      };
-
+    case JOB_PATCH: {
       return {
         ...state,
-        jobs: [..._.filter(state.jobs, j => j.id !== affectedJob.id), newJob]
+        jobs: state.jobs.map(
+          j => (j.id === action.payload.id ? action.payload : j)
+        )
+      };
+    }
+
+    case JOB_PATCH_ROLLBACK: {
+      return {
+        ...state,
+        jobs: state.jobs.map(j => (j.id === action.meta.id ? action.meta : j))
       };
     }
 

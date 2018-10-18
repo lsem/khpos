@@ -48,8 +48,9 @@ class PlanScreen extends React.Component {
 
   handleJobTaskAssign(jobId, taskId, employeeId) {
     const employee = _.find(this.props.staff, e => e.id === employeeId);
+    const job = _.find(this.props.jobs, j => j.id === jobId);
 
-    this.props.assignJobTask(jobId, taskId, employee);
+    this.props.assignJobTask(job, taskId, employee);
   }
 
   componentDidMount() {
@@ -408,8 +409,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(insertJob(techMap, column, startTime)),
     swapJobs: (draggedJob, neighbourJob) =>
       dispatch(swapJobs(draggedJob, neighbourJob)),
-    assignJobTask: (jobId, taskId, employee) =>
-      dispatch(assignJobTask(jobId, taskId, employee))
+    assignJobTask: (job, taskId, employee) =>
+      dispatch(assignJobTask(job, taskId, employee))
   };
 };
 

@@ -5,13 +5,12 @@ import { getApi } from "../api";
 import {
   PLAN_REQUEST_JOBS_SUCCEEDED,
   PLAN_SET_TIMESPAN,
-  MOVE_JOB,
-  MOVE_JOB_ROLLBACK,
   INSERT_JOB,
   INSERT_JOB_ROLLBACK,
   DELETE_JOB,
   DELETE_JOB_ROLLBACK,
-  JOB_TASK_ASSIGN
+  JOB_PATCH,
+  JOB_PATCH_ROLLBACK
 } from "./types";
 
 export const requestJobsSucceded = jobs => {
@@ -41,19 +40,14 @@ export const requestJobs = (fromDate, toDate) => {
 };
 
 export function moveJob(job, column, startTime) {
-  const payload = {
-    job,
-    column,
-    startTime
-  };
   const patchedJob = {
     ...job,
     column,
     startTime
   };
   return {
-    type: MOVE_JOB,
-    payload,
+    type: JOB_PATCH,
+    payload: patchedJob,
     meta: {
       offline: {
         effect: {
@@ -61,7 +55,7 @@ export function moveJob(job, column, startTime) {
           method: "PATCH",
           data: patchedJob
         },
-        rollback: { type: MOVE_JOB_ROLLBACK, meta: payload }
+        rollback: { type: JOB_PATCH, meta: job }
       }
     }
   };
@@ -106,9 +100,36 @@ export function swapJobs(draggedJob, neighbourJob) {
   ];
 }
 
-export function assignJobTask(jobId, taskId, employee) {
+export function assignJobTask(job, taskId, employee) {
+  const affectedTask = job.techMap.tasks.find(t => t.id === taskId);
+
+  const newTask = {
+    ...affectedTask,
+    assigned: affectedTask.assigned
+      ? [...affectedTask.assigned, employee]
+      : [employee]
+  };
+
+  const patchedJob = {
+    ...job,
+    techMap: {
+      ...job.techMap,
+      tasks: job.techMap.tasks.map(t => (t === affectedTask ? newTask : t))
+    }
+  };
+
   return {
-    type: JOB_TASK_ASSIGN,
-    payload: { jobId, taskId, employee }
+    type: JOB_PATCH,
+    payload: patchedJob,
+    meta: {
+      offline: {
+        effect: {
+          url: `${getApi()}/jobs/${job.id}`,
+          method: "PATCH",
+          data: patchedJob
+        },
+        rollback: { type: JOB_PATCH_ROLLBACK, meta: job }
+      }
+    }
   };
 }
