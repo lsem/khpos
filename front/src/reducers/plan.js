@@ -7,9 +7,9 @@ import {
   INSERT_JOB,
   INSERT_JOB_ROLLBACK,
   TECHMAPS_REQUEST_SUCCEEDED,
-  STAFF_REQUEST_SUCCEEDED,
-  STAFF_PATCH_EMPLOYEE,
-  STAFF_PATCH_EMPLOYEE_ROLLBACK,
+  EMPLOYEES_REQUEST_SUCCEEDED,
+  EMPLOYEES_PUT,
+  EMPLOYEES_PUT_ROLLBACK,
   DELETE_JOB,
   DELETE_JOB_ROLLBACK,
   JOB_PATCH,
@@ -25,7 +25,7 @@ const initialState = {
     .valueOf(),
   jobs: [],
   techMaps: [],
-  staff: []
+  employees: []
 };
 
 export default function plan(state = initialState, action) {
@@ -74,31 +74,31 @@ export default function plan(state = initialState, action) {
         techMaps: action.techMaps
       };
       
-    case STAFF_REQUEST_SUCCEEDED:
+    case EMPLOYEES_REQUEST_SUCCEEDED:
       return {
         ...state,
-        staff: action.staff
+        employees: action.employees
       };
 
-    case STAFF_PATCH_EMPLOYEE: {
-      const fiilteredEmployees = state.staff.filter(
+    case EMPLOYEES_PUT: {
+      const fiilteredEmployees = state.employees.filter(
         e => e.id !== action.payload.id
       );
 
       return {
         ...state,
-        staff: [...fiilteredEmployees, action.payload]
+        employees: [...fiilteredEmployees, action.payload]
       };
     }
 
-    case STAFF_PATCH_EMPLOYEE_ROLLBACK: {
-      const fiilteredEmployees = state.staff.filter(
+    case EMPLOYEES_PUT_ROLLBACK: {
+      const fiilteredEmployees = state.employees.filter(
         e => e.id !== action.meta.id
       );
 
       return {
         ...state,
-        staff: [...fiilteredEmployees, action.meta]
+        employees: [...fiilteredEmployees, action.meta]
       };
     }
 

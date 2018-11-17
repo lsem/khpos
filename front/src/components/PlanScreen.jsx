@@ -5,7 +5,7 @@ import PlanTimeline from "./PlanTimeline";
 import AssignmentsTimeline from "./AssignmentsTimeline";
 import PlanDateSpanSelector from "./PlanDateSpanSelector";
 import PlanTechMapsMenu from "./PlanTechMapsMenu";
-import PlanStaffMenu from "./PlanStaffMenu";
+import PlanEmployeesMenu from "./PlanEmployeesMenu";
 import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
 import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
@@ -13,7 +13,7 @@ import _ from "lodash";
 import {
   requestJobs,
   requestTechMaps,
-  requestStaff,
+  requestEmployees,
   moveJob,
   insertJob,
   swapJobs,
@@ -47,7 +47,7 @@ class PlanScreen extends React.Component {
   }
 
   handleJobTaskAssign(jobId, taskId, employeeId) {
-    const employee = _.find(this.props.staff, e => e.id === employeeId);
+    const employee = _.find(this.props.employees, e => e.id === employeeId);
     const job = _.find(this.props.jobs, j => j.id === jobId);
 
     this.props.assignJobTask(job, taskId, employee);
@@ -355,9 +355,9 @@ class PlanScreen extends React.Component {
           </div>
         </div>
         <div className="PlanScreenSideContainer">
-          <PlanStaffMenu
-            staff={this.props.staff}
-            requestStaff={this.props.requestStaff}
+          <PlanEmployeesMenu
+            employees={this.props.employees}
+            requestEmployees={this.props.requestEmployees}
             patchEmployee={this.props.patchEmployee}
           />
           <PlanTechMapsMenu
@@ -391,7 +391,7 @@ const mapStateToProps = state => {
     timelineEndTime: state.plan.toDate,
     jobs: state.plan.jobs,
     techMaps: state.plan.techMaps,
-    staff: state.plan.staff
+    employees: state.plan.employees
   };
 };
 
@@ -399,7 +399,7 @@ const mapDispatchToProps = dispatch => {
   return {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
-    requestStaff: () => dispatch(requestStaff()),
+    requestEmployees: () => dispatch(requestEmployees()),
     patchEmployee: (employee, patch) =>
       dispatch(patchEmployee(employee, patch)),
     moveJob: (job, column, startTime) =>

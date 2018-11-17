@@ -9,29 +9,17 @@ const chai = require("chai");
 var expect = require("chai").expect;
 var assert = require("chai").assert;
 var should = require("chai").should;
-const moment = require("moment");
-const uuid = require('uuid');
 const chaiHttp = require("chai-http");
 var chaiSubset = require('chai-subset');
 const _ = require('lodash');
+const helpers = require("../../helpers");
+const constants = require("../../constants");
 
 chai.use(chaiHttp);
 chai.use(chaiSubset);
 
-function newJobId() {
-  return 'JOB-' + uuid.v4()
-}
-
-function newTechMapId() {
-  return 'TM-' + uuid.v4()
-}
-
-function newTaskId() {
-  return 'TASK-' + uuid.v4()
-}
-
-function newAssigneId() {
-  return 'ASS-' + uuid.v4()
+function newEmployeeId() {
+  return helpers.generatePrefixedId(constants.EMPLOYEE_ID_PREFIX);
 }
 
 
@@ -53,12 +41,12 @@ describe("API", () => {
   })
 
 
-  describe("/staff", () => {
+  describe("/employees", () => {
 
     it("should provide application/json content type header", done => {
       chai
         .request(app.server())
-        .get("/staff")
+        .get("/employees")
         .end((err, res) => {
           expect(res).to.have.header('content-type', 'application/json; charset=utf-8');
           done();
@@ -74,60 +62,55 @@ describe("API", () => {
         expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
         expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
       };
-      checkExpectations(await chai.request(app.server()).get("/staff"));
-      checkExpectations(await chai.request(app.server()).post("/staff"));
-      checkExpectations(await chai.request(app.server()).patch("/staff"));
+      checkExpectations(await chai.request(app.server()).get("/employees"));
+      checkExpectations(await chai.request(app.server()).post("/employees"));
+      checkExpectations(await chai.request(app.server()).patch("/employees"));
     });
   });
 
   it("should return empty array on clear database", async () => {
-    const res = await chai.request(app.server()).get("/staff");
+    const res = await chai.request(app.server()).get("/employees");
     expect(res).to.have.status(200);
     expect(res.body).to.be.an('array');
     expect(res.body.length).to.equal(0);
   });
 
   it("should return collection of one element when one element is in the database", async () => {
-    const insertedStaffId = newAssigneId();
-    await app.getApp().insertStaff({
-      id: insertedStaffId,
+    await app.getApp().insertEmployee({
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     });
     const res = await chai
       .request(app.server())
-      .get("/staff");
+      .get("/employees");
 
     expect(res).to.have.status(200);
     expect(res.body).to.be.an('array');
     expect(res.body.length).to.equal(1);
 
     expect(res.body).to.containSubset([{
-      id: insertedStaffId,
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     }]);
 
   });
 
-  it("Should return 400 if invalid staff is requested", async () => {
-    const res = await chai.request(app.server()).get(`/staff/invalid_staff_id`);
+  it("Should return 400 if invalid employee is requested", async () => {
+    const res = await chai.request(app.server()).get(`/employees/invalid_staff_id`);
     expect(res).to.have.status(400);
   });
 
-  it("Should return 404 if unexisting staff is requested", async () => {
-    const res = await chai.request(app.server()).get(`/staff/${newAssigneId()}`);
+  it("Should return 404 if unexisting employee is requested", async () => {
+    const res = await chai.request(app.server()).get(`/employees/${newEmployeeId()}`);
     expect(res).to.have.status(404);
   });
 
-  it("Modification of existing staff should work fine", async () => {
-    const vasylId = newAssigneId();
-    await app.getApp().insertStaff({
-      id: vasylId,
+  it("Modification of existing employee should work fine", async () => {
+    const vasylId = await app.getApp().insertEmployee({
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     });
-    const modifyRes = await chai.request(app.server()).patch(`/staff/${vasylId}`).type(
+    const modifyRes = await chai.request(app.server()).put(`/employees/${vasylId}`).type(
       "application/json").send(
       JSON.stringify({
         id: vasylId,
@@ -140,7 +123,7 @@ describe("API", () => {
 
     const getStaffRes = await chai
       .request(app.server())
-      .get("/staff");
+      .get("/employees");
 
     expect(getStaffRes).to.have.status(200);
     expect(getStaffRes.body).to.be.an('array');
@@ -154,15 +137,15 @@ describe("API", () => {
 
   });
 
-  it("Modification of unexisting staff should return 404", async () => {
-    const vasylId = newAssigneId();
-    await app.getApp().insertStaff({
+  it("Modification of unexisting employee should return 404", async () => {
+    const vasylId = newEmployeeId();
+    await app.getApp().insertEmployee({
       id: vasylId,
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     });
 
-    const res = await chai.request(app.server()).patch(`/staff/${newAssigneId()}`).type(
+    const res = await chai.request(app.server()).patch(`/employees/${newEmployeeId()}`).type(
       "application/json").send(JSON.stringify({
       id: vasylId,
       firstName: "Василь",

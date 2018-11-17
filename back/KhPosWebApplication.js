@@ -73,9 +73,10 @@ class KhPosWebApplication {
     this.app.get("/stock", this.getStock.bind(this));
     this.app.get("/products", this.getProducts.bind(this));
     this.app.get("/techmaps", this.getTechMaps.bind(this));
-    this.app.get("/staff", this.getStaffCollection.bind(this));
-    this.app.get("/staff/:id", this.getStaff.bind(this));
-    this.app.patch("/staff/:id", this.patchStaff.bind(this));
+    this.app.get("/employees", this.getEmployees.bind(this));
+    this.app.get("/employees/:id", this.getEmployee.bind(this));
+    this.app.put("/employees/:id", this.putEmployee.bind(this));
+    this.app.post("/employees", this.postEmployee.bind(this));
     this.app.get("/jobs", this.getJobs.bind(this));
     this.app.get("/jobs/:id", this.getJob.bind(this));
     this.app.post("/jobs", this.postJobs.bind(this));
@@ -187,32 +188,41 @@ class KhPosWebApplication {
   }
 
   //
-  // GET /staff
+  // GET /employees
   //
-  getStaffCollection(req, res, next) {
+  getEmployees(req, res, next) {
     this.khApp
-      .getStaffCollection()
+      .getEmployeesCollection()
       .then(data => res.send(data))
       .catch(err => next(err));
   }
 
   //
-  // PATCH /staff
+  // PUT /employees
   //
-  patchStaff(req, res, next) {
-    debug(req.params.id);
+  putEmployee(req, res, next) {
     this.getApp(req)
-      .updateStaff(req.params.id, req.body)
+      .updateEmployee(req.params.id, req.body)
       .then(() => res.status(200).send())
       .catch(err => next(err));
   }
 
   //
-  // GET /staff/:id
+  // GET /employees/:id
   //
-  getStaff(req, res, next) {
+  getEmployee(req, res, next) {
     this.khApp
-      .getStaff(req.params.id)
+      .getEmployee(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // POST /employees
+  //
+  postEmployee(req, res, next) {
+    this.khApp
+      .insertEmployee(req.body)
       .then(data => res.send(data))
       .catch(err => next(err));
   }

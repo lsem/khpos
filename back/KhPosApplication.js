@@ -2,18 +2,21 @@ let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
 const moment = require("moment");
+const helpers = require("./helpers");
+const constants = require("./constants");
+
 
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
 const jobIdRegExp = new RegExp(uuidRegExp("JOB"), "i");
 const techMapIdRegExp = new RegExp(uuidRegExp("TM"), "i");
 const taskIdRegExp = new RegExp(uuidRegExp("TASK"), "i");
-const assigneeIdRegExp = new RegExp(uuidRegExp("ASS"), "i");
+const employeeIdRegExp = new RegExp(uuidRegExp(constants.EMPLOYEE_ID_PREFIX), "i");
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 const taskAssigneeSchema = joi.object().keys({
-  id: joi.string().regex(assigneeIdRegExp).required(),
+  id: joi.string().regex(employeeIdRegExp).required(),
   firstName: joi.string().required(),
   color: joi.string().required()
 });
@@ -72,10 +75,10 @@ const jobModelSchema = joi.object().keys({
   techMap: techMapSchema.required()
 });
 
-const staffModelSchema = joi.object().keys({
+const employeeModelSchema = joi.object().keys({
   id: joi
     .string()
-    .regex(assigneeIdRegExp)
+    .regex(employeeIdRegExp)
     .required(),
   firstName: joi.string().required(),
   color: joi.string().required()
@@ -196,42 +199,43 @@ class KhPosApplication {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  async getStaffCollection() {
-    const staff = this.storage.getStaff();
+  async getEmployeesCollection() {
+    const employees = this.storage.getAllEmployees();
     return new Promise((resolve, reject) => {
-      if (staff) {
-        resolve(staff);
+      if (employees) {
+        resolve(employees);
       } else {
-        reject("Failed to retreive staff from database");
+        reject("Failed to retreive employees from database");
       }
     });
   }
 
-  async getStaff(id) {
+  async getEmployee(id) {
     let irOrNull;
     try {
       irOrNull = await joi.validate(
         id,
         joi
         .string()
-        .regex(assigneeIdRegExp)
+        .regex(employeeIdRegExp)
         .required()
       );
     } catch (err) {
       throw new appErrors.InvalidArgError("Invalid staff id: " + id);
     }
-    return await this.storage.getStaffById(irOrNull);
+    return await this.storage.getEmployeeById(irOrNull);
   }
 
-  async insertStaff(model) {
-    const validatedModel = await joi.validate(model, staffModelSchema);
-    await this.storage.insertStaff(validatedModel)
+  async insertEmployee(employee) {
+    employee.id = helpers.generatePrefixedId(constants.EMPLOYEE_ID_PREFIX);
+    const validatedModel = await joi.validate(employee, employeeModelSchema);
+    await this.storage.insertEmployee(validatedModel)
     return validatedModel.id;
   }
 
-  async updateStaff(id, staffModel) {
-    const model = await joi.validate(staffModel, staffModelSchema);
-    await this.storage.updateStaffById(id, model);
+  async updateEmployee(id, employee) {
+    const validatedModel = await joi.validate(employee, employeeModelSchema);
+    await this.storage.updateEmployeeById(id, validatedModel);
   }
 
 }

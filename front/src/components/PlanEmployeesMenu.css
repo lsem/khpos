@@ -1,13 +1,13 @@
-.planStaffMenu {
+.planEmployeesMenu {
   margin: 12px 0 0 0;
 }
 
-.planStaffMenuHeader {
+.planEmployeesMenuHeader {
   line-height: 30px;
   padding: 0 0 0 20px;
 }
 
-.planStaffMenuHeader h6 {
+.planEmployeesMenuHeader h6 {
   font-family: 'Fira Sans Bold';
   padding: 0;
   margin: 0 0 0 4px;
@@ -15,7 +15,7 @@
   vertical-align: middle;
 }
 
-.planStaffAddButton {
+.planEmployeesAddButton {
   line-height: 24px;
   color: #007aff;
   padding: 0 0 0 20px;

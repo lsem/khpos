@@ -25,7 +25,7 @@ class KhStorage extends EventEmitter {
 
   async clear() {
     this.db.collection("jobs").remove();
-    this.db.collection("staff").remove();
+    this.db.collection("employees").remove();
   }
 
   async connectToMongoDb() {
@@ -160,24 +160,24 @@ class KhStorage extends EventEmitter {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  async getStaff() {
-    return sampleData.getStaff();
-    // return await this.db
-    //   .collection("staff")
-    //   .find({}, {
-    //     projection: {
-    //       _id: false
-    //     }
-    //   })
-    //   .toArray();
+  async getAllEmployees() {
+    //return sampleData.getStaff();
+    return await this.db
+      .collection("employees")
+      .find({}, {
+        projection: {
+          _id: false
+        }
+      })
+      .toArray();
   }
 
-  async insertStaff(staffModel) {
-    await this.db.collection("staff").insertOne(staffModel);
+  async insertEmployee(employee) {
+    await this.db.collection("employees").insertOne(employee);
   }
 
-  async getStaffById(id) {
-    const staffEntry = await this.db.collection("staff").findOne({
+  async getEmployeeById(id) {
+    const staffEntry = await this.db.collection("employees").findOne({
       id: id
     }, {
       projection: {
@@ -185,23 +185,23 @@ class KhStorage extends EventEmitter {
       }
     });
     if (!staffEntry) {
-      throw new appErrors.NotFoundError(`Staff ${id}`);
+      throw new appErrors.NotFoundError(`Employee ${id}`);
     }
     return staffEntry;
   }
 
-  async updateStaffById(id, model) {
-    const existingModel = await this.db.collection("staff").findOne({
+  async updateEmployeeById(id, model) {
+    const existingModel = await this.db.collection("employees").findOne({
       id: id
     });
     if (!existingModel) {
-      throw new appErrors.NotFoundError(`Staff ${id}`);
+      throw new appErrors.NotFoundError(`Employee ${id}`);
     }
     if (existingModel.id !== model.id) {
       throw new appErrors.InvalidOperationError(
-        `Staff modification is not allowed: ${existingModel.id} != ${model.id}`);
+        `Employee modification is not allowed: ${existingModel.id} != ${model.id}`);
     }
-    return await this.db.collection("staff").update({
+    return await this.db.collection("employees").update({
         id: id
       },
       model

@@ -1,33 +1,33 @@
 import React from "react";
 import _ from "lodash";
-import PlanStaffListItem from "./PlanStaffListItem";
+import PlanEmployeesListItem from "./PlanEmployeesListItem";
 import ListView from "./ListView";
 import Icon from "./Icon";
 import { ICONS } from "../constants/icons";
-import "./PlanStaffMenu.css";
+import "./PlanEmployeesMenu.css";
 
-export default class PlanStaffMenu extends React.Component {
+export default class PlanEmployeesMenu extends React.Component {
   componentDidMount() {
-    this.props.requestStaff();
+    this.props.requestEmployees();
   }
 
   render() {
     return (
-      <div className="planStaffMenu">
-        <div className="planStaffMenuHeader">
+      <div className="planEmployeesMenu">
+        <div className="planEmployeesMenuHeader">
           <Icon icon={ICONS.PEOPLE} size={16} color="#7F7F7F" />
           <h6>Працівники</h6>
         </div>
         <ListView>
-          {_.sortBy(this.props.staff, e => e.firstName).map(employee => (
-            <PlanStaffListItem
+          {_.sortBy(this.props.employees, e => e.firstName).map(employee => (
+            <PlanEmployeesListItem
               employee={employee}
               key={employee.id}
               patchEmployee={this.props.patchEmployee}
             />
           ))}
         </ListView>
-        <div className="planStaffAddButton">
+        <div className="planEmployeesAddButton">
           <Icon icon={ICONS.ADD} size={16} color="#007aff" />
           {" Додати "}
         </div>

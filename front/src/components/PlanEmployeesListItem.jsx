@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import classNames from "classnames";
 import Icon from "./Icon";
 import { ICONS } from "../constants/icons";
-import "./PlanStaffListItem.css";
+import "./PlanEmployeesListItem.css";
 import { DragSource } from "react-dnd";
 import DragItemTypes from "../dragItemTypes";
 
-class PlanStaffListItem extends Component {
+class PlanEmployeesListItem extends Component {
   constructor(props) {
     super(props);
 
@@ -44,11 +44,11 @@ class PlanStaffListItem extends Component {
       backgroundColor: this.props.employee.color
     };
 
-    const liClasses = classNames("planStaffListItem", {
-      planStaffListItemSelected: this.props.selected
+    const liClasses = classNames("planEmployeesListItem", {
+      planEmployeesListItemSelected: this.props.selected
     });
 
-    const badgeClasses = classNames("planStaffListItemBadge", {
+    const badgeClasses = classNames("planEmployeesListItemBadge", {
       badgeSelected: this.props.selected
     });
 
@@ -63,7 +63,7 @@ class PlanStaffListItem extends Component {
             autoFocus
             onKeyDown={this.textInputOnKeyDown}
             onFocus={this.textInputOnFocus}
-            className="planStaffListItemTextInput"
+            className="planEmployeesListItemTextInput"
             defaultValue={this.props.employee.firstName}
             onBlur={this.textInputOnBlur}
           />
@@ -73,11 +73,11 @@ class PlanStaffListItem extends Component {
       li = (
         <li onClick={this.props.onClick} className={liClasses}>
           <span style={badgeStyle} className={badgeClasses} />
-          <span className="planStaffListItemText">
+          <span className="planEmployeesListItemText">
             {this.props.employee.firstName}
           </span>
           <span
-            className="planStaffListItemEditButton"
+            className="planEmployeesListItemEditButton"
             onClick={this.renameClick}
           >
             <Icon icon={ICONS.RENAME} size={16} />
@@ -106,4 +106,4 @@ export default DragSource(
       isDragging: monitor.isDragging()
     };
   }
-)(PlanStaffListItem);
+)(PlanEmployeesListItem);
