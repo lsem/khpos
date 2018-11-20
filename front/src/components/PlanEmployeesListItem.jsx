@@ -32,7 +32,7 @@ class PlanEmployeesListItem extends Component {
 
   textInputOnKeyDown(e) {
     if (e.key === "Enter") {
-      this.props.patchEmployee(this.props.employee, {
+      this.props.patchEmployee(this.props.employee.id, {
         firstName: e.target.value
       });
       e.target.blur();

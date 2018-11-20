@@ -1,21 +1,16 @@
 import axios from "axios";
+import * as actionTypes from "../actions/types";
 import { getApi } from "../api";
-import {
-  EMPLOYEES_REQUEST_SUCCEEDED,
-  EMPLOYEES_PUT,
-  EMPLOYEES_PUT_ROLLBACK
-} from "./types";
-
-export const requestEmployeesSucceded = employees => {
-  return { type: EMPLOYEES_REQUEST_SUCCEEDED, employees };
-};
 
 export const requestEmployees = () => {
   return dispatch => {
     axios
       .get(`${getApi()}/employees`)
       .then(res => {
-        dispatch(requestEmployeesSucceded(res.data));
+        dispatch({
+          type: actionTypes.EMPLOYEES_REQUEST_SUCCEEDED,
+          payload: res.data
+        });
       })
       .catch(err => {
         console.log(err);
@@ -23,23 +18,32 @@ export const requestEmployees = () => {
   };
 };
 
-export function patchEmployee(employee, patch) {
-  const patchedEmployee = {
-    ...employee,
-    ...patch
-  };
-  return {
-    type: EMPLOYEES_PUT,
-    payload: patchedEmployee,
-    meta: {
-      offline: {
-        effect: {
-          url: `${getApi()}/employees/${employee.id}`,
-          method: "PUT",
-          data: { ...patchedEmployee }
-        },
-        rollback: { type: EMPLOYEES_PUT_ROLLBACK, meta: employee }
+export function patchEmployee(id, patch) {
+  return (dispatch, getState) => {
+    const state = getState();
+
+    const affectedEmployee = state.employees.find(e => e.id === id);
+    const patchedEmployee = {
+      ...affectedEmployee,
+      ...patch
+    };
+
+    dispatch({
+      type: actionTypes.EMPLOYEES_PUT,
+      payload: patchedEmployee,
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/employees/${id}`,
+            method: "PUT",
+            data: { ...patchedEmployee }
+          },
+          rollback: {
+            type: actionTypes.EMPLOYEES_PUT_ROLLBACK,
+            meta: affectedEmployee
+          }
+        }
       }
-    }
+    });
   };
 }

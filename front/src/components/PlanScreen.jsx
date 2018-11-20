@@ -47,10 +47,7 @@ class PlanScreen extends React.Component {
   }
 
   handleJobTaskAssign(jobId, taskId, employeeId) {
-    const employee = _.find(this.props.employees, e => e.id === employeeId);
-    const job = _.find(this.props.jobs, j => j.id === jobId);
-
-    this.props.assignJobTask(job, taskId, employee);
+    this.props.assignJobTask(jobId, taskId, employeeId);
   }
 
   componentDidMount() {
@@ -123,11 +120,8 @@ class PlanScreen extends React.Component {
       console.error("offsetInPixels < 0");
       return;
     }
-    // todo: consider using techMapId instead of embedded techmap
-    const techMap = _.find(this.props.techMaps, tm => tm.id === techMapId);
-    console.assert(techMap);
     this.props.insertJob(
-      techMap,
+      techMapId,
       column,
       moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
@@ -156,14 +150,11 @@ class PlanScreen extends React.Component {
     });
   }
   swapTechMaps(column, draggedJobId, existingJobId) {
-    const draggedJob = _.find(this.props.jobs, j => j.id === draggedJobId);
-    const existingJob = _.find(this.props.jobs, j => j.id === existingJobId);
-    this.props.swapJobs(draggedJob, existingJob);
+    this.props.swapJobs(draggedJobId, existingJobId);
   }
   moveJob(id, column, offsetInPixels) {
-    const job = _.find(this.props.jobs, j => j.id === id);
     this.props.moveJob(
-      job,
+      id,
       column,
       moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
@@ -387,11 +378,11 @@ class PlanScreen extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    timelineBeginTime: state.plan.fromDate,
-    timelineEndTime: state.plan.toDate,
-    jobs: state.plan.jobs,
-    techMaps: state.plan.techMaps,
-    employees: state.plan.employees
+    timelineBeginTime: state.appState.planTimeSpan.fromDate,
+    timelineEndTime: state.appState.planTimeSpan.toDate,
+    jobs: state.jobs,
+    techMaps: state.techMaps,
+    employees: state.employees
   };
 };
 
@@ -400,17 +391,16 @@ const mapDispatchToProps = dispatch => {
     loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestEmployees: () => dispatch(requestEmployees()),
-    patchEmployee: (employee, patch) =>
-      dispatch(patchEmployee(employee, patch)),
-    moveJob: (job, column, startTime) =>
-      dispatch(moveJob(job, column, startTime)),
-    // todo: consider using normalized state instead of techMap object
-    insertJob: (techMap, column, startTime) =>
-      dispatch(insertJob(techMap, column, startTime)),
-    swapJobs: (draggedJob, neighbourJob) =>
-      dispatch(swapJobs(draggedJob, neighbourJob)),
-    assignJobTask: (job, taskId, employee) =>
-      dispatch(assignJobTask(job, taskId, employee))
+    patchEmployee: (id, patch) =>
+      dispatch(patchEmployee(id, patch)),
+    moveJob: (id, column, startTime) =>
+      dispatch(moveJob(id, column, startTime)),
+    insertJob: (techMapId, column, startTime) =>
+      dispatch(insertJob(techMapId, column, startTime)),
+    swapJobs: (draggedJobId, neighbourJobId) =>
+      dispatch(swapJobs(draggedJobId, neighbourJobId)),
+    assignJobTask: (jobId, taskId, employeeId) =>
+      dispatch(assignJobTask(jobId, taskId, employeeId))
   };
 };
 
