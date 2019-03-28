@@ -12,7 +12,7 @@ import "moment/locale/uk";
 import ReactSwitch from "react-switch";
 import { setApiMode } from "./api";
 import { ROUTES } from "./constants/routes";
-import TechMapEditor from "./components/TechMapEditor";
+import TechMapEditor from "./components/techMaps/TechMapEditor";
 
 function ProductListItem(props) {
   return (
@@ -168,7 +168,9 @@ class App extends Component {
               <Route
                 path={`${ROUTES.EDIT_TECH_MAP}/:id`}
                 exact
-                component={TechMapEditor}
+                component={(props) => (
+                  <TechMapEditor id={props.match.params.id}/>
+                )}
               />
               <Redirect from="/" exact to={ROUTES.PLAN_SCREEN} />
               <Route component={() => "NOT FOUND"} />

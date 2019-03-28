@@ -1,0 +1,140 @@
+.techMapStep {
+  display: contents;
+}
+
+.techMapStepHeader {
+  line-height: 32px;
+}
+
+.techMapStepHeader > h2 {
+  display: inline-block;
+  font-size: 14px;
+  color: #333333;
+  padding: 0;
+  margin: 0 0 5px 12px;
+  vertical-align: bottom;
+}
+
+.techMapStepHeader > button {
+  display: inline-block;
+  background-color: transparent;
+  width: 16px;
+  height: 16px;
+  opacity: 0.3;
+  border: none;
+  padding: 0;
+  margin: 0 0 8px 6px;
+  vertical-align: bottom;
+  opacity: .5;
+}
+
+.techMapStepHeader > button:hover {
+  opacity: 1;
+}
+
+.techMapStepFrame {
+  border: solid black 1px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: -1px;
+}
+
+.techMapStep:focus-within .techMapStepFrame {
+  border: solid black 2px;
+  margin: -2px;
+}
+
+.techMapStep:focus-within .techMapStepHeader {
+  font-weight: bold;
+}
+
+.techMapStepFrameTop {
+  border-radius: 4px 0 4px 4px;
+}
+
+.techMapStepHeaderBg {
+  background-color: #F2FDF9;
+  height: 33px;
+}
+
+.techMapStep:focus-within .techMapStepHeaderBg {
+  background-color: #bff5df;
+}
+
+.techMapStepBodyBg {
+  height: 100%;
+  background-color: rgba(0,0,0,.1);
+}
+
+.unitsRowExplanation {
+  height: 28px;
+  display: flex;
+}
+
+.unitsRowExplanation > span {
+  display: inline-block;
+  align-self: flex-end;
+  opacity: 0.5;
+  font-size: 11px;
+  color: #333333;
+  margin-bottom: 3px;
+}
+
+.techMapStepSectionHeaderBg {
+  background-color: #fff;
+  margin: 0 0 0 0;
+}
+
+.techMapStepSectionHeader {
+  height: 36px;
+  font-style: italic;
+  font-weight: bold;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 6px;
+}
+
+.techMapStepSectionHeader > svg {
+  margin: 0 4px 0 14px;
+}
+
+.techMapStepSectionDescription {
+  height: 36px;
+  color: #8db5a5;
+  font-style: italic;
+  font-weight: normal;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 6px;
+}
+
+.gridRowWrapper {
+  display: contents;
+}
+
+.gridRowWrapper > .techMapTextCell {
+  background-color: #fff;
+}
+
+.gridRowWrapper:focus-within > .techMapTextCell {
+  background-color: #F2F8FF; 
+}
+
+.gridRowWrapper:hover > .techMapTextCell {
+  background-color: #e5f1ff;
+}
+
+.gridRowWrapper:hover > .techMapRoundButton1 {
+  opacity: .7;
+}
+
+.techMapStepInstructionsEditorWrapper {
+  background-color: #fff;
+  margin: 4px 0 0 0;
+  border-radius: 0 0 4px 4px;
+  overflow: hidden;
+}
+
+.techMapStepSideMenu {
+
+}

@@ -3,7 +3,7 @@
 import React from 'react'
 
 const Icon = props => {
-  const { icon, size, color } = props;
+  const { icon, size, originalSize, color } = props;
 
   const styles = {
     svg: {
@@ -20,7 +20,7 @@ const Icon = props => {
       style={styles.svg}
       width={`${size}px`}
       height={`${size}px`}
-      viewBox={`0 0 ${size} ${size}`}
+      viewBox={`0 0 ${originalSize ? originalSize : size} ${originalSize ? originalSize : size}`}
     >
       <path
         style={styles.path}

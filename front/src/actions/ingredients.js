@@ -1,12 +1,12 @@
 import axios from "axios";
 import * as actionTypes from "../actions/types";
 import { getApi } from "../api";
-import { getTechMaps } from "../sampleData";
+import { getIngredients } from "../sampleData";
 
-export const requestTechMaps = () => {
+export const requestIngredients = () => {
   return {
-    type: actionTypes.TECHMAPS_REQUEST_SUCCEEDED,
-    payload: getTechMaps()
+    type: actionTypes.INGREDIENTS_REQUEST_SUCCEEDED,
+    payload: getIngredients()
   }
   // return dispatch => {
   //   axios
