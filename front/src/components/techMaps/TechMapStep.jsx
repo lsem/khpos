@@ -49,7 +49,7 @@ export default class TechMapStep extends PureComponent {
           </button>
         </header>
 
-        <div className="techMapStepSideMenu" style={{gridColumn: 1, gridRowStart: increaseRowCount(0), gridRowEnd: totalRowsCount}}>
+        <div className="techMapStepSideMenu" style={{gridColumn: 1, gridRowStart: increaseRowCount(0), gridRowEnd: increaseRowCount(0) + totalRowsCount}}>
           <button className="techMapRoundButton2 rotate180">
             <Icon size={16} color="#007aff" icon={ICONS.UP} />
           </button>
@@ -120,6 +120,10 @@ export default class TechMapStep extends PureComponent {
             }}>
           <TechMapStepInstructionsEditor />
         </div>
+
+        <div 
+          className="rowSeparator"
+          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}/>
       </div>
     );
   }

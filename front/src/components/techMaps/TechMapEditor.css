@@ -135,6 +135,6 @@ select.techMapDropDown {
 }
 
 .rowSeparator {
-  background-color: red;
+  background-color: transparent;
   height: 20px;
 }

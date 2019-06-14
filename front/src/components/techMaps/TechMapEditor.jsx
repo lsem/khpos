@@ -94,9 +94,6 @@ class TechMapEditor extends PureComponent {
                 inventory={this.props.inventory}
                 increaseRowCount={this.increaseRowCount}
                 />
-              <div 
-                className="rowSeparator"
-                style={{ gridColumn: "2 / -2", gridRow: this.increaseRowCount(1) }}/>
             </React.Fragment>
           ))}
         </div>

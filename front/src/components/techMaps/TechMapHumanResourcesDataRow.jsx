@@ -27,6 +27,10 @@ export default class TechMapHumanResourcesDataRow extends PureComponent {
         <button className="techMapRoundButton1" style={{ gridRow: this.props.row, gridColumn: -2 }}>
           <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
         </button>
+
+        <button className="techMapRoundButton1" style={{ gridRow: this.props.row, gridColumn: "1 / -1", marginBottom: -24 }}>
+          <Icon icon={ICONS.ADD} size={16} color="#007aff" />
+        </button>
       </div>
     );
   }
