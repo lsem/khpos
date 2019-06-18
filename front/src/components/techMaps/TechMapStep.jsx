@@ -121,10 +121,25 @@ export default class TechMapStep extends PureComponent {
             }}>
           <TechMapStepInstructionsEditor />
         </div>
-
-        <div 
-          className="rowSeparator"
-          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}/>
+        
+        {!this.props.isBottom ?
+          (<div 
+            className="techMapStepSeparator"
+            style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}>
+            <hr />
+            <button className="techMapRoundButton1">
+              <Icon size={16} color="#007aff" icon={ICONS.ADD} />
+            </button>
+            <hr />
+          </div>) : 
+          (<button 
+            className="techMapAddStepButton"
+            style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}>
+            <Icon size={16} color="#007aff" icon={ICONS.ADD} />
+            <span>&nbsp;</span>
+            <span>Додати крок</span>
+          </button>)
+        }
       </div>
     );
   }

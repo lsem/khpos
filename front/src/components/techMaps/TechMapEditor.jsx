@@ -38,8 +38,7 @@ class TechMapEditor extends PureComponent {
     const style = {
       gridTemplateColumns: `30px 199px repeat(${
         techMap.units.length
-      }, max-content) 28px`,
-      gridTemplateRows: "repeat(100, auto)"
+      }, max-content) 28px`
     };
 
     return (
@@ -50,6 +49,10 @@ class TechMapEditor extends PureComponent {
             style={{ gridColumn: "2 / -1", gridRow: this.increaseRowCount(1) }}
           >
             {techMap.name}
+
+            <button>
+              <Icon size={16} color="#333" icon={ICONS.EDIT} />
+            </button>
           </header>
           <div
             className="unitsRowExplanation"
@@ -90,6 +93,7 @@ class TechMapEditor extends PureComponent {
                 units={techMap.units}
                 key={i}
                 isTop={!i}
+                isBottom={techMap.steps.length === i + 1}
                 ingredients={this.props.ingredients}
                 inventory={this.props.inventory}
                 increaseRowCount={this.increaseRowCount}

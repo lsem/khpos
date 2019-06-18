@@ -18,6 +18,23 @@
   margin: 0;
 }
 
+.techMapHeader > button {
+  display: inline-block;
+  background-color: transparent;
+  width: 16px;
+  height: 16px;
+  opacity: 0.3;
+  border: none;
+  padding: 0;
+  margin: 0 0 4px 6px;
+  vertical-align: bottom;
+  opacity: .5;
+}
+
+.techMapHeader > button:hover {
+  opacity: 1;
+}
+
 [contenteditable="true"].techMapTextCell {
   white-space: nowrap;
   overflow: hidden;
