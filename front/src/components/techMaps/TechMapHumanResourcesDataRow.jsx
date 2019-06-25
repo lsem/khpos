@@ -1,37 +1,34 @@
-import React, { PureComponent } from "react";
-import TechMapTextCell from "./TechMapTextCell";
+import React from "react";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
 
-export default class TechMapHumanResourcesDataRow extends PureComponent {
-  render() {
-    return (
-      <div className="gridRowWrapper">
-        <TechMapTextCell
-          value={this.props.humanResource.count}
-          column={2}
-          row={this.props.row}
-          type="int"
-        />
+export default function TechMapHumanResourcesDataRow(props) {
+  return (
+    <div className="gridRowWrapper">
+      <input style={{ gridRow: props.row, gridColumn: 2 }}
+        className="techMapTextCell"
+        type="number"
+        defaultValue={props.humanResource.count}
+        min={1}/>
 
-        {this.props.units.map((u, i) => (
-          <TechMapTextCell
-            value={this.props.humanResource.timeNormsByUnit[u]}
-            column={i + 3}
-            row={this.props.row}
-            key={i}
-            type="int"
-          />
-        ))}
+      {props.units.map((u, i) => (
+        <input style={{ gridRow: props.row, gridColumn: i + 3 }}
+          className="techMapTextCell"
+          type="number"
+          defaultValue={props.humanResource.timeNormsByUnit[u]}
+          key={i}/>
+      ))}
 
-        <button className="techMapRoundButton1" style={{ gridRow: this.props.row, gridColumn: -2 }}>
-          <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
-        </button>
+      <button 
+        className="techMapRoundButton1" 
+        style={{ gridRow: props.row, gridColumn: -2 }}
+        onClick={() => props.removeRow('humanResources', props.humanResource)}>
+        <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
+      </button>
 
-        <button className="techMapRoundButton1" style={{ gridRow: this.props.row, gridColumn: "1 / -1", marginBottom: -24 }}>
-          <Icon icon={ICONS.ADD} size={16} color="#007aff" />
-        </button>
-      </div>
-    );
-  }
+      <button className="techMapRoundButton1" style={{ gridRow: props.row, gridColumn: "1 / -1", marginBottom: -24 }}>
+        <Icon icon={ICONS.ADD} size={16} color="#007aff" />
+      </button>
+    </div>
+  );
 }

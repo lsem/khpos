@@ -11,7 +11,19 @@ import "./TechMapStep.css";
 
 export const stepTemplateRowsCount = 5;
 
-export default class TechMapStep extends PureComponent {
+export default class TechMapStep extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.removeRow = this.removeRow.bind(this);
+  }
+
+  removeRow(rowType, row) {
+    const oldStep = this.props.step;
+    const newStep = {...oldStep, [rowType]: oldStep[rowType].filter(r => r !== row)}
+    this.props.replaceStep(this.props.listId, newStep);
+  }
+
   render() {
     const step = this.props.step;
     const totalRowsCount =
@@ -79,6 +91,7 @@ export default class TechMapStep extends PureComponent {
             row={increaseRowCount(1)}
             ingredients={this.props.ingredients}
             key={indx}
+            removeRow={this.removeRow}
           />
         ))}
 
@@ -95,6 +108,7 @@ export default class TechMapStep extends PureComponent {
             humanResource={h}
             row={increaseRowCount(1)}
             key={indx}
+            removeRow={this.removeRow}
           />
         ))}
 
@@ -112,6 +126,7 @@ export default class TechMapStep extends PureComponent {
             row={increaseRowCount(1)}
             inventory={this.props.inventory}
             key={indx}
+            removeRow={this.removeRow}
           />
         ))}
 

@@ -6,7 +6,6 @@ import {
   requestInventory
 } from "../../actions";
 import "./TechMapEditor.css";
-import TechMapTextCell from "./TechMapTextCell";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
 import TechMapStep from "./TechMapStep";
@@ -15,13 +14,19 @@ class TechMapEditor extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.state = this.props.techMaps.find(t => t.id === this.props.id);
     this.currentRowCount = 0;
     this.increaseRowCount = this.increaseRowCount.bind(this);
+    this.replaceStep = this.replaceStep.bind(this);
   }
 
   increaseRowCount(count) {
     this.currentRowCount += count;
     return this.currentRowCount;
+  }
+
+  replaceStep(stepId, step) {
+    this.setState({steps: this.state.steps.map((s, i) => i === stepId ? step : s )});
   }
 
   componentDidMount() {
@@ -31,14 +36,14 @@ class TechMapEditor extends PureComponent {
 
   render() {
     this.currentRowCount = 0;
-    const techMap = this.props.techMaps.find(t => t.id === this.props.id);
+    const techMap = this.state;
 
     if (!techMap) return "Tech Map not found!";
 
     const style = {
       gridTemplateColumns: `30px 199px repeat(${
         techMap.units.length
-      }, max-content) 28px`
+      }, 67px) 28px`
     };
 
     return (
@@ -48,7 +53,8 @@ class TechMapEditor extends PureComponent {
             className="techMapHeader"
             style={{ gridColumn: "2 / -1", gridRow: this.increaseRowCount(1) }}
           >
-            {techMap.name}
+
+            <span>{techMap.name}</span>
 
             <button>
               <Icon size={16} color="#333" icon={ICONS.EDIT} />
@@ -68,17 +74,16 @@ class TechMapEditor extends PureComponent {
           />
           <div className="unitsRowWrapper">
             {techMap.units.map((u, i) => (
-              <div className="unitsColumnWrapper">
+              <div className="unitsColumnWrapper" key={i}>
                 <button className="techMapRoundButton1" style={{gridColumn: i + 3, gridRow: this.increaseRowCount(-1)}}>
                   <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
                 </button>
-                <TechMapTextCell
+
+                <input style={{ gridRow: this.increaseRowCount(1), gridColumn: i + 3 }}
+                  className="techMapTextCell"
+                  type="number"
                   value={u}
-                  column={i + 3}
-                  row={this.increaseRowCount(1)}
-                  isFirst={!i}
-                  key={i}
-                  />
+                  key={i}/>
               </div>
             ))}
             <button className="techMapRoundButton1" style={{ gridColumn: -2 }}>
@@ -87,16 +92,17 @@ class TechMapEditor extends PureComponent {
           </div>
 
           {techMap.steps.map((s, i) => (
-            <React.Fragment>
+            <React.Fragment key={i}>
               <TechMapStep
                 step={s}
                 units={techMap.units}
-                key={i}
+                listId={i}
                 isTop={!i}
                 isBottom={techMap.steps.length === i + 1}
                 ingredients={this.props.ingredients}
                 inventory={this.props.inventory}
                 increaseRowCount={this.increaseRowCount}
+                replaceStep={this.replaceStep}
                 />
             </React.Fragment>
           ))}
