@@ -1,27 +1,60 @@
 /* https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-images-fonts-and-files */
 @font-face {
   font-family: 'Fira Sans';
-  font-style: normal;
-  font-weight: normal;
   src: url('./fonts/FiraSans-Regular.otf');
 }
 
 @font-face {
-  font-family: 'Fira Sans Bold';
-  font-style: normal;
-  font-weight: 500;
+  font-family: 'Fira Sans';
+  src: url('./fonts/FiraSans-LightItalic.otf');
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Fira Sans';
   src: url('./fonts/FiraSans-Bold.otf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Fira Sans';
+  src: url('./fonts/FiraSans-BoldItalic.otf');
+  font-style: italic;
+  font-weight: bold;
+}
+
+html,body { 
+  font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
+  height:100%; 
+  font-size: 13px;
+  letter-spacing: .5px;
+}
+
+select {
+  letter-spacing: .5px;
+  font-size: 13px;
 }
 
 * {
-  font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  font-weight: normal;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: normal;
-  letter-spacing: 0.4px;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
+
+*:before, *:after {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: normal;
+}
+
+h6 { font-size: 9px; }
+h5 { font-size: 11px; }
+h4 { font-size: 13px; }
+h3 { font-size: 15px; }
+h2 { font-size: 16px; }
+h1 { font-size: 18px; }
 
 ul {
   margin: 0;
