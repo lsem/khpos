@@ -8,7 +8,7 @@ export default function TechMapIngredientsDataRow(props) {
       <select
         style={{ gridRow: props.row, gridColumn: 2 }}
         className="techMapTextCell techMapDropDown"
-        value={props.ingredient.id}
+        value={props.ingredient.ingredientId}
       >
         {props.ingredients.map((ing, i) => (
           <option value={ing.id} key={i}>{ing.name}</option>
@@ -19,7 +19,7 @@ export default function TechMapIngredientsDataRow(props) {
         <input style={{ gridRow: props.row, gridColumn: i + 3 }}
           className="techMapTextCell"
           type="number"
-          defaultValue={props.ingredient.countByUnits[u]}
+          value={props.ingredient.countByUnits.get(u)}
           key={i}/>
       ))}
 

@@ -10,14 +10,15 @@ import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
 import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
 import _ from "lodash";
+
+import { thunkSetTimeSpan } from "../store/plan/thunks"
+import { requestTechMaps } from "../store/techMaps/thunks"
+import { requestEmployees, patchEmployee } from "../store/employees/thunks"
+
 import {
-  requestJobs,
-  requestTechMaps,
-  requestEmployees,
   moveJob,
   insertJob,
   swapJobs,
-  patchEmployee,
   assignJobTask
 } from "../actions/index";
 import moment from "moment";
@@ -153,6 +154,10 @@ class PlanScreen extends React.Component {
     this.props.swapJobs(draggedJobId, existingJobId);
   }
   moveJob(id, column, offsetInPixels) {
+    const affectedJob = { ...this.jobs.find(j => j.id === id), column }
+
+
+
     this.props.moveJob(
       id,
       column,
@@ -292,7 +297,7 @@ class PlanScreen extends React.Component {
   }
 
   setPlanDateSpan = (fromDate, toDate) => {
-    this.props.loadPlan(fromDate, toDate);
+    this.props.setTimeSpan(fromDate, toDate);
   };
 
   render() {
@@ -388,7 +393,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    loadPlan: (fromDate, toDate) => dispatch(requestJobs(fromDate, toDate)),
+    setTimeSpan: (fromDate, toDate) => thunkSetTimeSpan(fromDate, toDate),
     requestTechMaps: () => dispatch(requestTechMaps()),
     requestEmployees: () => dispatch(requestEmployees()),
     patchEmployee: (id, patch) =>

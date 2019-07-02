@@ -16,11 +16,17 @@ export default class TechMapStep extends React.Component {
     super(props);
 
     this.removeRow = this.removeRow.bind(this);
+    this.editInstructions = this.editInstructions.bind(this);
   }
 
   removeRow(rowType, row) {
     const oldStep = this.props.step;
-    const newStep = {...oldStep, [rowType]: oldStep[rowType].filter(r => r !== row)}
+    const newStep = {...oldStep, [rowType]: oldStep[rowType].filter(r => r != row)}
+    this.props.replaceStep(this.props.listId, newStep);
+  }
+
+  editInstructions(value) {
+    const newStep = {...this.props.step, instructions: value}
     this.props.replaceStep(this.props.listId, newStep);
   }
 
@@ -105,7 +111,7 @@ export default class TechMapStep extends React.Component {
         {step.humanResources.map((h, indx) => (
           <TechMapHumanResourcesDataRow
             units={this.props.units}
-            humanResource={h}
+            humanResources={h}
             row={increaseRowCount(1)}
             key={indx}
             removeRow={this.removeRow}
@@ -134,7 +140,9 @@ export default class TechMapStep extends React.Component {
               gridColumn: "2 / -2",
               gridRow: increaseRowCount(1)
             }}>
-          <TechMapStepInstructionsEditor />
+          <TechMapStepInstructionsEditor 
+            instructions={step.instructions} 
+            editInstructions={this.editInstructions}/>
         </div>
         
         {!this.props.isBottom ?

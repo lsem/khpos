@@ -8,21 +8,21 @@ export default function TechMapHumanResourcesDataRow(props) {
       <input style={{ gridRow: props.row, gridColumn: 2 }}
         className="techMapTextCell"
         type="number"
-        defaultValue={props.humanResource.count}
+        value={props.humanResources.peopleCount}
         min={1}/>
 
       {props.units.map((u, i) => (
         <input style={{ gridRow: props.row, gridColumn: i + 3 }}
           className="techMapTextCell"
           type="number"
-          defaultValue={props.humanResource.timeNormsByUnit[u]}
+          value={props.humanResources.timeNormsByUnits.get(u)}
           key={i}/>
       ))}
 
       <button 
         className="techMapRoundButton1" 
         style={{ gridRow: props.row, gridColumn: -2 }}
-        onClick={() => props.removeRow('humanResources', props.humanResource)}>
+        onClick={() => props.removeRow('humanResources', props.humanResources)}>
         <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
       </button>
 

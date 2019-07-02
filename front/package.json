@@ -3,25 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "axios": "^0.18.0",
+    "@redux-offline/redux-offline": "^2.5.1",
+    "@types/jest": "^24.0.15",
+    "@types/node": "^12.0.10",
+    "@types/react": "^16.8.22",
+    "@types/react-dom": "^16.8.4",
+    "axios": "^0.18.1",
     "classnames": "^2.2.6",
+    "draft-convert": "^2.1.5",
     "draft-js": "^0.10.5",
-    "lodash": "^4.17.10",
-    "moment": "^2.22.2",
-    "react": "^16.4.1",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "react": "^16.8.6",
     "react-dnd": "^5.0.0",
     "react-dnd-html5-backend": "^5.0.1",
-    "react-dom": "^16.4.1",
-    "react-redux": "^5.0.7",
+    "react-dom": "^16.8.6",
+    "react-redux": "^5.1.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "1.1.4",
+    "react-scripts": "^3.0.1",
     "react-switch": "^3.0.4",
-    "redux": "^4.0.0",
-    "redux-devtools-extension": "^2.13.5",
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.8",
     "redux-multi": "^0.1.12",
-    "redux-offline": "^2.0.0",
     "redux-thunk": "^2.3.0",
     "typeface-fira-sans": "0.0.54",
+    "typescript": "^3.5.2",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -29,5 +35,21 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/react-redux": "^7.1.0",
+    "@types/react-router-dom": "^4.3.4"
   }
 }

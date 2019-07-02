@@ -1,10 +1,8 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
-import {
-  requestTechMaps,
-  requestIngredients,
-  requestInventory
-} from "../../actions";
+import { requestTechMaps } from "../../store/techMaps/thunks";
+import { requestIngredients } from "../../store/ingredients/thunks";
+import { requestInventory } from "../../store/inventory/thunks";
 import "./TechMapEditor.css";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
