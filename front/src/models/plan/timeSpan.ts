@@ -1,4 +1,4 @@
 export default interface TimeSpan {
-  fromDate: Date
-  toDate: Date
+  fromDate: number
+  toDate: number
 }

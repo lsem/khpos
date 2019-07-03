@@ -243,5 +243,13 @@ export function getInventory(): Array<Device> {
 }
 
 export function getJobs(timeSpan: TimeSpan): Array<Job> {
-  return []
+  return [
+    {
+      id: "JOB-XXX-YYY-ZZZ,YY0",
+      column: 0,
+      startTime: timeSpan.fromDate,
+      techMap: getTechMaps()[0],
+      quantity: 1
+    } as Job
+  ]
 }

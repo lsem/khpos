@@ -7,7 +7,7 @@ import { employeesRequestSucceeded, employeesPatchRollback } from "./actions";
 import Employee from "../../models/employees/employee";
 import { EMPLOYEES_PATCH } from "./types";
 
-export const requestEmployees = (): ThunkAction<
+export const thunkRequestEmployees = (): ThunkAction<
   void,
   AppState,
   null,
@@ -23,7 +23,7 @@ export const requestEmployees = (): ThunkAction<
     });
 };
 
-export function patchEmployee(patchedEmployee: Employee) {
+export function thunkPatchEmployee(patchedEmployee: Employee) {
   return async (dispatch: Dispatch, getState: Function) => {
     const state = getState() as AppState;
 
