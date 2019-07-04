@@ -10,17 +10,19 @@ import CustomDragLayer from "./CustomDragLayer";
 import DragAndDropManager from "../DndManager/DragAndDropManager";
 import DetectDragModifierKeysHelper from "../detectDragModifierKeysHelper";
 import _ from "lodash";
+import uuid from "uuid";
 
-import { thunkSetTimeSpan } from "../store/plan/thunks"
-import { requestTechMaps } from "../store/techMaps/thunks"
-import { requestEmployees, patchEmployee } from "../store/employees/thunks"
-
+import { thunkRequestTechMaps } from "../store/techMaps/thunks";
 import {
-  moveJob,
-  insertJob,
-  swapJobs,
-  assignJobTask
-} from "../actions/index";
+  thunkRequestEmployees,
+  thunkPatchEmployee
+} from "../store/employees/thunks";
+import {
+  thunkSetTimeSpan,
+  thunkInsertJob,
+  thunkPatchJob,
+  thunkAssignJob
+} from "../store/plan/thunks";
 import moment from "moment";
 
 class PlanScreen extends React.Component {
@@ -48,7 +50,8 @@ class PlanScreen extends React.Component {
   }
 
   handleJobTaskAssign(jobId, taskId, employeeId) {
-    this.props.assignJobTask(jobId, taskId, employeeId);
+    const employee = this.props.employees.find(e => e.id === employeeId);
+    this.props.assignJobTask(jobId, taskId, employee);
   }
 
   componentDidMount() {
@@ -121,13 +124,15 @@ class PlanScreen extends React.Component {
       console.error("offsetInPixels < 0");
       return;
     }
-    this.props.insertJob(
-      techMapId,
+    this.props.insertJob({
+      id: "JOB-" + uuid.v4(),
       column,
-      moment(this.props.timelineBeginTime)
+      startTime: moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
-        .valueOf()
-    );
+        .valueOf(),
+      techMap: this.props.techMaps.find(t => t.id === techMapId),
+      quantity: 1
+    });
   }
   draggedRectChangedAction(rect) {
     this.setState({
@@ -151,20 +156,22 @@ class PlanScreen extends React.Component {
     });
   }
   swapTechMaps(column, draggedJobId, existingJobId) {
-    this.props.swapJobs(draggedJobId, existingJobId);
+    const draggedJob = { ...this.props.jobs.find(j => j.id === draggedJobId) };
+    const targetJob = { ...this.props.jobs.find(j => j.id === existingJobId) };
+
+    this.props.patchJob(draggedJob);
+    this.props.patchJob(targetJob);
   }
   moveJob(id, column, offsetInPixels) {
-    const affectedJob = { ...this.jobs.find(j => j.id === id), column }
-
-
-
-    this.props.moveJob(
-      id,
+    const affectedJob = {
+      ...this.jobs.find(j => j.id === id),
       column,
-      moment(this.props.timelineBeginTime)
+      startTime: moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
         .valueOf()
-    );
+    };
+
+    this.props.patchJob(affectedJob);
   }
   columnHovered(column) {
     this.setState({
@@ -383,8 +390,8 @@ class PlanScreen extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    timelineBeginTime: state.appState.planTimeSpan.fromDate,
-    timelineEndTime: state.appState.planTimeSpan.toDate,
+    timelineBeginTime: state.plan.timeSpan.fromDate,
+    timelineEndTime: state.plan.timeSpan.toDate,
     jobs: state.jobs,
     techMaps: state.techMaps,
     employees: state.employees
@@ -393,19 +400,15 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setTimeSpan: (fromDate, toDate) => thunkSetTimeSpan(fromDate, toDate),
-    requestTechMaps: () => dispatch(requestTechMaps()),
-    requestEmployees: () => dispatch(requestEmployees()),
-    patchEmployee: (id, patch) =>
-      dispatch(patchEmployee(id, patch)),
-    moveJob: (id, column, startTime) =>
-      dispatch(moveJob(id, column, startTime)),
-    insertJob: (techMapId, column, startTime) =>
-      dispatch(insertJob(techMapId, column, startTime)),
-    swapJobs: (draggedJobId, neighbourJobId) =>
-      dispatch(swapJobs(draggedJobId, neighbourJobId)),
-    assignJobTask: (jobId, taskId, employeeId) =>
-      dispatch(assignJobTask(jobId, taskId, employeeId))
+    setTimeSpan: (fromDate, toDate) =>
+      dispatch(thunkSetTimeSpan({ fromDate, toDate })),
+    requestTechMaps: () => dispatch(thunkRequestTechMaps()),
+    requestEmployees: () => dispatch(thunkRequestEmployees()),
+    patchEmployee: employee => dispatch(thunkPatchEmployee(employee)),
+    patchJob: job => dispatch(thunkPatchJob(job)),
+    insertJob: job => dispatch(thunkInsertJob(job)),
+    assignJobTask: (jobId, taskId, employee) =>
+      dispatch(thunkAssignJob(jobId, taskId, employee))
   };
 };
 

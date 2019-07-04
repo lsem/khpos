@@ -1,8 +1,8 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
-import { requestTechMaps } from "../../store/techMaps/thunks";
-import { requestIngredients } from "../../store/ingredients/thunks";
-import { requestInventory } from "../../store/inventory/thunks";
+import { thunkRequestTechMaps } from "../../store/techMaps/thunks";
+import { thunkRequestIngredients } from "../../store/ingredients/thunks";
+import { thunkRequestInventory } from "../../store/inventory/thunks";
 import "./TechMapEditor.css";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
@@ -120,9 +120,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    requestTechMaps: () => dispatch(requestTechMaps()),
-    requestIngredients: () => dispatch(requestIngredients()),
-    requestInventory: () => dispatch(requestInventory())
+    requestTechMaps: () => dispatch(thunkRequestTechMaps()),
+    requestIngredients: () => dispatch(thunkRequestIngredients()),
+    requestInventory: () => dispatch(thunkRequestInventory())
   };
 };
 
