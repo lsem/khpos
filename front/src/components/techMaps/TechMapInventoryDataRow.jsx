@@ -8,7 +8,7 @@ export default function TechMapInventoryDataRow(props) {
       <select
         style={{ gridRow: props.row, gridColumn: 2 }}
         className="techMapTextCell techMapDropDown"
-        defaultValue={props.invent.id}
+        defaultValue={props.invent.deviceId}
       >
         {props.inventory.map((inv, i) => (
           <option value={inv.id} key={i}>{inv.name}</option>
@@ -19,7 +19,7 @@ export default function TechMapInventoryDataRow(props) {
         <input style={{ gridRow: props.row, gridColumn: i + 3 }}
           className="techMapTextCell"
           type="number"
-          defaultValue={props.invent.countByUnits[u]}
+          value={props.invent.countByUnits.get(u)}
           key={i}/>
       ))}
 
