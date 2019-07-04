@@ -109,7 +109,7 @@ export function getTechMaps() : Array<TechMap> {
               ])
             } as EquipmentRow
           ],
-          instructions: "<ol><li>Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об&#x27;єму.</li><li>Окремо відважити боршно в чисту і суху ємність відповідного об’єму.</li><li>В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).</li></ol>"
+          instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
         } as Step,
         {
           id: "STP-XXX-YYY-ZZZ-YY1",
@@ -205,7 +205,7 @@ export function getTechMaps() : Array<TechMap> {
               ])
             } as EquipmentRow
           ],
-          instructions: "<ol><li>Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об&#x27;єму.</li><li>Окремо відважити боршно в чисту і суху ємність відповідного об’єму.</li><li>В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).</li></ol>"
+          instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
         } as Step
       ]
     } as TechMap

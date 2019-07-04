@@ -6,7 +6,7 @@ import { thunkRequestInventory } from "../../store/inventory/thunks";
 import "./TechMapEditor.css";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
-import TechMapStep from "./TechMapStep";
+import { TechMapStep } from "./TechMapStep";
 
 class TechMapEditor extends PureComponent {
   constructor(props) {

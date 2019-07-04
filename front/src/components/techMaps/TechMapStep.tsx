@@ -1,46 +1,71 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import classNames from "classnames";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
-import TechMapIngredientsDataRow from "./TechMapIngredientsDataRow";
-import TechMapStepSectionHeader from "./TechMapStepSectionHeader";
-import TechMapHumanResourcesDataRow from "./TechMapHumanResourcesDataRow";
-import TechMapInventoryDataRow from "./TechMapInventoryDataRow";
-import TechMapStepInstructionsEditor from "./TechMapStepInstructionsEditor";
+import { TechMapIngredientsDataRow } from "./TechMapIngredientsDataRow";
+import { TechMapStepSectionHeader } from "./TechMapStepSectionHeader";
+import { TechMapHumanResourcesDataRow } from "./TechMapHumanResourcesDataRow";
+import { TechMapInventoryDataRow } from "./TechMapInventoryDataRow";
+import { TechMapStepInstructionsEditor } from "./TechMapStepInstructionsEditor";
 import "./TechMapStep.css";
+import Step from "../../models/techMaps/step";
+import Ingredient from "../../models/ingredients/ingredient";
+import Device from "../../models/inventory/device";
+import IngredientsRow from "../../models/techMaps/ingredientsRow";
+import HumanResourcesRow from "../../models/techMaps/humanResourcesRow";
+import EquipmentRow from "../../models/techMaps/equipmentRow";
 
 export const stepTemplateRowsCount = 5;
 
-export default class TechMapStep extends React.Component {
-  constructor(props) {
-    super(props);
+type Props = {
+  step: Step
+  units: number[]
+  listId: number
+  isTop: boolean
+  isBottom: boolean
+  ingredients: Ingredient[]
+  inventory: Device[]
+  increaseRowCount: Function
+  replaceStep: Function
+}
 
-    this.removeRow = this.removeRow.bind(this);
-    this.editInstructions = this.editInstructions.bind(this);
+type DataRow = IngredientsRow | HumanResourcesRow | EquipmentRow;
+
+export const TechMapStep: React.FC<Props> = (props) => {
+
+  const removeIngredientsRow = (row: DataRow) => {
+    const oldStep = props.step;
+    const newStep = {...oldStep, ingredients: oldStep.ingredients.filter(r => r != row)}
+    props.replaceStep(props.listId, newStep);
   }
 
-  removeRow(rowType, row) {
-    const oldStep = this.props.step;
-    const newStep = {...oldStep, [rowType]: oldStep[rowType].filter(r => r != row)}
-    this.props.replaceStep(this.props.listId, newStep);
+  const removeHumanResourcesRow = (row: DataRow) => {
+    const oldStep = props.step;
+    const newStep = {...oldStep, humanResources: oldStep.humanResources.filter(r => r != row)}
+    props.replaceStep(props.listId, newStep);
   }
 
-  editInstructions(value) {
-    const newStep = {...this.props.step, instructions: value}
-    this.props.replaceStep(this.props.listId, newStep);
+  const removeInventoryRow = (row: DataRow) => {
+    const oldStep = props.step;
+    const newStep = {...oldStep, inventory: oldStep.inventory.filter(r => r != row)}
+    props.replaceStep(props.listId, newStep);
   }
 
-  render() {
-    const step = this.props.step;
+  const editInstructions = (value: string) => {
+    const newStep = {...props.step, instructions: value}
+    props.replaceStep(props.listId, newStep);
+  }
+
+    const step = props.step;
     const totalRowsCount =
       step.ingredients.length +
       step.humanResources.length +
       step.inventory.length +
       stepTemplateRowsCount;
-    const increaseRowCount = this.props.increaseRowCount;
+    const increaseRowCount = props.increaseRowCount;
 
     const stepFrameClasses = classNames("techMapStepFrame", {
-      techMapStepFrameTop: this.props.isTop
+      techMapStepFrameTop: props.isTop
     });
 
     return (
@@ -92,12 +117,12 @@ export default class TechMapStep extends React.Component {
 
         {step.ingredients.map((i, indx) => (
           <TechMapIngredientsDataRow
-            units={this.props.units}
-            ingredient={i}
+            units={props.units}
+            ingredientsRow={i}
             row={increaseRowCount(1)}
-            ingredients={this.props.ingredients}
+            ingredients={props.ingredients}
             key={indx}
-            removeRow={this.removeRow}
+            removeRow={removeIngredientsRow}
           />
         ))}
 
@@ -110,11 +135,11 @@ export default class TechMapStep extends React.Component {
 
         {step.humanResources.map((h, indx) => (
           <TechMapHumanResourcesDataRow
-            units={this.props.units}
-            humanResources={h}
+            units={props.units}
+            humanResourcesRow={h}
             row={increaseRowCount(1)}
             key={indx}
-            removeRow={this.removeRow}
+            removeRow={removeHumanResourcesRow}
           />
         ))}
 
@@ -127,12 +152,12 @@ export default class TechMapStep extends React.Component {
 
         {step.inventory.map((i, indx) => (
           <TechMapInventoryDataRow
-            units={this.props.units}
-            invent={i}
+            units={props.units}
+            equipmentRow={i}
             row={increaseRowCount(1)}
-            inventory={this.props.inventory}
+            devices={props.inventory}
             key={indx}
-            removeRow={this.removeRow}
+            removeRow={removeInventoryRow}
           />
         ))}
 
@@ -142,10 +167,10 @@ export default class TechMapStep extends React.Component {
             }}>
           <TechMapStepInstructionsEditor 
             instructions={step.instructions} 
-            editInstructions={this.editInstructions}/>
+            editInstructions={editInstructions}/>
         </div>
         
-        {!this.props.isBottom ?
+        {!props.isBottom ?
           (<div 
             className="techMapStepSeparator"
             style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}>
@@ -166,4 +191,3 @@ export default class TechMapStep extends React.Component {
       </div>
     );
   }
-}

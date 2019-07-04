@@ -1,70 +1,81 @@
 import React from "react";
-import { Editor, EditorState, ContentState, RichUtils } from "draft-js";
-import { convertToHTML, convertFromHTML } from 'draft-convert';
+import {
+  Editor,
+  EditorState,
+  RichUtils,
+  convertToRaw,
+  convertFromRaw,
+  RawDraftContentState
+} from "draft-js";
 import "./TechMapStepInstructionsEditor.css";
 import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
 
-export default class TechMapStepInstructionsEditor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      editorState: EditorState.createEmpty()
-    };
+type State = {
+  editorState: EditorState;
+};
 
-    this.handleBlur = this.handleBlur.bind(this);
+type Props = {
+  instructions: string;
+  editInstructions: Function;
+};
 
-    this.focus = () => this.refs.editor.focus();
-    this.onChange = editorState => {
-      this.setState({ editorState });
-    };
+export class TechMapStepInstructionsEditor extends React.Component<
+  Props,
+  State
+> {
+  state = {
+    editorState: EditorState.createEmpty()
+  };
 
-    this.handleKeyCommand = command => this._handleKeyCommand(command);
-    this.onTab = e => this._onTab(e);
-    this.toggleBlockType = type => this._toggleBlockType(type);
-    this.toggleInlineStyle = style => this._toggleInlineStyle(style);
-  }
+  onChange = (editorState: EditorState) => {
+    this.setState({ editorState });
+  };
 
-  handleBlur() {
-    this.props.editInstructions(convertToHTML(this.state.editorState.getCurrentContent()));
-  }
+  handleBlur = () => {
+    this.props.editInstructions(
+      JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))
+    );
+  };
 
-  _handleKeyCommand(command) {
-    const { editorState } = this.state;
+  handleKeyCommand = (
+    command: string,
+    editorState: EditorState,
+    eventTimeStamp: number
+  ) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       this.onChange(newState);
-      return true;
+      return "handled";
     }
-    return false;
-  }
+    return "not-handled";
+  };
 
-  _onTab(e) {
+  onTab = (e: React.KeyboardEvent<{}>) => {
     const maxDepth = 4;
     this.onChange(RichUtils.onTab(e, this.state.editorState, maxDepth));
-  }
+  };
 
-  _toggleBlockType(blockType) {
+  toggleBlockType = (blockType: string) => {
     this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
-  }
+  };
 
-  _toggleInlineStyle(inlineStyle) {
+  toggleInlineStyle = (inlineStyle: string) => {
     this.onChange(
       RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     );
-  }
-
-  importHTML = () => {
-    const { editorState } = this.state;
-    this.onChange(EditorState.push(editorState, convertFromHTML(this.props.instructions)));
-  }
-  
-  exportHTML = () => {
-    this.setState({ convertedContent: convertToHTML(this.state.editorState.getCurrentContent()) });
-  }
+  };
 
   componentDidMount() {
-    this.importHTML();
+    if (!this.props.instructions) {
+      this.onChange(EditorState.createEmpty());
+      return;
+    }
+
+    const contentState = convertFromRaw(JSON.parse(
+      this.props.instructions
+    ) as RawDraftContentState);
+    this.onChange(EditorState.createWithContent(contentState));
   }
 
   render() {
@@ -90,10 +101,8 @@ export default class TechMapStepInstructionsEditor extends React.Component {
             />
           </button>
         </div>
-        <div className="RichEditor-editor" onClick={this.focus}>
+        <div className="RichEditor-editor">
           <Editor
-            // blockStyleFn={getBlockStyle}
-            // customStyleMap={styleMap}
             editorState={editorState}
             handleKeyCommand={this.handleKeyCommand}
             onChange={this.onChange}
