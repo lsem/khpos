@@ -1,16 +1,17 @@
 import TechMap from "../../models/techMaps/techMap";
 import { TechMapsActionTypes, TECHMAPS_REQUEST_SUCCEEDED } from "./types";
+import { Reducer } from "redux";
 
 
 const initialState: Array<TechMap> = [];
 
-export function techMapsReducer(
-  state = initialState,
-  action: TechMapsActionTypes
-): typeof initialState {
+export const techMapsReducer: Reducer<
+Array<TechMap>,
+TechMapsActionTypes
+> = (state = initialState, action) => {
   switch (action.type) {
     case TECHMAPS_REQUEST_SUCCEEDED:
-      return action.payload;
+      return action.techMaps;
     default:
       return state;
   }

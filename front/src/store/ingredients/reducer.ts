@@ -1,17 +1,20 @@
 import Ingredient from "../../models/ingredients/ingredient";
-import { IngredientsActionTypes, INGREDIENTS_REQUEST_SUCCEEDED } from "./types";
-
+import {
+  IngredientsActionTypes,
+  INGREDIENTS_REQUEST_SUCCEEDED
+} from "./types";
+import { Reducer } from "redux";
 
 const initialState: Array<Ingredient> = [];
 
-export function ingredientsReducer(
-  state = initialState,
-  action: IngredientsActionTypes
-): typeof initialState {
+export const ingredientsReducer: Reducer<
+  Array<Ingredient>,
+  IngredientsActionTypes
+> = (state = initialState, action) => {
   switch (action.type) {
     case INGREDIENTS_REQUEST_SUCCEEDED:
-      return action.payload;
+      return action.ingredients;
     default:
       return state;
   }
-}
+};

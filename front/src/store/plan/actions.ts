@@ -6,14 +6,13 @@ import Employee from "../../models/employees/employee";
 export function setTimeSpan(timeSpan: TimeSpan): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_SET_TIMESPAN,
-    payload: timeSpan
+    timeSpan: timeSpan
   };
 }
 
 export function requestJobs(): actionTypes.PlanActionTypes {
   return {
-    type: actionTypes.PLAN_REQUEST_JOBS,
-    payload: null
+    type: actionTypes.PLAN_REQUEST_JOBS
   };
 }
 
@@ -22,49 +21,49 @@ export function requestJobsSucceeded(
 ): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_REQUEST_JOBS_SUCCEEDED,
-    payload: jobs
+    jobs: jobs
   };
 }
 
 export function insertJob(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_INSERT_JOB,
-    payload: job
+    job: job
   };
 }
 
 export function insertJobRollback(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_INSERT_JOB_ROLLBACK,
-    payload: job
+    job: job
   };
 }
 
 export function deleteJob(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_DELETE_JOB,
-    payload: job
+    job: job
   };
 }
 
 export function deleteJobRollback(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_DELETE_JOB_ROLLBACK,
-    payload: job
+    job: job
   };
 }
 
 export function patchJob(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_PATCH_JOB,
-    payload: job
+    job: job
   };
 }
 
 export function patchJobRollback(job: Job): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_PATCH_JOB_ROLLBACK,
-    payload: job
+    job: job
   };
 }
 
@@ -75,7 +74,7 @@ export function assignJob(
 ): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_ASSIGN_JOB,
-    payload: { jobId, stepId, employee }
+    args: { jobId, stepId, employee }
   };
 }
 
@@ -86,6 +85,6 @@ export function assignJobRollback(
 ): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_ASSIGN_JOB_ROLLBACK,
-    payload: { jobId, stepId, employee }
+    args: { jobId, stepId, employee }
   };
 }

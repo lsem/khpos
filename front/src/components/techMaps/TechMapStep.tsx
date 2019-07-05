@@ -26,7 +26,7 @@ type Props = {
   ingredients: Ingredient[]
   inventory: Device[]
   increaseRowCount: Function
-  replaceStep: Function
+  commitStep: Function
 }
 
 type DataRow = IngredientsRow | HumanResourcesRow | EquipmentRow;
@@ -36,24 +36,24 @@ export const TechMapStep: React.FC<Props> = (props) => {
   const removeIngredientsRow = (row: DataRow) => {
     const oldStep = props.step;
     const newStep = {...oldStep, ingredients: oldStep.ingredients.filter(r => r != row)}
-    props.replaceStep(props.listId, newStep);
+    props.commitStep(props.listId, newStep);
   }
 
   const removeHumanResourcesRow = (row: DataRow) => {
     const oldStep = props.step;
     const newStep = {...oldStep, humanResources: oldStep.humanResources.filter(r => r != row)}
-    props.replaceStep(props.listId, newStep);
+    props.commitStep(props.listId, newStep);
   }
 
   const removeInventoryRow = (row: DataRow) => {
     const oldStep = props.step;
     const newStep = {...oldStep, inventory: oldStep.inventory.filter(r => r != row)}
-    props.replaceStep(props.listId, newStep);
+    props.commitStep(props.listId, newStep);
   }
 
   const editInstructions = (value: string) => {
     const newStep = {...props.step, instructions: value}
-    props.replaceStep(props.listId, newStep);
+    props.commitStep(props.listId, newStep);
   }
 
     const step = props.step;
