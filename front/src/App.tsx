@@ -13,20 +13,17 @@ import TechMapEditor from "./components/techMaps/TechMapEditor";
 import PageNotFound from "./components/PageNotFound";
 
 class App extends React.Component<{}, {inMem: boolean}> {
-  constructor() {
-    super({});
-
-    this.state = {
-      inMem: false
-    }
-
-    moment.locale("uk");
-    this.handleChange = this.handleChange.bind(this);
+  state = {
+    inMem: false
   }
 
-  handleChange(checked: boolean) {
+  handleChange = (checked: boolean) => {
     setApiMode(checked);
     this.setState({ inMem: checked });
+  }
+
+  componentDidMount() {
+    moment.locale("uk");
   }
 
   render() {
@@ -69,7 +66,7 @@ class App extends React.Component<{}, {inMem: boolean}> {
                 path={`${ROUTES.EDIT_TECH_MAP}/:id`}
                 exact
                 component={(props: any) => (
-                  <TechMapEditor id={props.match.params.id}/>
+                  <TechMapEditor techMapId={props.match.params.id}/>
                 )}
               />
               <Redirect from="/" exact to={ROUTES.PLAN_SCREEN} />

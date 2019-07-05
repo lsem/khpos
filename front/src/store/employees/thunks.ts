@@ -1,30 +1,47 @@
 import axios from "axios";
 import { getApi } from "../../api";
-import { Action, Dispatch } from "redux";
+import { ActionCreator } from "redux";
 import { AppState } from "../index";
 import { ThunkAction } from "redux-thunk";
-import { employeesRequestSucceeded, employeesPatchRollback } from "./actions";
+import {
+  employeesRequestSucceeded,
+  employeesPatch,
+  employeesPatchRollback,
+  employeesRequest
+} from "./actions";
 import Employee from "../../models/employees/employee";
-import { EMPLOYEES_PATCH } from "./types";
+import { EmployeesActionTypes } from "./types";
 
-export const thunkRequestEmployees = (): ThunkAction<
-  void,
-  AppState,
-  null,
-  Action<string>
-> => async dispatch => {
-  axios
-    .get(`${getApi()}/employees`)
-    .then(res => {
-      dispatch(employeesRequestSucceeded(res.data as Array<Employee>));
-    })
-    .catch(err => {
-      console.log(err);
-    });
+export const thunkRequestEmployees: ActionCreator<
+  ThunkAction<
+    Promise<void>, // The type of function return
+    AppState, // The type of global state
+    null, // The type of the thunk parameter
+    EmployeesActionTypes // The type of the last action to be dispatched
+  >
+> = () => {
+  return async dispatch => {
+    dispatch(employeesRequest());
+    axios
+      .get(`${getApi()}/employees`)
+      .then(res => {
+        dispatch(employeesRequestSucceeded(res.data as Array<Employee>));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 };
 
-export function thunkPatchEmployee(patchedEmployee: Employee) {
-  return async (dispatch: Dispatch, getState: Function) => {
+export const thunkPatchEmployee: ActionCreator<
+  ThunkAction<
+    Promise<void>, // The type of function return
+    AppState, // The type of global state
+    null, // The type of the thunk parameter
+    EmployeesActionTypes // The type of the last action to be dispatched
+  >
+> = (patchedEmployee: Employee) => {
+  return async (dispatch, getState) => {
     const state = getState() as AppState;
 
     const affectedEmployee = state.employees.find(
@@ -32,8 +49,7 @@ export function thunkPatchEmployee(patchedEmployee: Employee) {
     ) as Employee;
 
     dispatch({
-      type: EMPLOYEES_PATCH,
-      payload: patchedEmployee,
+      ...employeesPatch(patchedEmployee),
       meta: {
         offline: {
           effect: {
@@ -46,4 +62,4 @@ export function thunkPatchEmployee(patchedEmployee: Employee) {
       }
     });
   };
-}
+};

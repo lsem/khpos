@@ -1,10 +1,16 @@
 import TechMap from "../../models/techMaps/techMap";
+import { Action } from "redux";
 
+export const TECHMAPS_REQUEST = "TECHMAPS_REQUEST";
 export const TECHMAPS_REQUEST_SUCCEEDED = "TECHMAPS_REQUEST_SUCCEEDED";
 
-interface TechMapsRequestSucceededAction {
-  type: typeof TECHMAPS_REQUEST_SUCCEEDED
-  payload: Array<TechMap>
+interface TechMapsRequestAction extends Action<typeof TECHMAPS_REQUEST> {
 }
 
-export type TechMapsActionTypes = TechMapsRequestSucceededAction
+interface TechMapsRequestSucceededAction extends Action<typeof TECHMAPS_REQUEST_SUCCEEDED> {
+  techMaps: Array<TechMap>
+}
+
+export type TechMapsActionTypes = 
+TechMapsRequestAction
+| TechMapsRequestSucceededAction

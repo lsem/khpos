@@ -40,9 +40,7 @@ export class TechMapStepInstructionsEditor extends React.Component<
 
   handleKeyCommand = (
     command: string,
-    editorState: EditorState,
-    eventTimeStamp: number
-  ) => {
+    editorState: EditorState  ) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       this.onChange(newState);
@@ -80,11 +78,6 @@ export class TechMapStepInstructionsEditor extends React.Component<
 
   render() {
     const { editorState } = this.state;
-    const styleMap = {
-      STRIKETHROUGH: {
-        textDecoration: "line-through"
-      }
-    };
 
     return (
       <div className="RichEditor-root">
@@ -117,23 +110,3 @@ export class TechMapStepInstructionsEditor extends React.Component<
     );
   }
 }
-
-const BLOCK_TYPES = [
-  { label: "H1", style: "header-one" },
-  { label: "H2", style: "header-two" },
-  { label: "H3", style: "header-three" },
-  { label: "H4", style: "header-four" },
-  { label: "H5", style: "header-five" },
-  { label: "H6", style: "header-six" },
-  { label: "Blockquote", style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" },
-  { label: "Code Block", style: "code-block" }
-];
-
-var INLINE_STYLES = [
-  { label: "Bold", style: "BOLD" },
-  { label: "Italic", style: "ITALIC" },
-  { label: "Underline", style: "UNDERLINE" },
-  { label: "Monospace", style: "CODE" }
-];

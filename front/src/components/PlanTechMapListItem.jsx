@@ -10,10 +10,6 @@ import { ICONS } from "../constants/icons";
 import { ROUTES } from "../constants/routes";
 
 class PlanListItem extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   // Needed for react-dnd
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it

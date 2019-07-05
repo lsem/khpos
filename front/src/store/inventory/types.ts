@@ -1,10 +1,16 @@
 import Device from "../../models/inventory/device";
+import { Action } from "redux";
 
+export const INVENTORY_REQUEST = "INVENTORY_REQUEST";
 export const INVENTORY_REQUEST_SUCCEEDED = "INVENTORY_REQUEST_SUCCEEDED";
 
-interface InventoryRequestSucceededAction {
-  type: typeof INVENTORY_REQUEST_SUCCEEDED
-  payload: Array<Device>
+interface InventoryRequestAction extends Action<typeof INVENTORY_REQUEST> {
 }
 
-export type InventoryActionTypes = InventoryRequestSucceededAction
+interface InventoryRequestSucceededAction extends Action<typeof INVENTORY_REQUEST_SUCCEEDED> {
+  devices: Array<Device>
+}
+
+export type InventoryActionTypes = 
+InventoryRequestSucceededAction
+| InventoryRequestAction
