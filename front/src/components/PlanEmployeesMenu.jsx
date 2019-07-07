@@ -16,7 +16,7 @@ export default class PlanEmployeesMenu extends React.Component {
       <div className="planEmployeesMenu">
         <div className="planEmployeesMenuHeader">
           <Icon icon={ICONS.PEOPLE} size={16} color="#7F7F7F" />
-          <h6>Працівники</h6>
+          <span>Працівники</span>
         </div>
         <ListView>
           {_.sortBy(this.props.employees, e => e.firstName).map(employee => (

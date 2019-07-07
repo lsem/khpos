@@ -1,0 +1,159 @@
+.techMapEditorContainer {
+  min-height: 100%;
+  background-color: #efeff4;
+  padding: 31px;
+  box-sizing: border-box;
+}
+
+.techMapEditor {
+  display: grid;
+  grid-gap: 1px;
+}
+
+.techMapHeader {
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: 0.2px;
+  color: #333333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.techMapHeader > button {
+  display: inline-block;
+  background-color: transparent;
+  width: 16px;
+  height: 16px;
+  opacity: 0.3;
+  border: none;
+  padding: 0;
+  margin: 0 0 4px 6px;
+  vertical-align: bottom;
+  opacity: .5;
+}
+
+.techMapHeader > button:hover {
+  opacity: 1;
+}
+
+[contenteditable="true"].techMapTextCell {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+[contenteditable="true"].techMapTextCell br {
+  display: none;
+}
+
+[contenteditable="true"].techMapTextCell * {
+  display: inline;
+  white-space: nowrap;
+}
+
+.techMapTextCell {
+  height: 24px;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  text-align: right;
+  padding: 5px 1px 5px 13px;
+  margin: 0;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.techMapTextCell:hover {
+  height: 26px;
+  border: 1px solid rgba(0, 122, 255, 0.4);
+  margin: -1px;
+}
+
+.techMapTextCell:focus {
+  height: 26px;
+  border: 2px solid #007aff;
+  background-color: #fff !important;
+  margin: -1px;
+  padding: 4px 0 4px 12px;
+}
+
+select.techMapDropDown {
+  display: block;
+  margin: 0;
+  text-align: left !important;
+  background: url(../../assets/arrow-down.svg) right 4px center no-repeat;
+  background-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.unitsRowBg {
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: -1px;
+}
+
+.unitsRowWrapper {
+  display: contents;
+}
+
+.unitsRowWrapper .techMapTextCell {
+  background-color: #efeff4;
+}
+
+.unitsRowWrapper:hover > .techMapRoundButton1 {
+  opacity: 0.7;
+}
+
+.unitsColumnWrapper {
+  display: contents;
+}
+
+.unitsColumnWrapper:hover > .techMapRoundButton1 {
+  opacity: 0.7;
+}
+
+.techMapRoundButton1 {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  border: none;
+  outline: 0;
+  border-radius: 10px;
+  box-shadow: 0 1px 1px -1px rgba(0, 0, 0, 0.5),
+    0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
+  align-self: center;
+  justify-self: center;
+  padding: 0;
+  opacity: 0;
+  z-index: 1;
+}
+
+.techMapRoundButton1:hover {
+  opacity: 1 !important;
+}
+
+.techMapRoundButton2 {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  outline: 0;
+  border-radius: 10px;
+  background-color: transparent;
+  margin-bottom: 8px;
+  box-sizing: content-box;
+}
+
+.techMapRoundButton2:hover {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.rowSeparator {
+  background-color: transparent;
+  height: 20px;
+}

@@ -16,7 +16,7 @@ export default class PlanTechMapsMenu extends React.Component {
       <div className="planTechMapsMenu">
         <div className="planTechMapsMenuHeader">
           <Icon icon={ICONS.RECIEPTS} size={16} color="#7F7F7F" />
-          <h6>Технологічні карти</h6>
+          <span>Технологічні карти</span>
         </div>
         <ListView>
           {this.props.techMaps.map(techMap => (

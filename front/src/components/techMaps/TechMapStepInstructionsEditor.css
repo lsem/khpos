@@ -1,0 +1,67 @@
+.RichEditor-root {
+  background: #fff;
+  font-size: 14px;
+  padding: 0;
+  margin: 12px 14px;
+}
+
+.RichEditor-editor {
+  cursor: text;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+}
+
+.RichEditor-controls {
+  font-size: 14px;
+  user-select: none;
+  display: none;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.RichEditor-root:focus-within .RichEditor-controls {
+  display: block;
+}
+
+.RichEditor-styleButton {
+  cursor: pointer;
+  display: inline-block;
+  appearance: none;
+  border: 0;
+  background-color: transparent;
+  opacity: .5;
+}
+
+.RichEditor-styleButton:hover {
+  opacity: 1;
+}
+
+.RichEditor-editor ol {
+  list-style: none;
+  margin: 16px 10px;
+  max-width: 443px;
+}
+
+.RichEditor-editor ol li {
+  margin: 24px 0 24px 20px;
+  counter-increment: my-awesome-counter;
+  position: relative;
+}
+
+.RichEditor-editor ol li span {
+  line-height: 1.54;
+}
+
+.RichEditor-editor ol li::before {
+  content: counter(my-awesome-counter);
+  position: absolute;
+  top: -3px;
+  left: -30px;
+  padding: 4px 0 0 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 12px;
+  border: 1px solid #979797;
+  text-align: center;
+}

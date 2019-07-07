@@ -25,6 +25,7 @@
 }
 
 .planEmployeesListItemTextInput {
+  font-family: inherit;
   flex: 1 1;
   box-sizing: border-box;
   height: 16px;
