@@ -9,10 +9,11 @@ type Props = {
   ingredientsRow: IngredientsRow;
   ingredients: Ingredient[];
   row: number;
-  removeRow: Function;
+  removeClick: Function;
+  addClick: Function;
 };
 
-export const TechMapIngredientsDataRow: React.FC<Props> = (props) => {
+export const TechMapIngredientsDataRow: React.FC<Props> = props => {
   return (
     <div className="gridRowWrapper">
       <select
@@ -21,28 +22,37 @@ export const TechMapIngredientsDataRow: React.FC<Props> = (props) => {
         value={props.ingredientsRow.ingredientId}
       >
         {props.ingredients.map((ing, i) => (
-          <option value={ing.id} key={i}>{ing.name}</option>
+          <option value={ing.id} key={i}>
+            {ing.name}
+          </option>
         ))}
       </select>
 
       {props.units.map((u, i) => (
-        <input style={{ gridRow: props.row, gridColumn: i + 3 }}
+        <input
+          style={{ gridRow: props.row, gridColumn: i + 3 }}
           className="techMapTextCell"
           type="number"
           value={props.ingredientsRow.countByUnits.get(u)}
-          key={i}/>
+          key={i}
+        />
       ))}
 
-      <button 
-        className="techMapRoundButton1" 
+      <button
+        className="techMapRoundButton1"
         style={{ gridRow: props.row, gridColumn: -2 }}
-        onClick={() => props.removeRow(props.ingredientsRow)}>
+        onClick={() => props.removeClick(() => props.removeClick())}
+      >
         <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
       </button>
 
-      <button className="techMapRoundButton1" style={{ gridRow: props.row, gridColumn: "1 / -1", marginBottom: -24 }}>
+      <button
+        className="techMapRoundButton1"
+        style={{ gridRow: props.row, gridColumn: "1 / -1", marginBottom: -24 }}
+        onClick={() => props.addClick()}
+      >
         <Icon icon={ICONS.ADD} size={16} color="#007aff" />
       </button>
     </div>
   );
-}
+};

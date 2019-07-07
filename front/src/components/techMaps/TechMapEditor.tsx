@@ -14,6 +14,8 @@ import Step from "../../models/techMaps/step";
 import { AppState } from "../../store";
 import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
+import { TechMapStepSeparator } from "./TechMapStepSeparator";
+import { TechMapAddStep } from "./TechMapAddStep";
 
 type Props = {
   techMapId: string;
@@ -45,6 +47,78 @@ class TechMapEditor extends React.PureComponent<Props, TechMap> {
     this.setState({
       ...this.state,
       steps: this.state.steps.map(s => (s.id === step.id ? step : s))
+    });
+  };
+
+  removeColumn = (columnId: number) => {
+    if (this.state.units.length <= 1) {
+      console.warn("Cannot delete last unit");
+      return;
+    }
+
+    const newUnits = this.state.units.filter((u, i) => i !== columnId);
+    const newSteps = this.state.steps.map(s => {
+      return {
+        ...s,
+        ingredients: s.ingredients.filter((ing, i) => i !== columnId),
+        humanResources: s.humanResources.filter((h, i) => i !== columnId),
+        inventory: s.inventory.filter((ivn, i) => i !== columnId)
+      };
+    });
+
+    this.setState({
+      ...this.state,
+      units: newUnits,
+      steps: newSteps
+    });
+  };
+
+  addColumn = () => {
+    const oldUnits = this.state.units;
+    const newUnits = [...oldUnits];
+    const oldLastUnit = newUnits[oldUnits.length - 1];
+    const newLastUnit = newUnits[newUnits.length - 1] + 1;
+    newUnits.push(newLastUnit);
+
+    const newSteps = this.state.steps.map(s => {
+      const ingredients = s.ingredients.map(i => {
+        return {
+          ...i,
+          countByUnits: new Map<number, number>(i.countByUnits).set(
+            newLastUnit,
+            (i.countByUnits.get(oldLastUnit) as number) + 1
+          )
+        };
+      });
+      const humanResources = s.humanResources.map(i => {
+        return {
+          ...i,
+          timeNormsByUnits: new Map<number, number>(i.timeNormsByUnits).set(
+            newLastUnit,
+            (i.timeNormsByUnits.get(oldLastUnit) as number) + 1
+          )
+        };
+      });
+      const inventory = s.inventory.map(i => {
+        return {
+          ...i,
+          countByUnits: new Map<number, number>(i.countByUnits).set(
+            newLastUnit,
+            (i.countByUnits.get(oldLastUnit) as number) + 1
+          )
+        };
+      });
+      return {
+        ...s,
+        ingredients,
+        humanResources,
+        inventory
+      };
+    });
+    this.setState({
+      ...this.state,
+      units: newUnits,
+      steps: newSteps
     });
   };
 
@@ -106,6 +180,7 @@ class TechMapEditor extends React.PureComponent<Props, TechMap> {
                     gridColumn: i + 3,
                     gridRow: this.setCurrentRowCount(-1)
                   }}
+                  onClick={() => this.removeColumn(i)}
                 >
                   <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
                 </button>
@@ -122,7 +197,11 @@ class TechMapEditor extends React.PureComponent<Props, TechMap> {
                 />
               </div>
             ))}
-            <button className="techMapRoundButton1" style={{ gridColumn: -2 }}>
+            <button
+              className="techMapRoundButton1"
+              style={{ gridColumn: -2 }}
+              onClick={() => this.addColumn()}
+            >
               <Icon icon={ICONS.ADD} size={16} color="#007aff" />
             </button>
           </div>
@@ -139,6 +218,17 @@ class TechMapEditor extends React.PureComponent<Props, TechMap> {
                 increaseRowCount={this.setCurrentRowCount}
                 commitStep={this.commitStep}
               />
+              {i < techMap.steps.length - 1 ? (
+                <TechMapStepSeparator
+                  increaseRowCount={this.setCurrentRowCount}
+                  addStep={() => {}}
+                />
+              ) : (
+                <TechMapAddStep
+                  increaseRowCount={this.setCurrentRowCount}
+                  addStep={() => {}}
+                />
+              )}
             </React.Fragment>
           ))}
         </div>

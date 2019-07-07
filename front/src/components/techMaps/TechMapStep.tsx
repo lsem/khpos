@@ -14,6 +14,7 @@ import Device from "../../models/inventory/device";
 import IngredientsRow from "../../models/techMaps/ingredientsRow";
 import HumanResourcesRow from "../../models/techMaps/humanResourcesRow";
 import EquipmentRow from "../../models/techMaps/equipmentRow";
+import { TechMapAddRow } from "./TechMapAddRow";
 
 export const stepTemplateRowsCount = 5;
 
@@ -31,29 +32,63 @@ type Props = {
 type DataRow = IngredientsRow | HumanResourcesRow | EquipmentRow;
 
 export const TechMapStep: React.FC<Props> = props => {
-  const removeIngredientsRow = (row: DataRow) => {
+  const removeRow = (
+    rowId: number,
+    propName: "ingredients" | "humanResources" | "inventory"
+  ) => {
     const oldStep = props.step;
     const newStep = {
       ...oldStep,
-      ingredients: oldStep.ingredients.filter(r => r !== row)
+      [propName]: (oldStep[propName] as Array<DataRow>).filter(
+        (r, i) => i !== rowId
+      )
     };
     props.commitStep(newStep);
   };
 
-  const removeHumanResourcesRow = (row: DataRow) => {
+  const addRow = (
+    rowId: number,
+    propName: "ingredients" | "humanResources" | "inventory"
+  ) => {
     const oldStep = props.step;
-    const newStep = {
-      ...oldStep,
-      humanResources: oldStep.humanResources.filter(r => r !== row)
-    };
-    props.commitStep(newStep);
-  };
+    let newRow;
 
-  const removeInventoryRow = (row: DataRow) => {
-    const oldStep = props.step;
+    switch (propName) {
+      case "ingredients":
+        newRow = {
+          ingredientId: props.ingredients[0].id,
+          countByUnits: new Map<number, number>()
+        } as IngredientsRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.countByUnits.set(props.units[i], 1);
+        }
+        break;
+      case "humanResources":
+        newRow = {
+          peopleCount: 1,
+          timeNormsByUnits: new Map<number, number>()
+        } as HumanResourcesRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.timeNormsByUnits.set(props.units[i], 1);
+        }
+        break;
+      case "inventory":
+        newRow = {
+          deviceId: props.inventory[0].id,
+          countByUnits: new Map<number, number>()
+        } as EquipmentRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.countByUnits.set(props.units[i], 1);
+        }
+        break;
+    }
+
+    const newCollection = [...oldStep[propName]];
+    newCollection.splice(rowId, 0, newRow as DataRow);
+
     const newStep = {
       ...oldStep,
-      inventory: oldStep.inventory.filter(r => r !== row)
+      [propName]: newCollection
     };
     props.commitStep(newStep);
   };
@@ -64,11 +99,20 @@ export const TechMapStep: React.FC<Props> = props => {
   };
 
   const step = props.step;
+
+  const ingredientsRowsCount =
+    step.ingredients.length > 0 ? step.ingredients.length : 1;
+  const humanResourcesRowsCount =
+    step.humanResources.length > 0 ? step.humanResources.length : 1;
+  const inventoryRowsCount =
+    step.inventory.length > 0 ? step.inventory.length : 1;
+
   const totalRowsCount =
-    step.ingredients.length +
-    step.humanResources.length +
-    step.inventory.length +
+    ingredientsRowsCount +
+    humanResourcesRowsCount +
+    inventoryRowsCount +
     stepTemplateRowsCount;
+
   const increaseRowCount = props.increaseRowCount;
 
   const stepFrameClasses = classNames("techMapStepFrame", {
@@ -128,16 +172,24 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.ingredients.map((i, indx) => (
-        <TechMapIngredientsDataRow
-          units={props.units}
-          ingredientsRow={i}
+      {!step.ingredients || step.ingredients.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          ingredients={props.ingredients}
-          key={indx}
-          removeRow={removeIngredientsRow}
+          click={() => addRow(0, "ingredients")}
         />
-      ))}
+      ) : (
+        step.ingredients.map((i, indx) => (
+          <TechMapIngredientsDataRow
+            units={props.units}
+            ingredientsRow={i}
+            row={increaseRowCount(1)}
+            ingredients={props.ingredients}
+            key={indx}
+            removeClick={() => removeRow(indx, "ingredients")}
+            addClick={() => addRow(indx + 1, "ingredients")}
+          />
+        ))
+      )}
 
       <TechMapStepSectionHeader
         name="Кількість людей"
@@ -146,15 +198,23 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.humanResources.map((h, indx) => (
-        <TechMapHumanResourcesDataRow
-          units={props.units}
-          humanResourcesRow={h}
+      {!step.humanResources || step.humanResources.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          key={indx}
-          removeRow={removeHumanResourcesRow}
+          click={() => addRow(0, "humanResources")}
         />
-      ))}
+      ) : (
+        step.humanResources.map((h, indx) => (
+          <TechMapHumanResourcesDataRow
+            units={props.units}
+            humanResourcesRow={h}
+            row={increaseRowCount(1)}
+            key={indx}
+            removeClick={() => removeRow(indx, "humanResources")}
+            addClick={() => addRow(indx + 1, "humanResources")}
+          />
+        ))
+      )}
 
       <TechMapStepSectionHeader
         name="Обладнання"
@@ -163,16 +223,24 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.inventory.map((i, indx) => (
-        <TechMapInventoryDataRow
-          units={props.units}
-          equipmentRow={i}
+      {!step.inventory || step.inventory.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          devices={props.inventory}
-          key={indx}
-          removeRow={removeInventoryRow}
+          click={() => addRow(0, "inventory")}
         />
-      ))}
+      ) : (
+        step.inventory.map((i, indx) => (
+          <TechMapInventoryDataRow
+            units={props.units}
+            equipmentRow={i}
+            row={increaseRowCount(1)}
+            devices={props.inventory}
+            key={indx}
+            removeClick={() => removeRow(indx, "inventory")}
+            addClick={() => addRow(indx + 1, "inventory")}
+          />
+        ))
+      )}
 
       <div
         className="techMapStepInstructionsEditorWrapper"
@@ -186,28 +254,6 @@ export const TechMapStep: React.FC<Props> = props => {
           editInstructions={editInstructions}
         />
       </div>
-
-      {!props.isBottom ? (
-        <div
-          className="techMapStepSeparator"
-          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}
-        >
-          <hr />
-          <button className="techMapRoundButton1">
-            <Icon size={16} color="#007aff" icon={ICONS.ADD} />
-          </button>
-          <hr />
-        </div>
-      ) : (
-        <button
-          className="techMapAddStepButton"
-          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}
-        >
-          <Icon size={16} color="#007aff" icon={ICONS.ADD} />
-          <span>&nbsp;</span>
-          <span>Додати крок</span>
-        </button>
-      )}
     </div>
   );
 };

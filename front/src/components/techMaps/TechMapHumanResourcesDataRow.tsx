@@ -7,7 +7,8 @@ type Props = {
   units: number[];
   humanResourcesRow: HumanResourcesRow;
   row: number;
-  removeRow: Function;
+  removeClick: Function;
+  addClick: Function;
 };
 
 export const TechMapHumanResourcesDataRow: React.FC<Props> = props => {
@@ -34,7 +35,7 @@ export const TechMapHumanResourcesDataRow: React.FC<Props> = props => {
       <button
         className="techMapRoundButton1"
         style={{ gridRow: props.row, gridColumn: -2 }}
-        onClick={() => props.removeRow(props.humanResourcesRow)}
+        onClick={() => props.removeClick()}
       >
         <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
       </button>
@@ -42,6 +43,7 @@ export const TechMapHumanResourcesDataRow: React.FC<Props> = props => {
       <button
         className="techMapRoundButton1"
         style={{ gridRow: props.row, gridColumn: "1 / -1", marginBottom: -24 }}
+        onClick={() => props.addClick()}
       >
         <Icon icon={ICONS.ADD} size={16} color="#007aff" />
       </button>

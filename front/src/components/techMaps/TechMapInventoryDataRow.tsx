@@ -9,7 +9,8 @@ type Props = {
   equipmentRow: EquipmentRow;
   devices: Device[];
   row: number;
-  removeRow: Function;
+  removeClick: Function;
+  addClick: Function;
 };
 
 export const TechMapInventoryDataRow: React.FC<Props> = (props) => {
@@ -36,11 +37,16 @@ export const TechMapInventoryDataRow: React.FC<Props> = (props) => {
       <button 
         className="techMapRoundButton1" 
         style={{ gridRow: props.row, gridColumn: -2 }}
-        onClick={() => props.removeRow(props.equipmentRow)}>
+        onClick={() => props.removeClick()}>
         <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
       </button>
 
-      <button className="techMapRoundButton1" style={{ gridRow: props.row, gridColumn: "1 / -1", marginBottom: -24 }}>
+      <button 
+        className="techMapRoundButton1" 
+        style={{ gridRow: props.row, gridColumn: "1 / -1", 
+        marginBottom: -24 }}
+        onClick={() => props.addClick()}
+      >
         <Icon icon={ICONS.ADD} size={16} color="#007aff" />
       </button>
     </div>
