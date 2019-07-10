@@ -17,7 +17,6 @@ export function getTechMaps() : Array<TechMap> {
       steps: [
         {
           id: "STP-XXX-YYY-ZZZ-YY0",
-          order: 0,
           name: "Замішування",
           ingredients: [
             { 
@@ -113,7 +112,6 @@ export function getTechMaps() : Array<TechMap> {
         } as Step,
         {
           id: "STP-XXX-YYY-ZZZ-YY1",
-          order: 1,
           name: "Аутоліз",
           ingredients: [],
           humanResources: [],

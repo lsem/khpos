@@ -6,6 +6,11 @@
   line-height: 32px;
 }
 
+.techMapStepHeader > input {
+  font-size: inherit;
+  font-family: inherit;
+}
+
 .techMapStepHeader > h2 {
   display: inline-block;
   font-size: 14px;

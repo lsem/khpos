@@ -4,7 +4,6 @@ import EquipmentRow from "./equipmentRow";
 
 export default interface Step {
   id: string
-  order: number
   name: string
   ingredients: Array<IngredientsRow>
   humanResources: Array<HumanResourcesRow>
