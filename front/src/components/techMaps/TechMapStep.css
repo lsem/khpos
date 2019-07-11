@@ -9,6 +9,7 @@
 .techMapStepHeader > input {
   font-size: inherit;
   font-family: inherit;
+  margin: 0 0 5px 12px;
 }
 
 .techMapStepHeader > h2 {

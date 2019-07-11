@@ -16,7 +16,20 @@ import { TechMapStepInstructionsEditor } from './TechMapStepInstructionsEditor';
 import { TechMapStepSectionHeader } from './TechMapStepSectionHeader';
 import './TechMapStep.css';
 
-export const stepTemplateRowsCount = 5;
+export const calcNeededRowsForStep = (step: Step) => {
+  const stepTemplateRowsCount = 5
+  const ingredientsRowsCount =
+    step.ingredients.length > 0 ? step.ingredients.length : 1;
+  const humanResourcesRowsCount =
+    step.humanResources.length > 0 ? step.humanResources.length : 1;
+  const inventoryRowsCount =
+    step.inventory.length > 0 ? step.inventory.length : 1;
+
+  return ingredientsRowsCount +
+    humanResourcesRowsCount +
+    inventoryRowsCount +
+    stepTemplateRowsCount;
+}
 
 type Props = {
   step: Step;
@@ -25,7 +38,7 @@ type Props = {
   isBottom: boolean;
   ingredients: Ingredient[];
   inventory: Device[];
-  increaseRowCount: (count: number) => number;
+  startRow: number;
   commitStep: (step: Step) => void;
   moveStepUp: () => void;
   moveStepDown: () => void;
@@ -37,6 +50,14 @@ type DataRow = IngredientsRow | HumanResourcesRow | EquipmentRow;
 
 export const TechMapStep: React.FC<Props> = props => {
   const [state, setState] = React.useState({ isHeaderEditing: false });
+  const totalRows = calcNeededRowsForStep(props.step);
+
+  let currentRow = 0;
+  
+  const increaseRowCount = (count: number) => {
+    currentRow += count;
+    return props.startRow + currentRow; 
+  };
 
   const removeRow = (
     rowId: number,
@@ -120,21 +141,6 @@ export const TechMapStep: React.FC<Props> = props => {
 
   const step = props.step;
 
-  const ingredientsRowsCount =
-    step.ingredients.length > 0 ? step.ingredients.length : 1;
-  const humanResourcesRowsCount =
-    step.humanResources.length > 0 ? step.humanResources.length : 1;
-  const inventoryRowsCount =
-    step.inventory.length > 0 ? step.inventory.length : 1;
-
-  const totalRowsCount =
-    ingredientsRowsCount +
-    humanResourcesRowsCount +
-    inventoryRowsCount +
-    stepTemplateRowsCount;
-
-  const increaseRowCount = props.increaseRowCount;
-
   const stepFrameClasses = classNames("techMapStepFrame", {
     techMapStepFrameTop: props.isTop
   });
@@ -146,7 +152,7 @@ export const TechMapStep: React.FC<Props> = props => {
         style={{
           gridColumn: "2 / -2",
           gridRowStart: increaseRowCount(1),
-          gridRowEnd: totalRowsCount + increaseRowCount(0)
+          gridRowEnd: totalRows + increaseRowCount(0)
         }}
       >
         <section className="techMapStepHeaderBg" />
@@ -178,7 +184,7 @@ export const TechMapStep: React.FC<Props> = props => {
         style={{
           gridColumn: 1,
           gridRowStart: increaseRowCount(0),
-          gridRowEnd: increaseRowCount(0) + totalRowsCount
+          gridRowEnd: increaseRowCount(0) + totalRows
         }}
       >
         <button className="techMapRoundButton2 rotate180" onClick={() => props.moveStepUp()}>

@@ -3,7 +3,7 @@ import Icon from "../Icon";
 import { ICONS } from "../../constants/icons";
 
 interface Props {
-  increaseRowCount: Function;
+  startRow: number;
   addStep: Function;
 }
 
@@ -11,7 +11,7 @@ export const TechMapStepSeparator: React.FC<Props> = props => {
   return (
     <div
       className="techMapStepSeparator"
-      style={{ gridColumn: "2 / -2", gridRow: props.increaseRowCount(1) }}
+      style={{ gridColumn: "2 / -2", gridRow: props.startRow }}
     >
       <hr />
       <button className="techMapRoundButton1" onClick={() => props.addStep()}>

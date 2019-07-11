@@ -1,23 +1,23 @@
-import _ from 'lodash';
-import Device from '../../models/inventory/device';
-import Icon from '../Icon';
-import Ingredient from '../../models/ingredients/ingredient';
-import React from 'react';
-import Step from '../../models/techMaps/step';
-import TechMap from '../../models/techMaps/techMap';
-import uuid from 'uuid';
-import { AnyAction } from 'redux';
-import { AppState } from '../../store';
-import { connect } from 'react-redux';
-import { ICONS } from '../../constants/icons';
-import { TechMapAddStep } from './TechMapAddStep';
-import { TechMapStep } from './TechMapStep';
-import { TechMapStepSeparator } from './TechMapStepSeparator';
-import { ThunkDispatch } from 'redux-thunk';
-import { thunkRequestIngredients } from '../../store/ingredients/thunks';
-import { thunkRequestInventory } from '../../store/inventory/thunks';
-import { thunkRequestTechMaps } from '../../store/techMaps/thunks';
-import './TechMapEditor.css';
+import _ from "lodash";
+import Device from "../../models/inventory/device";
+import Icon from "../Icon";
+import Ingredient from "../../models/ingredients/ingredient";
+import React from "react";
+import Step from "../../models/techMaps/step";
+import TechMap from "../../models/techMaps/techMap";
+import uuid from "uuid";
+import { AnyAction } from "redux";
+import { AppState } from "../../store";
+import { connect } from "react-redux";
+import { ICONS } from "../../constants/icons";
+import { TechMapAddStep } from "./TechMapAddStep";
+import { TechMapStep, calcNeededRowsForStep } from "./TechMapStep";
+import { TechMapStepSeparator } from "./TechMapStepSeparator";
+import { ThunkDispatch } from "redux-thunk";
+import { thunkRequestIngredients } from "../../store/ingredients/thunks";
+import { thunkRequestInventory } from "../../store/inventory/thunks";
+import { thunkRequestTechMaps } from "../../store/techMaps/thunks";
+import "./TechMapEditor.css";
 
 type Props = {
   techMapId: string;
@@ -30,9 +30,9 @@ type Props = {
 };
 
 type State = {
-  techMap: TechMap,
-  isHeaderEditing: boolean
-}
+  techMap: TechMap;
+  isHeaderEditing: boolean;
+};
 
 class TechMapEditor extends React.PureComponent<Props, State> {
   state = {
@@ -40,7 +40,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
       t => t.id === this.props.techMapId
     ) as TechMap,
     isHeaderEditing: false
-  }
+  };
 
   currentRowCounter: number = 0; //cannot use state because of constant rerenders
 
@@ -152,11 +152,14 @@ class TechMapEditor extends React.PureComponent<Props, State> {
         steps: newSteps
       }
     });
-  }
+  };
 
   moveStepDown = (stepId: number) => {
-    if (this.state.techMap.steps.length < 2
-      || stepId === this.state.techMap.steps.length - 1) return;
+    if (
+      this.state.techMap.steps.length < 2 ||
+      stepId === this.state.techMap.steps.length - 1
+    )
+      return;
 
     const newSteps = [...this.state.techMap.steps];
     const buff = newSteps[stepId];
@@ -169,7 +172,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
         steps: newSteps
       }
     });
-  }
+  };
 
   removeStep = (stepId: number) => {
     const newSteps = this.state.techMap.steps.filter((s, i) => i !== stepId);
@@ -179,7 +182,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
         steps: newSteps
       }
     });
-  }
+  };
 
   duplicateStep = (stepId: number) => {
     const newStep = _.cloneDeep(this.state.techMap.steps[stepId]);
@@ -194,7 +197,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
         steps: newSteps
       }
     });
-  }
+  };
 
   addNewStepAt = (stepId: number) => {
     const newStep = {
@@ -204,7 +207,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
       humanResources: [],
       inventory: [],
       instructions: ""
-    } as Step
+    } as Step;
 
     const newSteps = [...this.state.techMap.steps];
     newSteps.splice(stepId + 1, 0, newStep as Step);
@@ -215,19 +218,19 @@ class TechMapEditor extends React.PureComponent<Props, State> {
         steps: newSteps
       }
     });
-  }
+  };
 
   beginHeaderEditing() {
     this.setState({
       isHeaderEditing: true
-    })
+    });
   }
 
   endHeaderEditing(newTechMapName: string) {
     this.setState({
       techMap: { ...this.state.techMap, name: newTechMapName },
       isHeaderEditing: false
-    })
+    });
   }
 
   componentDidMount() {
@@ -241,10 +244,12 @@ class TechMapEditor extends React.PureComponent<Props, State> {
 
     if (!techMap) return "Tech Map not found!";
 
+    const lastStepId = techMap.steps.length - 1;
+
     const style = {
       gridTemplateColumns: `30px 199px repeat(${
         techMap.units.length
-        }, 67px) 28px`
+      }, 67px) 28px`
     };
 
     return (
@@ -257,16 +262,17 @@ class TechMapEditor extends React.PureComponent<Props, State> {
               gridRow: this.setCurrentRowCount(1)
             }}
           >
-            {
-              this.state.isHeaderEditing ?
-                (<input
-                  type="text"
-                  autoFocus
-                  onBlur={(e) => this.endHeaderEditing(e.target.value)} 
-                  defaultValue={this.state.techMap.name} 
-                  onFocus={(e) => e.target.select()} />) :
-                (<span>{techMap.name}</span>)
-            }
+            {this.state.isHeaderEditing ? (
+              <input
+                type="text"
+                autoFocus
+                onBlur={e => this.endHeaderEditing(e.target.value)}
+                defaultValue={this.state.techMap.name}
+                onFocus={e => e.target.select()}
+              />
+            ) : (
+              <span>{techMap.name}</span>
+            )}
 
             <button onClick={() => this.beginHeaderEditing()}>
               <Icon size={16} color="#333" icon={ICONS.EDIT} />
@@ -316,7 +322,7 @@ class TechMapEditor extends React.PureComponent<Props, State> {
             ))}
             <button
               className="techMapRoundButton1"
-              style={{ gridColumn: -2 }}
+              style={{ gridColumn: -2, gridRow: this.setCurrentRowCount(0) }}
               onClick={() => this.addColumn()}
             >
               <Icon icon={ICONS.ADD} size={16} color="#007aff" />
@@ -332,26 +338,29 @@ class TechMapEditor extends React.PureComponent<Props, State> {
                 isBottom={techMap.steps.length === i + 1}
                 ingredients={this.props.ingredients}
                 inventory={this.props.inventory}
-                increaseRowCount={this.setCurrentRowCount}
+                startRow={this.setCurrentRowCount(0)}
                 commitStep={this.commitStep}
                 moveStepUp={() => this.moveStepUp(i)}
                 moveStepDown={() => this.moveStepDown(i)}
                 removeStep={() => this.removeStep(i)}
                 duplicateStep={() => this.duplicateStep(i)}
               />
-              {
-                i < techMap.steps.length - 1 && (
-                  <TechMapStepSeparator
-                    increaseRowCount={this.setCurrentRowCount}
-                    addStep={() => { this.addNewStepAt(i) }}
-                  />
-                )
-              }
+              {i < techMap.steps.length - 1 && (
+                <TechMapStepSeparator
+                  startRow={this.setCurrentRowCount(
+                    calcNeededRowsForStep(s) + 1
+                  )}
+                  addStep={() => {
+                    this.addNewStepAt(i);
+                  }}
+                />
+              )}
             </React.Fragment>
           ))}
           <TechMapAddStep
-            increaseRowCount={this.setCurrentRowCount}
-            addStep={() => { this.addNewStepAt(this.state.techMap.steps.length - 1) }}
+            addStep={() => {
+              this.addNewStepAt(lastStepId);
+            }}
           />
         </div>
       </div>
