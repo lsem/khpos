@@ -21,6 +21,17 @@ export class TechMapCell extends React.Component<Props, State> {
     this.props.onBlur && this.props.onBlur(e);
   };
 
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (
+      this.state.value !== this.props.initialValue &&
+      prevState.value === this.state.value
+    ) {
+      this.setState({
+        value: this.props.initialValue
+      });
+    }
+  }
+
   render() {
     if (this.input) {
       this.input.value = this.props.initialValue;
@@ -30,9 +41,9 @@ export class TechMapCell extends React.Component<Props, State> {
         className="techMapTextCell"
         style={{ gridRow: this.props.row, gridColumn: this.props.column }}
         type={this.props.inputType}
-        ref={(userInput) => this.input = userInput}
+        value={this.state.value}
+        onChange={e => this.setState({value: e.target.value})}
         onBlur={e => this.onBlur(e)}
-        defaultValue={this.state.value}
       />
     );
   }
