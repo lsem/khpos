@@ -65,7 +65,7 @@ export function getTechMaps() : Array<TechMap> {
           humanResources: [
             {
               peopleCount: 1,
-              timeNormsByUnits: new Map<number, number>([
+              countByUnits: new Map<number, number>([
                 [1, 15],
                 [6, 22],
                 [8, 25],
@@ -79,7 +79,7 @@ export function getTechMaps() : Array<TechMap> {
             } as HumanResourcesRow,
             {
               peopleCount: 2,
-              timeNormsByUnits: new Map<number, number>([
+              countByUnits: new Map<number, number>([
                 [1, 10],
                 [6, 15],
                 [8, 16],

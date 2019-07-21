@@ -18,6 +18,7 @@ import { thunkRequestIngredients } from "../../store/ingredients/thunks";
 import { thunkRequestInventory } from "../../store/inventory/thunks";
 import { thunkRequestTechMaps } from "../../store/techMaps/thunks";
 import "./TechMapEditor.css";
+import { TechMapCell } from "./TechMapCell";
 
 type Props = {
   techMapId: string;
@@ -34,7 +35,7 @@ type State = {
   isHeaderEditing: boolean;
 };
 
-class TechMapEditor extends React.PureComponent<Props, State> {
+class TechMapEditor extends React.Component<Props, State> {
   state = {
     techMap: this.props.techMaps.find(
       t => t.id === this.props.techMapId
@@ -107,9 +108,9 @@ class TechMapEditor extends React.PureComponent<Props, State> {
       const humanResources = s.humanResources.map(i => {
         return {
           ...i,
-          timeNormsByUnits: new Map<number, number>(i.timeNormsByUnits).set(
+          countByUnits: new Map<number, number>(i.countByUnits).set(
             newLastUnit,
-            (i.timeNormsByUnits.get(oldLastUnit) as number) + 1
+            (i.countByUnits.get(oldLastUnit) as number) + 1
           )
         };
       });
@@ -220,18 +221,72 @@ class TechMapEditor extends React.PureComponent<Props, State> {
     });
   };
 
-  beginHeaderEditing() {
+  beginHeaderEditing = () => {
     this.setState({
       isHeaderEditing: true
     });
-  }
+  };
 
-  endHeaderEditing(newTechMapName: string) {
+  endHeaderEditing = (newTechMapName: string) => {
     this.setState({
       techMap: { ...this.state.techMap, name: newTechMapName },
       isHeaderEditing: false
     });
-  }
+  };
+
+  commitUnitCell = (columnId: number, value: number) => {
+    if (this.state.techMap.units[columnId] === value) return;
+
+    const techMap = this.state.techMap;
+    const oldValue = techMap.units[columnId];
+
+    if (this.state.techMap.units.includes(value)) {
+      console.warn("Units already has unit: " + value + " edit canceled."); //TODO: notify user
+      
+      this.setState({
+        techMap: {
+          ...techMap,
+          units: techMap.units.map((u, i) => (i === columnId ? oldValue : u))
+        }
+      });
+      return;
+    }
+
+    const newSteps = techMap.steps.map(s => {
+      return {
+        ...s,
+        ingredients: s.ingredients.map(i => {
+          const val = i.countByUnits.get(oldValue) as number;
+          const newCountByUnits = new Map(i.countByUnits);
+          newCountByUnits.delete(oldValue);
+          newCountByUnits.set(value, val);
+          return { ...i, countByUnits: newCountByUnits }
+        }),
+        humanResources: s.humanResources.map(h => {
+          const val = h.countByUnits.get(oldValue) as number;
+          const newCountByUnits = new Map(h.countByUnits);
+          newCountByUnits.delete(oldValue);
+          newCountByUnits.set(value, val);
+          return { ...h, countByUnits: newCountByUnits }
+        }),
+        inventory: s.inventory.map(i => {
+          const val = i.countByUnits.get(oldValue) as number;
+          const newCountByUnits = new Map(i.countByUnits);
+          newCountByUnits.delete(oldValue);
+          newCountByUnits.set(value, val);
+          return { ...i, countByUnits: newCountByUnits }
+        })
+      }
+    })
+
+    this.setState({
+      techMap: {
+        ...techMap,
+        units: techMap.units.map((u, i) => (i === columnId ? value : u)),
+        steps: newSteps
+      }
+    });
+  };
 
   componentDidMount() {
     this.props.requestIngredients();
@@ -308,14 +363,12 @@ class TechMapEditor extends React.PureComponent<Props, State> {
                   <Icon icon={ICONS.MINUS} size={16} color="#ff3b30" />
                 </button>
 
-                <input
-                  style={{
-                    gridRow: this.setCurrentRowCount(1),
-                    gridColumn: i + 3
-                  }}
-                  className="techMapTextCell"
-                  type="number"
-                  value={u}
+                <TechMapCell
+                  row={this.setCurrentRowCount(1)}
+                  column={i + 3}
+                  inputType="number"
+                  initialValue={"" + u}
+                  onBlur={e => this.commitUnitCell(i, +e.target.value)}
                   key={i}
                 />
               </div>

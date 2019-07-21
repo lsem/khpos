@@ -1,4 +1,4 @@
 export default interface HumanResourcesRow {
   peopleCount: number
-  timeNormsByUnits: Map<number, number>
+  countByUnits: Map<number, number>
 }
