@@ -1,2 +1,25 @@
-Tutorials used:
-https://code.tutsplus.com/tutorials/introduction-to-api-calls-with-react-and-axios--cms-21027
+# Prerequsites
+
+0. npm
+1. MongoDB is somehow installed and mongod can be run from terminal.
+
+
+
+
+# How to run tests
+
+```
+npm test
+```
+
+# How to see debug information for tests
+
+```
+DEBUG=* npm test
+```
+
+
+# How to run backend
+
+Use script start_mongo.sh to start mongo
+

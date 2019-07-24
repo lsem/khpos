@@ -1,8 +1,4 @@
-process.env.NODE_NV = "test";
-
-if (!process.env.POSTER_API_LINK || !process.env.POSTER_SECURITY_TOKEN) {
-  throw new Error("No POSTER_API_LINK/POSTER_SECURITY_TOKEN env variable set");
-}
+process.env.NODE_ENV = "test";
 
 const KhPosNodeTestApp = require("../../KhPosNodeTestApp");
 const chai = require("chai");

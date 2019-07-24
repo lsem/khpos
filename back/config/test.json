@@ -1,14 +1,10 @@
 {
-  "server": {
-    "port": 8082
+  "web": {
+    "port": 7000
   },
   "storage": {
-    "port": 4000,
+    "port": 7001,
     "host": "localhost"
-  },
-  "poster": {
-    "apiLink" : "$POSTER_API_LINK",
-    "securityToken" : "$POSTER_SECURITY_TOKEN"
   },
   "stock": {
   }

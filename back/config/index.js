@@ -7,6 +7,8 @@ var debug = require('debug')('khconfig');
 const NODE_ENV = process.env.NODE_ENV;
 let configBuffer = null;
 
+console.info(`INFO: Loading config for ENV (set via NODE_ENV var): ${NODE_ENV}`)
+
 switch (NODE_ENV) {
   case "prod": {
     debug('loading PROD env')
