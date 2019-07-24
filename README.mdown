@@ -12,11 +12,13 @@
 npm test
 ```
 
-# How to see debug information for tests
+# How to see debug information
 
 ```
 DEBUG=* npm test
 ```
+
+See more [https://www.npmjs.com/package/debug](https://www.npmjs.com/package/debug)
 
 
 # How to run backend
