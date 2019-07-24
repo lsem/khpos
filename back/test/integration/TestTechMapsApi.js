@@ -14,6 +14,10 @@ const _ = require('lodash');
 chai.use(chaiHttp);
 chai.use(chaiSubset);
 
+function newTechMapId() {
+  return 'TM-' + uuid.v4()
+}
+
 describe("API", () => {
   let app;
 
@@ -52,6 +56,24 @@ describe("API", () => {
       checkExpectations(await chai.request(app.server()).get("/techmaps"));
       checkExpectations(await chai.request(app.server()).post("/techmaps"));
       checkExpectations(await chai.request(app.server()).patch("/techmaps"));
+    });
+
+    it("should return 404 if unexisting job is requested", async () => {
+      const res = await chai.request(app.server()).get(`/techmaps/${newTechMapId()}`);
+      expect(res).to.have.status(404);
+    });
+
+    it.skip("should bump up version when modified techmap put", async() => {
+      // todo: make sure all fields are checked.
+    });
+
+    it.skip("should not bump up version when unmodified techmap put", async() => {
+      // todo: consider returning error or some not-modified for this case,
+      // or emit warning at least, since it looks like clients logic error.
+    });
+
+    it.skip("should be able to return latest version by special name id", async() => {
+      // todo: test /techmaps/TM-XXXX-YYYY-ZZZZ-QQQQ/HEAD
     });
 
   });
