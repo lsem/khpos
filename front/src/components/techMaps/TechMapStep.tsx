@@ -1,21 +1,37 @@
-import React from "react";
 import classNames from "classnames";
+import Device from "../../models/inventory/device";
+import EquipmentRow from "../../models/techMaps/equipmentRow";
+import HumanResourcesRow from "../../models/techMaps/humanResourcesRow";
 import Icon from "../Icon";
+import Ingredient from "../../models/ingredients/ingredient";
+import IngredientsRow from "../../models/techMaps/ingredientsRow";
+import React from "react";
+import Step from "../../models/techMaps/step";
 import { ICONS } from "../../constants/icons";
-import { TechMapIngredientsDataRow } from "./TechMapIngredientsDataRow";
-import { TechMapStepSectionHeader } from "./TechMapStepSectionHeader";
+import { TechMapAddRow } from "./TechMapAddRow";
 import { TechMapHumanResourcesDataRow } from "./TechMapHumanResourcesDataRow";
+import { TechMapIngredientsDataRow } from "./TechMapIngredientsDataRow";
 import { TechMapInventoryDataRow } from "./TechMapInventoryDataRow";
 import { TechMapStepInstructionsEditor } from "./TechMapStepInstructionsEditor";
+import { TechMapStepSectionHeader } from "./TechMapStepSectionHeader";
 import "./TechMapStep.css";
-import Step from "../../models/techMaps/step";
-import Ingredient from "../../models/ingredients/ingredient";
-import Device from "../../models/inventory/device";
-import IngredientsRow from "../../models/techMaps/ingredientsRow";
-import HumanResourcesRow from "../../models/techMaps/humanResourcesRow";
-import EquipmentRow from "../../models/techMaps/equipmentRow";
 
-export const stepTemplateRowsCount = 5;
+export const calcNeededRowsForStep = (step: Step) => {
+  const stepTemplateRowsCount = 5;
+  const ingredientsRowsCount =
+    step.ingredients.length > 0 ? step.ingredients.length : 1;
+  const humanResourcesRowsCount =
+    step.humanResources.length > 0 ? step.humanResources.length : 1;
+  const inventoryRowsCount =
+    step.inventory.length > 0 ? step.inventory.length : 1;
+
+  return (
+    ingredientsRowsCount +
+    humanResourcesRowsCount +
+    inventoryRowsCount +
+    stepTemplateRowsCount
+  );
+};
 
 type Props = {
   step: Step;
@@ -24,52 +40,159 @@ type Props = {
   isBottom: boolean;
   ingredients: Ingredient[];
   inventory: Device[];
-  increaseRowCount: Function;
-  commitStep: Function;
+  startRow: number;
+  commitStep: (step: Step) => void;
+  moveStepUp: () => void;
+  moveStepDown: () => void;
+  removeStep: () => void;
+  duplicateStep: () => void;
 };
 
 type DataRow = IngredientsRow | HumanResourcesRow | EquipmentRow;
 
 export const TechMapStep: React.FC<Props> = props => {
-  const removeIngredientsRow = (row: DataRow) => {
-    const oldStep = props.step;
+  const [state, setState] = React.useState({ isHeaderEditing: false });
+  const step = props.step;
+  const totalRows = calcNeededRowsForStep(step);
+
+  let currentRow = 0;
+
+  const increaseRowCount = (count: number) => {
+    currentRow += count;
+    return props.startRow + currentRow;
+  };
+
+  const removeRow = (
+    rowId: number,
+    propName: "ingredients" | "humanResources" | "inventory"
+  ) => {
+    const oldStep = step;
     const newStep = {
       ...oldStep,
-      ingredients: oldStep.ingredients.filter(r => r !== row)
+      [propName]: (oldStep[propName] as Array<DataRow>).filter(
+        (r, i) => i !== rowId
+      )
     };
     props.commitStep(newStep);
   };
 
-  const removeHumanResourcesRow = (row: DataRow) => {
-    const oldStep = props.step;
-    const newStep = {
-      ...oldStep,
-      humanResources: oldStep.humanResources.filter(r => r !== row)
-    };
-    props.commitStep(newStep);
-  };
+  const addRow = (
+    rowId: number,
+    propName: "ingredients" | "humanResources" | "inventory"
+  ) => {
+    const oldStep = step;
+    let newRow;
 
-  const removeInventoryRow = (row: DataRow) => {
-    const oldStep = props.step;
+    switch (propName) {
+      case "ingredients":
+        newRow = {
+          ingredientId: props.ingredients[0].id,
+          countByUnits: new Map<number, number>()
+        } as IngredientsRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.countByUnits.set(props.units[i], 1);
+        }
+        break;
+      case "humanResources":
+        newRow = {
+          peopleCount: 1,
+          countByUnits: new Map<number, number>()
+        } as HumanResourcesRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.countByUnits.set(props.units[i], 1);
+        }
+        break;
+      case "inventory":
+        newRow = {
+          deviceId: props.inventory[0].id,
+          countByUnits: new Map<number, number>()
+        } as EquipmentRow;
+        for (let i = 0; i < props.units.length; i++) {
+          newRow.countByUnits.set(props.units[i], 1);
+        }
+        break;
+    }
+
+    const newCollection = [...oldStep[propName]];
+    newCollection.splice(rowId, 0, newRow as DataRow);
+
     const newStep = {
       ...oldStep,
-      inventory: oldStep.inventory.filter(r => r !== row)
+      [propName]: newCollection
     };
     props.commitStep(newStep);
   };
 
   const editInstructions = (value: string) => {
-    const newStep = { ...props.step, instructions: value };
+    const newStep = { ...step, instructions: value };
     props.commitStep(newStep);
   };
 
-  const step = props.step;
-  const totalRowsCount =
-    step.ingredients.length +
-    step.humanResources.length +
-    step.inventory.length +
-    stepTemplateRowsCount;
-  const increaseRowCount = props.increaseRowCount;
+  const beginHeaderEditing = () => {
+    setState({
+      isHeaderEditing: true
+    });
+  };
+
+  const endHeaderEditing = (newStepName: string) => {
+    setState({
+      isHeaderEditing: false
+    });
+    const newStep = { ...step, name: newStepName };
+    props.commitStep(newStep);
+  };
+
+  const commitDataCellValue = (
+    unit: number,
+    rowId: number,
+    value: number,
+    propName: "ingredients" | "humanResources" | "inventory"
+  ) => {
+    const oldRow = step[propName][rowId];
+    const newRow = {
+      ...oldRow,
+      countByUnits: new Map((oldRow as DataRow).countByUnits).set(unit, value)
+    };
+
+    const newRows = (step[propName] as DataRow[]).map((r, i) =>
+      i === rowId ? newRow : r
+    );
+    const newStep = { ...step, [propName]: newRows } as Step;
+    props.commitStep(newStep);
+  };
+
+  const commitIngredientDropDown = (rowId: number, value: string) => {
+    const oldRow = step.ingredients[rowId];
+    const newRow = { ...oldRow, ingredientId: value };
+
+    const newRows = step.ingredients.map((r, i) =>
+      i === rowId ? newRow : r
+    );
+    const newStep = { ...step, ingredients: newRows } as Step;
+    props.commitStep(newStep);
+  }
+
+  const commitPeopleCount = (rowId: number, value: number) => {
+    const oldRow = step.humanResources[rowId];
+    const newRow = { ...oldRow, peopleCount: value };
+
+    const newRows = step.humanResources.map((r, i) =>
+      i === rowId ? newRow : r
+    );
+    const newStep = { ...step, humanResources: newRows } as Step;
+    props.commitStep(newStep);
+  }
+
+  const commitInventoryDropDown = (rowId: number, value: string) => {
+    const oldRow = step.inventory[rowId];
+    const newRow = { ...oldRow, deviceId: value };
+
+    const newRows = step.inventory.map((r, i) =>
+      i === rowId ? newRow : r
+    );
+    const newStep = { ...step, inventory: newRows } as Step;
+    props.commitStep(newStep);
+  }
 
   const stepFrameClasses = classNames("techMapStepFrame", {
     techMapStepFrameTop: props.isTop
@@ -82,7 +205,7 @@ export const TechMapStep: React.FC<Props> = props => {
         style={{
           gridColumn: "2 / -2",
           gridRowStart: increaseRowCount(1),
-          gridRowEnd: totalRowsCount + increaseRowCount(0)
+          gridRowEnd: totalRows + increaseRowCount(0)
         }}
       >
         <section className="techMapStepHeaderBg" />
@@ -93,8 +216,19 @@ export const TechMapStep: React.FC<Props> = props => {
         className="techMapStepHeader"
         style={{ gridColumn: "2 / -1", gridRow: increaseRowCount(0) }}
       >
-        <h2>{step.name}</h2>
-        <button>
+        {state.isHeaderEditing ? (
+          <input
+            type="text"
+            autoFocus
+            onBlur={e => endHeaderEditing(e.target.value)}
+            defaultValue={step.name}
+            onFocus={e => e.target.select()}
+          />
+        ) : (
+          <h2>{step.name}</h2>
+        )}
+
+        <button onClick={() => beginHeaderEditing()}>
           <Icon size={16} color="#333" icon={ICONS.EDIT} />
         </button>
       </header>
@@ -104,19 +238,31 @@ export const TechMapStep: React.FC<Props> = props => {
         style={{
           gridColumn: 1,
           gridRowStart: increaseRowCount(0),
-          gridRowEnd: increaseRowCount(0) + totalRowsCount
+          gridRowEnd: increaseRowCount(0) + totalRows
         }}
       >
-        <button className="techMapRoundButton2 rotate180">
+        <button
+          className="techMapRoundButton2 rotate180"
+          onClick={() => props.moveStepUp()}
+        >
           <Icon size={16} color="#007aff" icon={ICONS.UP} />
         </button>
-        <button className="techMapRoundButton2">
+        <button
+          className="techMapRoundButton2"
+          onClick={() => props.moveStepDown()}
+        >
           <Icon size={16} color="#007aff" icon={ICONS.DOWN} />
         </button>
-        <button className="techMapRoundButton2">
+        <button
+          className="techMapRoundButton2"
+          onClick={() => props.duplicateStep()}
+        >
           <Icon size={16} color="#007aff" icon={ICONS.DUPLICATE} />
         </button>
-        <button className="techMapRoundButton2">
+        <button
+          className="techMapRoundButton2"
+          onClick={() => props.removeStep()}
+        >
           <Icon size={16} color="#ff3b30" icon={ICONS.REMOVE} />
         </button>
       </div>
@@ -128,16 +274,28 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.ingredients.map((i, indx) => (
-        <TechMapIngredientsDataRow
-          units={props.units}
-          ingredientsRow={i}
+      {!step.ingredients || step.ingredients.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          ingredients={props.ingredients}
-          key={indx}
-          removeRow={removeIngredientsRow}
+          click={() => addRow(0, "ingredients")}
         />
-      ))}
+      ) : (
+        step.ingredients.map((i, indx) => (
+          <TechMapIngredientsDataRow
+            units={props.units}
+            ingredientsRow={i}
+            row={increaseRowCount(1)}
+            ingredients={props.ingredients}
+            key={indx}
+            removeClick={() => removeRow(indx, "ingredients")}
+            addClick={() => addRow(indx + 1, "ingredients")}
+            updateCell={(unit, value) =>
+              commitDataCellValue(unit, indx, value, "ingredients")
+            }
+            changeIngredient={(i) => commitIngredientDropDown(indx, i)}
+          />
+        ))
+      )}
 
       <TechMapStepSectionHeader
         name="Кількість людей"
@@ -146,15 +304,27 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.humanResources.map((h, indx) => (
-        <TechMapHumanResourcesDataRow
-          units={props.units}
-          humanResourcesRow={h}
+      {!step.humanResources || step.humanResources.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          key={indx}
-          removeRow={removeHumanResourcesRow}
+          click={() => addRow(0, "humanResources")}
         />
-      ))}
+      ) : (
+        step.humanResources.map((h, indx) => (
+          <TechMapHumanResourcesDataRow
+            units={props.units}
+            humanResourcesRow={h}
+            row={increaseRowCount(1)}
+            key={indx}
+            removeClick={() => removeRow(indx, "humanResources")}
+            addClick={() => addRow(indx + 1, "humanResources")}
+            updateCell={(unit, value) =>
+              commitDataCellValue(unit, indx, value, "ingredients")
+            }
+            changePeopleCount={pc => commitPeopleCount(indx, pc)}
+          />
+        ))
+      )}
 
       <TechMapStepSectionHeader
         name="Обладнання"
@@ -163,16 +333,28 @@ export const TechMapStep: React.FC<Props> = props => {
         row={increaseRowCount(1)}
       />
 
-      {step.inventory.map((i, indx) => (
-        <TechMapInventoryDataRow
-          units={props.units}
-          equipmentRow={i}
+      {!step.inventory || step.inventory.length === 0 ? (
+        <TechMapAddRow
           row={increaseRowCount(1)}
-          devices={props.inventory}
-          key={indx}
-          removeRow={removeInventoryRow}
+          click={() => addRow(0, "inventory")}
         />
-      ))}
+      ) : (
+        step.inventory.map((i, indx) => (
+          <TechMapInventoryDataRow
+            units={props.units}
+            equipmentRow={i}
+            row={increaseRowCount(1)}
+            devices={props.inventory}
+            key={indx}
+            removeClick={() => removeRow(indx, "inventory")}
+            addClick={() => addRow(indx + 1, "inventory")}
+            updateCell={(unit, value) =>
+              commitDataCellValue(unit, indx, value, "ingredients")
+            }
+            changeDevice={d => commitInventoryDropDown(indx, d)}
+          />
+        ))
+      )}
 
       <div
         className="techMapStepInstructionsEditorWrapper"
@@ -186,28 +368,6 @@ export const TechMapStep: React.FC<Props> = props => {
           editInstructions={editInstructions}
         />
       </div>
-
-      {!props.isBottom ? (
-        <div
-          className="techMapStepSeparator"
-          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}
-        >
-          <hr />
-          <button className="techMapRoundButton1">
-            <Icon size={16} color="#007aff" icon={ICONS.ADD} />
-          </button>
-          <hr />
-        </div>
-      ) : (
-        <button
-          className="techMapAddStepButton"
-          style={{ gridColumn: "2 / -2", gridRow: increaseRowCount(1) }}
-        >
-          <Icon size={16} color="#007aff" icon={ICONS.ADD} />
-          <span>&nbsp;</span>
-          <span>Додати крок</span>
-        </button>
-      )}
     </div>
   );
 };
