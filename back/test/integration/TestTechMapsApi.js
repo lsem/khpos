@@ -76,5 +76,13 @@ describe("API", () => {
       // todo: test /techmaps/TM-XXXX-YYYY-ZZZZ-QQQQ/HEAD
     });
 
+    it.skip("newly inserted techmap should be availavle in collection", async() => {
+      // todo: test get /techmaps/
+    });
+
+    it.skip("getting techmap without version specified should return collection of all versions", async() => {
+      // todo: teset get /techmaps/TM-XXXX-YYYY-ZZZZ-QQQQ
+    });
+
   });
 });
