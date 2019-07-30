@@ -197,6 +197,10 @@ class KhPosApplication {
     });
   }
 
+  async insertNewTechMap() {
+    
+  }
+
   ///////////////////////////////////////////////////////////////////////////
 
   async getEmployeesCollection() {
