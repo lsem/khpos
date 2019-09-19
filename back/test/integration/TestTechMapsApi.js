@@ -57,12 +57,12 @@ describe("API", () => {
       checkExpectations(await chai.request(app.server()).patch("/techmaps"));
     });
 
-    it("should return 404 if unexisting job is requested", async () => {
+    it("should return 404 if unexisting techMap is requested", async () => {
       const res = await chai.request(app.server()).get(`/techmaps/${newItemId("TM")}`);
       expect(res).to.have.status(404);
     });
 
-    it.skip("should bump up version when modified techmap put", async () => {
+    it("should bump up version when modified techmap put", async () => {
       const id = newItemId("TM");
 
       const newTechMap = {
@@ -71,7 +71,7 @@ describe("API", () => {
         units: [1, 6],
         steps: [
           {
-            id: newStepId(),
+            id: newItemId("STP"),
             name: "Замішування",
             ingredients: [
               {
@@ -102,17 +102,17 @@ describe("API", () => {
         .type("application/json")
         .send(JSON.stringify(newTechMap));
 
-      expect(insertRes).to.have.status(200);
+      expect(insertRes).to.have.status(201);
 
       const getNewRes = await chai
         .request(app.server())
-        .get(`/techMaps/${modifiedMap.id}`);
+        .get(`/techMaps/${newTechMap.id}`);
 
       expect(getNewRes).to.have.status(200);
-      expect(getNewRes.body).containSubset(newTechMap);
-      expect(getNewRes.body).to.have.property("version");
+      expect(getNewRes.body).containSubset([newTechMap]);
+      expect(getNewRes.body[0]).to.have.property("version");
 
-      const insertVersion = getNewRes.body.version;
+      const insertVersion = getNewRes.body[0].version;
 
       const modifiedMap = {
         ...newTechMap,
@@ -121,7 +121,7 @@ describe("API", () => {
 
       const putRes = await chai
         .request(app.server())
-        .put(`/techMaps/${modifiedMap.id}`)
+        .put(`/techMaps/`)
         .type("application/json")
         .send(JSON.stringify(modifiedMap));
 
@@ -130,14 +130,12 @@ describe("API", () => {
       const getRes = await chai.request(app.server()).get(`/techMaps/${modifiedMap.id}`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).containSubset(modifiedMap);
-      expect(getNewRes.body).to.have.property("version");
-      expect(getNewRes.body.version).to.equal(insertVersion + 1);
+      expect(getRes.body[1]).containSubset(modifiedMap);
+      expect(getRes.body[1]).to.have.property("version");
+      expect(getRes.body[1].version).to.equal(insertVersion + 1);
     });
 
-    it.skip("should not bump up version when unmodified techmap put", async () => {
-      // todo: consider returning error or some not-modified for this case,
-      // or emit warning at least, since it looks like clients logic error.
+    it("should not bump up version when unmodified techmap put", async () => {
       const id = newItemId("TM");
 
       const newTechMap = {
@@ -177,11 +175,11 @@ describe("API", () => {
         .type("application/json")
         .send(JSON.stringify(newTechMap));
 
-      expect(insertRes).to.have.status(200);
+      expect(insertRes).to.have.status(201);
 
       const getNewRes = await chai
         .request(app.server())
-        .get(`/techMaps/${modifiedMap.id}`);
+        .get(`/techMaps/${newTechMap.id}/HEAD`);
 
       expect(getNewRes).to.have.status(200);
       expect(getNewRes.body).containSubset(newTechMap);
@@ -189,11 +187,11 @@ describe("API", () => {
 
       const insertVersion = getNewRes.body.version;
 
-      const notModifiedMap = { ...newTechMap };
+      const notModifiedMap = { ...getNewRes.body };
 
       const putRes = await chai
         .request(app.server())
-        .put(`/techMaps/${notModifiedMap.id}`)
+        .put(`/techMaps/`)
         .type("application/json")
         .send(JSON.stringify(notModifiedMap));
 
@@ -201,7 +199,7 @@ describe("API", () => {
 
       const getRes = await chai
         .request(app.server())
-        .get(`/techMaps/${notModifiedMap.id}`);
+        .get(`/techMaps/${newTechMap.id}/HEAD`);
 
       expect(getRes).to.have.status(200);
       expect(getRes.body).containSubset(notModifiedMap);
@@ -209,7 +207,7 @@ describe("API", () => {
       expect(getNewRes.body.version).to.equal(insertVersion);
     });
 
-    it.skip("should be able to return latest version by special name id", async () => {
+    it("should be able to return latest version by special name id", async () => {
       const id = newItemId("TM");
 
       const newTechMap = {
@@ -243,7 +241,7 @@ describe("API", () => {
         ]
       };
 
-      app.insertNewTechMap(newTechMap);
+      await app.getApp().insertTechMap(newTechMap);
 
       const modifiedMap = {
         ...newTechMap,
@@ -252,7 +250,7 @@ describe("API", () => {
 
       const putRes = await chai
         .request(app.server())
-        .put(`/techMaps/${modifiedMap.id}`)
+        .put(`/techMaps/`)
         .type("application/json")
         .send(JSON.stringify(modifiedMap));
 
@@ -266,8 +264,7 @@ describe("API", () => {
       expect(getRes.body).containSubset(modifiedMap);
     });
 
-    it.skip("newly inserted techmap should be availavle in collection", async () => {
-      // todo: test get /techmaps/
+    it("newly inserted techmap should be availavle in collection", async () => {
       const id = newItemId("TM");
 
       const newTechMap = {
@@ -307,18 +304,16 @@ describe("API", () => {
         .type("application/json")
         .send(JSON.stringify(newTechMap));
 
-      expect(insertRes).to.have.status(200);
+      expect(insertRes).to.have.status(201);
       expect(insertRes).to.have.header("Location", "/techMaps/" + id);
 
       const getRes = await chai.request(app.server()).get("/techMaps");
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).to.be.array();
-      expect(getRes.body).containSubset(newTechMap);
+      expect(getRes.body).containSubset([newTechMap]);
     });
 
-    it.skip("getting techmap without version specified should return collection of all versions", async () => {
-      // todo: teset get /techmaps/TM-XXXX-YYYY-ZZZZ-QQQQ
+    it("getting techmap without version specified should return collection of all versions", async () => {
       const id = newItemId("TM");
 
       const newTechMap = {
@@ -352,7 +347,7 @@ describe("API", () => {
         ]
       };
 
-      app.insertNewTechMap(newTechMap);
+      await app.getApp().insertTechMap(newTechMap);
 
       const modifiedMap = {
         ...newTechMap,
@@ -361,7 +356,7 @@ describe("API", () => {
 
       const putRes = await chai
         .request(app.server())
-        .put(`/techMaps/${modifiedMap.id}`)
+        .put(`/techMaps/`)
         .type("application/json")
         .send(JSON.stringify(modifiedMap));
 
@@ -370,9 +365,115 @@ describe("API", () => {
       const getRes = await chai.request(app.server()).get(`/techMaps/${modifiedMap.id}`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).to.be.array();
-      expect(getRes.body).to.be.ofSize(2);
       expect(getRes.body).containSubset([newTechMap, modifiedMap]);
+    });
+
+    it("should return specific version of techMap requested", async () => {
+      const id = newItemId("TM");
+
+      const newTechMap = {
+        id,
+        name: "Хліб Французький (КХ)",
+        units: [1, 6],
+        steps: [
+          {
+            id: newItemId("STP"),
+            name: "Замішування",
+            ingredients: [
+              {
+                ingredientId: newItemId("ING"),
+                countByUnits: [[1, 292], [6, 1752]]
+              }
+            ],
+            humanResources: [
+              {
+                peopleCount: 1,
+                countByUnits: [[1, 15], [6, 22]]
+              }
+            ],
+            inventory: [
+              {
+                deviceId: newItemId("INV"),
+                countByUnits: [[1, 1], [6, 1]]
+              }
+            ],
+            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
+          }
+        ]
+      };
+
+      await app.getApp().insertTechMap(newTechMap);
+
+      const modifiedMap = {
+        ...newTechMap,
+        name: "Хліб Китайський (КХ)"
+      };
+
+      const putRes = await chai
+        .request(app.server())
+        .put(`/techMaps/`)
+        .type("application/json")
+        .send(JSON.stringify(modifiedMap));
+
+      expect(putRes).to.have.status(201);
+
+      const getRes = await chai
+        .request(app.server())
+        .get(`/techMaps/${modifiedMap.id}/0`);
+
+      expect(getRes).to.have.status(200);
+      expect(getRes.body).containSubset(newTechMap);
+      expect(getRes.body.version).equal(0);
+    });
+
+    it("should return only latest versions of techMaps when get with no params is requested", async () => {
+      const id = newItemId("TM");
+
+      const first = {
+        id,
+        name: "Хліб Французький (КХ)",
+        units: [1, 6],
+        steps: [
+          {
+            id: newItemId("STP"),
+            name: "Замішування",
+            ingredients: [
+              {
+                ingredientId: newItemId("ING"),
+                countByUnits: [[1, 292], [6, 1752]]
+              }
+            ],
+            humanResources: [
+              {
+                peopleCount: 1,
+                countByUnits: [[1, 15], [6, 22]]
+              }
+            ],
+            inventory: [
+              {
+                deviceId: newItemId("INV"),
+                countByUnits: [[1, 1], [6, 1]]
+              }
+            ],
+            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
+          }
+        ]
+      };
+
+      const firstModified = { ...first, name: "Хліб Китайський (КХ)" };
+      const second = { ...first, id: newItemId("TM"), name: "Хліб Корейський (КХ)" };
+      const secondModified = { ...second, name: "Хліб Тайський (КХ)" };
+
+      await app.getApp().insertTechMap(first);
+      await app.getApp().insertTechMapNewVersion(firstModified);
+      await app.getApp().insertTechMap(second);
+      await app.getApp().insertTechMapNewVersion(secondModified);
+
+      const getRes = await chai.request(app.server()).get(`/techMaps`);
+
+      expect(getRes).to.have.status(200);
+      expect(getRes.body.length).equal(2);
+      expect(getRes.body).containSubset([firstModified, secondModified]);
     });
   });
 });

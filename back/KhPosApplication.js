@@ -2,9 +2,9 @@ let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
 const moment = require("moment");
+const _ = require("lodash");
 const helpers = require("./helpers");
 const constants = require("./constants");
-
 
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -16,11 +16,13 @@ const employeeIdRegExp = new RegExp(uuidRegExp(constants.EMPLOYEE_ID_PREFIX), "i
 ////////////////////////////////////////////////////////////////////////////////////
 
 const taskAssigneeSchema = joi.object().keys({
-  id: joi.string().regex(employeeIdRegExp).required(),
+  id: joi
+    .string()
+    .regex(employeeIdRegExp)
+    .required(),
   firstName: joi.string().required(),
   color: joi.string().required()
 });
-
 
 const techMapTaskSchema = joi.object().keys({
   id: joi
@@ -37,18 +39,16 @@ const techMapTaskSchema = joi.object().keys({
   assigned: joi.array().items(taskAssigneeSchema)
 });
 
-
 const techMapSchema = joi.object().keys({
   id: joi
     .string()
     .regex(techMapIdRegExp)
     .required(),
   name: joi.string().required(),
-  tintColor: joi.string().required(), //.regex(/^#[A-Fa-f0-9]{6}/),
-  tasks: joi
-    .array()
-    .items(techMapTaskSchema)
-    .required()
+  units: joi.array().required(),
+  steps: joi.array().required(),
+  version: joi.number(),
+  isHead: joi.boolean()
 });
 
 const jobModelSchema = joi.object().keys({
@@ -58,13 +58,13 @@ const jobModelSchema = joi.object().keys({
     .required(),
   startTime: [
     joi
-    .date()
-    .iso()
-    .required(),
+      .date()
+      .iso()
+      .required(),
     joi
-    .date()
-    .timestamp()
-    .required()
+      .date()
+      .timestamp()
+      .required()
   ],
   column: joi
     .number()
@@ -94,8 +94,8 @@ class KhPosApplication {
     this.posterProxyService = deps.posterProxy;
     this._storageConnected = false;
     this.onErrorCb = err => debug("Default error handler: %o", err);
-    this.storage.on('connected', () => this.connectedToStorage());
-    this.storage.on('disconnected', () => this.disconnectedFromStorge());
+    this.storage.on("connected", () => this.connectedToStorage());
+    this.storage.on("disconnected", () => this.disconnectedFromStorge());
   }
 
   connectedToStorage() {
@@ -174,9 +174,9 @@ class KhPosApplication {
       irOrNull = await joi.validate(
         jobId,
         joi
-        .string()
-        .regex(jobIdRegExp)
-        .required()
+          .string()
+          .regex(jobIdRegExp)
+          .required()
       );
     } catch (err) {
       throw new appErrors.InvalidArgError("Invalid job id: " + jobId);
@@ -186,19 +186,81 @@ class KhPosApplication {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  async getTechMaps() {
-    const techMaps = this.storage.getTechMaps();
-    return new Promise((resolve, reject) => {
-      if (techMaps) {
-        resolve(techMaps);
-      } else {
-        reject("Failed to retreive techMaps from database");
-      }
-    });
+  async getTechMapsHeads() {
+    return await this.storage.getTechMapsHeads();
   }
 
-  async insertNewTechMap() {
-    
+  async getTechMapAllVersions(id) {
+    const res = await this.storage.getTechMapAllVersions(id);
+
+    if (!res || !res.length) {
+      throw new appErrors.NotFoundError(`techMap: ${id}`);
+    }
+    return res;
+  }
+
+  async getTechMapHead(id) {
+    const head = await this.storage.getTechMapHead(id);
+
+    if (!head) {
+      throw new appErrors.NotFoundError(`techMap: ${id}`);
+    }
+    return head;
+  }
+
+  async getTechMapSpecificVersion(id, version) {
+    const specificVersion = await this.storage.getTechMapSpecificVersion(id, +version);
+
+    if (!specificVersion) {
+      throw new appErrors.NotFoundError(`techMap: ${id}, version: ${version}`);
+    }
+    return specificVersion;
+  }
+
+  async insertTechMap(techMap) {
+    try {
+      await joi.validate(techMap, techMapSchema);
+    } catch (err) {
+      throw new appErrors.InvalidModelError(techMap);
+    }
+
+    const existing = await this.storage.getTechMapHead(techMap.id);
+
+    if (existing) {
+      throw new appErrors.BadRequestError(`techMap with id ${techMap.id} already exists`);
+    }
+
+    await this.storage.insertTechMap({ ...techMap, version: 0, isHead: true });
+    return techMap.id;
+  }
+
+  async insertTechMapNewVersion(techMap) {
+    try {
+      await joi.validate(techMap, techMapSchema);
+    } catch (err) {
+      throw new appErrors.InvalidModelError(techMap);
+    }
+
+    const head = await this.storage.getTechMapHead(techMap.id);
+
+    if (!head) {
+      throw new appErrors.NotFoundError(
+        `attempt to put non-existent techMap ${techMap.id}`
+      );
+    }
+    if (_.isEqual(techMap, head)) {
+      throw new appErrors.UnmodifiedPutError(
+        `attempt to put unmodified techMap ${techMap.id}`
+      );
+    }
+    await this.storage.updateTechMap({ id: head.id, isHead: true }, { isHead: false });
+
+    await this.storage.insertTechMap({
+      ...techMap,
+      version: head.version + 1,
+      isHead: true
+    });
+    return techMap.id;
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -220,9 +282,9 @@ class KhPosApplication {
       irOrNull = await joi.validate(
         id,
         joi
-        .string()
-        .regex(employeeIdRegExp)
-        .required()
+          .string()
+          .regex(employeeIdRegExp)
+          .required()
       );
     } catch (err) {
       throw new appErrors.InvalidArgError("Invalid staff id: " + id);
@@ -233,7 +295,7 @@ class KhPosApplication {
   async insertEmployee(employee) {
     employee.id = helpers.generatePrefixedId(constants.EMPLOYEE_ID_PREFIX);
     const validatedModel = await joi.validate(employee, employeeModelSchema);
-    await this.storage.insertEmployee(validatedModel)
+    await this.storage.insertEmployee(validatedModel);
     return validatedModel.id;
   }
 
@@ -241,7 +303,6 @@ class KhPosApplication {
     const validatedModel = await joi.validate(employee, employeeModelSchema);
     await this.storage.updateEmployeeById(id, validatedModel);
   }
-
 }
 
 module.exports = KhPosApplication;

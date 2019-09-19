@@ -6,7 +6,6 @@ var debug = require("debug")("khweb");
 let appErrors = require("./AppErrors");
 const http = require("http");
 
-
 function asDate(value) {
   return new Date(value);
 }
@@ -45,6 +44,9 @@ function errorHandler(err, req, res, next) {
   } else if (err instanceof appErrors.InvalidOperationError) {
     debug("appErrors.InvalidOperationError: %o", err);
     res.status(400).send(err.message);
+  } else if (err instanceof appErrors.UnmodifiedPutError) {
+    debug("appErrors.UnmodifiedPutError: %o", err);
+    res.status(400).send(err.message);
   } else if (err instanceof appErrors.BadRequestError) {
     debug("appErrors.BadRequestError: %o", err);
     res.status(400).send(err.message);
@@ -73,6 +75,11 @@ class KhPosWebApplication {
     this.app.get("/stock", this.getStock.bind(this));
     this.app.get("/products", this.getProducts.bind(this));
     this.app.get("/techmaps", this.getTechMaps.bind(this));
+    this.app.get("/techmaps/:id", this.getTechMap.bind(this));
+    this.app.get("/techmaps/:id/HEAD", this.getTechMapHead.bind(this));
+    this.app.get("/techmaps/:id/:version", this.getTechMapSpecificVersion.bind(this));
+    this.app.post("/techmaps", this.postTechMap.bind(this));
+    this.app.put("/techmaps", this.putTechMap.bind(this));
     this.app.get("/employees", this.getEmployees.bind(this));
     this.app.get("/employees/:id", this.getEmployee.bind(this));
     this.app.put("/employees/:id", this.putEmployee.bind(this));
@@ -163,10 +170,11 @@ class KhPosWebApplication {
       .insertJob(req.body)
       .then(id =>
         res
-        .status(201)
-        .location("/jobs/" + id)
-        .send()
-      ).catch(err => next(err));
+          .status(201)
+          .location("/jobs/" + id)
+          .send()
+      )
+      .catch(err => next(err));
   }
 
   patchJob(req, res, next) {
@@ -182,8 +190,59 @@ class KhPosWebApplication {
   //
   getTechMaps(req, res, next) {
     this.khApp
-      .getTechMaps()
+      .getTechMapsHeads()
       .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  getTechMap(req, res, next) {
+    this.khApp
+      .getTechMapAllVersions(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  getTechMapHead(req, res, next) {
+    this.khApp
+      .getTechMapHead(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  getTechMapSpecificVersion(req, res, next) {
+    this.khApp
+      .getTechMapSpecificVersion(req.params.id, req.params.version)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // POST /techmaps
+  //
+  postTechMap(req, res, next) {
+    this.khApp
+      .insertTechMap(req.body)
+      .then(id =>
+        res
+          .status(201)
+          .location("/techMaps/" + id)
+          .send()
+      )
+      .catch(err => next(err));
+  }
+
+  //
+  // PUT /techmaps
+  //
+  putTechMap(req, res, next) {
+    this.khApp
+      .insertTechMapNewVersion(req.body)
+      .then(id =>
+        res
+          .status(201)
+          .location("/techMaps/" + id)
+          .send()
+      )
       .catch(err => next(err));
   }
 

@@ -60,6 +60,12 @@ class InvalidModelError extends BadRequestError {
   }
 }
 
+class UnmodifiedPutError extends BadRequestError {
+  constructor(message) {
+    super(message);
+  }
+}
+
 
 module.exports = {
   KhApplicationError,
@@ -71,4 +77,5 @@ module.exports = {
   InvalidOperationError,
   BadRequestError,
   InvalidArgError,
+  UnmodifiedPutError
 };

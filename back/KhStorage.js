@@ -7,6 +7,7 @@ let appErrors = require("./AppErrors");
 
 const STATE_CONNECTED = "STATE_CONNECTED";
 const STATE_DISCONNECTED = "STATE_DISCONNECTED";
+const EXCLUDE_MONGO_ID = { projection: { _id: 0 } };
 
 class KhStorage extends EventEmitter {
   constructor(config) {
@@ -26,6 +27,7 @@ class KhStorage extends EventEmitter {
   async clear() {
     this.db.collection("jobs").remove();
     this.db.collection("employees").remove();
+    this.db.collection("techMaps").remove();
   }
 
   async connectToMongoDb() {
@@ -34,10 +36,7 @@ class KhStorage extends EventEmitter {
       const options = {
         useNewUrlParser: true
       };
-      this.client = await MongoClient.connect(
-        this.uri,
-        options
-      );
+      this.client = await MongoClient.connect(this.uri, options);
       this.client.on("close", () => this.handleClose());
       this.client.on("authenticated", () => this.handleAuthenticated());
       this.client.on("error", () => this.handleError());
@@ -98,27 +97,33 @@ class KhStorage extends EventEmitter {
   async getJobs(dateFrom, dateTo) {
     return await this.db
       .collection("jobs")
-      .find({
-        startTime: {
-          $gte: dateFrom.toDate(),
-          $lte: dateTo.toDate()
+      .find(
+        {
+          startTime: {
+            $gte: dateFrom.toDate(),
+            $lte: dateTo.toDate()
+          }
+        },
+        {
+          projection: {
+            _id: false
+          }
         }
-      }, {
-        projection: {
-          _id: false
-        }
-      })
+      )
       .toArray();
   }
 
   async getAllJobs() {
     return await this.db
       .collection("jobs")
-      .find({}, {
-        projection: {
-          _id: false
+      .find(
+        {},
+        {
+          projection: {
+            _id: false
+          }
         }
-      })
+      )
       .toArray();
   }
 
@@ -131,9 +136,11 @@ class KhStorage extends EventEmitter {
     }
     if (existingModel.id !== model.id) {
       throw new appErrors.InvalidOperationError(
-        `Job modification is not allowed: ${existingModel.id} != ${model.id}`);
+        `Job modification is not allowed: ${existingModel.id} != ${model.id}`
+      );
     }
-    return await this.db.collection("jobs").update({
+    return await this.db.collection("jobs").update(
+      {
         id: id
       },
       model
@@ -141,21 +148,20 @@ class KhStorage extends EventEmitter {
   }
 
   async getJobById(id) {
-    const job = await this.db.collection("jobs").findOne({
-      id: id
-    }, {
-      projection: {
-        _id: false
+    const job = await this.db.collection("jobs").findOne(
+      {
+        id: id
+      },
+      {
+        projection: {
+          _id: false
+        }
       }
-    });
+    );
     if (!job) {
       throw new appErrors.NotFoundError(`Job ${id}`);
     }
     return job;
-  }
-
-  async getTechMaps() {
-    return await sampleData.getTechMaps();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -164,11 +170,14 @@ class KhStorage extends EventEmitter {
     //return sampleData.getStaff();
     return await this.db
       .collection("employees")
-      .find({}, {
-        projection: {
-          _id: false
+      .find(
+        {},
+        {
+          projection: {
+            _id: false
+          }
         }
-      })
+      )
       .toArray();
   }
 
@@ -177,13 +186,16 @@ class KhStorage extends EventEmitter {
   }
 
   async getEmployeeById(id) {
-    const staffEntry = await this.db.collection("employees").findOne({
-      id: id
-    }, {
-      projection: {
-        _id: false
+    const staffEntry = await this.db.collection("employees").findOne(
+      {
+        id: id
+      },
+      {
+        projection: {
+          _id: false
+        }
       }
-    });
+    );
     if (!staffEntry) {
       throw new appErrors.NotFoundError(`Employee ${id}`);
     }
@@ -199,15 +211,53 @@ class KhStorage extends EventEmitter {
     }
     if (existingModel.id !== model.id) {
       throw new appErrors.InvalidOperationError(
-        `Employee modification is not allowed: ${existingModel.id} != ${model.id}`);
+        `Employee modification is not allowed: ${existingModel.id} != ${model.id}`
+      );
     }
-    return await this.db.collection("employees").update({
+    return await this.db.collection("employees").update(
+      {
         id: id
       },
       model
     );
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getTechMapsHeads() {
+    return await this.db
+      .collection("techMaps")
+      .find({ isHead: true }, EXCLUDE_MONGO_ID)
+      .toArray();
+  }
+
+  async getTechMapAllVersions(id) {
+    return await this.db
+      .collection("techMaps")
+      .find({ id }, EXCLUDE_MONGO_ID)
+      .toArray();
+  }
+
+  async getTechMapHead(id) {
+    return await this.db
+      .collection("techMaps")
+      .findOne({ id, isHead: true }, EXCLUDE_MONGO_ID);
+  }
+
+  async getTechMapSpecificVersion(id, version) {
+    return await this.db
+      .collection("techMaps")
+      .findOne({ id, version }, EXCLUDE_MONGO_ID);
+  }
+
+  async insertTechMap(techMap) {
+    await this.db.collection("techMaps").insertOne({ ...techMap });
+    //explicit copying because mongodb modifies passed object by adding _id prop
+  }
+
+  async updateTechMap(filter, patch) {
+    await this.db.collection("techMaps").updateOne(filter, { $set: patch });
+  }
 }
 
 module.exports = KhStorage;
