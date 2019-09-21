@@ -5,17 +5,60 @@ const chai = require("chai");
 var expect = require("chai").expect;
 var assert = require("chai").assert;
 var should = require("chai").should;
-const moment = require("moment");
 const uuid = require("uuid");
 const chaiHttp = require("chai-http");
 var chaiSubset = require("chai-subset");
-const _ = require("lodash");
 
 chai.use(chaiHttp);
 chai.use(chaiSubset);
 
-function newItemId(prefix) {
-  return `${prefix}-${uuid.v4()}`;
+function newTechMapId() {
+  return `TM-${uuid.v4()}`;
+}
+
+function newStepId() {
+  return `STP-${uuid.v4()}`;
+}
+
+function newIngredientId() {
+  return `ING-${uuid.v4()}`;
+}
+
+function newInventoryId() {
+  return `INV-${uuid.v4()}`;
+}
+
+function defaultTechMap() {
+  return {
+    id: newTechMapId(),
+    name: "Хліб Французький (КХ)",
+    units: [1, 6],
+    steps: [
+      {
+        id: newStepId(),
+        name: "Замішування",
+        ingredients: [
+          {
+            ingredientId: newIngredientId(),
+            countByUnits: [[1, 292], [6, 1752]]
+          }
+        ],
+        humanResources: [
+          {
+            peopleCount: 1,
+            countByUnits: [[1, 15], [6, 22]]
+          }
+        ],
+        inventory: [
+          {
+            deviceId: newInventoryId(),
+            countByUnits: [[1, 1], [6, 1]]
+          }
+        ],
+        instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
+      }
+    ]
+  };
 }
 
 describe("API", () => {
@@ -58,140 +101,38 @@ describe("API", () => {
     });
 
     it("should return 404 if unexisting techMap is requested", async () => {
-      const res = await chai.request(app.server()).get(`/techmaps/${newItemId("TM")}`);
+      const res = await chai.request(app.server()).get(`/techmaps/${newTechMapId()}`);
       expect(res).to.have.status(404);
     });
 
     it("should bump up version when modified techmap put", async () => {
-      const id = newItemId("TM");
+      const newTechMap = { ...defaultTechMap(), name: "original" };
 
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      await app.getApp().insertTechMap(newTechMap);
 
-      const insertRes = await chai
-        .request(app.server())
-        .post(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(newTechMap));
+      const modifiedMap = { ...newTechMap, name: "modified" };
 
-      expect(insertRes).to.have.status(201);
+      await app.getApp().updateTechMap(modifiedMap.id, modifiedMap);
 
-      const getNewRes = await chai
-        .request(app.server())
-        .get(`/techMaps/${newTechMap.id}`);
-
-      expect(getNewRes).to.have.status(200);
-      expect(getNewRes.body).containSubset([newTechMap]);
-      expect(getNewRes.body[0]).to.have.property("version");
-
-      const insertVersion = getNewRes.body[0].version;
-
-      const modifiedMap = {
-        ...newTechMap,
-        name: "Хліб Китайський (КХ)"
-      };
-
-      const putRes = await chai
-        .request(app.server())
-        .put(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(modifiedMap));
-
-      expect(putRes).to.have.status(201);
-
-      const getRes = await chai.request(app.server()).get(`/techMaps/${modifiedMap.id}`);
+      const getRes = await chai.request(app.server()).get(`/techMaps/${newTechMap.id}`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body[1]).containSubset(modifiedMap);
-      expect(getRes.body[1]).to.have.property("version");
-      expect(getRes.body[1].version).to.equal(insertVersion + 1);
+      expect(getRes.body).containSubset([
+        { name: "original", version: 0 },
+        { name: "modified", version: 1 }
+      ]);
     });
 
     it("should not bump up version when unmodified techmap put", async () => {
-      const id = newItemId("TM");
+      const newTechMap = defaultTechMap();
 
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      await app.getApp().insertTechMap(newTechMap);
 
-      const insertRes = await chai
-        .request(app.server())
-        .post(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(newTechMap));
-
-      expect(insertRes).to.have.status(201);
-
-      const getNewRes = await chai
-        .request(app.server())
-        .get(`/techMaps/${newTechMap.id}/HEAD`);
-
-      expect(getNewRes).to.have.status(200);
-      expect(getNewRes.body).containSubset(newTechMap);
-      expect(getNewRes.body).to.have.property("version");
-
-      const insertVersion = getNewRes.body.version;
-
-      const notModifiedMap = { ...getNewRes.body };
+      const notModifiedMap = await app.getApp().getTechMapHead(newTechMap.id);
 
       const putRes = await chai
         .request(app.server())
-        .put(`/techMaps/`)
+        .put(`/techMaps/${newTechMap.id}`)
         .type("application/json")
         .send(JSON.stringify(notModifiedMap));
 
@@ -202,101 +143,28 @@ describe("API", () => {
         .get(`/techMaps/${newTechMap.id}/HEAD`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).containSubset(notModifiedMap);
-      expect(getNewRes.body).to.have.property("version");
-      expect(getNewRes.body.version).to.equal(insertVersion);
+      expect(getRes.body).containSubset({ version: 0 });
     });
 
     it("should be able to return latest version by special name id", async () => {
-      const id = newItemId("TM");
-
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      const newTechMap = { ...defaultTechMap(), name: "original" };
 
       await app.getApp().insertTechMap(newTechMap);
 
-      const modifiedMap = {
-        ...newTechMap,
-        name: "Хліб Китайський (КХ)"
-      };
+      const modifiedMap = { ...newTechMap, name: "modified" };
 
-      const putRes = await chai
-        .request(app.server())
-        .put(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(modifiedMap));
-
-      expect(putRes).to.have.status(201);
+      await app.getApp().updateTechMap(modifiedMap.id, modifiedMap);
 
       const getRes = await chai
         .request(app.server())
-        .get(`/techMaps/${modifiedMap.id}/HEAD`);
+        .get(`/techMaps/${newTechMap.id}/HEAD`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).containSubset(modifiedMap);
+      expect(getRes.body).containSubset({ name: "modified", version: 1 });
     });
 
     it("newly inserted techmap should be availavle in collection", async () => {
-      const id = newItemId("TM");
-
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      const newTechMap = defaultTechMap();
 
       const insertRes = await chai
         .request(app.server())
@@ -305,7 +173,7 @@ describe("API", () => {
         .send(JSON.stringify(newTechMap));
 
       expect(insertRes).to.have.status(201);
-      expect(insertRes).to.have.header("Location", "/techMaps/" + id);
+      expect(insertRes).to.have.header("Location", "/techMaps/" + newTechMap.id);
 
       const getRes = await chai.request(app.server()).get("/techMaps");
 
@@ -314,166 +182,54 @@ describe("API", () => {
     });
 
     it("getting techmap without version specified should return collection of all versions", async () => {
-      const id = newItemId("TM");
-
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      const newTechMap = { ...defaultTechMap(), name: "original" };
 
       await app.getApp().insertTechMap(newTechMap);
 
-      const modifiedMap = {
-        ...newTechMap,
-        name: "Хліб Китайський (КХ)"
-      };
+      const modifiedMap = { ...newTechMap, name: "modified" };
 
-      const putRes = await chai
-        .request(app.server())
-        .put(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(modifiedMap));
+      await app.getApp().updateTechMap(modifiedMap.id, modifiedMap);
 
-      expect(putRes).to.have.status(201);
-
-      const getRes = await chai.request(app.server()).get(`/techMaps/${modifiedMap.id}`);
+      const getRes = await chai.request(app.server()).get(`/techMaps/${newTechMap.id}`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).containSubset([newTechMap, modifiedMap]);
+      expect(getRes.body).containSubset([{ version: 0 }, { version: 1 }]);
     });
 
     it("should return specific version of techMap requested", async () => {
-      const id = newItemId("TM");
-
-      const newTechMap = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
+      const newTechMap = { ...defaultTechMap(), name: "first" };
 
       await app.getApp().insertTechMap(newTechMap);
 
-      const modifiedMap = {
-        ...newTechMap,
-        name: "Хліб Китайський (КХ)"
-      };
+      const modifiedMap = { ...newTechMap, name: "second" };
 
-      const putRes = await chai
-        .request(app.server())
-        .put(`/techMaps/`)
-        .type("application/json")
-        .send(JSON.stringify(modifiedMap));
+      await app.getApp().updateTechMap(modifiedMap.id, modifiedMap);
 
-      expect(putRes).to.have.status(201);
-
-      const getRes = await chai
-        .request(app.server())
-        .get(`/techMaps/${modifiedMap.id}/0`);
+      const getRes = await chai.request(app.server()).get(`/techMaps/${newTechMap.id}/0`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).containSubset(newTechMap);
-      expect(getRes.body.version).equal(0);
+      expect(getRes.body).containSubset({ name: "first", version: 0 });
     });
 
     it("should return only latest versions of techMaps when get with no params is requested", async () => {
-      const id = newItemId("TM");
-
-      const first = {
-        id,
-        name: "Хліб Французький (КХ)",
-        units: [1, 6],
-        steps: [
-          {
-            id: newItemId("STP"),
-            name: "Замішування",
-            ingredients: [
-              {
-                ingredientId: newItemId("ING"),
-                countByUnits: [[1, 292], [6, 1752]]
-              }
-            ],
-            humanResources: [
-              {
-                peopleCount: 1,
-                countByUnits: [[1, 15], [6, 22]]
-              }
-            ],
-            inventory: [
-              {
-                deviceId: newItemId("INV"),
-                countByUnits: [[1, 1], [6, 1]]
-              }
-            ],
-            instructions: `{"blocks":[{"key":"2ic2d","text":"Відважити воду та пшеничну закваску в чисту і суху ємність відповідного об'єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"7pdcs","text":"Окремо відважити боршно в чисту і суху ємність відповідного об’єму.","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"an4s6","text":"В спіральному тістомісі змішати компоненти з послідовності (1) на протязі 4—5 хвилин (в залежності від кількості замісу).","type":"ordered-list-item","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`
-          }
-        ]
-      };
-
-      const firstModified = { ...first, name: "Хліб Китайський (КХ)" };
-      const second = { ...first, id: newItemId("TM"), name: "Хліб Корейський (КХ)" };
-      const secondModified = { ...second, name: "Хліб Тайський (КХ)" };
+      const first = { ...defaultTechMap(), name: "first" };
+      const firstModified = { ...first, name: "first modified" };
+      const second = { ...defaultTechMap(), name: "second" };
+      const secondModified = { ...second, name: "second modified" };
 
       await app.getApp().insertTechMap(first);
-      await app.getApp().insertTechMapNewVersion(firstModified);
+      await app.getApp().updateTechMap(firstModified.id, firstModified);
       await app.getApp().insertTechMap(second);
-      await app.getApp().insertTechMapNewVersion(secondModified);
+      await app.getApp().updateTechMap(secondModified.id, secondModified);
 
       const getRes = await chai.request(app.server()).get(`/techMaps`);
 
       expect(getRes).to.have.status(200);
       expect(getRes.body.length).equal(2);
-      expect(getRes.body).containSubset([firstModified, secondModified]);
+      expect(getRes.body).containSubset([
+        { name: "first modified", version: 1 },
+        { name: "second modified", version: 1 }
+      ]);
     });
   });
 });

@@ -2,7 +2,6 @@ let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
 const moment = require("moment");
-const _ = require("lodash");
 const helpers = require("./helpers");
 const constants = require("./constants");
 
@@ -191,30 +190,15 @@ class KhPosApplication {
   }
 
   async getTechMapAllVersions(id) {
-    const res = await this.storage.getTechMapAllVersions(id);
-
-    if (!res || !res.length) {
-      throw new appErrors.NotFoundError(`techMap: ${id}`);
-    }
-    return res;
+    return await this.storage.getTechMapAllVersions(id);
   }
 
   async getTechMapHead(id) {
-    const head = await this.storage.getTechMapHead(id);
-
-    if (!head) {
-      throw new appErrors.NotFoundError(`techMap: ${id}`);
-    }
-    return head;
+    return await this.storage.getTechMapHead(id);
   }
 
   async getTechMapSpecificVersion(id, version) {
-    const specificVersion = await this.storage.getTechMapSpecificVersion(id, +version);
-
-    if (!specificVersion) {
-      throw new appErrors.NotFoundError(`techMap: ${id}, version: ${version}`);
-    }
-    return specificVersion;
+    return await this.storage.getTechMapSpecificVersion(id, +version);
   }
 
   async insertTechMap(techMap) {
@@ -224,7 +208,7 @@ class KhPosApplication {
       throw new appErrors.InvalidModelError(techMap);
     }
 
-    const existing = await this.storage.getTechMapHead(techMap.id);
+    const existing = await this.storage.findOne("techMaps", { id: techMap.id });
 
     if (existing) {
       throw new appErrors.BadRequestError(`techMap with id ${techMap.id} already exists`);
@@ -234,33 +218,20 @@ class KhPosApplication {
     return techMap.id;
   }
 
-  async insertTechMapNewVersion(techMap) {
+  async updateTechMap(id, techMap) {
+    if (id !== techMap.id) {
+      throw new appErrors.BadRequestError(
+        `Specified id param (${id}) differs from actual id field (${techMap.id})`
+      );
+    }
+
     try {
       await joi.validate(techMap, techMapSchema);
     } catch (err) {
       throw new appErrors.InvalidModelError(techMap);
     }
 
-    const head = await this.storage.getTechMapHead(techMap.id);
-
-    if (!head) {
-      throw new appErrors.NotFoundError(
-        `attempt to put non-existent techMap ${techMap.id}`
-      );
-    }
-    if (_.isEqual(techMap, head)) {
-      throw new appErrors.UnmodifiedPutError(
-        `attempt to put unmodified techMap ${techMap.id}`
-      );
-    }
-    await this.storage.updateTechMap({ id: head.id, isHead: true }, { isHead: false });
-
-    await this.storage.insertTechMap({
-      ...techMap,
-      version: head.version + 1,
-      isHead: true
-    });
-    return techMap.id;
+    await this.storage.updateTechMap(techMap);
   }
 
   ///////////////////////////////////////////////////////////////////////////

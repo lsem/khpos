@@ -79,7 +79,7 @@ class KhPosWebApplication {
     this.app.get("/techmaps/:id/HEAD", this.getTechMapHead.bind(this));
     this.app.get("/techmaps/:id/:version", this.getTechMapSpecificVersion.bind(this));
     this.app.post("/techmaps", this.postTechMap.bind(this));
-    this.app.put("/techmaps", this.putTechMap.bind(this));
+    this.app.put("/techmaps/:id", this.putTechMap.bind(this));
     this.app.get("/employees", this.getEmployees.bind(this));
     this.app.get("/employees/:id", this.getEmployee.bind(this));
     this.app.put("/employees/:id", this.putEmployee.bind(this));
@@ -236,11 +236,10 @@ class KhPosWebApplication {
   //
   putTechMap(req, res, next) {
     this.khApp
-      .insertTechMapNewVersion(req.body)
+      .updateTechMap(req.params.id, req.body)
       .then(id =>
         res
-          .status(201)
-          .location("/techMaps/" + id)
+          .status(200)
           .send()
       )
       .catch(err => next(err));

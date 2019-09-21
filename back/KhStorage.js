@@ -1,6 +1,7 @@
 const EventEmitter = require("events");
 const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
+const _ = require("lodash");
 let debug = require("debug")("khstorage");
 const sampleData = require("./sampleData");
 let appErrors = require("./AppErrors");
@@ -86,6 +87,10 @@ class KhStorage extends EventEmitter {
     } else {
       await this.connectToMongoDb();
     }
+  }
+
+  async findOne(collectionName, filter) {
+    return await this.db.collection(collectionName).findOne(filter, EXCLUDE_MONGO_ID);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,22 +237,34 @@ class KhStorage extends EventEmitter {
   }
 
   async getTechMapAllVersions(id) {
-    return await this.db
+    const res = await this.db
       .collection("techMaps")
       .find({ id }, EXCLUDE_MONGO_ID)
       .toArray();
+    if (!res || !res.length) {
+      throw new appErrors.NotFoundError(`techMap: ${id}`);
+    }
+    return res;
   }
 
   async getTechMapHead(id) {
-    return await this.db
+    const head = await this.db
       .collection("techMaps")
       .findOne({ id, isHead: true }, EXCLUDE_MONGO_ID);
+    if (!head) {
+      throw new appErrors.NotFoundError(`techMap: ${id}`);
+    }
+    return head;
   }
 
   async getTechMapSpecificVersion(id, version) {
-    return await this.db
+    const specificVersion = await this.db
       .collection("techMaps")
       .findOne({ id, version }, EXCLUDE_MONGO_ID);
+    if (!specificVersion) {
+      throw new appErrors.NotFoundError(`techMap: ${id}, version: ${version}`);
+    }
+    return specificVersion;
   }
 
   async insertTechMap(techMap) {
@@ -255,8 +272,42 @@ class KhStorage extends EventEmitter {
     //explicit copying because mongodb modifies passed object by adding _id prop
   }
 
-  async updateTechMap(filter, patch) {
-    await this.db.collection("techMaps").updateOne(filter, { $set: patch });
+  async updateTechMap(updatedTechMap) {
+    const head = await this.db
+      .collection("techMaps")
+      .findOne({ id: updatedTechMap.id, isHead: true }, EXCLUDE_MONGO_ID);
+
+    if (!head) {
+      throw new appErrors.NotFoundError(
+        `attempt to put non-existent techMap ${updatedTechMap.id}`
+      );
+    }
+    if (_.isEqual(updatedTechMap, head)) {
+      throw new appErrors.UnmodifiedPutError(
+        `attempt to put unmodified techMap ${updatedTechMap.id}`
+      );
+    }
+
+    let session = this.client.startSession();
+    session.startTransaction();
+
+    try {
+      this.db
+        .collection("techMaps")
+        .updateOne({ id: head.id, isHead: true }, { $set: { isHead: false } });
+
+      this.db.collection("techMaps").insertOne({
+        ...updatedTechMap,
+        version: head.version + 1,
+        isHead: true
+      });
+
+      await session.commitTransaction();
+      session.endSession();
+    } catch (err) {
+      session.endSession();
+      throw new appErrors.StorageError(err);
+    }
   }
 }
 
