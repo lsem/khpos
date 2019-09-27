@@ -2,6 +2,7 @@ let debug = require("debug")("khapp");
 let appErrors = require("./AppErrors");
 const joi = require("joi");
 const moment = require("moment");
+const _ = require("lodash");
 const helpers = require("./helpers");
 const constants = require("./constants");
 
@@ -186,19 +187,23 @@ class KhPosApplication {
   ///////////////////////////////////////////////////////////////////////////
 
   async getTechMapsHeads() {
-    return await this.storage.getTechMapsHeads();
+    const all = await this.storage.getTechMaps();
+    const heads = all.map(t => _.last(t.versions));
+    return heads;
   }
 
   async getTechMapAllVersions(id) {
-    return await this.storage.getTechMapAllVersions(id);
+    return (await this.storage.getTechMap(id)).versions;
   }
 
   async getTechMapHead(id) {
-    return await this.storage.getTechMapHead(id);
+    const tm = await this.storage.getTechMap(id);
+    return _.last(tm.versions);
   }
 
   async getTechMapSpecificVersion(id, version) {
-    return await this.storage.getTechMapSpecificVersion(id, +version);
+    const tm = await this.storage.getTechMap(id);
+    return tm.versions[+version];
   }
 
   async insertTechMap(techMap) {
@@ -207,14 +212,10 @@ class KhPosApplication {
     } catch (err) {
       throw new appErrors.InvalidModelError(techMap);
     }
-
-    const existing = await this.storage.findOne("techMaps", { id: techMap.id });
-
-    if (existing) {
-      throw new appErrors.BadRequestError(`techMap with id ${techMap.id} already exists`);
-    }
-
-    await this.storage.insertTechMap({ ...techMap, version: 0, isHead: true });
+    await this.storage.insertTechMap({
+      id: techMap.id,
+      versions: [{ ...techMap, version: 0 }]
+    });
     return techMap.id;
   }
 
@@ -231,7 +232,16 @@ class KhPosApplication {
       throw new appErrors.InvalidModelError(techMap);
     }
 
-    await this.storage.updateTechMap(techMap);
+    await this.storage.updateTechMap(id, tm => {
+      const head = _.last(tm.versions);
+      if (_.isEqual(techMap, head)) {
+        throw new appErrors.UnmodifiedPutError(`attempt to put unmodified techMap ${id}`);
+      }
+      return {
+        ...tm,
+        versions: [...tm.versions, { ...techMap, version: head.version + 1 }]
+      };
+    });
   }
 
   ///////////////////////////////////////////////////////////////////////////

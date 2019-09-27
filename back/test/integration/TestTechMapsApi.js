@@ -211,6 +211,20 @@ describe("API", () => {
       expect(getRes.body).containSubset({ name: "first", version: 0 });
     });
 
+    it("should not allow to insert new techMap if such already exist", async () => {
+      const newTechMap = defaultTechMap();
+
+      await app.getApp().insertTechMap(newTechMap);
+
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/techMaps/`)
+        .type("application/json")
+        .send(JSON.stringify(newTechMap));
+
+      expect(insertRes).to.have.status(400);
+    });
+
     it("should return only latest versions of techMaps when get with no params is requested", async () => {
       const first = { ...defaultTechMap(), name: "first" };
       const firstModified = { ...first, name: "first modified" };
