@@ -66,6 +66,12 @@ class UnmodifiedPutError extends BadRequestError {
   }
 }
 
+class AlreadyExistsError extends BadRequestError {
+  constructor(what) {
+    super(`Object already exists: ${what}`)
+  }
+}
+
 
 module.exports = {
   KhApplicationError,
@@ -77,5 +83,6 @@ module.exports = {
   InvalidOperationError,
   BadRequestError,
   InvalidArgError,
-  UnmodifiedPutError
+  UnmodifiedPutError,
+  AlreadyExistsError
 };

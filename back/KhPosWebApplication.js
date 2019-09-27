@@ -47,6 +47,9 @@ function errorHandler(err, req, res, next) {
   } else if (err instanceof appErrors.UnmodifiedPutError) {
     debug("appErrors.UnmodifiedPutError: %o", err);
     res.status(400).send(err.message);
+  } else if (err instanceof appErrors.AlreadyExistsError) {
+    debug("appErrors.AlreadyExistsError: %o", err);
+    res.status(400).send(err.message);
   } else if (err instanceof appErrors.BadRequestError) {
     debug("appErrors.BadRequestError: %o", err);
     res.status(400).send(err.message);

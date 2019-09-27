@@ -249,9 +249,7 @@ class KhStorage extends EventEmitter {
       await this.db.collection("techMaps").insertOne({ ...techMap });
     } catch (e) {
       if (e.code === 11000) {
-        throw new appErrors.BadRequestError(
-          `techMap with id ${techMap.id} already exists`
-        );
+        throw new appErrors.AlreadyExistsError(techMap.id);
       } else {
         throw e;
       }
