@@ -3,40 +3,26 @@ let appErrors = require("./AppErrors");
 const joi = require("joi");
 const moment = require("moment");
 const _ = require("lodash");
-const helpers = require("./helpers");
-const constants = require("./constants");
 
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
 const jobIdRegExp = new RegExp(uuidRegExp("JOB"), "i");
 const techMapIdRegExp = new RegExp(uuidRegExp("TM"), "i");
-const taskIdRegExp = new RegExp(uuidRegExp("TASK"), "i");
-const employeeIdRegExp = new RegExp(uuidRegExp(constants.EMPLOYEE_ID_PREFIX), "i");
+const stepIdRegExp = new RegExp(uuidRegExp("STP"), "i");
+const employeeIdRegExp = new RegExp(uuidRegExp("EMP"), "i");
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-const taskAssigneeSchema = joi.object().keys({
+const techMapStepSchema = joi.object().keys({
   id: joi
     .string()
-    .regex(employeeIdRegExp)
-    .required(),
-  firstName: joi.string().required(),
-  color: joi.string().required()
-});
-
-const techMapTaskSchema = joi.object().keys({
-  id: joi
-    .string()
-    .regex(taskIdRegExp)
+    .regex(stepIdRegExp)
     .required(),
   name: joi.string().required(),
-  durationMins: joi
-    .number()
-    .min(1)
-    .max(24 * 60)
-    .required(),
-  bgColor: joi.string().required(), //.regex(/^#[A-Fa-f0-9]{6}/),
-  assigned: joi.array().items(taskAssigneeSchema)
+  ingredients: joi.array().required(),
+  humanResources: joi.array().required(),
+  inventory: joi.array().required(),
+  instructions: joi.string()
 });
 
 const techMapSchema = joi.object().keys({
@@ -46,9 +32,20 @@ const techMapSchema = joi.object().keys({
     .required(),
   name: joi.string().required(),
   units: joi.array().required(),
-  steps: joi.array().required(),
+  steps: joi
+    .array()
+    .items(techMapStepSchema)
+    .required(),
   version: joi.number(),
   isHead: joi.boolean()
+});
+
+const techMapPointerSchema = joi.object().keys({
+  id: joi
+    .string()
+    .regex(techMapIdRegExp)
+    .required(),
+  version: joi.number()
 });
 
 const jobModelSchema = joi.object().keys({
@@ -72,7 +69,24 @@ const jobModelSchema = joi.object().keys({
     .min(0)
     .max(100)
     .required(),
-  techMap: techMapSchema.required()
+  techMap: techMapPointerSchema.required(),
+  productionQuantity: joi
+    .number()
+    .integer()
+    .min(1)
+    .required(),
+  stepAssignments: joi.array().items(
+    joi.object().keys({
+      employeeId: joi
+        .string()
+        .regex(employeeIdRegExp)
+        .required(),
+      stepId: joi
+        .string()
+        .regex(stepIdRegExp)
+        .required()
+    })
+  )
 });
 
 const employeeModelSchema = joi.object().keys({
@@ -274,7 +288,6 @@ class KhPosApplication {
   }
 
   async insertEmployee(employee) {
-    employee.id = helpers.generatePrefixedId(constants.EMPLOYEE_ID_PREFIX);
     const validatedModel = await joi.validate(employee, employeeModelSchema);
     await this.storage.insertEmployee(validatedModel);
     return validatedModel.id;

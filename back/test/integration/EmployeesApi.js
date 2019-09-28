@@ -8,16 +8,14 @@ var should = require("chai").should;
 const chaiHttp = require("chai-http");
 var chaiSubset = require('chai-subset');
 const _ = require('lodash');
-const helpers = require("../../helpers");
-const constants = require("../../constants");
+const uuid = require("uuid");
 
 chai.use(chaiHttp);
 chai.use(chaiSubset);
 
 function newEmployeeId() {
-  return helpers.generatePrefixedId(constants.EMPLOYEE_ID_PREFIX);
+  return "EMP-" + uuid.v4();
 }
-
 
 // https://mherman.org/blog/testing-node-and-express/#integration-tests
 describe("API", () => {
@@ -73,6 +71,7 @@ describe("API", () => {
 
   it("should return collection of one element when one element is in the database", async () => {
     await app.getApp().insertEmployee({
+      id: newEmployeeId(),
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     });
@@ -103,6 +102,7 @@ describe("API", () => {
 
   it("Modification of existing employee should work fine", async () => {
     const vasylId = await app.getApp().insertEmployee({
+      id: newEmployeeId(),
       firstName: "Василь",
       color: "rgb(216, 216, 216)"
     });
