@@ -6,32 +6,31 @@ var expect = require("chai").expect;
 var assert = require("chai").assert;
 var should = require("chai").should;
 const moment = require("moment");
-const uuid = require('uuid');
+const uuid = require("uuid");
 const chaiHttp = require("chai-http");
-var chaiSubset = require('chai-subset');
-const _ = require('lodash');
+var chaiSubset = require("chai-subset");
+const _ = require("lodash");
 
 chai.use(chaiHttp);
 chai.use(chaiSubset);
 
 function newJobId() {
-  return 'JOB-' + uuid.v4()
+  return "JOB-" + uuid.v4();
 }
 
 function newTechMapId() {
-  return 'TM-' + uuid.v4()
+  return "TM-" + uuid.v4();
 }
 
-function newTaskId() {
-  return 'TASK-' + uuid.v4()
+function newStepId() {
+  return "STP-" + uuid.v4();
 }
 
-function newAssigneId() {
-  return 'ASS-' + uuid.v4()
+function newEmployeeId() {
+  return "EMP-" + uuid.v4();
 }
 
 // TODO: Test that invalid assignes are rejected and return 400!
-
 
 // https://mherman.org/blog/testing-node-and-express/#integration-tests
 describe("API", () => {
@@ -47,8 +46,8 @@ describe("API", () => {
   });
 
   beforeEach(async () => {
-    await app.getApp().clearStorage()
-  })
+    await app.getApp().clearStorage();
+  });
 
   async function insertJobAutoCompleted(jobModel) {
     const baseModel = {
@@ -57,17 +56,11 @@ describe("API", () => {
       column: 0,
       techMap: {
         id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
-        name: "1",
-        tintColor: "rgb(216, 216, 216)",
-        tasks: [{
-          id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
-          name: "task 1",
-          durationMins: 10,
-          bgColor: "rgb(216, 216, 216)",
-          assigned: []
-        }]
-      }
-    }
+        version: 0
+      },
+      productionQuantity: 1,
+      stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+    };
     await app.getApp().insertJob(_.merge(baseModel, jobModel));
     return baseModel;
   }
@@ -81,13 +74,12 @@ describe("API", () => {
   });
 
   describe("/jobs", () => {
-
     it("should provide application/json content type header", done => {
       chai
         .request(app.server())
         .get("/jobs")
         .end((err, res) => {
-          expect(res).to.have.header('content-type', 'application/json; charset=utf-8');
+          expect(res).to.have.header("content-type", "application/json; charset=utf-8");
           done();
         });
     });
@@ -96,10 +88,10 @@ describe("API", () => {
 
     it("should be CORS enabled", async () => {
       // TODO: https://github.com/lsem/khpos/issues/10
-      const checkExpectations = (res) => {
-        expect(res).to.have.header('Access-Control-Allow-Origin', '*');
-        expect(res).to.have.header('Access-Control-Allow-Methods', undefined);
-        expect(res).to.have.header('Access-Control-Allow-Headers', undefined);
+      const checkExpectations = res => {
+        expect(res).to.have.header("Access-Control-Allow-Origin", "*");
+        expect(res).to.have.header("Access-Control-Allow-Methods", undefined);
+        expect(res).to.have.header("Access-Control-Allow-Headers", undefined);
       };
       checkExpectations(await chai.request(app.server()).get("/jobs"));
       checkExpectations(await chai.request(app.server()).post("/jobs"));
@@ -109,11 +101,9 @@ describe("API", () => {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("should return empty collection on empty database", async () => {
-      const res = await chai
-        .request(app.server())
-        .get("/jobs");
+      const res = await chai.request(app.server()).get("/jobs");
       expect(res).to.have.status(200);
-      expect(res.body).to.be.an('array');
+      expect(res.body).to.be.an("array");
       expect(res.body.length).to.equal(0);
     });
 
@@ -122,35 +112,31 @@ describe("API", () => {
     it("should return collection of one element when one element is in the database", async () => {
       const insertedJobId = newJobId();
       await app.getApp().insertJob({
-        startTime: moment(123456).add(115, "minutes").valueOf(),
+        startTime: moment(123456)
+          .add(115, "minutes")
+          .valueOf(),
         id: insertedJobId,
         column: 0,
         techMap: {
           id: newTechMapId(),
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: newTaskId(),
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
-      const res = await chai
-        .request(app.server())
-        .get("/jobs");
+      const res = await chai.request(app.server()).get("/jobs");
       expect(res).to.have.status(200);
-      expect(res.body).to.be.an('array');
+      expect(res.body).to.be.an("array");
       expect(res.body.length).to.equal(1);
 
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-01T01:57:03.456Z",
-        id: insertedJobId,
-        column: 0,
-        techMap: {}
-      }]);
+      expect(res.body).to.containSubset([
+        {
+          startTime: "1970-01-01T01:57:03.456Z",
+          id: insertedJobId,
+          column: 0,
+          techMap: {}
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -163,24 +149,18 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: newTechMapId(),
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: newTaskId(),
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
-      const res = await chai
-        .request(app.server())
-        .get("/jobs");
+      const res = await chai.request(app.server()).get("/jobs");
       expect(res).to.have.status(200);
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-01T01:57:03.456Z"
-      }]);
+      expect(res.body).to.containSubset([
+        {
+          startTime: "1970-01-01T01:57:03.456Z"
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -193,24 +173,18 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: newTechMapId(),
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: newTaskId(),
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
-      const res = await chai
-        .request(app.server())
-        .get("/jobs");
+      const res = await chai.request(app.server()).get("/jobs");
       expect(res).to.have.status(200);
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-02T00:00:00.000Z"
-      }]);
+      expect(res.body).to.containSubset([
+        {
+          startTime: "1970-01-02T00:00:00.000Z"
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -222,30 +196,22 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
-      }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+      };
 
       await app.getApp().insertJob(sampleJob);
 
-      const allJobsResult = await chai
-        .request(app.server())
-        .get("/jobs");
+      const allJobsResult = await chai.request(app.server()).get("/jobs");
       expect(allJobsResult).to.have.status(200);
 
       allJobsResult.body.forEach(jobNode => {
-        expect(jobNode).to.not.have.property('_id');
+        expect(jobNode).to.not.have.property("_id");
       });
 
-      expect(allJobsResult.body).to.containSubset([{...sampleJob}]);
+      expect(allJobsResult.body).to.containSubset([{ ...sampleJob }]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -257,17 +223,11 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
-      }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+      };
 
       await app.getApp().insertJob(sampleJob);
 
@@ -277,10 +237,10 @@ describe("API", () => {
       expect(timeSpanJobsResult).to.have.status(200);
 
       timeSpanJobsResult.body.forEach(jobNode => {
-        expect(jobNode).to.not.have.property('_id');
+        expect(jobNode).to.not.have.property("_id");
       });
 
-      expect(timeSpanJobsResult.body).to.containSubset([{...sampleJob}]);
+      expect(timeSpanJobsResult.body).to.containSubset([{ ...sampleJob }]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -292,17 +252,11 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: "TASK-540b2c24-9ee3-470e-93d6-0758d9f44968",
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
-      }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+      };
 
       await app.getApp().insertJob(sampleJob);
 
@@ -312,11 +266,10 @@ describe("API", () => {
       expect(jobByIdResult).to.have.status(200);
 
       jobByIdResult.body.forEach(jobNode => {
-        expect(jobNode).to.not.have.property('_id');
+        expect(jobNode).to.not.have.property("_id");
       });
 
-      expect(jobByIdResult.body).to.containSubset([{ ...sampleJob
-      }]);
+      expect(jobByIdResult.body).to.containSubset([{ ...sampleJob }]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -326,23 +279,26 @@ describe("API", () => {
         anotherJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const anotherJob = await insertJobAutoCompleted({
         id: anotherJobId,
-        startTime: '1970-01-02T00:00:00.000Z'
+        startTime: "1970-01-02T00:00:00.000Z"
       });
       const res = await chai
         .request(app.server())
         .get("/jobs?startTime=1970-01-01T00:00:00.000Z&endTime=1970-01-02T00:00:00.000Z");
       expect(res).to.have.status(200);
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-01T00:00:00.000Z",
-        id: oneJobId
-      }, {
-        startTime: "1970-01-02T00:00:00.000Z",
-        id: anotherJobId
-      }]);
+      expect(res.body).to.containSubset([
+        {
+          startTime: "1970-01-01T00:00:00.000Z",
+          id: oneJobId
+        },
+        {
+          startTime: "1970-01-02T00:00:00.000Z",
+          id: anotherJobId
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -352,24 +308,29 @@ describe("API", () => {
         anotherJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const anotherJob = await insertJobAutoCompleted({
         id: anotherJobId,
-        startTime: '1970-01-02T00:00:00.000Z'
+        startTime: "1970-01-02T00:00:00.000Z"
       });
       const res = await chai
         .request(app.server())
         .get("/jobs?fromDate=1970-01-01T00:00:01.000Z&toDate=1970-01-02T00:00:00.000Z");
       expect(res).to.have.status(200);
-      expect(res.body).to.not.containSubset([{
-        startTime: "1970-01-01T00:00:00.000Z",
-        id: oneJobId
-      }]);
-      expect(res.body).to.containSubset([, {
-        startTime: "1970-01-02T00:00:00.000Z",
-        id: anotherJobId
-      }]);
+      expect(res.body).to.not.containSubset([
+        {
+          startTime: "1970-01-01T00:00:00.000Z",
+          id: oneJobId
+        }
+      ]);
+      expect(res.body).to.containSubset([
+        ,
+        {
+          startTime: "1970-01-02T00:00:00.000Z",
+          id: anotherJobId
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -379,35 +340,40 @@ describe("API", () => {
         anotherJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const anotherJob = await insertJobAutoCompleted({
         id: anotherJobId,
-        startTime: '1970-01-02T00:00:00.000Z'
+        startTime: "1970-01-02T00:00:00.000Z"
       });
       const res = await chai
         .request(app.server())
         .get("/jobs?fromDate=1970-01-01T00:00:00.000Z&toDate=1970-01-01T23:59:59.000Z");
       expect(res).to.have.status(200);
-      expect(res.body).to.not.containSubset([, {
-        startTime: "1970-01-02T00:00:00.000Z",
-        id: anotherJobId
-      }]);
-      expect(res.body).to.containSubset([{
-        startTime: "1970-01-01T00:00:00.000Z",
-        id: oneJobId
-      }]);
+      expect(res.body).to.not.containSubset([
+        ,
+        {
+          startTime: "1970-01-02T00:00:00.000Z",
+          id: anotherJobId
+        }
+      ]);
+      expect(res.body).to.containSubset([
+        {
+          startTime: "1970-01-01T00:00:00.000Z",
+          id: oneJobId
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Filtering should not work with only start or with only end date", async () => {
-      expect(await chai
-        .request(app.server())
-        .get("/jobs?fromDate=1970-01-01T00:00:00.000Z")).to.have.status(400);
-      expect(await chai
-        .request(app.server())
-        .get("/jobs?toDate=1970-01-01T00:00:00.000Z")).to.have.status(400);
+      expect(
+        await chai.request(app.server()).get("/jobs?fromDate=1970-01-01T00:00:00.000Z")
+      ).to.have.status(400);
+      expect(
+        await chai.request(app.server()).get("/jobs?toDate=1970-01-01T00:00:00.000Z")
+      ).to.have.status(400);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -416,30 +382,33 @@ describe("API", () => {
       const oneJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const modifiedJob = _.merge(oneJob, {
         id: oneJobId,
-        startTime: '2018-01-01T00:00:00.000Z'
+        startTime: "2018-01-01T00:00:00.000Z"
       });
-      const modifyRes = await chai.request(app.server()).patch(`/jobs/${oneJobId}`).type(
-        "application/json").send(
-        JSON.stringify(modifiedJob)
-      );
+      const modifyRes = await chai
+        .request(app.server())
+        .patch(`/jobs/${oneJobId}`)
+        .type("application/json")
+        .send(JSON.stringify(modifiedJob));
       expect(modifyRes).to.have.status(200);
 
-      const jobsRes = await chai
-        .request(app.server())
-        .get("/jobs");
+      const jobsRes = await chai.request(app.server()).get("/jobs");
       expect(jobsRes).to.have.status(200);
-      expect(jobsRes.body).to.containSubset([{
-        startTime: "2018-01-01T00:00:00.000Z",
-        id: oneJobId
-      }]);
-      expect(jobsRes.body).to.not.containSubset([{
-        startTime: "1970-01-01T00:00:00.000Z",
-        id: oneJobId
-      }]);
+      expect(jobsRes.body).to.containSubset([
+        {
+          startTime: "2018-01-01T00:00:00.000Z",
+          id: oneJobId
+        }
+      ]);
+      expect(jobsRes.body).to.not.containSubset([
+        {
+          startTime: "1970-01-01T00:00:00.000Z",
+          id: oneJobId
+        }
+      ]);
     });
 
     it("Should return 400 if invalid job is requested", async () => {
@@ -457,31 +426,34 @@ describe("API", () => {
         unexistingJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const modifiedJob = _.merge(oneJob, {
         id: oneJobId,
-        startTime: '2018-01-01T00:00:00.000Z'
+        startTime: "2018-01-01T00:00:00.000Z"
       });
-      const modifyRes = await chai.request(app.server()).patch(`/jobs/${unexistingJobId}`).type(
-        "application/json").send(
-        JSON.stringify(modifiedJob)
-      );
+      const modifyRes = await chai
+        .request(app.server())
+        .patch(`/jobs/${unexistingJobId}`)
+        .type("application/json")
+        .send(JSON.stringify(modifiedJob));
       expect(modifyRes).to.have.status(404);
 
       // Make sure it was not modified.
-      const jobsRes = await chai
-        .request(app.server())
-        .get("/jobs");
+      const jobsRes = await chai.request(app.server()).get("/jobs");
       expect(jobsRes).to.have.status(200);
-      expect(jobsRes.body).to.containSubset([{
-        id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
-      }]);
-      expect(jobsRes.body).to.not.containSubset([{
-        id: oneJobId,
-        startTime: '2018-01-01T00:00:00.000Z'
-      }]);
+      expect(jobsRes.body).to.containSubset([
+        {
+          id: oneJobId,
+          startTime: "1970-01-01T00:00:00.000Z"
+        }
+      ]);
+      expect(jobsRes.body).to.not.containSubset([
+        {
+          id: oneJobId,
+          startTime: "2018-01-01T00:00:00.000Z"
+        }
+      ]);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -491,16 +463,17 @@ describe("API", () => {
         unexistingJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
       const modifiedJob = _.merge(oneJob, {
         id: unexistingJobId,
-        startTime: '2018-01-01T00:00:00.000Z'
+        startTime: "2018-01-01T00:00:00.000Z"
       });
-      const modifyRes = await chai.request(app.server()).patch(`/jobs/${oneJobId}`).type(
-        "application/json").send(
-        JSON.stringify(modifiedJob)
-      );
+      const modifyRes = await chai
+        .request(app.server())
+        .patch(`/jobs/${oneJobId}`)
+        .type("application/json")
+        .send(JSON.stringify(modifiedJob));
       expect(modifyRes).to.have.status(400);
     });
 
@@ -510,45 +483,36 @@ describe("API", () => {
       const oneJobId = newJobId();
       const oneJob = await insertJobAutoCompleted({
         id: oneJobId,
-        startTime: '1970-01-01T00:00:00.000Z'
+        startTime: "1970-01-01T00:00:00.000Z"
       });
-      const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
-        "application/json").send(
-        JSON.stringify(oneJob)
-      );
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/jobs/`)
+        .type("application/json")
+        .send(JSON.stringify(oneJob));
       expect(insertRes).to.have.status(201);
-      expect(insertRes).to.have.header('Location', '/jobs/' + oneJobId);
+      expect(insertRes).to.have.header("Location", "/jobs/" + oneJobId);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Should validate incoming assigne ids", async () => {
-      const oneJobId = newJobId();
       const oneJob = {
-        startTime: '1970-01-01T00:00:00.000Z',
+        startTime: "1970-01-01T00:00:00.000Z",
         id: newJobId(),
         column: 0,
         techMap: {
           id: newTechMapId(),
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: newTaskId(),
-            name: "task 1",
-            durationMins: 20,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: [{
-              id: uuid.v4(),
-              firstName: "Аня",
-              color: "#5AC8FA"
-            }]
-          }]
-        }
+          version: 0
+        },
+        productionQuantity: 1,
+        stepAssignments: [{ employeeId: "invalidId", stepId: "invalidId" }]
       };
-      const insertRes = await chai.request(app.server()).post(`/jobs`).type(
-        "application/json").send(
-        JSON.stringify(oneJob)
-      );
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/jobs`)
+        .type("application/json")
+        .send(JSON.stringify(oneJob));
       expect(insertRes).to.have.status(400);
     });
 
@@ -556,34 +520,30 @@ describe("API", () => {
 
     it("Posted job should be queriable and not modified ", async () => {
       const insertedJobId = newJobId(),
-        taskId = newTaskId(),
         tmId = newTechMapId();
-      const insertRes = await chai.request(app.server()).post(`/jobs/`).type(
-        "application/json").send({
-        startTime: moment(123456).add(115, "minutes").valueOf(),
-        id: insertedJobId,
-        column: 0,
-        techMap: {
-          id: tmId,
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: taskId,
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)",
-            assigned: []
-          }]
-        }
-      });
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/jobs/`)
+        .type("application/json")
+        .send({
+          startTime: moment(123456)
+            .add(115, "minutes")
+            .valueOf(),
+          id: insertedJobId,
+          column: 0,
+          techMap: {
+            id: tmId,
+            version: 0
+          },
+          productionQuantity: 1,
+          stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+        });
       expect(insertRes).to.have.status(201);
 
-      const getRes = await chai
-        .request(app.server())
-        .get(insertRes.header['location']);
+      const getRes = await chai.request(app.server()).get(insertRes.header["location"]);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body).to.be.an('object');
+      expect(getRes.body).to.be.an("object");
 
       expect(getRes.body).to.containSubset({
         startTime: "1970-01-01T01:57:03.456Z",
@@ -591,17 +551,9 @@ describe("API", () => {
         column: 0,
         techMap: {
           id: tmId,
-          name: "1",
-          tintColor: "rgb(216, 216, 216)",
-          tasks: [{
-            id: taskId,
-            name: "task 1",
-            durationMins: 10,
-            bgColor: "rgb(216, 216, 216)"
-          }]
+          version: 0
         }
       });
-
-    })
+    });
   }); // jobs
 });
