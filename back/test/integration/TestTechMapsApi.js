@@ -97,7 +97,7 @@ describe("API", () => {
       };
       checkExpectations(await chai.request(app.server()).get("/techmaps"));
       checkExpectations(await chai.request(app.server()).post("/techmaps"));
-      checkExpectations(await chai.request(app.server()).patch("/techmaps"));
+      checkExpectations(await chai.request(app.server()).put("/techmaps"));
     });
 
     it("should return 404 if unexisting techMap is requested", async () => {
@@ -144,6 +144,14 @@ describe("API", () => {
 
       expect(getRes).to.have.status(200);
       expect(getRes.body).containSubset({ version: 0 });
+
+      const getAllRes = await chai
+        .request(app.server())
+        .get(`/techMaps/${newTechMap.id}/`);
+
+      expect(getAllRes).to.have.status(200);
+      expect(getAllRes.body).containSubset([{ version: 0 }]);
+      expect(getAllRes.body).not.containSubset([{ version: 1 }]);
     });
 
     it("should be able to return latest version by special name id", async () => {
@@ -239,10 +247,13 @@ describe("API", () => {
       const getRes = await chai.request(app.server()).get(`/techMaps`);
 
       expect(getRes).to.have.status(200);
-      expect(getRes.body.length).equal(2);
       expect(getRes.body).containSubset([
         { name: "first modified", version: 1 },
         { name: "second modified", version: 1 }
+      ]);
+      expect(getRes.body).not.containSubset([
+        { name: "first modified", version: 0 },
+        { name: "second modified", version: 0 }
       ]);
     });
   });
