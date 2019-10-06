@@ -25,5 +25,3 @@ See more [https://www.npmjs.com/package/debug](https://www.npmjs.com/package/deb
 
 Use script start_mongo.sh to start mongo
 
-
-
