@@ -196,11 +196,6 @@ class PlanTimeline extends React.Component {
           // because it will be inconsistent at some moment with currently
           // available tech maps registry
           job={job}
-          techMap={this.props.techMaps.find(
-            tm =>
-              tm.id === job.techMap.id && tm.version === job.techMap.version
-          )}
-          employees={this.props.employees}
           minsToPixels={this.props.minsToPixels}
           left={0}
           width={this.props.jobWidth}

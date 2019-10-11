@@ -26,6 +26,42 @@ import {
 import moment from "moment";
 
 class PlanScreen extends React.Component {
+  static convertToSolidJobsForView(jobs, techMaps, employees) {
+    const js = jobs.map(j => {
+      const tmap = techMaps.find(
+        tm => tm.id === j.techMap.id && tm.version === j.techMap.version
+      );
+      return {
+        ...j,
+        techMap: {
+          ...j.techMap,
+          ...tmap
+        },
+        stepAssignments: j.stepAssignments
+          ? j.stepAssignments.map(a => {
+              return {
+                employee: employees.find(e => e.id === a.employeeId),
+                stepId: a.stepId
+              };
+            })
+          : []
+      };
+    });
+    return js;
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const newState = {
+      ...state,
+      jobsForView: PlanScreen.convertToSolidJobsForView(
+        props.jobs,
+        props.techMaps,
+        props.employees
+      )
+    };
+    return newState;
+  }
+
   constructor(props) {
     super(props);
     this.minsToPixels = this.minsToPixels.bind(this);
@@ -40,7 +76,8 @@ class PlanScreen extends React.Component {
       PlanTimelineRect: null,
       initialOffset: null,
       scrollTop: 0,
-      scollLeft: 0
+      scollLeft: 0,
+      jobsForView: []
     };
     this.onModifierKeyChanged = this.onModifierKeyChanged.bind(this);
     this.detectDragModifierKeysHelper = new DetectDragModifierKeysHelper(
@@ -315,13 +352,13 @@ class PlanScreen extends React.Component {
             endTime={this.props.timelineEndTime}
           />
           <div className="timelineScroll">
-            <AssignmentsTimeline
-              jobs={this.props.jobs}
+            {/* <AssignmentsTimeline
+              jobs={this.state.jobsForView}
               columnWidth={12}
               msToPixels={this.msToPixels}
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
-            />
+            /> */}
             <PlanTimeline
               onSchedulerTimelineDomNodeRefUpdate={
                 this.onSchedulerTimelineDomNodeRefUpdate
@@ -347,9 +384,7 @@ class PlanScreen extends React.Component {
               horizontalPadding={15}
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
-              jobs={this.props.jobs}
-              techMaps={this.props.techMaps}
-              employees={this.props.employees}
+              jobs={this.state.jobsForView}
               left={0}
               hoverColumn={this.state.hoverColumn}
               onDrop={this.onDrop}
@@ -371,8 +406,8 @@ class PlanScreen extends React.Component {
         {/* Instantiate CustomDragLayer to get react-dnd aware about custom drag layey.
           Our of drag and drop context it must not affect rendering. */}
         <CustomDragLayer
+          jobs={this.state.jobsForView}
           techMaps={this.props.techMaps}
-          jobs={this.props.jobs}
           minsToPixels={this.minsToPixels}
           onTechMapPreviewStartedDragging={this.onTechMapPreviewStartedDragging}
           onTechMapPreviewFinishedDragging={

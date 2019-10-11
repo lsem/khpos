@@ -10,7 +10,7 @@ import TechMapStep from "./TechMapStep";
 const techMapViewSource = {
   beginDrag(props, monitor, component) {
     return {
-      techMapId: props.techMap.id,
+      techMapId: props.job.techMap.id,
       jobId: props.job.id,
       colIndex: props.colIndex, // index of source component
       rowIndex: props.rowIndex // index of source component
@@ -47,9 +47,9 @@ class PlanJobView extends React.Component {
   };
 
   calcJobDuration = () => {
-    return this.props.steps.reduce((acc, s) => {
-      return (acc += this.calcStepDuration(s));
-    });
+    return this.props.job.techMap.steps.reduce(
+      (acc, s) => (acc += this.calcStepDuration(s))
+    );
   };
 
   setRef(ref) {
@@ -87,24 +87,21 @@ class PlanJobView extends React.Component {
     if (this.props.job && this.props.job.stepAssignments)
       assignments = this.props.job.stepAssignments;
 
-    const steps = this.props.techMap
-      ? _.map(this.props.techMap.steps, s => {
-          return (
-            <TechMapStep
-              height={this.props.minsToPixels(this.calcStepDuration(s))}
-              step={s}
-              key={s.id}
-              employees={this.props.employees}
-              stepAssignments={assignments.filter(a => a.stepId === s.id)}
-              assign={this.handleTaskAssign}
-            />
-          );
-        })
-      : null;
+    const steps = this.props.job.techMap.steps;
+
+    const stepViews = steps ? steps.map(s => 
+      <TechMapStep
+        height={this.props.minsToPixels(this.calcStepDuration(s))}
+        step={s}
+        key={s.id}
+        stepAssignments={assignments}
+        assign={this.handleTaskAssign}
+      />
+    ) : null;
 
     return connectDragSource(
       <div className={className} style={techMapStyle} ref={this.setRef}>
-        {steps}
+        {stepViews}
       </div>
     );
   }

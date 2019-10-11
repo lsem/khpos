@@ -124,7 +124,7 @@ class CustomDragLayer extends React.PureComponent {
 
     const jobBoilerplate = {
       id: `JOB-${uuid.v4()}`,
-      techMap: { id: techMap.id, version: techMap.version },
+      techMap,
       productionQuantity: techMap.units[0],
       employeesQuantity: techMap.steps[0].humanResources[0].peopleCount
     }
@@ -164,7 +164,7 @@ class CustomDragLayer extends React.PureComponent {
     // Timeline techmaps use techmap attached to job
     if (itemType === DragItemTypes.TIMELINE_TECHMAP) {
       const job = _.find(this.props.jobs, x => x.id === item.jobId);
-      return job ? this.props.techMaps.find(tm => tm.id === job.techMap.id) : null;
+      return job ? job.techMap : null;
     } else if (itemType === DragItemTypes.SIDEBAR_TECHMAP) {
       // While panel items use techmaps from current catalogue
       return _.find(this.props.techMaps, x => x.id === item.techMapId);
