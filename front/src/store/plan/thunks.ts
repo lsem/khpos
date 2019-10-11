@@ -11,7 +11,6 @@ import {
 } from "./actions";
 import TimeSpan from "../../models/plan/timeSpan";
 import Job from "../../models/plan/job";
-import Employee from "../../models/employees/employee";
 import { ThunkAction } from "redux-thunk";
 import { PlanActionTypes } from "./types";
 import { AppState } from "..";
@@ -77,11 +76,11 @@ export const thunkAssignJob: ActionCreator<
   ThunkAction<
     Promise<PlanActionTypes>, // The type of function return
     AppState, // The type of global state
-    { jobId: string; stepId: string; employee: Employee }, // The type of the thunk parameter
+    { jobId: string; stepId: string; employeeId: string }, // The type of the thunk parameter
     PlanActionTypes // The type of the last action to be dispatched
   >
 > = args => {
   return async (dispatch: Dispatch) => {
-    return dispatch(assignJob(args.jobId, args.stepId, args.employee));
+    return dispatch(assignJob(args.jobId, args.stepId, args.employeeId));
   };
 };

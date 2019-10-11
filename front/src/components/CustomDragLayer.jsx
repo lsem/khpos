@@ -2,10 +2,11 @@
 
 import React from "react";
 import { DragLayer } from "react-dnd";
-import TechMapView from "./TechMap";
+import PlanJobView from "./PlanJobView";
 import PlanTechMapListItem from "./PlanTechMapListItem";
 import _ from "lodash";
 import DragItemTypes from "../dragItemTypes";
+import uuid from "uuid";
 
 // tips for future work: https://stackoverflow.com/questions/47500136/get-element-position-in-the-dom-on-react-dnd-drop
 // http://rafaelquintanilha.com/sortable-targets-with-react-dnd/
@@ -114,26 +115,35 @@ class CustomDragLayer extends React.PureComponent {
       effectiveOffset.x = this.props.draggedTechMapHorizontalLock;
     }
     const layerStyle = getItemTransform(effectiveOffset);
-    layerStyle.height = TechMapView.calcHeight(
-      techMap,
-      this.props.minsToPixels
-    );
+    // looks like height is not needed. Job expands according to steps
+    // layerStyle.height = PlanJobView.calcHeight(
+    //   techMap,
+    //   this.props.minsToPixels
+    // );
     layerStyle.width = techMapViewWidth;
+
+    const jobBoilerplate = {
+      id: `JOB-${uuid.v4()}`,
+      techMap: { id: techMap.id, version: techMap.version },
+      productionQuantity: techMap.units[0],
+      employeesQuantity: techMap.steps[0].humanResources[0].peopleCount
+    }
+
     return (
       <div
         className="CustomDragLayer"
         style={layerStyle}
         ref={this.props.onTechMapPreviewDomNodeRefUpdate}
       >
-        <TechMapView
+        <PlanJobView
           title={"Drag layer"}
-          tintColor={techMap.tintColor}
           left={0}
           width={techMapViewWidth}
           top={0}
           key={"Drag layer"}
           minsToPixels={this.props.minsToPixels}
-          tasks={techMap.tasks}
+          techMap={techMap}
+          job={jobBoilerplate}
           innerRef={node => void 0} // todo: this can be used instand of taking node from parent native dom node
         />
       </div>
@@ -154,7 +164,7 @@ class CustomDragLayer extends React.PureComponent {
     // Timeline techmaps use techmap attached to job
     if (itemType === DragItemTypes.TIMELINE_TECHMAP) {
       const job = _.find(this.props.jobs, x => x.id === item.jobId);
-      return job ? job.techMap : null;
+      return job ? this.props.techMaps.find(tm => tm.id === job.techMap.id) : null;
     } else if (itemType === DragItemTypes.SIDEBAR_TECHMAP) {
       // While panel items use techmaps from current catalogue
       return _.find(this.props.techMaps, x => x.id === item.techMapId);

@@ -1,6 +1,5 @@
 import TimeSpan from "../../models/plan/timeSpan";
 import Job from "../../models/plan/job";
-import Employee from "../../models/employees/employee";
 import { Action } from "redux";
 
 export const PLAN_SET_TIMESPAN = "PLAN_SET_TIMESPAN";
@@ -54,12 +53,12 @@ interface PatchJobRollbackAction
 }
 
 interface AssignJobAction extends Action<typeof PLAN_ASSIGN_JOB> {
-  args: { jobId: string; stepId: string; employee: Employee };
+  args: { jobId: string; stepId: string; employeeId: string };
 }
 
 interface AssignJobRollbackAction
   extends Action<typeof PLAN_ASSIGN_JOB_ROLLBACK> {
-  args: { jobId: string; stepId: string; employee: Employee };
+  args: { jobId: string; stepId: string; employeeId: string };
 }
 
 export type PlanActionTypes =

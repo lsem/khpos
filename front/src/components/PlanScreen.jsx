@@ -46,12 +46,6 @@ class PlanScreen extends React.Component {
     this.detectDragModifierKeysHelper = new DetectDragModifierKeysHelper(
       this.onModifierKeyChanged
     );
-    this.handleJobTaskAssign = this.handleJobTaskAssign.bind(this);
-  }
-
-  handleJobTaskAssign(jobId, taskId, employeeId) {
-    const employee = this.props.employees.find(e => e.id === employeeId);
-    this.props.assignJobTask(jobId, taskId, employee);
   }
 
   componentDidMount() {
@@ -130,8 +124,12 @@ class PlanScreen extends React.Component {
       startTime: moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
         .valueOf(),
-      techMap: this.props.techMaps.find(t => t.id === techMapId),
-      quantity: 1
+      techMap: {
+        id: techMapId,
+        version: this.props.techMaps.find(tm => tm.id === techMapId).version
+      },
+      productionQuantity: 1,
+      employeesQuantity: 1
     });
   }
   draggedRectChangedAction(rect) {
@@ -164,7 +162,7 @@ class PlanScreen extends React.Component {
   }
   moveJob(id, column, offsetInPixels) {
     const affectedJob = {
-      ...this.jobs.find(j => j.id === id),
+      ...this.props.jobs.find(j => j.id === id),
       column,
       startTime: moment(this.props.timelineBeginTime)
         .add(this.pixelsToMins(offsetInPixels), "minutes")
@@ -350,10 +348,12 @@ class PlanScreen extends React.Component {
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
               jobs={this.props.jobs}
+              techMaps={this.props.techMaps}
+              employees={this.props.employees}
               left={0}
               hoverColumn={this.state.hoverColumn}
               onDrop={this.onDrop}
-              handleJobTaskAssign={this.handleJobTaskAssign}
+              handleJobTaskAssign={this.props.assignJobTask}
             />
           </div>
         </div>
@@ -392,7 +392,7 @@ const mapStateToProps = state => {
   return {
     timelineBeginTime: state.plan.timeSpan.fromDate,
     timelineEndTime: state.plan.timeSpan.toDate,
-    jobs: state.jobs,
+    jobs: state.plan.jobs,
     techMaps: state.techMaps,
     employees: state.employees
   };
@@ -407,8 +407,8 @@ const mapDispatchToProps = dispatch => {
     patchEmployee: employee => dispatch(thunkPatchEmployee(employee)),
     patchJob: job => dispatch(thunkPatchJob(job)),
     insertJob: job => dispatch(thunkInsertJob(job)),
-    assignJobTask: (jobId, taskId, employee) =>
-      dispatch(thunkAssignJob(jobId, taskId, employee))
+    assignJobTask: (jobId, stepId, employeeId) =>
+      dispatch(thunkAssignJob({ jobId, stepId, employeeId }))
   };
 };
 

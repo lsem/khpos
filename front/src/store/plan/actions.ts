@@ -1,7 +1,6 @@
 import * as actionTypes from "./types";
 import Job from "../../models/plan/job";
 import TimeSpan from "../../models/plan/timeSpan";
-import Employee from "../../models/employees/employee";
 
 export function setTimeSpan(timeSpan: TimeSpan): actionTypes.PlanActionTypes {
   return {
@@ -70,21 +69,21 @@ export function patchJobRollback(job: Job): actionTypes.PlanActionTypes {
 export function assignJob(
   jobId: string,
   stepId: string,
-  employee: Employee
+  employeeId: string
 ): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_ASSIGN_JOB,
-    args: { jobId, stepId, employee }
+    args: { jobId, stepId, employeeId }
   };
 }
 
 export function assignJobRollback(
   jobId: string,
   stepId: string,
-  employee: Employee
+  employeeId: string
 ): actionTypes.PlanActionTypes {
   return {
     type: actionTypes.PLAN_ASSIGN_JOB_ROLLBACK,
-    args: { jobId, stepId, employee }
+    args: { jobId, stepId, employeeId }
   };
 }

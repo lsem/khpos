@@ -12,6 +12,7 @@ export function getTechMaps() : Array<TechMap> {
   return [
     {
       id: "TM-5fee8d0d-1ec9-4dcd-91fe-312bfefde835",
+      version: 0,
       name: "Хліб Французький (КХ)",
       units: [1, 6, 8, 10, 12, 14, 16, 18, 20],
       steps: [
@@ -171,11 +172,12 @@ export function getInventory(): Array<Device> {
 export function getJobs(timeSpan: TimeSpan): Array<Job> {
   return [
     {
-      id: "JOB-XXX-YYY-ZZZ,YY0",
+      id: "JOB-5708a5a2-aebf-47f4-9363-00fff8d8836b",
       column: 0,
       startTime: timeSpan.fromDate,
-      techMap: getTechMaps()[0],
-      quantity: 1
+      techMap: { id: getTechMaps()[0].id, version: getTechMaps()[0].version },
+      productionQuantity: 1,
+      employeesQuantity: 1
     } as Job
   ]
 }

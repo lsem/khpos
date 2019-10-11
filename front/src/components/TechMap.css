@@ -1,6 +1,0 @@
-.TechMapView {
-  position: absolute;
-  border-radius: 15px;
-  overflow: hidden; /* avoid overflowing rounded corners */
-  /* outline: black 1px solid; */
-}

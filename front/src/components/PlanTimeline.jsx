@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { DropTarget } from "react-dnd";
-import TechMapView from "./TechMap";
+import PlanJobView from "./PlanJobView";
 import _ from "lodash";
 import "./PlanTimeline.css";
 import DragItemTypes from "../dragItemTypes";
@@ -191,14 +191,16 @@ class PlanTimeline extends React.Component {
     const jobsByCols = this.getColumnsTechmaps();
     return _.keys(jobsByCols).map(column => {
       const columnTechMaps = jobsByCols[column].map((job, rowIndex) => (
-        <TechMapView
+        <PlanJobView
           // TODO: WARNING: this refers to techMapId but in fact it should not,
           // because it will be inconsistent at some moment with currently
           // available tech maps registry
-          techMapId={job.techMap.id}
-          jobId={job.id}
-          title={job.techMap.name}
-          tintColor={job.techMap.tintColor}
+          job={job}
+          techMap={this.props.techMaps.find(
+            tm =>
+              tm.id === job.techMap.id && tm.version === job.techMap.version
+          )}
+          employees={this.props.employees}
           minsToPixels={this.props.minsToPixels}
           left={0}
           width={this.props.jobWidth}
@@ -208,7 +210,6 @@ class PlanTimeline extends React.Component {
           getContainerRect={this.getContainerRect}
           colIndex={column}
           rowIndex={rowIndex}
-          tasks={job.techMap.tasks}
           innerRef={this.techMapDomAttached.bind(
             this,
             job.techMap.id,

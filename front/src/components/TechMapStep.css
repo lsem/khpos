@@ -1,0 +1,24 @@
+.planTechMapStep {
+  border-style: solid;
+  border-color: #A2A2A2;
+  border-width: 1px 0 0 0;
+}
+
+.planTechMapStep {
+  border-style: solid;
+  border-color: #A2A2A2;
+  border-width: 1px 0 0 0;
+}
+
+.planTechMapStep:first-child {
+  border: none;
+}
+
+.planTechMapStepBadgeStyle {
+  margin: 8px 0 0 8px;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+  border: 1px solid #00000044;
+  border-radius: 10px;
+}
