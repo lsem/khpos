@@ -41,7 +41,7 @@ class PlanJobView extends React.Component {
 
   static calcJobDuration(job) {
     return job.techMap.steps.reduce(
-      (acc, s) => (acc += PlanJobView.calcStepDuration(s))
+      (acc, s) => (acc += PlanJobView.calcStepDuration(job, s.id))
     );
   }
 
@@ -97,7 +97,7 @@ class PlanJobView extends React.Component {
             )}
             step={s}
             key={s.id}
-            stepAssignments={assignments}
+            stepAssignments={assignments.filter(a => a.stepId === s.id)}
             assign={this.handleTaskAssign}
           />
         ))

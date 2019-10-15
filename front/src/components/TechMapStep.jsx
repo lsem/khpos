@@ -6,19 +6,19 @@ import dragItemTypes from "../dragItemTypes";
 
 class TechMapStep extends Component {
   render() {
-    const { height, step, employees, stepAssignments } = this.props;
+    const { height, step, stepAssignments } = this.props;
 
     const badges = stepAssignments
       ? stepAssignments.map(a => {
           const badgeStyle = {
-            backgroundColor: employees.find(e => e.id === a.employeeId).color
+            backgroundColor: a.employee.color
           };
 
           return (
             <span
               className="planTechMapStepBadgeStyle"
               style={badgeStyle}
-              key={a.employeeId}
+              key={a.employee.id}
             />
           );
         })

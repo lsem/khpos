@@ -3,51 +3,57 @@ import "./AssignmentsTimeline.css";
 import _ from "lodash";
 import classNames from "classnames";
 import moment from "moment";
+import PlanJobView from "./PlanJobView";
 
 function AssignmentsTimeline(props) {
   const { jobs, columnWidth, msToPixels, beginTime, endTime } = props;
 
   const minsToMills = mins => mins * 60 * 1000;
 
-  const tasksByWorkers = _(jobs)
-    .map(j => {
-      let startTime = moment(j.startTime).valueOf();
-      return _.map(j.techMap.tasks, t => {
-        const st = startTime;
-        startTime += minsToMills(t.durationMins);
+  const stepsByEmployees = _(jobs)
+    .filter(j => j.stepAssignments && j.stepAssignments.length)
+    .flatMap(j =>
+      _.map(j.stepAssignments, a => {
+        const prevSteps = _.takeWhile(j.techMap.steps, s => s.id !== a.stepId);
+        const startTime =
+          moment(j.startTime).valueOf() +
+          minsToMills(
+            prevSteps.reduce(
+              (acc, s) => (acc += PlanJobView.calcStepDuration(j, s.id)),
+              0
+            )
+          );
+        const endTime =
+          startTime +
+          minsToMills(
+            PlanJobView.calcStepDuration(
+              j,
+              a.stepId
+            )
+          );
         return {
-          ...t,
-          startTime: st,
-          endTime: st + minsToMills(t.durationMins)
+          firstName: a.employee.firstName,
+          color: a.employee.color,
+          startTime,
+          endTime
         };
-      });
-    })
-    .flatMap()
-    .filter(t => t.assigned)
-    .flatMap(t => {
-      return _.map(t.assigned, a => {
-        return {
-          ...a,
-          startTime: t.startTime,
-          endTime: t.endTime
-        };
-      });
-    })
+      })
+    )
     .sortBy(a => a.startTime)
     .groupBy(a => a.firstName)
     .value();
 
-  var tasksByWorkersOrderedByFirstName = {};
-  _(tasksByWorkers)
+  var stepsByEmployeesOrderedByFirstName = {};
+  _(stepsByEmployees)
     .keys()
     .sort()
     .each(function(key) {
-      tasksByWorkersOrderedByFirstName[key] = tasksByWorkers[key];
+      stepsByEmployeesOrderedByFirstName[key] = stepsByEmployees[key];
     });
 
   const tasksByColumns = [];
 
-  _.forEach(tasksByWorkersOrderedByFirstName, tbw => {
+  _.forEach(stepsByEmployeesOrderedByFirstName, tbw => {
     tasksByColumns.push([]);
     _.forEach(tbw, (t, i) => {
       for (let j = 0; j < i; j++) {
@@ -76,11 +82,7 @@ function AssignmentsTimeline(props) {
     });
 
     return (
-      <div
-        style={assignmentTimeSpanStyle}
-        className={classes}
-        key={key}
-      />
+      <div style={assignmentTimeSpanStyle} className={classes} key={key} />
     );
   };
 

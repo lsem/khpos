@@ -352,13 +352,13 @@ class PlanScreen extends React.Component {
             endTime={this.props.timelineEndTime}
           />
           <div className="timelineScroll">
-            {/* <AssignmentsTimeline
+            <AssignmentsTimeline
               jobs={this.state.jobsForView}
               columnWidth={12}
               msToPixels={this.msToPixels}
               beginTime={this.props.timelineBeginTime}
               endTime={this.props.timelineEndTime}
-            /> */}
+            />
             <PlanTimeline
               onSchedulerTimelineDomNodeRefUpdate={
                 this.onSchedulerTimelineDomNodeRefUpdate
