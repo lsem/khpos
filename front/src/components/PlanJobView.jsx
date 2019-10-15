@@ -32,25 +32,25 @@ class PlanJobView extends React.Component {
     return minsToPixels(minutes);
   }
 
+  static calcStepDuration(job, stepId) {
+    const step = job.techMap.steps.find(s => s.id === stepId);
+    return step.humanResources
+      .find(hr => hr.peopleCount === job.employeesQuantity)
+      .countByUnits.get(job.productionQuantity);
+  }
+
+  static calcJobDuration(job) {
+    return job.techMap.steps.reduce(
+      (acc, s) => (acc += PlanJobView.calcStepDuration(s))
+    );
+  }
+
   constructor(props) {
     super(props);
     this.ref = null;
     this.setRef = this.setRef.bind(this);
     this.handleTaskAssign = this.handleTaskAssign.bind(this);
   }
-
-  calcStepDuration = step => {
-    const job = this.props.job;
-    return step.humanResources
-      .find(hr => hr.peopleCount === job.employeesQuantity)
-      .countByUnits.get(job.productionQuantity);
-  };
-
-  calcJobDuration = () => {
-    return this.props.job.techMap.steps.reduce(
-      (acc, s) => (acc += this.calcStepDuration(s))
-    );
-  };
 
   setRef(ref) {
     this.ref = ref;
@@ -89,15 +89,19 @@ class PlanJobView extends React.Component {
 
     const steps = this.props.job.techMap.steps;
 
-    const stepViews = steps ? steps.map(s => 
-      <TechMapStep
-        height={this.props.minsToPixels(this.calcStepDuration(s))}
-        step={s}
-        key={s.id}
-        stepAssignments={assignments}
-        assign={this.handleTaskAssign}
-      />
-    ) : null;
+    const stepViews = steps
+      ? steps.map(s => (
+          <TechMapStep
+            height={this.props.minsToPixels(
+              PlanJobView.calcStepDuration(this.props.job, s.id)
+            )}
+            step={s}
+            key={s.id}
+            stepAssignments={assignments}
+            assign={this.handleTaskAssign}
+          />
+        ))
+      : null;
 
     return connectDragSource(
       <div className={className} style={techMapStyle} ref={this.setRef}>
