@@ -75,6 +75,11 @@ const jobModelSchema = joi.object().keys({
     .integer()
     .min(1)
     .required(),
+  employeesQuantity: joi
+    .number()
+    .integer()
+    .min(1)
+    .required(),
   stepAssignments: joi.array().items(
     joi.object().keys({
       employeeId: joi

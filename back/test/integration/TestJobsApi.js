@@ -59,6 +59,7 @@ describe("API", () => {
         version: 0
       },
       productionQuantity: 1,
+      employeesQuantity: 1,
       stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
     };
     await app.getApp().insertJob(_.merge(baseModel, jobModel));
@@ -122,6 +123,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
       const res = await chai.request(app.server()).get("/jobs");
@@ -152,6 +154,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
       const res = await chai.request(app.server()).get("/jobs");
@@ -176,6 +179,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       });
       const res = await chai.request(app.server()).get("/jobs");
@@ -199,6 +203,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       };
 
@@ -226,6 +231,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       };
 
@@ -255,6 +261,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
       };
 
@@ -506,6 +513,7 @@ describe("API", () => {
           version: 0
         },
         productionQuantity: 1,
+        employeesQuantity: 1,
         stepAssignments: [{ employeeId: "invalidId", stepId: "invalidId" }]
       };
       const insertRes = await chai
@@ -536,6 +544,7 @@ describe("API", () => {
             version: 0
           },
           productionQuantity: 1,
+          employeesQuantity: 1,
           stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
         });
       expect(insertRes).to.have.status(201);
