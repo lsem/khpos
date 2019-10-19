@@ -33,6 +33,7 @@ class PlanJobView extends React.Component {
   }
 
   static calcStepDuration(job, stepId) {
+    if (!job.techMap.steps) return 0;
     const step = job.techMap.steps.find(s => s.id === stepId);
     return step.humanResources
       .find(hr => hr.peopleCount === job.employeesQuantity)
