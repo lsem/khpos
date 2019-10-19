@@ -159,7 +159,7 @@ describe("API", () => {
     expect(res).to.have.status(404);
   });
 
-  it("should not allow to insert new techMap if such already exist", async () => {
+  it("should not allow to insert new employee if such already exist", async () => {
     const newEmployee = defaultEmployee();
 
     await app.getApp().insertEmployee(newEmployee);
