@@ -79,19 +79,21 @@ ul {
 .App-header {
   box-sizing: border-box;
   position: absolute;
+  display: flex;
+  align-items: center;
   top: 0;
   left: 0;
   right: 0;
   background-color: #222;
   height: 100px;
-  padding: 20px;
   color: white;
 }
 
+.App-header > * {
+  margin: 0 20px;
+}
+
 .inmem-switch {
-  position: relative;
-  left: 160px;
-  top: -41px;
 }
 
 .App-title {
