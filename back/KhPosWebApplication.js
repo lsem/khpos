@@ -91,6 +91,12 @@ class KhPosWebApplication {
     this.app.get("/jobs/:id", this.getJob.bind(this));
     this.app.post("/jobs", this.postJobs.bind(this));
     this.app.patch("/jobs/:id", this.patchJob.bind(this));
+    this.app.get("/ingredients", this.getIngredients.bind(this));
+    this.app.get("/ingredients/:id", this.getIngredient.bind(this));
+    this.app.post("/ingredients", this.postIngredient.bind(this));
+    this.app.get("/inventory", this.getInventory.bind(this));
+    this.app.get("/inventory/:id", this.getDevice.bind(this));
+    this.app.post("/inventory", this.postDevice.bind(this));
     // Warning: Error handler must go after everything else.
     this.app.use(errorHandler);
   }
@@ -287,5 +293,66 @@ class KhPosWebApplication {
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+
+  //
+  // GET /ingredients
+  //
+  getIngredients(req, res, next) {
+    this.khApp
+      .getIngredientsCollection()
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // GET /ingredients/:id
+  //
+  getIngredient(req, res, next) {
+    this.khApp
+      .getIngredient(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // POST /ingredients
+  //
+  postIngredient(req, res, next) {
+    this.khApp
+      .insertIngredient(req.body)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // GET /inventory
+  //
+  getInventory(req, res, next) {
+    this.khApp
+      .getInventoryCollection()
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // GET /inventory/:id
+  //
+  getDevice(req, res, next) {
+    this.khApp
+      .getDevice(req.params.id)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
+
+  //
+  // POST /inventory
+  //
+  postDevice(req, res, next) {
+    this.khApp
+      .insertDevice(req.body)
+      .then(data => res.send(data))
+      .catch(err => next(err));
+  }
 }
+
 module.exports = KhPosWebApplication;

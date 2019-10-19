@@ -28,6 +28,8 @@ class KhStorage extends EventEmitter {
     this.db.collection("jobs").remove();
     this.db.collection("employees").remove();
     this.db.collection("techMaps").remove();
+    this.db.collection("ingredients").remove();
+    this.db.collection("inventory").remove();
   }
 
   async connectToMongoDb() {
@@ -79,6 +81,8 @@ class KhStorage extends EventEmitter {
     await this.db.collection("techMaps").ensureIndex({ id: 1 }, { unique: true });
     await this.db.collection("jobs").ensureIndex({ id: 1 }, { unique: true });
     await this.db.collection("employees").ensureIndex({ id: 1 }, { unique: true });
+    await this.db.collection("ingredients").ensureIndex({ id: 1 }, { unique: true });
+    await this.db.collection("inventory").ensureIndex({ id: 1 }, { unique: true });
   }
 
   async start() {
@@ -277,6 +281,64 @@ class KhStorage extends EventEmitter {
   async updateTechMap(id, updateCB) {
     const updated = updateCB(await this.getTechMap(id));
     await this.db.collection("techMaps").replaceOne({ id }, { ...updated });
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getIngredients() {
+    return await this.db
+      .collection("ingredients")
+      .find()
+      .toArray();
+  }
+
+  async getIngredient(id) {
+    const res = await this.db.collection("ingredients").findOne({ id });
+    if (!res) {
+      throw new appErrors.NotFoundError(`ingredient: ${id}`);
+    }
+    return res;
+  }
+
+  async insertIngredient(ingredient) {
+    try {
+      await this.db.collection("ingredients").insertOne({ ...ingredient });
+    } catch (e) {
+      if (e.code === 11000) {
+        throw new appErrors.AlreadyExistsError(ingredient.id);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getInventory() {
+    return await this.db
+      .collection("inventory")
+      .find()
+      .toArray();
+  }
+
+  async getDevice(id) {
+    const res = await this.db.collection("inventory").findOne({ id });
+    if (!res) {
+      throw new appErrors.NotFoundError(`device: ${id}`);
+    }
+    return res;
+  }
+
+  async insertDevice(inventory) {
+    try {
+      await this.db.collection("inventory").insertOne({ ...inventory });
+    } catch (e) {
+      if (e.code === 11000) {
+        throw new appErrors.AlreadyExistsError(inventory.id);
+      } else {
+        throw e;
+      }
+    }
   }
 }
 

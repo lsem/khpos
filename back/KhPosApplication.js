@@ -10,6 +10,8 @@ const jobIdRegExp = new RegExp(uuidRegExp("JOB"), "i");
 const techMapIdRegExp = new RegExp(uuidRegExp("TM"), "i");
 const stepIdRegExp = new RegExp(uuidRegExp("STP"), "i");
 const employeeIdRegExp = new RegExp(uuidRegExp("EMP"), "i");
+const ingredientIdRegExp = new RegExp(uuidRegExp("ING"), "i");
+const inventoryIdRegExp = new RegExp(uuidRegExp("INV"), "i");
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,6 +103,24 @@ const employeeModelSchema = joi.object().keys({
     .required(),
   firstName: joi.string().required(),
   color: joi.string().required()
+});
+
+const ingredientSchema = joi.object().keys({
+  id: joi
+    .string()
+    .regex(ingredientIdRegExp)
+    .required(),
+  name: joi.string().required(),
+  units: joi.string().required()
+});
+
+const inventorySchema = joi.object().keys({
+  id: joi
+    .string()
+    .regex(inventoryIdRegExp)
+    .required(),
+  name: joi.string().required(),
+  units: joi.string().required()
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -301,6 +321,62 @@ class KhPosApplication {
   async updateEmployee(id, employee) {
     const validatedModel = await joi.validate(employee, employeeModelSchema);
     await this.storage.updateEmployeeById(id, validatedModel);
+  }
+
+  ///////////////////////////////////////////////////////////////////////
+
+  async getIngredientsCollection() {
+    return await this.storage.getIngredients();
+  }
+
+  async getIngredient(id) {
+    let idOrNull;
+    try {
+      idOrNull = await joi.validate(
+        id,
+        joi
+          .string()
+          .regex(ingredientIdRegExp)
+          .required()
+      );
+    } catch (err) {
+      throw new appErrors.InvalidArgError("Invalid ingredient id: " + id);
+    }
+    return await this.storage.getIngredient(idOrNull);
+  }
+
+  async insertIngredient(ingredient) {
+    const validatedModel = await joi.validate(ingredient, ingredientSchema);
+    await this.storage.insertIngredient(validatedModel);
+    return validatedModel.id;
+  }
+
+  ///////////////////////////////////////////////////////////////////////
+
+  async getInventoryCollection() {
+    return await this.storage.getInventory();
+  }
+
+  async getDevice(id) {
+    let idOrNull;
+    try {
+      idOrNull = await joi.validate(
+        id,
+        joi
+          .string()
+          .regex(inventoryIdRegExp)
+          .required()
+      );
+    } catch (err) {
+      throw new appErrors.InvalidArgError("Invalid device id: " + id);
+    }
+    return await this.storage.getDevice(idOrNull);
+  }
+
+  async insertDevice(device) {
+    const validatedModel = await joi.validate(device, inventorySchema);
+    await this.storage.insertDevice(validatedModel);
+    return validatedModel.id;
   }
 }
 
