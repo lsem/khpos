@@ -1,16 +1,18 @@
-import axios from "axios";
-import { getApi } from "../../api";
-import { ActionCreator } from "redux";
-import { AppState } from "../index";
-import { ThunkAction } from "redux-thunk";
+import axios from 'axios';
+import Employee from '../../models/employees/employee';
+import { ActionCreator } from 'redux';
+import { AppState } from '../index';
+import { EmployeesActionTypes } from './types';
 import {
-  employeesRequestSucceeded,
+  employeesInsert,
+  employeesInsertRollback,
   employeesPatch,
   employeesPatchRollback,
-  employeesRequest
-} from "./actions";
-import Employee from "../../models/employees/employee";
-import { EmployeesActionTypes } from "./types";
+  employeesRequest,
+  employeesRequestSucceeded
+  } from './actions';
+import { getApi } from '../../api';
+import { ThunkAction } from 'redux-thunk';
 
 export const thunkRequestEmployees: ActionCreator<
   ThunkAction<
@@ -30,6 +32,31 @@ export const thunkRequestEmployees: ActionCreator<
       .catch(err => {
         console.log(err);
       });
+  };
+};
+
+export const thunkInsertEmployee: ActionCreator<
+  ThunkAction<
+    Promise<void>, // The type of function return
+    AppState, // The type of global state
+    null, // The type of the thunk parameter
+    EmployeesActionTypes // The type of the last action to be dispatched
+  >
+> = (employee: Employee) => {
+  return async (dispatch) => {
+    dispatch({
+      ...employeesInsert(employee),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/employees`,
+            method: "POST",
+            json: { ...employee }
+          },
+          rollback: employeesInsertRollback(employee)
+        }
+      }
+    });
   };
 };
 
@@ -55,7 +82,7 @@ export const thunkPatchEmployee: ActionCreator<
           effect: {
             url: `${getApi()}/employees/${patchedEmployee.id}`,
             method: "PUT",
-            data: { ...patchedEmployee }
+            json: { ...patchedEmployee }
           },
           rollback: employeesPatchRollback(affectedEmployee)
         }

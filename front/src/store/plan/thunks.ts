@@ -61,7 +61,7 @@ export const thunkInsertJob: ActionCreator<
           effect: {
             url: `${getApi()}/jobs`,
             method: "POST",
-            data: job
+            json: job
           },
           rollback: insertJobRollback(job)
         }
@@ -78,7 +78,7 @@ export const thunkDeleteJob: ActionCreator<
     PlanActionTypes // The type of the last action to be dispatched
   >
 > = job => {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch) => {
     dispatch({
       ...deleteJob(job),
       meta: {
@@ -86,7 +86,7 @@ export const thunkDeleteJob: ActionCreator<
           effect: {
             url: `${getApi()}/jobs/${job.id}`,
             method: "DELETE",
-            data: job
+            json: job
           },
           rollback: deleteJobRollback(job)
         }
@@ -103,7 +103,9 @@ export const thunkPatchJob: ActionCreator<
     PlanActionTypes // The type of the last action to be dispatched
   >
 > = job => {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch, getState) => {
+    const affectedJob = getState().plan.jobs.find(j => j.id === job.id) as Job;
+
     dispatch({
       ...patchJob(job),
       meta: {
@@ -111,9 +113,9 @@ export const thunkPatchJob: ActionCreator<
           effect: {
             url: `${getApi()}/jobs/${job.id}`,
             method: "PATCH",
-            data: job
+            json: job
           },
-          rollback: patchJobRollback(job)
+          rollback: patchJobRollback(affectedJob)
         }
       }
     });
@@ -136,7 +138,7 @@ export const thunkAssignJob: ActionCreator<
           effect: {
             url: `${getApi()}/jobs/${args.jobId}`,
             method: "PATCH",
-            data: getState().plan.jobs.find(j => j.id === args.jobId)
+            json: getState().plan.jobs.find(j => j.id === args.jobId)
           },
           rollback: assignJobRollback(args.jobId, args.stepId, args.employeeId)
         }

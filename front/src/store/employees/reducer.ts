@@ -1,11 +1,14 @@
-import Employee from "../../models/employees/employee";
+import _ from 'lodash';
+import Employee from '../../models/employees/employee';
 import {
-  EmployeesActionTypes,
-  EMPLOYEES_REQUEST_SUCCEEDED,
+  EMPLOYEES_INSERT,
+  EMPLOYEES_INSERT_ROLLBACK,
   EMPLOYEES_PATCH,
-  EMPLOYEES_PATCH_ROLLBACK
-} from "./types";
-import { Reducer } from "redux";
+  EMPLOYEES_PATCH_ROLLBACK,
+  EMPLOYEES_REQUEST_SUCCEEDED,
+  EmployeesActionTypes
+  } from './types';
+import { Reducer } from 'redux';
 
 const initialState: Array<Employee> = [];
 
@@ -16,6 +19,10 @@ export const employeesReducer: Reducer<
   switch (action.type) {
     case EMPLOYEES_REQUEST_SUCCEEDED:
       return action.employees;
+    case EMPLOYEES_INSERT:
+      return [...state, action.employee];
+    case EMPLOYEES_INSERT_ROLLBACK:
+      return _.without(state, action.employee);
     case EMPLOYEES_PATCH:
     case EMPLOYEES_PATCH_ROLLBACK:
       return state.map(e => {

@@ -1,5 +1,12 @@
 import { ActionCreator } from "redux";
-import { techMapsRequestSucceeded, techMapsRequest } from "./actions";
+import {
+  techMapsRequestSucceeded,
+  techMapsRequest,
+  techMapsPut,
+  techMapsPutRollback,
+  techMapsInsert,
+  techMapsInsertRollback
+} from "./actions";
 import { ThunkAction } from "redux-thunk";
 import { TechMapsActionTypes } from "./types";
 import { AppState } from "..";
@@ -53,5 +60,59 @@ export const thunkRequestTechMaps: ActionCreator<
         dispatch(techMapsRequestSucceeded(data as Array<TechMap>));
       })
       .catch(error => console.error(error));
+  };
+};
+
+export const thunkInsertTechMap: ActionCreator<
+  ThunkAction<
+    void, // The type of function return
+    AppState, // The type of global state
+    TechMap, // The type of the thunk parameter
+    TechMapsActionTypes // The type of the last action to be dispatched
+  >
+> = techMap => {
+  return async dispatch => {
+    dispatch({
+      ...techMapsInsert(techMap),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/techMaps`,
+            method: "POST",
+            body: JSON.stringify(techMap, techMapParserReplacer)
+          },
+          rollback: techMapsInsertRollback(techMap)
+        }
+      }
+    });
+  };
+};
+
+export const thunkPutTechMap: ActionCreator<
+  ThunkAction<
+    void, // The type of function return
+    AppState, // The type of global state
+    TechMap, // The type of the thunk parameter
+    TechMapsActionTypes // The type of the last action to be dispatched
+  >
+> = techMap => {
+  return async (dispatch, getState) => {
+    const affectedTechMap = getState().techMaps.find(
+      t => t.id === techMap.id
+    ) as TechMap;
+
+    dispatch({
+      ...techMapsPut(techMap),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/techMaps/${techMap.id}`,
+            method: "PUT",
+            body: JSON.stringify(techMap, techMapParserReplacer)
+          },
+          rollback: techMapsPutRollback(affectedTechMap)
+        }
+      }
+    });
   };
 };

@@ -16,6 +16,24 @@ export function employeesRequestSucceeded(
   };
 }
 
+export function employeesInsert(
+  employee: Employee
+): actionTypes.EmployeesActionTypes {
+  return {
+    type: actionTypes.EMPLOYEES_INSERT,
+    employee
+  };
+}
+
+export function employeesInsertRollback(
+  affectedEmployee: Employee
+): actionTypes.EmployeesActionTypes {
+  return {
+    type: actionTypes.EMPLOYEES_INSERT_ROLLBACK,
+    employee: affectedEmployee
+  };
+}
+
 export function employeesPatch(
   patchedEmployee: Employee
 ): actionTypes.EmployeesActionTypes {

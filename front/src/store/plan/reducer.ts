@@ -1,19 +1,20 @@
-import {
-  PlanActionTypes,
-  PLAN_REQUEST_JOBS_SUCCEEDED,
-  PLAN_SET_TIMESPAN,
-  PLAN_INSERT_JOB,
-  PLAN_INSERT_JOB_ROLLBACK,
-  PLAN_DELETE_JOB,
-  PLAN_DELETE_JOB_ROLLBACK,
-  PLAN_PATCH_JOB,
-  PLAN_PATCH_JOB_ROLLBACK,
-  PLAN_ASSIGN_JOB,
-  PLAN_ASSIGN_JOB_ROLLBACK
-} from "./types";
+import _ from "lodash";
 import Job from "../../models/plan/job";
 import moment from "moment";
 import TimeSpan from "../../models/plan/timeSpan";
+import {
+  PLAN_ASSIGN_JOB,
+  PLAN_ASSIGN_JOB_ROLLBACK,
+  PLAN_DELETE_JOB,
+  PLAN_DELETE_JOB_ROLLBACK,
+  PLAN_INSERT_JOB,
+  PLAN_INSERT_JOB_ROLLBACK,
+  PLAN_PATCH_JOB,
+  PLAN_PATCH_JOB_ROLLBACK,
+  PLAN_REQUEST_JOBS_SUCCEEDED,
+  PLAN_SET_TIMESPAN,
+  PlanActionTypes
+} from "./types";
 import { Reducer } from "redux";
 
 const initialState = {
@@ -42,7 +43,7 @@ export const planReducer: Reducer<typeof initialState, PlanActionTypes> = (
       return { ...state, jobs: [...state.jobs, action.job] };
     case PLAN_INSERT_JOB_ROLLBACK:
     case PLAN_DELETE_JOB:
-      return { ...state, jobs: state.jobs.filter(j => j.id !== action.job.id) };
+      return { ...state, jobs: _.without(state.jobs, action.job) };
     case PLAN_PATCH_JOB:
     case PLAN_PATCH_JOB_ROLLBACK:
       return {
