@@ -19,12 +19,12 @@ export default class PlanTechMapsMenu extends React.Component {
           <span>Технологічні карти</span>
         </div>
         <ListView>
-          {this.props.techMaps.map(techMap => (
+          {this.props.techMaps.map((techMap, i) => (
             <PlanTechMapListItem
               itemDisplayName={techMap.name}
               isDraggableItem={true}
               techMapId={techMap.id}
-              key={techMap.id}
+              key={i}
             />
           ))}
         </ListView>

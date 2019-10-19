@@ -200,7 +200,7 @@ class PlanTimeline extends React.Component {
           left={0}
           width={this.props.jobWidth}
           top={jobTop(job)}
-          key={job.id}
+          key={rowIndex}
           moveTechMap={this.moveTechMap}
           getContainerRect={this.getContainerRect}
           colIndex={column}

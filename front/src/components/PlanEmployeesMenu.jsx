@@ -19,10 +19,10 @@ export default class PlanEmployeesMenu extends React.Component {
           <span>Працівники</span>
         </div>
         <ListView>
-          {_.sortBy(this.props.employees, e => e.firstName).map(employee => (
+          {_.sortBy(this.props.employees, e => e.firstName).map((employee, i) => (
             <PlanEmployeesListItem
               employee={employee}
-              key={employee.id}
+              key={i}
               patchEmployee={this.props.patchEmployee}
             />
           ))}
