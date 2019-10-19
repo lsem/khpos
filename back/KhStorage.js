@@ -77,6 +77,8 @@ class KhStorage extends EventEmitter {
 
   async ensureIndexes() {
     await this.db.collection("techMaps").ensureIndex({ id: 1 }, { unique: true });
+    await this.db.collection("jobs").ensureIndex({ id: 1 }, { unique: true });
+    await this.db.collection("employees").ensureIndex({ id: 1 }, { unique: true });
   }
 
   async start() {
