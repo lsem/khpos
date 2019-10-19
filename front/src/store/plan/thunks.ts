@@ -54,16 +54,18 @@ export const thunkInsertJob: ActionCreator<
   >
 > = job => {
   return async (dispatch: Dispatch) => {
-    dispatch(insertJob(job)); //optimistic
-    fetch(`${getApi()}/jobs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8"
-      },
-      body: JSON.stringify(job)
-    }).catch(error => {
-      console.error(error);
-      dispatch(insertJobRollback(job));
+    dispatch({
+      ...insertJob(job),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/jobs`,
+            method: "POST",
+            data: job
+          },
+          rollback: insertJobRollback(job)
+        }
+      }
     });
   };
 };
@@ -77,15 +79,18 @@ export const thunkDeleteJob: ActionCreator<
   >
 > = job => {
   return async (dispatch: Dispatch) => {
-    dispatch(deleteJob(job)); //optimistic
-    fetch(`${getApi()}/jobs/${job.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8"
+    dispatch({
+      ...deleteJob(job),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/jobs/${job.id}`,
+            method: "DELETE",
+            data: job
+          },
+          rollback: deleteJobRollback(job)
+        }
       }
-    }).catch(error => {
-      console.error(error);
-      dispatch(deleteJobRollback(job));
     });
   };
 };
@@ -99,16 +104,18 @@ export const thunkPatchJob: ActionCreator<
   >
 > = job => {
   return async (dispatch: Dispatch) => {
-    dispatch(patchJob(job)); //optimistic
-    fetch(`${getApi()}/jobs/${job.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8"
-      },
-      body: JSON.stringify(job)
-    }).catch(error => {
-      console.error(error);
-      dispatch(patchJobRollback(job));
+    dispatch({
+      ...patchJob(job),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/jobs/${job.id}`,
+            method: "PATCH",
+            data: job
+          },
+          rollback: patchJobRollback(job)
+        }
+      }
     });
   };
 };
@@ -122,16 +129,18 @@ export const thunkAssignJob: ActionCreator<
   >
 > = args => {
   return async (dispatch: Dispatch, getState: () => AppState) => {
-    dispatch(assignJob(args.jobId, args.stepId, args.employeeId)); //optimistic
-    fetch(`${getApi()}/jobs/${args.jobId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8"
-      },
-      body: JSON.stringify(getState().plan.jobs.find(j => j.id === args.jobId))
-    }).catch(error => {
-      console.error(error);
-      dispatch(assignJobRollback(args.jobId, args.stepId, args.employeeId));
+    dispatch({
+      ...assignJob(args.jobId, args.stepId, args.employeeId),
+      meta: {
+        offline: {
+          effect: {
+            url: `${getApi()}/jobs/${args.jobId}`,
+            method: "PATCH",
+            data: getState().plan.jobs.find(j => j.id === args.jobId)
+          },
+          rollback: assignJobRollback(args.jobId, args.stepId, args.employeeId)
+        }
+      }
     });
   };
 };
