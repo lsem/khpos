@@ -11,6 +11,7 @@ import { setApiMode } from "./api";
 import { ROUTES } from "./constants/routes";
 import TechMapEditor from "./components/techMaps/TechMapEditor";
 import PageNotFound from "./components/PageNotFound";
+import PopulateSampleDataButton from "./components/PopulateSampleDataButton";
 
 class App extends React.Component<{}, {inMem: boolean}> {
   state = {
@@ -45,6 +46,7 @@ class App extends React.Component<{}, {inMem: boolean}> {
             className="inmem-switch"
             id="material-switch"
           />
+          <PopulateSampleDataButton/>
         </header>
         <BrowserRouter>
           <div className="AppBody">
