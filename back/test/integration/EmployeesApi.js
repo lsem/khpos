@@ -17,6 +17,14 @@ function newEmployeeId() {
   return "EMP-" + uuid.v4();
 }
 
+function defaultEmployee() {
+  return {
+    id: newEmployeeId(),
+    firstName: "Eugene",
+    color: "gray"
+  }
+}
+
 // https://mherman.org/blog/testing-node-and-express/#integration-tests
 describe("API", () => {
   let app;
@@ -151,4 +159,17 @@ describe("API", () => {
     expect(res).to.have.status(404);
   });
 
+  it("should not allow to insert new techMap if such already exist", async () => {
+    const newEmployee = defaultEmployee();
+
+    await app.getApp().insertEmployee(newEmployee);
+
+    const insertRes = await chai
+      .request(app.server())
+      .post(`/employees/`)
+      .type("application/json")
+      .send(JSON.stringify(newEmployee));
+
+    expect(insertRes).to.have.status(400);
+  });
 });

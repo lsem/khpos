@@ -66,6 +66,21 @@ describe("API", () => {
     return baseModel;
   }
 
+  function defaultJob() {
+    return {
+      startTime: "1970-01-02T00:00:00.000Z",
+      id: "JOB-6c947cf2-7ad4-48a1-b929-5add19033e26",
+      column: 0,
+      techMap: {
+        id: "TM-e4020471-80cc-433b-abfb-fd682224d42e",
+        version: 0
+      },
+      productionQuantity: 1,
+      employeesQuantity: 1,
+      stepAssignments: [{ employeeId: newEmployeeId(), stepId: newStepId() }]
+    }
+  }
+
   describe("/login", () => {
     it("Posting into login with valid credentials should return 200", done => {
       // TODO: https://github.com/lsem/khpos/issues/11
@@ -487,18 +502,14 @@ describe("API", () => {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     it("Inserting valid job should return new job in location and status 201", async () => {
-      const oneJobId = newJobId();
-      const oneJob = await insertJobAutoCompleted({
-        id: oneJobId,
-        startTime: "1970-01-01T00:00:00.000Z"
-      });
+      const oneJob = defaultJob();
       const insertRes = await chai
         .request(app.server())
         .post(`/jobs/`)
         .type("application/json")
         .send(JSON.stringify(oneJob));
       expect(insertRes).to.have.status(201);
-      expect(insertRes).to.have.header("Location", "/jobs/" + oneJobId);
+      expect(insertRes).to.have.header("Location", "/jobs/" + oneJob.id);
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -563,6 +574,18 @@ describe("API", () => {
           version: 0
         }
       });
+    });
+
+    it("should not allow to insert new job if such already exist", async () => {
+      const newJob = await insertJobAutoCompleted({});
+
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/jobs/`)
+        .type("application/json")
+        .send(JSON.stringify(newJob));
+
+      expect(insertRes).to.have.status(400);
     });
   }); // jobs
 });
