@@ -98,7 +98,15 @@ class KhStorage extends EventEmitter {
   //////////////////////////////////////////////////////////////////////////////////////////
 
   async insertJob(jobModel) {
-    await this.db.collection("jobs").insertOne(jobModel);
+    try {
+      await this.db.collection("jobs").insertOne(jobModel);
+    } catch (e) {
+      if (e.code === 11000) {
+        throw new appErrors.AlreadyExistsError(jobModel.id);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async getJobs(dateFrom, dateTo) {
@@ -189,7 +197,15 @@ class KhStorage extends EventEmitter {
   }
 
   async insertEmployee(employee) {
-    await this.db.collection("employees").insertOne(employee);
+    try {
+      await this.db.collection("employees").insertOne(employee);
+    } catch (e) {
+      if (e.code === 11000) {
+        throw new appErrors.AlreadyExistsError(employee.id);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async getEmployeeById(id) {
