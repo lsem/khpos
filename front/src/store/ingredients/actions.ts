@@ -12,6 +12,24 @@ export function ingredientsRequestSucceeded(
 ): actionTypes.IngredientsActionTypes {
   return {
     type: actionTypes.INGREDIENTS_REQUEST_SUCCEEDED,
-    ingredients: ingredients
+    ingredients
+  };
+}
+
+export function ingredientsInsert(
+  ingredient: Ingredient
+): actionTypes.IngredientsActionTypes {
+  return {
+    type: actionTypes.INGREDIENTS_INSERT,
+    ingredient
+  };
+}
+
+export function ingredientsInsertRollback(
+  ingredient: Ingredient
+): actionTypes.IngredientsActionTypes {
+  return {
+    type: actionTypes.INGREDIENTS_INSERT_ROLLBACK,
+    ingredient
   };
 }
