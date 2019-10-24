@@ -256,5 +256,49 @@ describe("API", () => {
         { name: "second modified", version: 0 }
       ]);
     });
+
+    it("should not allow to insert new techMap with step which doesn't have neither humanResources nor timeNorms", async () => {
+      const newTechMap = {
+        ...defaultTechMap(),
+        steps: [{
+          id: newStepId,
+          name: "whatever step name",
+          ingredients: [],
+          inventory: [],
+          instructions: "whatever instructions"
+        }]
+      };
+
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/techMaps/`)
+        .type("application/json")
+        .send(JSON.stringify(newTechMap));
+
+      expect(insertRes).to.have.status(400);
+    });
+
+    it("should not allow to insert new techMap with step which has both humanResources and timeNorms", async () => {
+      const newTechMap = {
+        ...defaultTechMap(),
+        steps: [{
+          id: newStepId,
+          name: "whatever step name",
+          ingredients: [],
+          humanResources: [],
+          timeNorms: [],
+          inventory: [],
+          instructions: "whatever instructions"
+        }]
+      };
+
+      const insertRes = await chai
+        .request(app.server())
+        .post(`/techMaps/`)
+        .type("application/json")
+        .send(JSON.stringify(newTechMap));
+
+      expect(insertRes).to.have.status(400);
+    });
   });
 });
