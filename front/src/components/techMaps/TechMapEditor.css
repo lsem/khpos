@@ -11,6 +11,20 @@
   transition: .5s;
 }
 
+.techMapEditorBackButton {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: #007AFF;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.techMapEditorBackButton > svg {
+  margin: -2px 6px 0 0;
+}
+
 .techMapHeader {
   font-size: 18px;
   line-height: 22px;

@@ -1,24 +1,24 @@
-import _ from "lodash";
-import Device from "../../models/inventory/device";
-import Icon from "../Icon";
-import Ingredient from "../../models/ingredients/ingredient";
-import React from "react";
-import Step from "../../models/techMaps/step";
-import TechMap from "../../models/techMaps/techMap";
-import uuid from "uuid";
-import { AnyAction } from "redux";
-import { AppState } from "../../store";
-import { connect } from "react-redux";
-import { ICONS } from "../../constants/icons";
-import { TechMapAddStep } from "./TechMapAddStep";
-import { TechMapStep, calcNeededRowsForStep } from "./TechMapStep";
-import { TechMapStepSeparator } from "./TechMapStepSeparator";
-import { ThunkDispatch } from "redux-thunk";
-import { thunkRequestIngredients } from "../../store/ingredients/thunks";
-import { thunkRequestInventory } from "../../store/inventory/thunks";
-import { thunkRequestTechMaps } from "../../store/techMaps/thunks";
-import "./TechMapEditor.css";
-import { TechMapCell } from "./TechMapCell";
+import _ from 'lodash';
+import Device from '../../models/inventory/device';
+import Icon from '../Icon';
+import Ingredient from '../../models/ingredients/ingredient';
+import React from 'react';
+import Step from '../../models/techMaps/step';
+import TechMap from '../../models/techMaps/techMap';
+import uuid from 'uuid';
+import { AnyAction } from 'redux';
+import { AppState } from '../../store';
+import { calcNeededRowsForStep, TechMapStep } from './TechMapStep';
+import { connect } from 'react-redux';
+import { ICONS } from '../../constants/icons';
+import { TechMapAddStep } from './TechMapAddStep';
+import { TechMapCell } from './TechMapCell';
+import { TechMapStepSeparator } from './TechMapStepSeparator';
+import { ThunkDispatch } from 'redux-thunk';
+import { thunkRequestIngredients } from '../../store/ingredients/thunks';
+import { thunkRequestInventory } from '../../store/inventory/thunks';
+import { thunkRequestTechMaps } from '../../store/techMaps/thunks';
+import './TechMapEditor.css';
 
 type Props = {
   techMapId: string;
@@ -28,6 +28,7 @@ type Props = {
   requestTechMaps: Function;
   requestIngredients: Function;
   requestInventory: Function;
+  goBack: () => void;
 };
 
 type State = {
@@ -242,7 +243,7 @@ class TechMapEditor extends React.Component<Props, State> {
 
     if (this.state.techMap.units.includes(value)) {
       console.warn("Units already has unit: " + value + " edit canceled."); //TODO: notify user
-      
+
       this.setState({
         techMap: {
           ...techMap,
@@ -260,24 +261,24 @@ class TechMapEditor extends React.Component<Props, State> {
           const newCountByUnits = new Map(i.countByUnits);
           newCountByUnits.delete(oldValue);
           newCountByUnits.set(value, val);
-          return { ...i, countByUnits: newCountByUnits }
+          return { ...i, countByUnits: newCountByUnits };
         }),
         humanResources: s.humanResources.map(h => {
           const val = h.countByUnits.get(oldValue) as number;
           const newCountByUnits = new Map(h.countByUnits);
           newCountByUnits.delete(oldValue);
           newCountByUnits.set(value, val);
-          return { ...h, countByUnits: newCountByUnits }
+          return { ...h, countByUnits: newCountByUnits };
         }),
         inventory: s.inventory.map(i => {
           const val = i.countByUnits.get(oldValue) as number;
           const newCountByUnits = new Map(i.countByUnits);
           newCountByUnits.delete(oldValue);
           newCountByUnits.set(value, val);
-          return { ...i, countByUnits: newCountByUnits }
+          return { ...i, countByUnits: newCountByUnits };
         })
-      }
-    })
+      };
+    });
 
     this.setState({
       techMap: {
@@ -302,14 +303,27 @@ class TechMapEditor extends React.Component<Props, State> {
     const lastStepId = techMap.steps.length - 1;
 
     const style = {
-      gridTemplateColumns: `30px 199px repeat(${
-        techMap.units.length
-      }, 67px) 28px`
+      gridTemplateColumns: `30px 199px repeat(${techMap.units.length}, 67px) 28px`
     };
 
     return (
       <div className="techMapEditorContainer">
         <div className="techMapEditor" style={style}>
+          <nav
+            className="techMapNavBar"
+            style={{
+              gridColumn: "2 / -1",
+              gridRow: this.setCurrentRowCount(1)
+            }}
+          >
+            <button
+              className="techMapEditorBackButton"
+              onClick={this.props.goBack}
+            >
+              <Icon size={12} color="#007AFF" icon={ICONS.BACK} />
+              <span>Назад</span>
+            </button>
+          </nav>
           <header
             className="techMapHeader"
             style={{
