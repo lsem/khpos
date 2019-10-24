@@ -22,10 +22,11 @@ const techMapStepSchema = joi.object().keys({
     .required(),
   name: joi.string().required(),
   ingredients: joi.array().required(),
-  humanResources: joi.array().required(),
+  humanResources: joi.array(),
+  timeNorms: joi.array(),
   inventory: joi.array().required(),
   instructions: joi.string()
-});
+}).xor("humanResources", "timeNorms");
 
 const techMapSchema = joi.object().keys({
   id: joi
