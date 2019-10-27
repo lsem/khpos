@@ -11,13 +11,14 @@ import { AppState } from "../../store";
 import { calcNeededRowsForStep, TechMapStep } from "./TechMapStep";
 import { connect } from "react-redux";
 import { ICONS } from "../../constants/icons";
+import { ROUTES } from "../../constants/routes";
 import { TechMapAddStep } from "./TechMapAddStep";
 import { TechMapCell } from "./TechMapCell";
 import { TechMapStepSeparator } from "./TechMapStepSeparator";
 import { ThunkDispatch } from "redux-thunk";
+import { thunkInsertTechMap, thunkPutTechMap, thunkRequestTechMaps } from "../../store/techMaps/thunks";
 import { thunkRequestIngredients } from "../../store/ingredients/thunks";
 import { thunkRequestInventory } from "../../store/inventory/thunks";
-import { thunkRequestTechMaps } from "../../store/techMaps/thunks";
 import "./TechMapEditor.css";
 
 type Props = {
@@ -28,7 +29,10 @@ type Props = {
   requestTechMaps: Function;
   requestIngredients: Function;
   requestInventory: Function;
+  updateTechMap: (techMap: TechMap) => void;
+  createNewTechMap: (techMap: TechMap) => void;
   goBack: () => void;
+  goToRoute: (r: string) => void;
 };
 
 type State = {
@@ -315,6 +319,23 @@ class TechMapEditor extends React.Component<Props, State> {
     });
   };
 
+  newTechMapId = () => {
+    return `TM-${uuid.v4()}`;
+  };
+
+  handleSaveTechMapClick = () => {
+    this.props.updateTechMap(this.state.techMap);
+  };
+
+  handleSaveCopyTechMapClick = () => {
+    const newId = this.newTechMapId();
+    this.props.createNewTechMap({
+      ...this.state.techMap,
+      id: newId
+    });
+    this.props.goToRoute(`${ROUTES.EDIT_TECH_MAP}/${newId}`);
+  };
+
   componentDidMount() {
     this.props.requestIngredients();
     this.props.requestInventory();
@@ -340,12 +361,18 @@ class TechMapEditor extends React.Component<Props, State> {
         </button>
 
         <section className="techMapEditorCrudSection">
-          <button className="techMapEditorCrudBlue">
+          <button
+            className="techMapEditorCrudBlue"
+            onClick={() => this.handleSaveTechMapClick()}
+          >
             <Icon size={12} color="#007AFF" icon={ICONS.SAVE} />
             &nbsp;
             <span>Зберегти</span>
           </button>
-          <button className="techMapEditorCrudBlue">
+          <button
+            className="techMapEditorCrudBlue"
+            onClick={() => this.handleSaveCopyTechMapClick()}
+          >
             <Icon size={12} color="#007AFF" icon={ICONS.DUPLICATE2} />
             &nbsp;
             <span>Зберегти копію</span>
@@ -481,7 +508,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<any, any, AnyAction>) => {
   return {
     requestTechMaps: () => dispatch(thunkRequestTechMaps()),
     requestIngredients: () => dispatch(thunkRequestIngredients()),
-    requestInventory: () => dispatch(thunkRequestInventory())
+    requestInventory: () => dispatch(thunkRequestInventory()),
+    updateTechMap: (techMap: TechMap) => dispatch(thunkPutTechMap(techMap)),
+    createNewTechMap: (techMap: TechMap) =>
+      dispatch(thunkInsertTechMap(techMap))
   };
 };
 

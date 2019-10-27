@@ -1,17 +1,17 @@
+import TechMap from "../../models/techMaps/techMap";
 import { ActionCreator } from "redux";
+import { AppState } from "..";
+import { getApi } from "../../api";
+import { TechMapsActionTypes } from "./types";
 import {
-  techMapsRequestSucceeded,
-  techMapsRequest,
+  techMapsInsert,
+  techMapsInsertRollback,
   techMapsPut,
   techMapsPutRollback,
-  techMapsInsert,
-  techMapsInsertRollback
-} from "./actions";
+  techMapsRequest,
+  techMapsRequestSucceeded
+  } from "./actions";
 import { ThunkAction } from "redux-thunk";
-import { TechMapsActionTypes } from "./types";
-import { AppState } from "..";
-import TechMap from "../../models/techMaps/techMap";
-import { getApi } from "../../api";
 
 const techMapParserReviever: any = (key: string, value: any) => {
   if (typeof value === "object" && value !== null) {
@@ -27,7 +27,7 @@ const techMapParserReviever: any = (key: string, value: any) => {
 };
 
 const techMapParserReplacer: any = (key: string, value: any) => {
-  if (key === "countByUnits" || key === "timeNorms") {
+  if (value && (key === "countByUnits" || key === "timeNorms")) {
     const o: { [k: string]: any } = {};
 
     for (let e of value.entries()) o[e[0]] = e[1];

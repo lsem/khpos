@@ -1,23 +1,23 @@
-import HTML5Backend from 'react-dnd-html5-backend';
-import moment from 'moment';
-import PageNotFound from './components/PageNotFound';
-import PopulateSampleDataButton from './components/PopulateSampleDataButton';
-import React from 'react';
-import ReactSwitch from 'react-switch';
-import TechMapEditor from './components/techMaps/TechMapEditor';
-import TimelineScreen from './components/PlanScreen';
+import HTML5Backend from "react-dnd-html5-backend";
+import moment from "moment";
+import PageNotFound from "./components/PageNotFound";
+import PopulateSampleDataButton from "./components/PopulateSampleDataButton";
+import React from "react";
+import ReactSwitch from "react-switch";
+import TechMapEditor from "./components/techMaps/TechMapEditor";
+import TimelineScreen from "./components/PlanScreen";
 import {
   BrowserRouter,
   Redirect,
   Route,
   RouteComponentProps,
   Switch
-  } from 'react-router-dom';
-import { DragDropContext } from 'react-dnd';
-import { ROUTES } from './constants/routes';
-import { setApiMode } from './api';
-import './App.css';
-import 'moment/locale/uk';
+  } from "react-router-dom";
+import { DragDropContext } from "react-dnd";
+import { ROUTES } from "./constants/routes";
+import { setApiMode } from "./api";
+import "./App.css";
+import "moment/locale/uk";
 
 class App extends React.Component<{}, { inMem: boolean }> {
   state = {
@@ -77,6 +77,7 @@ class App extends React.Component<{}, { inMem: boolean }> {
                   <TechMapEditor
                     techMapId={props.match.params.id}
                     goBack={props.history.goBack}
+                    goToRoute={(r: string) => props.history.push(r)}
                   />
                 )}
               />
