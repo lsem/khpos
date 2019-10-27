@@ -23,7 +23,7 @@ const techMapStepSchema = joi.object().keys({
   name: joi.string().required(),
   ingredients: joi.array().required(),
   humanResources: joi.array(),
-  timeNorms: joi.array(),
+  timeNorms: joi.object(),
   inventory: joi.array().required(),
   instructions: joi.string()
 }).xor("humanResources", "timeNorms");

@@ -286,7 +286,7 @@ describe("API", () => {
           name: "whatever step name",
           ingredients: [],
           humanResources: [],
-          timeNorms: [],
+          timeNorms: {},
           inventory: [],
           instructions: "whatever instructions"
         }]
