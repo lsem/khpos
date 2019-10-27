@@ -63,6 +63,10 @@ ul {
   list-style-type: 0;
 }
 
+button {
+  font: inherit;
+}
+
 #root, .App {
   height: 100%;
 }
