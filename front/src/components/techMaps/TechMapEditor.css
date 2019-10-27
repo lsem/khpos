@@ -17,12 +17,39 @@
   background-color: transparent;
   border: none;
   color: #007AFF;
-  margin-bottom: 20px;
+  margin-left: 33px;
   cursor: pointer;
 }
 
 .techMapEditorBackButton > svg {
   margin: -2px 6px 0 0;
+}
+
+.techMapEditorCrudSection {
+  display: flex;
+  padding-left: 33px;
+  justify-content: center;
+}
+
+.techMapEditorCrudSection > button {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 4px 10px;
+  margin: 4px 6px;
+}
+
+.techMapEditorCrudBlue {
+  border-color: #007aff;
+  color: #007AFF;
+}
+
+.techMapEditorCrudRed {
+  border-color: #ff3b30;
+  color: #ff3b30;
 }
 
 .techMapHeader {
