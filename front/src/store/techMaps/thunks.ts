@@ -15,7 +15,7 @@ import { getApi } from "../../api";
 
 const techMapParserReviever: any = (key: string, value: any) => {
   if (typeof value === "object" && value !== null) {
-    if (key === "countByUnits") {
+    if (key === "countByUnits" || key === "timeNorms") {
       const map = new Map();
       Object.keys(value).forEach(key => {
         map.set(+key, value[key]);
@@ -27,7 +27,7 @@ const techMapParserReviever: any = (key: string, value: any) => {
 };
 
 const techMapParserReplacer: any = (key: string, value: any) => {
-  if (key === "countByUnits") {
+  if (key === "countByUnits" || key === "timeNorms") {
     const o: { [k: string]: any } = {};
 
     for (let e of value.entries()) o[e[0]] = e[1];

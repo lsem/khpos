@@ -75,7 +75,8 @@ class TechMapEditor extends React.Component<Props, State> {
       return {
         ...s,
         ingredients: s.ingredients.filter((ing, i) => i !== columnId),
-        humanResources: s.humanResources.filter((h, i) => i !== columnId),
+        humanResources:
+          s.humanResources && s.humanResources.filter((h, i) => i !== columnId),
         inventory: s.inventory.filter((ivn, i) => i !== columnId)
       };
     });
@@ -106,15 +107,24 @@ class TechMapEditor extends React.Component<Props, State> {
           )
         };
       });
-      const humanResources = s.humanResources.map(i => {
-        return {
-          ...i,
-          countByUnits: new Map<number, number>(i.countByUnits).set(
-            newLastUnit,
-            (i.countByUnits.get(oldLastUnit) as number) + 1
-          )
-        };
-      });
+      const humanResources =
+        s.humanResources &&
+        s.humanResources.map(i => {
+          return {
+            ...i,
+            countByUnits: new Map<number, number>(i.countByUnits).set(
+              newLastUnit,
+              (i.countByUnits.get(oldLastUnit) as number) + 1
+            )
+          };
+        });
+      const timeNorms =
+        s.timeNorms &&
+        new Map<number, number>(s.timeNorms).set(
+          newLastUnit,
+          (s.timeNorms.get(oldLastUnit) as number) + 1
+        );
+
       const inventory = s.inventory.map(i => {
         return {
           ...i,
@@ -128,6 +138,7 @@ class TechMapEditor extends React.Component<Props, State> {
         ...s,
         ingredients,
         humanResources,
+        timeNorms,
         inventory
       };
     });
@@ -206,7 +217,6 @@ class TechMapEditor extends React.Component<Props, State> {
       id: `STP-${uuid.v4()}`,
       name: "Новий крок",
       ingredients: [],
-      humanResources: [],
       inventory: [],
       instructions: ""
     } as Step;
@@ -254,29 +264,45 @@ class TechMapEditor extends React.Component<Props, State> {
     }
 
     const newSteps = techMap.steps.map(s => {
-      return {
-        ...s,
-        ingredients: s.ingredients.map(i => {
-          const val = i.countByUnits.get(oldValue) as number;
-          const newCountByUnits = new Map(i.countByUnits);
-          newCountByUnits.delete(oldValue);
-          newCountByUnits.set(value, val);
-          return { ...i, countByUnits: newCountByUnits };
-        }),
-        humanResources: s.humanResources.map(h => {
+      const ingredients = s.ingredients.map(i => {
+        const val = i.countByUnits.get(oldValue) as number;
+        const newCountByUnits = new Map(i.countByUnits);
+        newCountByUnits.delete(oldValue);
+        newCountByUnits.set(value, val);
+        return { ...i, countByUnits: newCountByUnits };
+      });
+
+      const humanResources =
+        s.humanResources &&
+        s.humanResources.map(h => {
           const val = h.countByUnits.get(oldValue) as number;
           const newCountByUnits = new Map(h.countByUnits);
           newCountByUnits.delete(oldValue);
           newCountByUnits.set(value, val);
           return { ...h, countByUnits: newCountByUnits };
-        }),
-        inventory: s.inventory.map(i => {
-          const val = i.countByUnits.get(oldValue) as number;
-          const newCountByUnits = new Map(i.countByUnits);
-          newCountByUnits.delete(oldValue);
-          newCountByUnits.set(value, val);
-          return { ...i, countByUnits: newCountByUnits };
-        })
+        });
+
+      let timeNorms;
+      if (s.timeNorms) {
+        timeNorms = new Map<number, number>(s.timeNorms);
+        timeNorms.delete(oldValue);
+        timeNorms.set(value, s.timeNorms.get(oldValue) as number);
+      }
+
+      const inventory = s.inventory.map(i => {
+        const val = i.countByUnits.get(oldValue) as number;
+        const newCountByUnits = new Map(i.countByUnits);
+        newCountByUnits.delete(oldValue);
+        newCountByUnits.set(value, val);
+        return { ...i, countByUnits: newCountByUnits };
+      });
+
+      return {
+        ...s,
+        ingredients,
+        humanResources,
+        timeNorms,
+        inventory
       };
     });
 

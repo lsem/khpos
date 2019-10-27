@@ -6,7 +6,8 @@ export default interface Step {
   id: string
   name: string
   ingredients: Array<IngredientsRow>
-  humanResources: Array<HumanResourcesRow>
+  humanResources?: Array<HumanResourcesRow>
+  timeNorms?: Map<number, number>
   inventory: Array<EquipmentRow>
   instructions: string
 }

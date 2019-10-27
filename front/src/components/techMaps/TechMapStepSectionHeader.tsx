@@ -5,11 +5,12 @@ type Props = {
   name: string;
   description: string;
   icon: string;
+  iconSize: number;
   row: number;
 };
 
 export const TechMapStepSectionHeader: React.FC<Props> = props => {
-  const { name, description, icon, row } = props;
+  const { name, description, icon, iconSize, row } = props;
 
   return (
     <React.Fragment>
@@ -21,7 +22,7 @@ export const TechMapStepSectionHeader: React.FC<Props> = props => {
         className="techMapStepSectionHeader"
         style={{ gridColumn: "2", gridRow: row }}
       >
-        <Icon size={16} color="rgba(0,0,0,.5)" icon={icon} />
+        <Icon size={iconSize} color="rgba(0,0,0,.5)" icon={icon} />
         {name}
       </div>
       <div
