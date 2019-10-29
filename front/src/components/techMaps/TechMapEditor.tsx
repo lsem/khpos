@@ -355,36 +355,49 @@ class TechMapEditor extends React.Component<Props, State> {
 
     return (
       <div className="techMapEditorContainer">
-        <button className="techMapEditorBackButton" onClick={this.props.goBack}>
-          <Icon size={12} color="#007AFF" icon={ICONS.BACK} />
-          <span>Назад</span>
-        </button>
-
-        <section className="techMapEditorCrudSection">
-          <button
-            className="techMapEditorCrudBlue"
-            onClick={() => this.handleSaveTechMapClick()}
-          >
-            <Icon size={12} color="#007AFF" icon={ICONS.SAVE} />
-            &nbsp;
-            <span>Зберегти</span>
-          </button>
-          <button
-            className="techMapEditorCrudBlue"
-            onClick={() => this.handleSaveCopyTechMapClick()}
-          >
-            <Icon size={12} color="#007AFF" icon={ICONS.DUPLICATE2} />
-            &nbsp;
-            <span>Зберегти копію</span>
-          </button>
-          <button className="techMapEditorCrudRed">
-            <Icon size={12} color="#ff3b30" icon={ICONS.DELETE} />
-            &nbsp;
-            <span>Видалити</span>
-          </button>
-        </section>
-
         <div className="techMapEditor" style={style}>
+          <nav
+            className="techMapEditorNavBar"
+            style={{
+              gridColumn: "2 / -2",
+              gridRow: this.setCurrentRowCount(1)
+            }}
+          >
+            <button
+              className="techMapEditorBackButton"
+              onClick={this.props.goBack}
+            >
+              <Icon size={12} color="#007AFF" icon={ICONS.BACK} />
+              <span>Назад</span>
+            </button>
+
+            <section className="techMapNavCrudSection">
+              <button
+                className="techMapEditorCrudBlue"
+                onClick={() => this.handleSaveTechMapClick()}
+              >
+                <Icon size={12} color="#007AFF" icon={ICONS.SAVE} />
+                &nbsp;
+                <span>Зберегти</span>
+              </button>
+
+              <button
+                className="techMapEditorCrudBlue"
+                onClick={() => this.handleSaveCopyTechMapClick()}
+              >
+                <Icon size={12} color="#007AFF" icon={ICONS.DUPLICATE2} />
+                &nbsp;
+                <span>Зберегти копію</span>
+              </button>
+
+              <button className="techMapEditorCrudRed">
+                <Icon size={12} color="#ff3b30" icon={ICONS.DELETE} />
+                &nbsp;
+                <span>Видалити</span>
+              </button>
+            </section>
+          </nav>
+
           <header
             className="techMapHeader"
             style={{

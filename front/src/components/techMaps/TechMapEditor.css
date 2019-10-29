@@ -17,7 +17,6 @@
   background-color: transparent;
   border: none;
   color: #007AFF;
-  margin-left: 33px;
   cursor: pointer;
 }
 
@@ -25,13 +24,17 @@
   margin: -2px 6px 0 0;
 }
 
-.techMapEditorCrudSection {
+.techMapEditorNavBar {
   display: flex;
-  padding-left: 33px;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 20px 0;
 }
 
-.techMapEditorCrudSection > button {
+.techMapNavCrudSection {
+  display: flex;
+}
+
+.techMapNavCrudSection > button {
   display: flex;
   align-items: center;
   background-color: transparent;
@@ -39,7 +42,7 @@
   border-radius: 12px;
   cursor: pointer;
   padding: 4px 10px;
-  margin: 4px 6px;
+  margin-left: 6px;
 }
 
 .techMapEditorCrudBlue {
