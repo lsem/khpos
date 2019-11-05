@@ -15,3 +15,21 @@ export function inventoryRequestSucceeded(
     devices: devices
   };
 }
+
+export function inventoryInsert(
+  inventory: Device
+): actionTypes.InventoryActionTypes {
+  return {
+    type: actionTypes.INVENTORY_INSERT,
+    inventory
+  };
+}
+
+export function inventoryInsertRollback(
+  inventory: Device
+): actionTypes.InventoryActionTypes {
+  return {
+    type: actionTypes.INVENTORY_INSERT_ROLLBACK,
+    inventory
+  };
+}
