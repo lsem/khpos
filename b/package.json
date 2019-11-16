@@ -1,0 +1,33 @@
+{
+  "name": "kh-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=dev nodemon index.js",
+    "prod": "cross-env NODE_ENV=prod index.js",
+    "test": "cross-env NODE_ENV=test mocha tests/**/*.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^6.0.3",
+    "express": "^4.17.1",
+    "express-promise-router": "^3.0.3",
+    "joi": "^14.3.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "mongodb": "^3.3.3",
+    "morgan": "^1.9.1",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "chai-subset": "^1.6.0",
+    "mocha": "^6.2.2",
+    "mongodb-memory-server": "^6.0.1",
+    "nodemon": "^1.19.4"
+  }
+}
