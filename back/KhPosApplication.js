@@ -4,6 +4,7 @@ const joi = require("joi");
 const moment = require("moment");
 const _ = require("lodash");
 
+//#region Joi Validation Schemas
 const uuidRegExp = tag =>
   `^${tag}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
 const jobIdRegExp = new RegExp(uuidRegExp("JOB"), "i");
@@ -12,8 +13,6 @@ const stepIdRegExp = new RegExp(uuidRegExp("STP"), "i");
 const employeeIdRegExp = new RegExp(uuidRegExp("EMP"), "i");
 const ingredientIdRegExp = new RegExp(uuidRegExp("ING"), "i");
 const inventoryIdRegExp = new RegExp(uuidRegExp("INV"), "i");
-
-////////////////////////////////////////////////////////////////////////////////////
 
 const techMapStepSchema = joi.object().keys({
   id: joi
@@ -123,10 +122,10 @@ const inventorySchema = joi.object().keys({
   name: joi.string().required(),
   units: joi.string().required()
 });
-
-////////////////////////////////////////////////////////////////////////////////////
+//#endregion
 
 class KhPosApplication {
+  //#region Internals
   constructor(deps) {
     if (!deps.storage) throw new Error("No storage");
     if (!deps.posterProxy) throw new Error("No posterProxy");
@@ -159,7 +158,9 @@ class KhPosApplication {
   async clearStorage() {
     await this.storage.clear();
   }
+  //#endregion
 
+  //#region Products
   async getProducts() {
     return new Promise((resolve, reject) => {
       this.posterProxyService.getProducts(
@@ -169,9 +170,9 @@ class KhPosApplication {
       );
     });
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////////
-
+  //#region Stock
   async getStock() {
     return new Promise((resolve, reject) => {
       this.posterProxyService.getStock(
@@ -181,9 +182,9 @@ class KhPosApplication {
       );
     });
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////////
-
+  //#region Jobs
   async getJobs(fromDate, toDate) {
     if (!fromDate || !toDate) {
       return await this.storage.getAllJobs();
@@ -223,9 +224,9 @@ class KhPosApplication {
     }
     return await this.storage.getJobById(irOrNull);
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////////
-
+  //#region Techmaps
   async getTechMapsHeads() {
     const all = await this.storage.getTechMaps();
     const heads = all.map(t => _.last(t.versions));
@@ -283,9 +284,9 @@ class KhPosApplication {
       };
     });
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////////
-
+  //#region Employees
   async getEmployeesCollection() {
     const employees = this.storage.getAllEmployees();
     return new Promise((resolve, reject) => {
@@ -323,9 +324,9 @@ class KhPosApplication {
     const validatedModel = await joi.validate(employee, employeeModelSchema);
     await this.storage.updateEmployeeById(id, validatedModel);
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////
-
+  //#region Ingridients
   async getIngredientsCollection() {
     return await this.storage.getIngredients();
   }
@@ -351,9 +352,9 @@ class KhPosApplication {
     await this.storage.insertIngredient(validatedModel);
     return validatedModel.id;
   }
+  //#endregion
 
-  ///////////////////////////////////////////////////////////////////////
-
+  //#region Inventory
   async getInventoryCollection() {
     return await this.storage.getInventory();
   }
@@ -379,6 +380,7 @@ class KhPosApplication {
     await this.storage.insertDevice(validatedModel);
     return validatedModel.id;
   }
+  //#endregion
 }
 
 module.exports = KhPosApplication;

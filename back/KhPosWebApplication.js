@@ -63,6 +63,7 @@ function errorHandler(err, req, res, next) {
 }
 
 class KhPosWebApplication {
+  //#region Internals
   constructor(config, khApp, inMemApp) {
     this.port = config.port;
     this.khApp = khApp;
@@ -120,14 +121,18 @@ class KhPosWebApplication {
       console.log(`web: listening on port ${this.port}!`)
     );
   }
+  //#endregion
 
+  //#region Stock API
   getStock(req, res, next) {
     this.khApp
       .getStock()
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Products API
   getProducts(req, res, next) {
     debug("getting products");
     this.khApp
@@ -135,7 +140,9 @@ class KhPosWebApplication {
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Jobs API
   //
   // GET /jobs
   //
@@ -193,7 +200,9 @@ class KhPosWebApplication {
       .then(() => res.status(200).send())
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Techmaps API
   //
   // GET /techmaps
   //
@@ -253,7 +262,9 @@ class KhPosWebApplication {
       )
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Employees API
   //
   // GET /employees
   //
@@ -293,7 +304,9 @@ class KhPosWebApplication {
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Ingridients API
   //
   // GET /ingredients
   //
@@ -323,7 +336,9 @@ class KhPosWebApplication {
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+  //#endregion
 
+  //#region Inventory API
   //
   // GET /inventory
   //
@@ -353,6 +368,7 @@ class KhPosWebApplication {
       .then(data => res.send(data))
       .catch(err => next(err));
   }
+  //#endregion
 }
 
 module.exports = KhPosWebApplication;

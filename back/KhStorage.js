@@ -10,6 +10,7 @@ const STATE_DISCONNECTED = "STATE_DISCONNECTED";
 const EXCLUDE_MONGO_ID = { projection: { _id: 0 } };
 
 class KhStorage extends EventEmitter {
+  //#region Internals
   constructor(config) {
     super();
     this.uri = config.uri;
@@ -99,8 +100,9 @@ class KhStorage extends EventEmitter {
     await this.ensureIndexes();
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////
-
+  //#endregion
+ 
+  //#region Jobs
   async insertJob(jobModel) {
     try {
       await this.db.collection("jobs").insertOne(jobModel);
@@ -183,8 +185,9 @@ class KhStorage extends EventEmitter {
     return job;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
+  //#endregion
 
+  //#region Employees
   async getAllEmployees() {
     //return sampleData.getStaff();
     return await this.db
@@ -248,9 +251,9 @@ class KhStorage extends EventEmitter {
       model
     );
   }
+  //#endregion
 
-  /////////////////////////////////////////////////////////////////////////////
-
+  //#region Techmaps
   async getTechMaps() {
     return await this.db
       .collection("techMaps")
@@ -283,8 +286,9 @@ class KhStorage extends EventEmitter {
     await this.db.collection("techMaps").replaceOne({ id }, { ...updated });
   }
 
-  /////////////////////////////////////////////////////////////////////////////
+  //#endregion
 
+  //#region Ingridients
   async getIngredients() {
     return await this.db
       .collection("ingredients")
@@ -311,9 +315,9 @@ class KhStorage extends EventEmitter {
       }
     }
   }
+  //#endregion
 
-  /////////////////////////////////////////////////////////////////////////////
-
+  //#region Inventory
   async getInventory() {
     return await this.db
       .collection("inventory")
@@ -340,6 +344,8 @@ class KhStorage extends EventEmitter {
       }
     }
   }
+  //#endregion
 }
+
 
 module.exports = KhStorage;
