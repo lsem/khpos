@@ -1,0 +1,46 @@
+{
+  "name": "posterproxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.1",
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
+    "joi": "^13.6.0",
+    "lodash": "^4.17.15",
+    "moment": "^2.22.2",
+    "mongodb": "^3.1.1",
+    "morgan": "^1.9.0",
+    "uuid": "^3.3.2"
+  },
+  "prettier": {
+    "printWidth": 90,
+    "parser": "flow"
+  },
+  "devDependencies": {
+    "@types/expect": "^24.3.0",
+    "@types/joi": "^14.3.4",
+    "@types/lodash": "^4.14.152",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.5",
+    "@types/uuid": "^8.0.0",
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
+    "chai-subset": "^1.6.0",
+    "mocha": "^5.2.0",
+    "mongodb-memory-server": "^2.4.3",
+    "source-map": "^0.7.3",
+    "source-map-support": "^0.5.19",
+    "ts-mocha": "^7.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.3"
+  }
+}

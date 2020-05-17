@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es6",                      
+    "module": "commonjs",  
+    "allowJs": true,
+    "sourceMap": true,
+    "outDir": "build",
+    "rootDir": "./",  
+    "composite": true,
+    "strict": true,   
+    "moduleResolution": "node",
+    "baseUrl": "./src/",
+    "rootDirs": [],            
+    "typeRoots": [],           
+    "types": ["mocha"],        
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,             
+    "skipLibCheck": true,                     
+    "forceConsistentCasingInFileNames": true  
+  }
+}
