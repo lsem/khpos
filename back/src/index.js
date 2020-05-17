@@ -1,4 +1,4 @@
-const config = require('./config/index');
+const config = require('../config/index');
 let PosterProxyService = require('./posterProxy');
 let KhStorage = require('./KhStorage');
 let InMemStorage = require('./InMemStorage');

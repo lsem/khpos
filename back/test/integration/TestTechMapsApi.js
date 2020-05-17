@@ -1,6 +1,6 @@
 process.env.NODE_ENV = "test";
 
-const KhPosNodeTestApp = require("../../KhPosNodeTestApp");
+const KhPosNodeTestApp = require("./KhPosNodeTestApp");
 const chai = require("chai");
 var expect = require("chai").expect;
 var assert = require("chai").assert;

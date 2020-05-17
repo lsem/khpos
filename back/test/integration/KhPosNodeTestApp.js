@@ -1,8 +1,8 @@
-let PosterProxyService = require("./posterProxy");
-let KhStorage = require("./KhStorage");
-let KhPosApplication = require("./KhPosApplication");
-let KhPosWebApplication = require("./KhPosWebApplication");
-let KhStock = require("./KhStock");
+let PosterProxyService = require("../../src/posterProxy");
+let KhStorage = require("../../src/KhStorage");
+let KhPosApplication = require("../../src/KhPosApplication");
+let KhPosWebApplication = require("../../src/KhPosWebApplication");
+let KhStock = require("../../src/KhStock");
 const mongoDbServer = require('mongodb-memory-server');
 
 class KhPosNodeTestApp {
@@ -14,7 +14,7 @@ class KhPosNodeTestApp {
       uri: await mongod.getUri(),
       keepReconnect: false
     });
-    return new KhPosNodeTestApp(require("./config/index"), mongod, testStorage);
+    return new KhPosNodeTestApp(require("../../config/index"), mongod, testStorage);
   }
 
   constructor(config, mongod, storage) {
