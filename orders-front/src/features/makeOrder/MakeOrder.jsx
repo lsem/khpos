@@ -42,17 +42,17 @@ const useStyles = makeStyles((theme) => ({
   },
   goodsLi: {
     padding: "0 10px",
-    "&:hover": {
-      backgroundColor: theme.palette.action.focus,
-    },
-    "&:active": {
-      backgroundColor: theme.palette.action.active,
-    },
     "&:nth-child(even)": {
       backgroundColor: theme.palette.background.default,
     },
     "&:nth-child(odd)": {
       backgroundColor: theme.palette.background.paper,
+    },
+    "&:hover": {
+      backgroundColor: theme.palette.action.focus,
+    },
+    "&:active": {
+      backgroundColor: theme.palette.action.active,
     },
   },
   categoryLi: {
