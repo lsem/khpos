@@ -1,11 +1,28 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { TextField, Fab, Typography } from "@material-ui/core";
+import {
+  TextField,
+  Fab,
+  Typography,
+  Dialog,
+  Slide,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Button,
+} from "@material-ui/core";
 import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
 import goods from "../../samples/goods.json";
+import OrderCheckout from "./OrderCheckout";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+//#region STYLES
 
 const useStyles = makeStyles((theme) => ({
   unselectable: {
@@ -93,6 +110,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+//#endregion
+
 function MakeOrder() {
   const classes = useStyles();
 
@@ -107,7 +126,36 @@ function MakeOrder() {
     goodsWithQty: goods.map((g) => {
       return { ...g, quantity: 0 };
     }),
+
+    orderedGoods: [],
+
+    showCheckout: false,
+
+    messageBox: {
+      show: false,
+      message: "",
+    },
   });
+
+  const showMessageBox = (message) => {
+    setState({
+      ...state,
+      messageBox: {
+        show: true,
+        message,
+      },
+    });
+  };
+
+  const closeMessageBox = () => {
+    setState({
+      ...state,
+      messageBox: {
+        show: false,
+        message: "",
+      },
+    });
+  };
 
   const handleExpandClick = (category) => {
     setState({
@@ -120,6 +168,39 @@ function MakeOrder() {
               expanded: !category.expanded,
             }
       ),
+    });
+  };
+
+  const handleQuantityChange = (event, goodId) => {
+    setState({
+      ...state,
+      goodsWithQty: state.goodsWithQty.map((g) =>
+        g.id !== goodId ? g : { ...g, quantity: +event.target.value }
+      ),
+    });
+  };
+
+  const handleCheckoutClick = () => {
+    const atLeastOneOrdered = state.goodsWithQty.filter((g) => g.quantity > 0);
+
+    if (!atLeastOneOrdered || !atLeastOneOrdered.length) {
+      showMessageBox("Ви нічого не замовили.");
+      return;
+    }
+
+    const orderedGoods = _.groupBy(atLeastOneOrdered, "category");
+
+    setState({
+      ...state,
+      orderedGoods,
+      showCheckout: true,
+    });
+  };
+
+  const handleCancelCheckoutClick = () => {
+    setState({
+      ...state,
+      showCheckout: false,
     });
   };
 
@@ -156,13 +237,13 @@ function MakeOrder() {
                   )}
                 >
                   {_(state.goodsWithQty)
-                    .filter((g) => g.category !== c.category)
+                    .filter((g) => g.category === c.category)
                     .sortBy("name")
-                    .map((g, i) => {
+                    .map((g) => {
                       return (
                         <div
                           className={classNames(classes.li, classes.goodsLi)}
-                          key={i}
+                          key={g.id}
                           onClick={(e) => {
                             e.target.childNodes[1] &&
                               e.target.childNodes[1].focus();
@@ -176,6 +257,7 @@ function MakeOrder() {
                             onFocus={(event) => {
                               event.target.select();
                             }}
+                            onChange={(e) => handleQuantityChange(e, g.id)}
                           />
                         </div>
                       );
@@ -188,9 +270,42 @@ function MakeOrder() {
         }
       </div>
 
-      <Fab color="primary" className={classes.fab}>
+      <Fab
+        color="primary"
+        className={classes.fab}
+        onClick={handleCheckoutClick}
+      >
         <AssignmentTurnedIn />
       </Fab>
+
+      <Dialog
+        fullScreen
+        open={state.showCheckout}
+        onClose={handleCancelCheckoutClick}
+        TransitionComponent={Transition}
+      >
+        <OrderCheckout
+          orderedGoods={state.orderedGoods}
+          closeCheckout={handleCancelCheckoutClick}
+        />
+      </Dialog>
+
+      <Dialog
+        open={state.messageBox.show}
+        onClose={closeMessageBox}
+        aria-labelledby="alert-dialog-title"
+      >
+        <DialogContent>
+          <DialogTitle id="alert-dialog-title">
+            {state.messageBox.message}
+          </DialogTitle>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeMessageBox} color="primary" autoFocus>
+            Зрозуміло
+          </Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 }
