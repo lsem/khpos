@@ -1,50 +1,99 @@
 import React, { useState } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import {
-  TextField,
-  Fab,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Collapse,
-  Divider,
-} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { TextField, Fab, Typography } from "@material-ui/core";
 import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
+import classNames from "classnames";
 import goods from "../../samples/goods.json";
 
 const useStyles = makeStyles((theme) => ({
+  unselectable: {
+    userSelect: "none",
+  },
   list: {
     maxWidth: 800,
-    margin: "0 auto"
+    margin: "0 auto",
   },
   fab: {
     position: "fixed",
     bottom: theme.spacing(4),
-    right: theme.spacing(4),
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: 80,
+    left: theme.spacing(4),
   },
   dateField: {
     display: "block",
     maxWidth: 150,
     margin: "20px auto 5px auto",
   },
-  button: {
-    margin: theme.spacing(1),
+  expandable: {},
+  expandableHidden: {
+    display: "none",
   },
-  nested: {
-    paddingLeft: theme.spacing(4),
+  expandableVisible: {
+    display: "block",
+  },
+  li: {
+    margin: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    transition: "background-color 200ms linear",
+    cursor: "pointer",
+  },
+  goodsLi: {
+    padding: "0 10px",
+    "&:hover": {
+      backgroundColor: theme.palette.action.focus,
+    },
+    "&:active": {
+      backgroundColor: theme.palette.action.active,
+    },
+    "&:nth-child(even)": {
+      backgroundColor: theme.palette.background.default,
+    },
+    "&:nth-child(odd)": {
+      backgroundColor: theme.palette.background.paper,
+    },
+  },
+  categoryLi: {
+    padding: theme.spacing(2),
+    borderWidth: "0 0 1px 0",
+    borderStyle: "solid",
+    borderColor: theme.palette.divider,
+    "&:hover": {
+      backgroundColor: theme.palette.action.focus,
+    },
+    "&:active": {
+      backgroundColor: theme.palette.action.active,
+    },
+  },
+  numberInput: {
+    height: 36,
+    width: 80,
+    padding: theme.spacing(1),
+    margin: 0,
+    boxSizing: "border-box",
+    outline: "none",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: theme.palette.text.disabled,
+    borderRadius: 5,
+    borderStyle: "solid",
+    color: theme.palette.text.primary,
+    fontFamily: "inherit",
+    fontSize: "inherit",
+    "&:hover": {
+      borderColor: theme.palette.text.primary,
+    },
+    "&:focus": {
+      borderWidth: 2,
+      borderRadius: 5,
+      borderColor: theme.palette.info.dark,
+    },
   },
 }));
 
 function MakeOrder() {
-  const theme = useTheme();
   const classes = useStyles();
 
   const [state, setState] = useState({
@@ -87,55 +136,56 @@ function MakeOrder() {
             shrink: true,
           }}
         />
-        <List className={classes.list}>
-          {state.categories.map((c, i) => (
-            <React.Fragment key={i}>
-              <ListItem button onClick={() => handleExpandClick(c)}>
-                <ListItemText primary={c.category} />
-                {c.expanded ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
-
-              <Collapse in={c.expanded} timeout={0} unmountOnExit>
-                <List component={List} disablePadding>
+        {
+          <div className={classes.list}>
+            {state.categories.map((c, i) => (
+              <React.Fragment key={i}>
+                <div
+                  className={classNames(classes.li, classes.categoryLi)}
+                  onClick={() => handleExpandClick(c)}
+                >
+                  <Typography>{c.category}</Typography>
+                  {c.expanded ? <ExpandLess /> : <ExpandMore />}
+                </div>
+                <div
+                  className={classNames(
+                    classes.expandable,
+                    c.expanded
+                      ? classes.expandableVisible
+                      : classes.expandableHidden
+                  )}
+                >
                   {_(state.goodsWithQty)
                     .filter((g) => g.category !== c.category)
                     .sortBy("name")
-                    .map((g, i) => (
-                      <ListItem
-                        button
-                        className={classes.nested}
-                        key={i}
-                        style={{
-                          backgroundColor:
-                            i % 2
-                              ? theme.palette.background.default
-                              : theme.palette.background.paper,
-                        }}
-                      >
-                        <ListItemText primary={g.name} />
-                        <ListItemSecondaryAction>
-                          <TextField
-                            className={classes.textField}
+                    .map((g, i) => {
+                      return (
+                        <div
+                          className={classNames(classes.li, classes.goodsLi)}
+                          key={i}
+                          onClick={(e) => {
+                            e.target.childNodes[1] &&
+                              e.target.childNodes[1].focus();
+                          }}
+                        >
+                          <p className={classes.unselectable}>{g.name}</p>
+                          <input
+                            className={classes.numberInput}
                             defaultValue={g.quantity}
                             type="number"
-                            id="outlined-basic"
-                            label=""
-                            variant="outlined"
-                            size="small"
                             onFocus={(event) => {
                               event.target.select();
                             }}
                           />
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    ))
+                        </div>
+                      );
+                    })
                     .valueOf()}
-                </List>
-              </Collapse>
-              <Divider />
-            </React.Fragment>
-          ))}
-        </List>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        }
       </div>
 
       <Fab color="primary" className={classes.fab}>
