@@ -68,9 +68,6 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       backgroundColor: theme.palette.action.focus,
     },
-    "&:active": {
-      backgroundColor: theme.palette.action.active,
-    },
   },
   categoryLi: {
     padding: theme.spacing(2),
