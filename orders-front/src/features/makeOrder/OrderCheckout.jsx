@@ -25,6 +25,11 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     backgroundColor: theme.palette.background.default,
     marginBottom: 20,
+    paddingTop: 20,
+    "& h6": {
+      textAlign: "center",
+      margin: 5
+    }
   },
   buttonBar: {
     display: "flex",
@@ -46,6 +51,8 @@ export default function OrderCheckout(props) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
+        <Typography variant="h6">{props.orderDate}</Typography>
+        <Typography variant="h6">{props.sellPoint}</Typography>
         <table>
           <tbody>
             <tr>

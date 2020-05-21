@@ -10,12 +10,17 @@ import {
   DialogTitle,
   DialogActions,
   Button,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@material-ui/core";
 import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
 import goods from "../../samples/goods.json";
+import sellPoints from "../../samples/sellPoints.json";
 import OrderCheckout from "./OrderCheckout";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -37,10 +42,16 @@ const useStyles = makeStyles((theme) => ({
     bottom: theme.spacing(4),
     left: theme.spacing(4),
   },
-  dateField: {
-    display: "block",
-    maxWidth: 150,
-    margin: "20px auto 5px auto",
+  optionsBar: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "20px 0 5px 0",
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 140,
   },
   expandable: {},
   expandableHidden: {
@@ -132,7 +143,25 @@ function MakeOrder() {
       show: false,
       message: "",
     },
+
+    orderDate: moment().add(1, "days").valueOf(),
+
+    sellPointId: sellPoints[0].id,
   });
+
+  const handleOrderDateChange = (event) => {
+    setState({
+      ...state,
+      orderDate: moment(event.target.value).valueOf(),
+    });
+  };
+
+  const handleSellPointChange = (event) => {
+    setState({
+      ...state,
+      sellPointId: event.target.value,
+    });
+  };
 
   const showMessageBox = (message) => {
     setState({
@@ -204,16 +233,35 @@ function MakeOrder() {
   return (
     <React.Fragment>
       <div>
-        <TextField
-          id="date"
-          label="Дата замовлення"
-          type="date"
-          defaultValue={moment().add(1, "days").format("YYYY-MM-DD")}
-          className={classes.dateField}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
+        <div className={classes.optionsBar}>
+          <FormControl className={classes.formControl}>
+            <TextField
+              id="date"
+              label="Дата замовлення"
+              type="date"
+              defaultValue={moment(state.orderDate).format("YYYY-MM-DD")}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={handleOrderDateChange}
+            />
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <InputLabel id="select-sell-point-label">Точка продажу</InputLabel>
+            <Select
+              labelId="select-sell-point-label"
+              id="select-sell-point"
+              value={state.sellPointId}
+              onChange={handleSellPointChange}
+            >
+              {sellPoints.map((sp) => (
+                <MenuItem key={sp.id} value={sp.id}>
+                  {sp.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
         {
           <div className={classes.list}>
             {state.categories.map((c, i) => (
@@ -282,6 +330,8 @@ function MakeOrder() {
         TransitionComponent={Transition}
       >
         <OrderCheckout
+          orderDate={moment(state.orderDate).format("DD.MM.YYYY")}
+          sellPoint={sellPoints.find((sp) => sp.id === state.sellPointId).name}
           orderedGoods={state.orderedGoods}
           closeCheckout={handleCancelCheckoutClick}
         />
