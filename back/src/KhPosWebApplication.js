@@ -68,7 +68,7 @@ class KhPosWebApplication {
     this.port = config.port;
     this.khApp = khApp;
     this.inMemApp = inMemApp;
-    this.khApp.onError(what => {
+    this.khApp.onError((what) => {
       this.error = what;
     });
     this.app = express();
@@ -127,8 +127,8 @@ class KhPosWebApplication {
   getStock(req, res, next) {
     this.khApp
       .getStock()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -137,8 +137,8 @@ class KhPosWebApplication {
     debug("getting products");
     this.khApp
       .getProducts()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -164,8 +164,8 @@ class KhPosWebApplication {
     }
     this.getApp(req)
       .getJobs(fromDate, toDate)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //
   // GET /job
@@ -174,8 +174,8 @@ class KhPosWebApplication {
     debug(req.params.id);
     this.getApp(req)
       .getJob(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //
   // POST /jobs
@@ -184,13 +184,13 @@ class KhPosWebApplication {
     debug("body: %O", req.body);
     this.getApp(req)
       .insertJob(req.body)
-      .then(id =>
+      .then((id) =>
         res
           .status(201)
           .location("/jobs/" + id)
           .send()
       )
-      .catch(err => next(err));
+      .catch((err) => next(err));
   }
 
   patchJob(req, res, next) {
@@ -198,7 +198,7 @@ class KhPosWebApplication {
     this.getApp(req)
       .updateJob(req.params.id, req.body)
       .then(() => res.status(200).send())
-      .catch(err => next(err));
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -209,29 +209,29 @@ class KhPosWebApplication {
   getTechMaps(req, res, next) {
     this.khApp
       .getTechMapsHeads()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   getTechMap(req, res, next) {
     this.khApp
       .getTechMapAllVersions(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   getTechMapHead(req, res, next) {
     this.khApp
       .getTechMapHead(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   getTechMapSpecificVersion(req, res, next) {
     this.khApp
       .getTechMapSpecificVersion(req.params.id, req.params.version)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -240,13 +240,13 @@ class KhPosWebApplication {
   postTechMap(req, res, next) {
     this.khApp
       .insertTechMap(req.body)
-      .then(id =>
+      .then((id) =>
         res
           .status(201)
           .location("/techMaps/" + id)
           .send()
       )
-      .catch(err => next(err));
+      .catch((err) => next(err));
   }
 
   //
@@ -255,12 +255,8 @@ class KhPosWebApplication {
   putTechMap(req, res, next) {
     this.khApp
       .updateTechMap(req.params.id, req.body)
-      .then(id =>
-        res
-          .status(200)
-          .send()
-      )
-      .catch(err => next(err));
+      .then((id) => res.status(200).send())
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -271,8 +267,8 @@ class KhPosWebApplication {
   getEmployees(req, res, next) {
     this.khApp
       .getEmployeesCollection()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -282,7 +278,7 @@ class KhPosWebApplication {
     this.getApp(req)
       .updateEmployee(req.params.id, req.body)
       .then(() => res.status(200).send())
-      .catch(err => next(err));
+      .catch((err) => next(err));
   }
 
   //
@@ -291,8 +287,8 @@ class KhPosWebApplication {
   getEmployee(req, res, next) {
     this.khApp
       .getEmployee(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -301,8 +297,8 @@ class KhPosWebApplication {
   postEmployee(req, res, next) {
     this.khApp
       .insertEmployee(req.body)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -313,8 +309,8 @@ class KhPosWebApplication {
   getIngredients(req, res, next) {
     this.khApp
       .getIngredientsCollection()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -323,8 +319,8 @@ class KhPosWebApplication {
   getIngredient(req, res, next) {
     this.khApp
       .getIngredient(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -333,8 +329,8 @@ class KhPosWebApplication {
   postIngredient(req, res, next) {
     this.khApp
       .insertIngredient(req.body)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //#endregion
 
@@ -345,8 +341,8 @@ class KhPosWebApplication {
   getInventory(req, res, next) {
     this.khApp
       .getInventoryCollection()
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -355,8 +351,8 @@ class KhPosWebApplication {
   getDevice(req, res, next) {
     this.khApp
       .getDevice(req.params.id)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
 
   //
@@ -365,8 +361,8 @@ class KhPosWebApplication {
   postDevice(req, res, next) {
     this.khApp
       .insertDevice(req.body)
-      .then(data => res.send(data))
-      .catch(err => next(err));
+      .then((data) => res.send(data))
+      .catch((err) => next(err));
   }
   //#endregion
 }
