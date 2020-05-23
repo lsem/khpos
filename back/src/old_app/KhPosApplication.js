@@ -415,4 +415,6 @@ class KhPosApplication {
   //#endregion
 }
 
+
+
 module.exports = KhPosApplication;

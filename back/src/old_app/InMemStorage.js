@@ -1,4 +1,4 @@
-const EventEmitter = require("events");
+import EventEmitter from 'events';
 let debug = require("debug")("khinmemstorage");
 const sampleData = require("./sampleData");
 let appErrors = require("./AppErrors");
