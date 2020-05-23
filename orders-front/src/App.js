@@ -3,8 +3,8 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import ApplicationBar from "./features/applicationBar/ApplicationBar";
-import MakeOrder from "./features/makeOrder/MakeOrder";
+import ApplicationBar from "./features/ApplicationBar";
+import MakeOrder from "./features/MakeOrder";
 
 function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");

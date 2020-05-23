@@ -19,8 +19,8 @@ import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import goods from "../../samples/goods.json";
-import sellPoints from "../../samples/sellPoints.json";
+import goods from "../samples/goods.json";
+import sellPoints from "../samples/sellPoints.json";
 import OrderCheckout from "./OrderCheckout";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
