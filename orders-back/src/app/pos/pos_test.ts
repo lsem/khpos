@@ -40,6 +40,7 @@ describe("[point-of-interests]", () => {
       await pos.createPOS(storage, "ЧУПРИНКИ1");
       firstPassed = true;
       await pos.createPOS(storage, "ЧУПРИНКИ1");
+      assert.fail("Second executed while not supposed to");
     } catch (err) {
       assert.instanceOf(err, Error);
       assert.equal(err.message, "POS IDName is not unique");
