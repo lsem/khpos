@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   TextField,
   Fab,
   Typography,
   Dialog,
-  Slide,
   DialogContent,
   DialogTitle,
   DialogActions,
@@ -19,13 +19,11 @@ import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import goods from "../samples/goods.json";
-import sellPoints from "../samples/sellPoints.json";
-import OrderCheckout from "./OrderCheckout";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import {
+  getOrderFromApi,
+  getSellPointsFromApi,
+  selectCategories,
+} from "./orderManagementSlice";
 
 //#region STYLES
 
@@ -120,114 +118,38 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function MakeOrder() {
+function MakeOrder(props) {
+  const { getSellPoints, sellPoints, order } = props;
+
+  useEffect(() => getSellPoints(), []);
+
   const classes = useStyles();
 
-  const [state, setState] = useState({
-    categories: _(goods)
-      .uniqBy((g) => g.category)
-      .map((o) => {
-        return { category: o.category, expanded: false };
-      })
-      .valueOf(),
-
-    goodsWithQty: goods.map((g) => {
-      return { ...g, quantity: 0 };
-    }),
-
-    orderedGoods: [],
-
-    showCheckout: false,
-
-    messageBox: {
-      show: false,
-      message: "",
-    },
-
-    orderDate: moment().add(1, "days").valueOf(),
-
-    sellPointId: sellPoints[0].id,
-  });
-
-  const handleOrderDateChange = (event) => {
-    setState({
-      ...state,
-      orderDate: moment(event.target.value).valueOf(),
-    });
-  };
-
-  const handleSellPointChange = (event) => {
-    setState({
-      ...state,
-      sellPointId: event.target.value,
-    });
-  };
-
-  const showMessageBox = (message) => {
-    setState({
-      ...state,
-      messageBox: {
-        show: true,
-        message,
-      },
-    });
-  };
-
-  const closeMessageBox = () => {
-    setState({
-      ...state,
-      messageBox: {
-        show: false,
-        message: "",
-      },
-    });
-  };
+  const [orderDate, setOrderDate] = useState(moment().add(1, "days").valueOf());
+  const [sellPointId, setSellPointId] = useState("");
+  const [messageBox, setMessageBox] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [items, setItems] = useState([]);
 
   const handleExpandClick = (category) => {
-    setState({
-      ...state,
-      categories: state.categories.map((c) =>
+    setCategories(
+      categories.map((c) =>
         c.category !== category.category
           ? c
           : {
               ...category,
               expanded: !category.expanded,
             }
-      ),
-    });
+      )
+    );
   };
 
-  const handleQuantityChange = (event, goodId) => {
-    setState({
-      ...state,
-      goodsWithQty: state.goodsWithQty.map((g) =>
-        g.id !== goodId ? g : { ...g, quantity: +event.target.value }
-      ),
-    });
-  };
-
-  const handleCheckoutClick = () => {
-    const atLeastOneOrdered = state.goodsWithQty.filter((g) => g.quantity > 0);
-
-    if (!atLeastOneOrdered || !atLeastOneOrdered.length) {
-      showMessageBox("Ви нічого не замовили.");
-      return;
-    }
-
-    const orderedGoods = _.groupBy(atLeastOneOrdered, "category");
-
-    setState({
-      ...state,
-      orderedGoods,
-      showCheckout: true,
-    });
-  };
-
-  const handleCancelCheckoutClick = () => {
-    setState({
-      ...state,
-      showCheckout: false,
-    });
+  const handleOrderedQuantityChange = (event, goodId) => {
+    setItems(
+      items.map((g) =>
+        g.id !== goodId ? g : { ...g, orderedcount: +event.target.value }
+      )
+    );
   };
 
   return (
@@ -239,32 +161,42 @@ function MakeOrder() {
               id="date"
               label="Дата замовлення"
               type="date"
-              defaultValue={moment(state.orderDate).format("YYYY-MM-DD")}
+              defaultValue={moment(orderDate).format("YYYY-MM-DD")}
               InputLabelProps={{
                 shrink: true,
               }}
-              onChange={handleOrderDateChange}
+              onChange={(e) => {
+                setOrderDate(e.target.value);
+              }}
             />
           </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel id="select-sell-point-label">Точка продажу</InputLabel>
-            <Select
-              labelId="select-sell-point-label"
-              id="select-sell-point"
-              value={state.sellPointId}
-              onChange={handleSellPointChange}
-            >
-              {sellPoints.map((sp) => (
-                <MenuItem key={sp.id} value={sp.id}>
-                  {sp.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {sellPoints ? (
+            <FormControl className={classes.formControl}>
+              <InputLabel id="select-sell-point-label">
+                Точка продажу
+              </InputLabel>
+              <Select
+                labelId="select-sell-point-label"
+                id="select-sell-point"
+                value={sellPointId}
+                onChange={(e) => {
+                  setSellPointId(e.target.value);
+                }}
+              >
+                {sellPoints.map((sp) => (
+                  <MenuItem key={sp.id} value={sp.id}>
+                    {sp.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <Typography>завантажується...</Typography>
+          )}
         </div>
-        {
+        {order ? (
           <div className={classes.list}>
-            {state.categories.map((c, i) => (
+            {categories.map((c, i) => (
               <React.Fragment key={i}>
                 <div
                   className={classNames(classes.li, classes.categoryLi)}
@@ -281,7 +213,7 @@ function MakeOrder() {
                       : classes.expandableHidden
                   )}
                 >
-                  {_(state.goodsWithQty)
+                  {_(items)
                     .filter((g) => g.category === c.category)
                     .sortBy("name")
                     .map((g) => {
@@ -302,7 +234,9 @@ function MakeOrder() {
                             onFocus={(event) => {
                               event.target.select();
                             }}
-                            onChange={(e) => handleQuantityChange(e, g.id)}
+                            onChange={(e) =>
+                              handleOrderedQuantityChange(e, g.id)
+                            }
                           />
                         </div>
                       );
@@ -312,43 +246,29 @@ function MakeOrder() {
               </React.Fragment>
             ))}
           </div>
-        }
+        ) : (
+          <Typography>завантажується...</Typography>
+        )}
       </div>
 
-      <Fab
-        color="primary"
-        className={classes.fab}
-        onClick={handleCheckoutClick}
-      >
+      <Fab color="primary" className={classes.fab}>
         <AssignmentTurnedIn />
       </Fab>
 
       <Dialog
-        fullScreen
-        open={state.showCheckout}
-        onClose={handleCancelCheckoutClick}
-        TransitionComponent={Transition}
-      >
-        <OrderCheckout
-          orderDate={moment(state.orderDate).format("DD.MM.YYYY")}
-          sellPoint={sellPoints.find((sp) => sp.id === state.sellPointId).name}
-          orderedGoods={state.orderedGoods}
-          closeCheckout={handleCancelCheckoutClick}
-        />
-      </Dialog>
-
-      <Dialog
-        open={state.messageBox.show}
-        onClose={closeMessageBox}
+        open={messageBox}
+        onClose={() => setMessageBox(false)}
         aria-labelledby="alert-dialog-title"
       >
         <DialogContent>
-          <DialogTitle id="alert-dialog-title">
-            {state.messageBox.message}
-          </DialogTitle>
+          <DialogTitle id="alert-dialog-title">{messageBox}</DialogTitle>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeMessageBox} color="primary" autoFocus>
+          <Button
+            onClick={() => setMessageBox(false)}
+            color="primary"
+            autoFocus
+          >
             Зрозуміло
           </Button>
         </DialogActions>
@@ -357,4 +277,18 @@ function MakeOrder() {
   );
 }
 
-export default MakeOrder;
+const mapStateToProps = (state) => ({
+  order: state.orderManagement.order,
+  sellPoints: state.orderManagement.sellPoints,
+  error: state.orderManagement.errorMessage,
+  categories: selectCategories(state),
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  getOrder: (date, sellPointId) => {
+    dispatch(getOrderFromApi(date, sellPointId));
+  },
+  getSellPoints: () => { dispatch(getSellPointsFromApi()) },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MakeOrder);

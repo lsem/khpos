@@ -4,7 +4,7 @@ import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import ApplicationBar from "./features/ApplicationBar";
-import OrderManagement from "./features/OrderManagement";
+import OrderManagement from "./features/orderManagement/OrderManagement";
 
 function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
