@@ -2,616 +2,862 @@
     {
         "id": "0792fb0a-99e4-11ea-bb37-0242ac130002",
         "name": "Домашній хліб",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0792fde4-99e4-11ea-bb37-0242ac130002",
         "name": "Жорновий хліб",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0792fee8-99e4-11ea-bb37-0242ac130002",
         "name": "Багет",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0792ffb0-99e4-11ea-bb37-0242ac130002",
         "name": "Булка бургерна",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793006e-99e4-11ea-bb37-0242ac130002",
         "name": "Булка Тру Бургер",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930280-99e4-11ea-bb37-0242ac130002",
         "name": "Булочка 80 г в2в",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793033e-99e4-11ea-bb37-0242ac130002",
         "name": "Булочка бріош",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079303fc-99e4-11ea-bb37-0242ac130002",
         "name": "Буряковий",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079304b0-99e4-11ea-bb37-0242ac130002",
         "name": "Заварний",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930636-99e4-11ea-bb37-0242ac130002",
         "name": "Культовий",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079306fe-99e4-11ea-bb37-0242ac130002",
         "name": "Хліб Бріош",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079307b2-99e4-11ea-bb37-0242ac130002",
         "name": "Хліб Бріош тостовий",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930866-99e4-11ea-bb37-0242ac130002",
         "name": "Хліб Французький",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079309ec-99e4-11ea-bb37-0242ac130002",
         "name": "Цільнозерновий",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930aaa-99e4-11ea-bb37-0242ac130002",
         "name": "Чіабата з оливками",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930b68-99e4-11ea-bb37-0242ac130002",
         "name": "Чіабата класична",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930c1c-99e4-11ea-bb37-0242ac130002",
         "name": "Чіабата солод.-греч.",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930e38-99e4-11ea-bb37-0242ac130002",
         "name": "Шведський",
-        "category": "ХЛІБ"
+        "category": "ХЛІБ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930f00-99e4-11ea-bb37-0242ac130002",
         "name": "Вишневий пиріг",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07930fbe-99e4-11ea-bb37-0242ac130002",
         "name": "Кекс гарбузовий",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793107c-99e4-11ea-bb37-0242ac130002",
         "name": "Маківник",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931144-99e4-11ea-bb37-0242ac130002",
         "name": "Мафін",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079312a2-99e4-11ea-bb37-0242ac130002",
         "name": "Наполеон",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931374-99e4-11ea-bb37-0242ac130002",
         "name": "Панфорте",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931428-99e4-11ea-bb37-0242ac130002",
         "name": "Профітролі пусті",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079314e6-99e4-11ea-bb37-0242ac130002",
         "name": "Сирник",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079315a4-99e4-11ea-bb37-0242ac130002",
         "name": "Смородиновий тарт",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931716-99e4-11ea-bb37-0242ac130002",
         "name": "Тарт чорничний",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079317d4-99e4-11ea-bb37-0242ac130002",
         "name": "Фінський чорничний",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931892-99e4-11ea-bb37-0242ac130002",
         "name": "Шарлотка",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079319b4-99e4-11ea-bb37-0242ac130002",
         "name": "Штрудель яблучний",
-        "category": "ПИРОГИ СОЛОДКІ"
+        "category": "ПИРОГИ СОЛОДКІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931a7c-99e4-11ea-bb37-0242ac130002",
         "name": "Гарбузовий пиріг",
-        "category": "ПИРОГИ СОЛОНІ"
+        "category": "ПИРОГИ СОЛОНІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931b3a-99e4-11ea-bb37-0242ac130002",
         "name": "Кіш з бринзою",
-        "category": "ПИРОГИ СОЛОНІ"
+        "category": "ПИРОГИ СОЛОНІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931ca2-99e4-11ea-bb37-0242ac130002",
         "name": "Кіш з куркою",
-        "category": "ПИРОГИ СОЛОНІ"
+        "category": "ПИРОГИ СОЛОНІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931dd8-99e4-11ea-bb37-0242ac130002",
         "name": "Овочева Корзинка",
-        "category": "ПИРОГИ СОЛОНІ"
+        "category": "ПИРОГИ СОЛОНІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931eb4-99e4-11ea-bb37-0242ac130002",
         "name": "Штрудель з фетою",
-        "category": "ПИРОГИ СОЛОНІ"
+        "category": "ПИРОГИ СОЛОНІ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07931fea-99e4-11ea-bb37-0242ac130002",
         "name": "Еклер",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079320a8-99e4-11ea-bb37-0242ac130002",
         "name": "Пана кота",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079321c0-99e4-11ea-bb37-0242ac130002",
         "name": "Тартал. з лим. курд.",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793227e-99e4-11ea-bb37-0242ac130002",
         "name": "Тортик білий",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079323e6-99e4-11ea-bb37-0242ac130002",
         "name": "Тортик чорний",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079324ae-99e4-11ea-bb37-0242ac130002",
         "name": "Чіа з манго",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793256c-99e4-11ea-bb37-0242ac130002",
         "name": "Чіа смузі апельсинов.",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793262a-99e4-11ea-bb37-0242ac130002",
         "name": "Чіа смузі яблучно- гарбуз.",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079327ba-99e4-11ea-bb37-0242ac130002",
         "name": "Чіа смузі гранатовий",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932882-99e4-11ea-bb37-0242ac130002",
         "name": "Чіа смузі чорничний",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932940-99e4-11ea-bb37-0242ac130002",
         "name": "Шоколад. тарталетка",
-        "category": "ДЕСЕРТИ"
+        "category": "ДЕСЕРТИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079329fe-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан крем-чіз",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932b70-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан з моцарел.",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932c38-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан мигдалевий",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932d96-99e4-11ea-bb37-0242ac130002",
         "name": "Сендвіч-круасан",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07932f4e-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан з вишнею",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933034-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан з абрикосом",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079330fc-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан мороженний",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079331ba-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан пустий",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933304-99e4-11ea-bb37-0242ac130002",
         "name": "Круасан зерн. пустий",
-        "category": "КРУАСАН"
+        "category": "КРУАСАН",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079333cc-99e4-11ea-bb37-0242ac130002",
         "name": "Начинка лимон",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933516-99e4-11ea-bb37-0242ac130002",
         "name": "Начинка вишня",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079335e8-99e4-11ea-bb37-0242ac130002",
         "name": "Начинка абрикос",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079336a6-99e4-11ea-bb37-0242ac130002",
         "name": "Начинка шоколад",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079337f0-99e4-11ea-bb37-0242ac130002",
         "name": "Начинка крем-чіз",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079338ae-99e4-11ea-bb37-0242ac130002",
         "name": "Мигдалевий краш",
-        "category": "НАЧИНКИ"
+        "category": "НАЧИНКИ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793399e-99e4-11ea-bb37-0242ac130002",
         "name": "Шоколадне печиво",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933aa2-99e4-11ea-bb37-0242ac130002",
         "name": "Вівсяне печиво",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933bd8-99e4-11ea-bb37-0242ac130002",
         "name": "Журавлинове з шоколадом",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933cdc-99e4-11ea-bb37-0242ac130002",
         "name": "Житнє печиво",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933e08-99e4-11ea-bb37-0242ac130002",
         "name": "Печиво Тоффі/фундук",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07933f0c-99e4-11ea-bb37-0242ac130002",
         "name": "Пряник",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934038-99e4-11ea-bb37-0242ac130002",
         "name": "Фруктове",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934146-99e4-11ea-bb37-0242ac130002",
         "name": "Кокосове без яєць",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934236-99e4-11ea-bb37-0242ac130002",
         "name": "Печиво Vegan біле",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934330-99e4-11ea-bb37-0242ac130002",
         "name": "Кунжутне печиво",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079344ca-99e4-11ea-bb37-0242ac130002",
         "name": "Кокосові хмаринки",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934600-99e4-11ea-bb37-0242ac130002",
         "name": "Сирне солене",
-        "category": "ПЕЧИВО"
+        "category": "ПЕЧИВО",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934740-99e4-11ea-bb37-0242ac130002",
         "name": "Смузі Галіція",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793484e-99e4-11ea-bb37-0242ac130002",
         "name": "Моршинська сл.г. 0,33",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793495c-99e4-11ea-bb37-0242ac130002",
         "name": "Моршинська н.г. 0,33",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934a42-99e4-11ea-bb37-0242ac130002",
         "name": "Мангове ласі",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934b5a-99e4-11ea-bb37-0242ac130002",
         "name": "Галіція сік асорті, по N шт",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934c4a-99e4-11ea-bb37-0242ac130002",
         "name": "Сироп",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934d62-99e4-11ea-bb37-0242ac130002",
         "name": "Сироп",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934e7a-99e4-11ea-bb37-0242ac130002",
         "name": "Сироп",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07934f9c-99e4-11ea-bb37-0242ac130002",
         "name": "Сироп",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079350be-99e4-11ea-bb37-0242ac130002",
         "name": "Топінг",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935208-99e4-11ea-bb37-0242ac130002",
         "name": "Кава",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935762-99e4-11ea-bb37-0242ac130002",
         "name": "Какао",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079358b6-99e4-11ea-bb37-0242ac130002",
         "name": "Кориця",
-        "category": "НАПОЇ"
+        "category": "НАПОЇ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079359ec-99e4-11ea-bb37-0242ac130002",
         "name": "Цукор стік",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935b18-99e4-11ea-bb37-0242ac130002",
         "name": "Ложки",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935c58-99e4-11ea-bb37-0242ac130002",
         "name": "Серветки",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935d7a-99e4-11ea-bb37-0242ac130002",
         "name": "Рушнички",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935eb0-99e4-11ea-bb37-0242ac130002",
         "name": "Рукавиці",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07935fb4-99e4-11ea-bb37-0242ac130002",
         "name": "Ганчірки",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936108-99e4-11ea-bb37-0242ac130002",
         "name": "Пакети малі",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793623e-99e4-11ea-bb37-0242ac130002",
         "name": "Пакети середні",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079363d8-99e4-11ea-bb37-0242ac130002",
         "name": "Пакет багет",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793659a-99e4-11ea-bb37-0242ac130002",
         "name": "Пакет майка",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079366da-99e4-11ea-bb37-0242ac130002",
         "name": "Пакет Вишиванка",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079367de-99e4-11ea-bb37-0242ac130002",
         "name": "Пакет Великий",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936950-99e4-11ea-bb37-0242ac130002",
         "name": "Коробка пиріг",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936ae0-99e4-11ea-bb37-0242ac130002",
         "name": "Коробка 0.5 пиріг",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936c20-99e4-11ea-bb37-0242ac130002",
         "name": "Контейнер квадратний",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936d60-99e4-11ea-bb37-0242ac130002",
         "name": "Контейнер довгий",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936ec8-99e4-11ea-bb37-0242ac130002",
         "name": "Мішалка дерево",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07936ff4-99e4-11ea-bb37-0242ac130002",
         "name": "Зубочистка",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793710c-99e4-11ea-bb37-0242ac130002",
         "name": "Стакани великі",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079372c4-99e4-11ea-bb37-0242ac130002",
         "name": "Стакани малі",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079374d6-99e4-11ea-bb37-0242ac130002",
         "name": "Кришки малі",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793760c-99e4-11ea-bb37-0242ac130002",
         "name": "Кришки великі",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "0793771a-99e4-11ea-bb37-0242ac130002",
         "name": "Миючий для рук",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937814-99e4-11ea-bb37-0242ac130002",
         "name": "Пакет сміттєвий",
-        "category": "ІНШЕ"
+        "category": "ІНШЕ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937936-99e4-11ea-bb37-0242ac130002",
         "name": "Чорний",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937a30-99e4-11ea-bb37-0242ac130002",
         "name": "Трав'яний",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937b5c-99e4-11ea-bb37-0242ac130002",
         "name": "Фруктовий",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937d32-99e4-11ea-bb37-0242ac130002",
         "name": "Зелений",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937e72-99e4-11ea-bb37-0242ac130002",
         "name": "Гінкго",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07937fe4-99e4-11ea-bb37-0242ac130002",
         "name": "А. Різдвяне диво",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079380f2-99e4-11ea-bb37-0242ac130002",
         "name": "А. Блакитна долина",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07938228-99e4-11ea-bb37-0242ac130002",
         "name": "А. Детоксік",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079383c2-99e4-11ea-bb37-0242ac130002",
         "name": "А. Чай-тонік",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "07938642-99e4-11ea-bb37-0242ac130002",
         "name": "Чорний з бергамот.",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079387a0-99e4-11ea-bb37-0242ac130002",
         "name": "Молоко",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     },
     {
         "id": "079388b8-99e4-11ea-bb37-0242ac130002",
         "name": "Вершки",
-        "category": "ЧАЙ"
+        "category": "ЧАЙ",
+        "orderedcount": 0,
+        "deliveredcount": 0
     }
 ]
