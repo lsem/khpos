@@ -2,6 +2,7 @@ import { EntityID } from "./core_types";
 
 // Defines model for POS
 interface POSModel {
+  posID: EntityID;
   posIDName: string;
 }
 

@@ -9,6 +9,7 @@ class InMemoryStorage implements AbstractStorage {
   orders = new Map<EntityID, OrderModel>();
   products = new Map<EntityID, ProductModel>();
 
+  //#region Products
   async insertProduct(productID: EntityID, productModel: ProductModel): Promise<void> {
     // todo: validate that not exists.
     this.products.set(productID, productModel);
@@ -20,8 +21,13 @@ class InMemoryStorage implements AbstractStorage {
     }
     return this.products.get(id)!
   }
+  //#endregion
 
+  //#region POS
   async insertPointOfSale(posID: EntityID, posModel: POSModel): Promise<void> {
+    if (this.poss.has(posID)) {
+      throw new Error("Already exists");
+    }
     this.poss.set(posID, posModel);
   }
 
@@ -32,9 +38,12 @@ class InMemoryStorage implements AbstractStorage {
     return this.poss.get(posID)!;    
   }
 
-  getAllPointsOfSale(): Promise<void> {
-    throw new Error("Method not implemented.");
+  async getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>> {
+    return Array.from(this.poss.values());
   }
+  //#endregion
+
+  //#region Orders
   async insertOrder(orderID: EntityID, orderModel: OrderModel): Promise<void> {
     this.orders.set(orderID, orderModel);
   }
@@ -54,13 +63,16 @@ class InMemoryStorage implements AbstractStorage {
     }
     return results;
   }
+  //#endregion
 
+  //#region  Users
   async insertUser(userID: EntityID, userModel: UserModel): Promise<void> {
     this.users.set(userID, userModel);
   }
   getUsers(): Promise<void> {
     throw new Error("Method not implemented.");
   }
+  //#endregion
 }
 
 export { InMemoryStorage };

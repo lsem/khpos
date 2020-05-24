@@ -37,6 +37,7 @@ describe("orders", () => {
     const pos1ID = new EntityID("POS");
     storage.insertPointOfSale(pos1ID, {
       posIDName: "ЮЛипи",
+      posID: pos1ID,
     });
 
     // Create another User2.
@@ -50,6 +51,7 @@ describe("orders", () => {
     const pos2ID = new EntityID("POS");
     storage.insertPointOfSale(pos2ID, {
       posIDName: "Чупринки",
+      posID: pos2ID
     });
 
     // User1 places its order for some day.

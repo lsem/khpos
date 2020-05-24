@@ -7,7 +7,7 @@ interface AbstractStorage {
   getProductByID(id: EntityID): Promise<ProductModel>;
   insertPointOfSale(posID: EntityID, posModel: POSModel): Promise<void>;
   getPointOfSale(posID: EntityID): Promise<POSModel>;
-  getAllPointsOfSale(): Promise<void>;
+  getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>>;
   insertOrder(orderID: EntityID, rderModel: OrderModel): Promise<void>;
   getOrders(from: Date, to: Date): Promise<OrderModel[]>;
   insertUser(userID: EntityID, userModel: UserModel): Promise<void>;
