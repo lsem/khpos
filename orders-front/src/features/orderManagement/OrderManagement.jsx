@@ -1,3 +1,4 @@
+//#region IMPORTS
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
@@ -14,20 +15,22 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  CircularProgress,
 } from "@material-ui/core";
 import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
 import {
-  getOrderFromApi,
-  getSellPointsFromApi,
-  selectCategories,
+  thunkGetOrderFromApi,
+  thunkGetSellPointsFromApi,
 } from "./orderManagementSlice";
+//#endregion
 
 //#region STYLES
 
 const useStyles = makeStyles((theme) => ({
+  root: {},
   unselectable: {
     userSelect: "none",
   },
@@ -114,26 +117,40 @@ const useStyles = makeStyles((theme) => ({
       borderColor: theme.palette.info.dark,
     },
   },
+  hintText: {
+    textAlign: "center",
+    margin: theme.spacing(6),
+    color: theme.palette.text.hint,
+  },
 }));
 
 //#endregion
 
-function MakeOrder(props) {
-  const { getSellPoints, sellPoints, order } = props;
-
-  useEffect(() => getSellPoints(), []);
-
+function MakeOrder({ getOrder, getSellPoints, sellPoints, order, categories }) {
   const classes = useStyles();
 
+  //#region STATE
   const [orderDate, setOrderDate] = useState(moment().add(1, "days").valueOf());
   const [sellPointId, setSellPointId] = useState("");
   const [messageBox, setMessageBox] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categoriesMenu, setCategoriesMenu] = useState([]);
   const [items, setItems] = useState([]);
+  //#endregion
 
+  //#region EFFECTS
+  useEffect(() => {
+    getSellPoints();
+  }, [getSellPoints]);
+
+  useEffect(() => {
+    if (sellPointId) getOrder(orderDate, sellPointId);
+  }, [orderDate, sellPointId, getOrder]);
+  //#endregion
+
+  //#region UI HANDLERS
   const handleExpandClick = (category) => {
-    setCategories(
-      categories.map((c) =>
+    setCategoriesMenu(
+      categoriesMenu.map((c) =>
         c.category !== category.category
           ? c
           : {
@@ -151,10 +168,25 @@ function MakeOrder(props) {
       )
     );
   };
+  //#endregion
+
+  //#region JSX
+  if (order && !categoriesMenu.length) {
+    setCategoriesMenu(
+      _(order.items)
+        .uniqBy((g) => {
+          return g.category;
+        })
+        .map((o) => {
+          return { category: o.category, expanded: false };
+        })
+        .valueOf()
+    );
+  }
 
   return (
     <React.Fragment>
-      <div>
+      <div className={classes.root}>
         <div className={classes.optionsBar}>
           <FormControl className={classes.formControl}>
             <TextField
@@ -194,9 +226,10 @@ function MakeOrder(props) {
             <Typography>завантажується...</Typography>
           )}
         </div>
-        {order ? (
+
+        {!order ? null : (
           <div className={classes.list}>
-            {categories.map((c, i) => (
+            {categoriesMenu.map((c, i) => (
               <React.Fragment key={i}>
                 <div
                   className={classNames(classes.li, classes.categoryLi)}
@@ -213,29 +246,29 @@ function MakeOrder(props) {
                       : classes.expandableHidden
                   )}
                 >
-                  {_(items)
-                    .filter((g) => g.category === c.category)
+                  {_(order.items)
+                    .filter((i) => i.category === c.category)
                     .sortBy("name")
-                    .map((g) => {
+                    .map((i) => {
                       return (
                         <div
                           className={classNames(classes.li, classes.goodsLi)}
-                          key={g.id}
+                          key={i.id}
                           onClick={(e) => {
                             e.target.childNodes[1] &&
                               e.target.childNodes[1].focus();
                           }}
                         >
-                          <p className={classes.unselectable}>{g.name}</p>
+                          <p className={classes.unselectable}>{i.name}</p>
                           <input
                             className={classes.numberInput}
-                            defaultValue={g.quantity}
+                            defaultValue={i.orderedcount}
                             type="number"
                             onFocus={(event) => {
                               event.target.select();
                             }}
                             onChange={(e) =>
-                              handleOrderedQuantityChange(e, g.id)
+                              handleOrderedQuantityChange(e, i.id)
                             }
                           />
                         </div>
@@ -246,10 +279,20 @@ function MakeOrder(props) {
               </React.Fragment>
             ))}
           </div>
-        ) : (
-          <Typography>завантажується...</Typography>
         )}
       </div>
+
+      {sellPointId ? null : (
+        <Typography variant="h5" className={classes.hintText}>
+          оберіть точку продажу
+        </Typography>
+      )}
+
+      {!(sellPointId && !order) ? null : (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CircularProgress style={{ margin: "30px auto" }} />
+        </div>
+      )}
 
       <Fab color="primary" className={classes.fab}>
         <AssignmentTurnedIn />
@@ -275,20 +318,22 @@ function MakeOrder(props) {
       </Dialog>
     </React.Fragment>
   );
+  //#endregion
 }
 
 const mapStateToProps = (state) => ({
   order: state.orderManagement.order,
   sellPoints: state.orderManagement.sellPoints,
   error: state.orderManagement.errorMessage,
-  categories: selectCategories(state),
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getOrder: (date, sellPointId) => {
-    dispatch(getOrderFromApi(date, sellPointId));
+    dispatch(thunkGetOrderFromApi(date, sellPointId));
   },
-  getSellPoints: () => { dispatch(getSellPointsFromApi()) },
+  getSellPoints: () => {
+    dispatch(thunkGetSellPointsFromApi());
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(MakeOrder);

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import _ from "lodash";
 
 //temp samples
 import itemsSample from "../../samples/orderManagement.json";
@@ -13,6 +12,9 @@ export const goodsSlice = createSlice({
     errorMessage: null,
   },
   reducers: {
+    getOrderFromApi: (state) => {
+      state.order = null;
+    },
     setOrder: (state, action) => {
       state.order = action.payload;
       state.errorMessage = null;
@@ -20,6 +22,9 @@ export const goodsSlice = createSlice({
     setOrderError: (state, action) => {
       state.order = null;
       state.errorMessage = action.payload;
+    },
+    getSellPointsFromApi: (state) => {
+      state.sellPoints = null;
     },
     setSellPoints: (state, action) => {
       state.sellPoints = action.payload;
@@ -33,17 +38,20 @@ export const goodsSlice = createSlice({
 });
 
 //actions
-export const {
+const {
+  getOrderFromApi,
   setOrder,
   setOrderError,
+  getSellPointsFromApi,
   setSellPoints,
   setSellPointsError,
 } = goodsSlice.actions;
 
 //thunks
-export const getOrderFromApi = (date, sellPointId) => (dispatch) => {
+export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
+  dispatch(getOrderFromApi());
   new Promise((resolve) => {
-    setTimeout(resolve, 100);
+    setTimeout(resolve, 1000);
   })
     .then(() => {
       dispatch(
@@ -56,12 +64,15 @@ export const getOrderFromApi = (date, sellPointId) => (dispatch) => {
         })
       );
     })
-    .catch(dispatch(setOrderError("Не вдалося отримати товари з сервера")));
+    .catch(() => {
+      dispatch(setOrderError("Не вдалося отримати товари з сервера"));
+    });
 };
 
-export const getSellPointsFromApi = () => (dispatch) => {
+export const thunkGetSellPointsFromApi = () => (dispatch) => {
+  dispatch(getSellPointsFromApi());
   new Promise((resolve) => {
-    setTimeout(resolve, 5000);
+    setTimeout(resolve, 1000);
   })
     .then(() => {
       dispatch(setSellPoints(sellPointsSample));
@@ -72,12 +83,5 @@ export const getSellPointsFromApi = () => (dispatch) => {
       );
     });
 };
-
-export const selectCategories = (state) =>
-  state.orderManagement.order
-    ? _(state.orderManagement.order.items)
-        .uniqBy((g) => g.category)
-        .valueOf()
-    : [];
 
 export default goodsSlice.reducer;
