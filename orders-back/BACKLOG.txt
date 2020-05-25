@@ -5,3 +5,5 @@
 - Implement WEB API for orders/uers/producsts
 - Implement sync tools for Poster API
 - Implement access rights for users
+- Consider introducing PorductionShop as separate entity, at least internally with some predefined value (it may not ProductionShop but something like BackOffice)
+- Consider creating Audit LOG
