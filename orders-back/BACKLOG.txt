@@ -4,3 +4,4 @@
 - Design an approach to writing tests for storage so that such tests can be ran for different storage implementations.
 - Implement WEB API for orders/uers/producsts
 - Implement sync tools for Poster API
+- Implement access rights for users

@@ -4,6 +4,10 @@ import {UserModel} from 'types/domain_types';
 
 export async function createUser(storage: AbstractStorage, userIDName: string, userFullName: string,
                                  telNumber: string): Promise<EntityID> {
+  const maybeExisting = await storage.findUserByIdName(userIDName);
+  if (maybeExisting) {
+    throw new Error("User with such IDName already exists")
+  }
   const newUserID = new EntityID('USR');
   storage.insertUser(newUserID, {
     userID : newUserID,

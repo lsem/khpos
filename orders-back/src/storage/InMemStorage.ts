@@ -80,6 +80,12 @@ class InMemoryStorage implements AbstractStorage {
     return this.users.get(userID)!;
   }
 
+  async findUserByIdName(idName: string): Promise<UserModel|undefined> {
+    const maybeUser = _.find(Array.from(this.users.values()),
+                             (u: UserModel) => { return u.userIdName == idName; });
+    return maybeUser;
+  }
+
   //#endregion
 }
 

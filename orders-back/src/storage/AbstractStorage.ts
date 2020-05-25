@@ -13,6 +13,7 @@ interface AbstractStorage {
   insertUser(userID: EntityID, userModel: UserModel): Promise<void>;
   getUser(userID: EntityID): Promise<UserModel>;
   getAllUsers(): Promise<ReadonlyArray<UserModel>>;
+  findUserByIdName(idName: string): Promise<UserModel|undefined>;
 }
 
 export {AbstractStorage};
