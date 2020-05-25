@@ -1,11 +1,23 @@
-import { AbstractStorage } from "storage/AbstractStorage";
+import {AbstractStorage} from 'storage/AbstractStorage';
+import {EntityID} from 'types/core_types';
+import {UserModel} from 'types/domain_types';
 
-
-async function createUser(storage: AbstractStorage) {
+export async function createUser(storage: AbstractStorage, userIDName: string, userFullName: string,
+                                 telNumber: string): Promise<EntityID> {
+  const newUserID = new EntityID('USR');
+  storage.insertUser(newUserID, {
+    userID : newUserID,
+    userIdName : userIDName,
+    userFullName : userFullName,
+    telNumber : telNumber,
+  });
+  return newUserID;
 }
 
-async function getUsers(storage: AbstractStorage) {
-
+export async function getAllUsers(storage: AbstractStorage): Promise<ReadonlyArray<UserModel>> {
+  return storage.getAllUsers();
 }
 
-export { createUser, getUsers };
+export async function getUser(storage: AbstractStorage, userID: EntityID): Promise<UserModel> {
+  return storage.getUser(userID);
+}

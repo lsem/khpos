@@ -12,10 +12,7 @@ class EntityID {
     this.innerStr = tag + "-" + uuid.v1();
   }
 
-  toString() {
-    return this.innerStr;
-  }
+  toString() { return this.innerStr; }
 }
 
-
-export { EntityID };
+export {EntityID};

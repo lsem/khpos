@@ -1,5 +1,5 @@
-import { EntityID } from "../types/core_types";
-import { POSModel, UserModel, OrderModel, ProductModel } from "../types/domain_types";
+import {EntityID} from "../types/core_types";
+import {OrderModel, POSModel, ProductModel, UserModel} from "../types/domain_types";
 
 // Defines abstract storage interface.
 interface AbstractStorage {
@@ -11,7 +11,8 @@ interface AbstractStorage {
   insertOrder(orderID: EntityID, rderModel: OrderModel): Promise<void>;
   getOrders(from: Date, to: Date): Promise<OrderModel[]>;
   insertUser(userID: EntityID, userModel: UserModel): Promise<void>;
-  getUsers(): Promise<void>;
+  getUser(userID: EntityID): Promise<UserModel>;
+  getAllUsers(): Promise<ReadonlyArray<UserModel>>;
 }
 
-export { AbstractStorage };
+export {AbstractStorage};

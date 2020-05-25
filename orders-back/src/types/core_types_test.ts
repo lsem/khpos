@@ -1,5 +1,5 @@
-import { assert } from "chai";
-import { EntityID } from "./core_types";
+import {assert} from "chai";
+import {EntityID} from "./core_types";
 
 describe("[core_types]", () => {
   it("Entity id should be comparable", () => {

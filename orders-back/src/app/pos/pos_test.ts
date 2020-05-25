@@ -1,6 +1,7 @@
-import { assert } from "chai";
+import {assert} from "chai";
+import {InMemoryStorage} from "storage/InMemStorage";
+
 import * as pos from "./pos";
-import { InMemoryStorage } from "storage/InMemStorage";
 
 describe("[point-of-interests]", () => {
   it("should be possible to create point of sales and get listed them", async () => {
@@ -10,22 +11,22 @@ describe("[point-of-interests]", () => {
 
     assert.deepEqual(await pos.getAllPOS(storage), [
       {
-        posIDName: "ЧУПРИНКИ1",
-        posID: pos1ID,
+        posIDName : "ЧУПРИНКИ1",
+        posID : pos1ID,
       },
       {
-        posIDName: "ЛЕВИЦЬКОГО1",
-        posID: pos2ID,
+        posIDName : "ЛЕВИЦЬКОГО1",
+        posID : pos2ID,
       },
     ]);
 
     assert.deepEqual(await pos.getPOSByID(storage, pos1ID), {
-      posID: pos1ID,
-      posIDName: "ЧУПРИНКИ1",
+      posID : pos1ID,
+      posIDName : "ЧУПРИНКИ1",
     });
     assert.deepEqual(await pos.getPOSByID(storage, pos2ID), {
-      posID: pos2ID,
-      posIDName: "ЛЕВИЦЬКОГО1",
+      posID : pos2ID,
+      posIDName : "ЛЕВИЦЬКОГО1",
     });
   });
 

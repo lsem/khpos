@@ -1,7 +1,9 @@
-import { AbstractStorage } from "./AbstractStorage";
-import { EntityID } from "../types/core_types";
-import { POSModel, UserModel, OrderModel, ProductModel } from "../types/domain_types";
 import _ from "lodash";
+
+import {EntityID} from "../types/core_types";
+import {OrderModel, POSModel, ProductModel, UserModel} from "../types/domain_types";
+
+import {AbstractStorage} from "./AbstractStorage";
 
 class InMemoryStorage implements AbstractStorage {
   users = new Map<EntityID, UserModel>();
@@ -35,7 +37,7 @@ class InMemoryStorage implements AbstractStorage {
     if (!this.poss.has(posID)) {
       throw new Error("Does not exists!");
     }
-    return this.poss.get(posID)!;    
+    return this.poss.get(posID)!;
   }
 
   async getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>> {
@@ -49,9 +51,8 @@ class InMemoryStorage implements AbstractStorage {
   }
 
   async getOrders(from: Date, to: Date): Promise<OrderModel[]> {
-    const truncateTime = (d1: Date): Date => {
-      return new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
-    };
+    const truncateTime =
+        (d1: Date): Date => { return new Date(d1.getFullYear(), d1.getMonth(), d1.getDate()); };
     from = truncateTime(from);
     to = truncateTime(to);
     let results: OrderModel[] = [];
@@ -69,10 +70,17 @@ class InMemoryStorage implements AbstractStorage {
   async insertUser(userID: EntityID, userModel: UserModel): Promise<void> {
     this.users.set(userID, userModel);
   }
-  getUsers(): Promise<void> {
-    throw new Error("Method not implemented.");
+  async getAllUsers(): Promise<readonly UserModel[]> { return Array.from(this.users.values()); }
+
+  async getUser(userID: EntityID): Promise<UserModel> {
+    if (!this.users.has(userID)) {
+      throw new Error('User does not exist');
+    }
+    // todo: return clone! add test!
+    return this.users.get(userID)!;
   }
+
   //#endregion
 }
 
-export { InMemoryStorage };
+export {InMemoryStorage};

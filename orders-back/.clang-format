@@ -1,0 +1,5 @@
+# JavaScriptWrapImports
+
+Language:        JavaScript
+BasedOnStyle:    LLVM
+ColumnLimit:     100

@@ -1,4 +1,4 @@
-import { EntityID } from "./core_types";
+import {EntityID} from "./core_types";
 
 // Defines model for POS
 interface POSModel {
@@ -7,8 +7,10 @@ interface POSModel {
 }
 
 interface UserModel {
+  userID: EntityID;
   userIdName: string;
   userFullName: string;
+  telNumber: string;
 }
 
 interface OrderModelItem {
@@ -28,4 +30,4 @@ interface ProductModel {
   productName: string;
 }
 
-export { POSModel, UserModel, OrderModel, OrderModelItem, ProductModel };
+export {POSModel, UserModel, OrderModel, OrderModelItem, ProductModel};
