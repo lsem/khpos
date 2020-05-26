@@ -278,7 +278,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                             <p className={classes.unselectable}>{i.name}</p>
                             <input
                               className={classes.numberInput}
-                              defaultValue={i.orderedcount}
+                              value={i.orderedcount}
                               type="number"
                               onFocus={(event) => {
                                 event.target.select();
