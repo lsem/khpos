@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import moment from "moment";
 
 //temp samples
 import itemsSample from "../../samples/orderManagement.json";
@@ -47,6 +48,13 @@ const {
   setSellPointsError,
 } = goodsSlice.actions;
 
+//temp helper
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 //thunks
 export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
   dispatch(getOrderFromApi());
@@ -54,13 +62,24 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
     setTimeout(resolve, 1000);
   })
     .then(() => {
+      let items, status;
+      if (moment(date).isBefore(moment())) {
+        items = JSON.parse(JSON.stringify(itemsSample))
+          .filter((item, i) => !(i%9))
+          .map((i) => ({ ...i, orderedcount: getRandomInt(1, 20) }));
+        status = "processing";
+      } else {
+        items = itemsSample;
+        status = "new";
+      }
+
       dispatch(
         setOrder({
           id: "eda20216-9dc8-11ea-bb37-0242ac130002",
           sellPointId,
           date,
-          status: "new",
-          items: itemsSample,
+          status,
+          items,
         })
       );
     })
