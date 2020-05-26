@@ -130,7 +130,9 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   const classes = useStyles();
 
   //#region STATE
-  const [orderDate, setOrderDate] = React.useState(moment().add(1, "days").valueOf());
+  const [orderDate, setOrderDate] = React.useState(
+    moment().add(1, "days").valueOf()
+  );
   const [sellPointId, setSellPointId] = React.useState("");
   const [messageBox, setMessageBox] = React.useState(false);
   const [categoriesMenu, setCategoriesMenu] = React.useState([]);
@@ -159,9 +161,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
           .valueOf()
       );
 
-      setItems(
-        JSON.parse(JSON.stringify(order.items))
-      );
+      setItems(JSON.parse(JSON.stringify(order.items)));
     }
   }, [order]);
   //#endregion
@@ -235,55 +235,66 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
 
         {!order ? null : (
           <div className={classes.list}>
-            {categoriesMenu.map((c, i) => (
-              <React.Fragment key={i}>
-                <div
-                  className={classNames(classes.li, classes.categoryLi)}
-                  onClick={() => handleExpandClick(c)}
-                >
-                  <Typography>{c.category}</Typography>
-                  {c.expanded ? <ExpandLess /> : <ExpandMore />}
-                </div>
-                <div
-                  className={classNames(
-                    classes.expandable,
-                    c.expanded
-                      ? classes.expandableVisible
-                      : classes.expandableHidden
-                  )}
-                >
-                  {_(items)
-                    .filter((i) => i.category === c.category)
-                    .sortBy("name")
-                    .map((i) => {
-                      return (
-                        <div
-                          className={classNames(classes.li, classes.goodsLi)}
-                          key={i.id}
-                          onClick={(e) => {
-                            e.target.childNodes[1] &&
-                              e.target.childNodes[1].focus();
-                          }}
-                        >
-                          <p className={classes.unselectable}>{i.name}</p>
-                          <input
-                            className={classes.numberInput}
-                            defaultValue={i.orderedcount}
-                            type="number"
-                            onFocus={(event) => {
-                              event.target.select();
+            {categoriesMenu.map((c, i) => {
+              const categotyItems = items.filter(
+                (i) => i.category === c.category
+              );
+              const categorySummary = categotyItems.reduce(
+                (acc, cur) => acc + cur.orderedcount,
+                0
+              );
+              return (
+                <React.Fragment key={i}>
+                  <div
+                    className={classNames(classes.li, classes.categoryLi)}
+                    onClick={() => handleExpandClick(c)}
+                  >
+                    <Typography>
+                      {c.category}{" "}
+                      {categorySummary ? `(${categorySummary})` : null}
+                    </Typography>
+                    {c.expanded ? <ExpandLess /> : <ExpandMore />}
+                  </div>
+                  <div
+                    className={classNames(
+                      classes.expandable,
+                      c.expanded
+                        ? classes.expandableVisible
+                        : classes.expandableHidden
+                    )}
+                  >
+                    {_(categotyItems)
+                      .sortBy("name")
+                      .map((i) => {
+                        return (
+                          <div
+                            className={classNames(classes.li, classes.goodsLi)}
+                            key={i.id}
+                            onClick={(e) => {
+                              e.target.childNodes[1] &&
+                                e.target.childNodes[1].focus();
                             }}
-                            onChange={(e) =>
-                              handleOrderedQuantityChange(e, i.id)
-                            }
-                          />
-                        </div>
-                      );
-                    })
-                    .valueOf()}
-                </div>
-              </React.Fragment>
-            ))}
+                          >
+                            <p className={classes.unselectable}>{i.name}</p>
+                            <input
+                              className={classes.numberInput}
+                              defaultValue={i.orderedcount}
+                              type="number"
+                              onFocus={(event) => {
+                                event.target.select();
+                              }}
+                              onChange={(e) =>
+                                handleOrderedQuantityChange(e, i.id)
+                              }
+                            />
+                          </div>
+                        );
+                      })
+                      .valueOf()}
+                  </div>
+                </React.Fragment>
+              );
+            })}
           </div>
         )}
       </div>
