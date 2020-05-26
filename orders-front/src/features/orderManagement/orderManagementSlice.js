@@ -65,7 +65,7 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
       let items, status;
       if (moment(date).isBefore(moment())) {
         items = JSON.parse(JSON.stringify(itemsSample))
-          .filter((item, i) => !(i%9))
+          .filter((item, i) => !(i % 9))
           .map((i) => ({ ...i, orderedcount: getRandomInt(1, 20) }));
         status = "processing";
       } else {
@@ -83,8 +83,8 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
         })
       );
     })
-    .catch(() => {
-      dispatch(setOrderError("Не вдалося отримати товари з сервера"));
+    .catch((e) => {
+      dispatch(setOrderError(`Не вдалося отримати товари з сервера: ${e}`));
     });
 };
 
@@ -96,9 +96,9 @@ export const thunkGetSellPointsFromApi = () => (dispatch) => {
     .then(() => {
       dispatch(setSellPoints(sellPointsSample));
     })
-    .catch(() => {
+    .catch((e) => {
       dispatch(
-        setSellPointsError("Не вдалося отримати точки продажу з сервера")
+        setSellPointsError(`Не вдалося отримати точки продажу з сервера: ${e}`)
       );
     });
 };
