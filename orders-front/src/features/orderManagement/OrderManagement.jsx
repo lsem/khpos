@@ -16,6 +16,7 @@ import {
   InputLabel,
   FormControl,
   CircularProgress,
+  Divider,
 } from "@material-ui/core";
 import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
@@ -64,13 +65,14 @@ const useStyles = makeStyles((theme) => ({
   li: {
     margin: 0,
     display: "flex",
+    flexWrap: "wrap",
     alignItems: "center",
-    justifyContent: "space-between",
+    alignContent: "center",
     transition: "background-color 200ms linear",
     cursor: "pointer",
   },
   goodsLi: {
-    padding: "0 10px",
+    padding: "5px 10px",
     "&:nth-child(even)": {
       backgroundColor: theme.palette.background.default,
     },
@@ -117,10 +119,20 @@ const useStyles = makeStyles((theme) => ({
       borderColor: theme.palette.info.dark,
     },
   },
-  hintText: {
+  actionHint: {
     textAlign: "center",
     margin: theme.spacing(6),
     color: theme.palette.text.hint,
+  },
+  listCellHint: {
+    color: theme.palette.text.hint,
+    margin: theme.spacing(2),
+  },
+  flexLeft: {
+    marginRight: "auto",
+  },
+  flexRight: {
+    marginLeft: "auto",
   },
 }));
 
@@ -187,6 +199,14 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
       )
     );
   };
+
+  const handleDeliveredQuantityChange = (event, goodId) => {
+    setItems(
+      items.map((g) =>
+        g.id !== goodId ? g : { ...g, deliveredcount: +event.target.value }
+      )
+    );
+  };
   //#endregion
 
   //#region JSX
@@ -249,11 +269,13 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                     className={classNames(classes.li, classes.categoryLi)}
                     onClick={() => handleExpandClick(c)}
                   >
-                    <Typography>
+                    <Typography className={classes.flexLeft}>
                       {c.category}{" "}
                       {categorySummary ? `(${categorySummary})` : null}
                     </Typography>
-                    {c.expanded ? <ExpandLess /> : <ExpandMore />}
+                    <div className={classes.flexRight}>
+                      {c.expanded ? <ExpandLess /> : <ExpandMore />}
+                    </div>
                   </div>
                   <div
                     className={classNames(
@@ -271,26 +293,67 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                             className={classNames(classes.li, classes.goodsLi)}
                             key={i.id}
                             onClick={(e) => {
-                              e.target.childNodes[1] &&
-                                e.target.childNodes[1].focus();
+                              const ordInput = document.getElementById(
+                                `ord-input-${i.id}`
+                              );
+                              const delInput = document.getElementById(
+                                `del-input-${i.id}`
+                              );
+                              if (ordInput) ordInput.focus();
+                              if (delInput) delInput.focus();
                             }}
                           >
-                            <p className={classes.unselectable}>{i.name}</p>
-                            <input
-                              className={classes.numberInput}
-                              value={i.orderedcount}
-                              type="number"
-                              onFocus={(event) => {
-                                event.target.select();
-                              }}
-                              onChange={(e) =>
-                                handleOrderedQuantityChange(e, i.id)
-                              }
-                            />
+                            <span
+                              style={{ marginRight: "auto", maxWidth: 200 }}
+                              className={classes.unselectable}
+                            >
+                              {i.name}
+                            </span>
+                            <div style={{ marginLeft: "auto" }}>
+                              {order.status !== "closed" &&
+                              order.status !== "processing" ? (
+                                <input
+                                  id={`ord-input-${i.id}`}
+                                  className={classes.numberInput}
+                                  value={i.orderedcount}
+                                  type="number"
+                                  onFocus={(event) => {
+                                    event.target.select();
+                                  }}
+                                  onChange={(e) => {
+                                    handleOrderedQuantityChange(e, i.id);
+                                  }}
+                                />
+                              ) : (
+                                <span className={classes.listCellHint}>
+                                  замовлено: {i.orderedcount}
+                                </span>
+                              )}
+                              {order.status === "processing" ? (
+                                <input
+                                  id={`del-input-${i.id}`}
+                                  className={classes.numberInput}
+                                  value={i.deliveredcount}
+                                  type="number"
+                                  onFocus={(event) => {
+                                    event.target.select();
+                                  }}
+                                  onChange={(e) => {
+                                    handleDeliveredQuantityChange(e, i.id);
+                                  }}
+                                />
+                              ) : null}
+                              {order.status === "closed" ? (
+                                <span className={classes.listCellHint}>
+                                  прийнято: {i.deliveredcount}
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
                         );
                       })
                       .valueOf()}
+                    <Divider />
                   </div>
                 </React.Fragment>
               );
@@ -300,7 +363,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
       </div>
 
       {sellPointId ? null : (
-        <Typography variant="h5" className={classes.hintText}>
+        <Typography variant="h5" className={classes.actionHint}>
           оберіть точку продажу
         </Typography>
       )}
