@@ -17,8 +17,9 @@ import {
   FormControl,
   CircularProgress,
   Divider,
+  Menu,
 } from "@material-ui/core";
-import { AssignmentTurnedIn, ExpandLess, ExpandMore } from "@material-ui/icons";
+import { Check, MoreVert, ExpandLess, ExpandMore } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
@@ -43,6 +44,11 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     bottom: theme.spacing(4),
     left: theme.spacing(4),
+  },
+  fabMenu: {
+    position: "fixed",
+    bottom: theme.spacing(12),
+    left: theme.spacing(5),
   },
   optionsBar: {
     display: "flex",
@@ -149,6 +155,8 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   const [messageBox, setMessageBox] = React.useState(false);
   const [categoriesMenu, setCategoriesMenu] = React.useState([]);
   const [items, setItems] = React.useState([]);
+  const [anchorMenu, setAnchorMenu] = React.useState(null);
+  const [showUnordered, setShowUnordered] = React.useState(true);
   //#endregion
 
   //#region EFFECTS
@@ -206,6 +214,40 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         g.id !== goodId ? g : { ...g, deliveredcount: +event.target.value }
       )
     );
+  };
+
+  const handleMenuButtonClick = (event) => {
+    setAnchorMenu(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorMenu(null);
+  };
+
+  const handleFoldAll = () => {
+    setCategoriesMenu(
+      categoriesMenu.map((c) => ({
+        ...c,
+        expanded: false,
+      }))
+    );
+  };
+
+  const handleUnfoldAll = () => {
+    setCategoriesMenu(
+      categoriesMenu.map((c) => ({
+        ...c,
+        expanded: true,
+      }))
+    );
+  };
+
+  const handleHideUnordered = () => {
+    setShowUnordered(false);
+  };
+
+  const handleShowUnordered = () => {
+    setShowUnordered(false);
   };
   //#endregion
 
@@ -286,6 +328,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                     )}
                   >
                     {_(categotyItems)
+                      .filter((i) => showUnordered || i.orderedcount)
                       .sortBy("name")
                       .map((i) => {
                         return (
@@ -373,10 +416,32 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
           <CircularProgress style={{ margin: "30px auto" }} />
         </div>
       )}
-
+      {!items || !items.length ? null : (
+        <Fab
+          color="default"
+          className={classes.fabMenu}
+          onClick={handleMenuButtonClick}
+          size="small"
+        >
+          <MoreVert />
+        </Fab>
+      )}
       <Fab color="primary" className={classes.fab}>
-        <AssignmentTurnedIn />
+        <Check />
       </Fab>
+
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorMenu}
+        keepMounted
+        open={Boolean(anchorMenu)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleFoldAll}>Згорнути всі</MenuItem>
+        <MenuItem onClick={handleUnfoldAll}>Розгорнути всі</MenuItem>
+        <MenuItem onClick={handleHideUnordered}>Сховати незамовлені</MenuItem>
+        <MenuItem onClick={handleShowUnordered}>Показати незамовлені</MenuItem>
+      </Menu>
 
       <Dialog
         open={messageBox}
