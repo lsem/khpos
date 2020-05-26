@@ -63,12 +63,18 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
   })
     .then(() => {
       let items, status;
-      if (moment(date).isBefore(moment())) {
+      if (moment(date).isSame(moment(), "days")) {
         items = JSON.parse(JSON.stringify(itemsSample))
           .filter((item, i) => !(i % 9))
           .map((i) => ({ ...i, orderedcount: getRandomInt(1, 20) }));
         status = "processing";
-      } else {
+      } else if (moment(date).isBefore(moment(), "days")) {
+        items = JSON.parse(JSON.stringify(itemsSample))
+          .filter((item, i) => !(i % 9))
+          .map((i) => ({ ...i, orderedcount: getRandomInt(1, 20), deliveredcount: getRandomInt(1, 20)}));
+        status = "closed";
+      }
+       else {
         items = itemsSample;
         status = "new";
       }
