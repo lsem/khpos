@@ -1,5 +1,5 @@
 //#region IMPORTS
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -126,25 +126,44 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function MakeOrder({ getOrder, getSellPoints, sellPoints, order, categories }) {
+function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   const classes = useStyles();
 
   //#region STATE
-  const [orderDate, setOrderDate] = useState(moment().add(1, "days").valueOf());
-  const [sellPointId, setSellPointId] = useState("");
-  const [messageBox, setMessageBox] = useState(false);
-  const [categoriesMenu, setCategoriesMenu] = useState([]);
-  const [items, setItems] = useState([]);
+  const [orderDate, setOrderDate] = React.useState(moment().add(1, "days").valueOf());
+  const [sellPointId, setSellPointId] = React.useState("");
+  const [messageBox, setMessageBox] = React.useState(false);
+  const [categoriesMenu, setCategoriesMenu] = React.useState([]);
+  const [items, setItems] = React.useState([]);
   //#endregion
 
   //#region EFFECTS
-  useEffect(() => {
+  React.useEffect(() => {
     getSellPoints();
   }, [getSellPoints]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (sellPointId) getOrder(orderDate, sellPointId);
   }, [orderDate, sellPointId, getOrder]);
+
+  React.useEffect(() => {
+    if (order) {
+      setCategoriesMenu(
+        _(order.items)
+          .uniqBy((g) => {
+            return g.category;
+          })
+          .map((o) => {
+            return { category: o.category, expanded: false };
+          })
+          .valueOf()
+      );
+
+      setItems(
+        JSON.parse(JSON.stringify(order.items))
+      );
+    }
+  }, [order]);
   //#endregion
 
   //#region UI HANDLERS
@@ -171,19 +190,6 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order, categories }) {
   //#endregion
 
   //#region JSX
-  if (order && !categoriesMenu.length) {
-    setCategoriesMenu(
-      _(order.items)
-        .uniqBy((g) => {
-          return g.category;
-        })
-        .map((o) => {
-          return { category: o.category, expanded: false };
-        })
-        .valueOf()
-    );
-  }
-
   return (
     <React.Fragment>
       <div className={classes.root}>
@@ -246,7 +252,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order, categories }) {
                       : classes.expandableHidden
                   )}
                 >
-                  {_(order.items)
+                  {_(items)
                     .filter((i) => i.category === c.category)
                     .sortBy("name")
                     .map((i) => {
