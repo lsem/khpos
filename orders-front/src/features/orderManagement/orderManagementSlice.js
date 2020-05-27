@@ -70,7 +70,6 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
         status = "processing";
       } else if (moment(date).isBefore(moment(), "days")) {
         items = JSON.parse(JSON.stringify(itemsSample))
-          .filter((item, i) => !(i % 9))
           .map((item, i) =>
             !(i % 9)
               ? {

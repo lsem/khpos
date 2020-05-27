@@ -170,20 +170,29 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
 
   React.useEffect(() => {
     if (order) {
-      setCategoriesMenu(
-        _(order.items)
-          .uniqBy((g) => {
-            return g.category;
-          })
-          .map((o) => {
-            return { category: o.category, expanded: false };
-          })
-          .valueOf()
-      );
-
       setItems(JSON.parse(JSON.stringify(order.items)));
+      setShowUnordered(order.status === "new");
     }
   }, [order]);
+
+  React.useEffect(() => {
+    setCategoriesMenu((categoriesMenu) =>
+      _(items)
+        .filter((i) => showUnordered || i.orderedcount)
+        .uniqBy((g) => {
+          return g.category;
+        })
+        .map((o) => {
+          let prevCatMenuItem = categoriesMenu.find(
+            (c) => c.category === o.category
+          );
+          return prevCatMenuItem
+            ? prevCatMenuItem
+            : { category: o.category, expanded: false };
+        })
+        .valueOf()
+    );
+  }, [items, showUnordered]);
   //#endregion
 
   //#region UI HANDLERS
@@ -247,7 +256,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   };
 
   const handleShowUnordered = () => {
-    setShowUnordered(false);
+    setShowUnordered(true);
   };
   //#endregion
 
@@ -437,10 +446,38 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         open={Boolean(anchorMenu)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleFoldAll}>Згорнути всі</MenuItem>
-        <MenuItem onClick={handleUnfoldAll}>Розгорнути всі</MenuItem>
-        <MenuItem onClick={handleHideUnordered}>Сховати незамовлені</MenuItem>
-        <MenuItem onClick={handleShowUnordered}>Показати незамовлені</MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleFoldAll();
+            handleMenuClose();
+          }}
+        >
+          Згорнути всі
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUnfoldAll();
+            handleMenuClose();
+          }}
+        >
+          Розгорнути всі
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleHideUnordered();
+            handleMenuClose();
+          }}
+        >
+          Сховати незамовлені
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleShowUnordered();
+            handleMenuClose();
+          }}
+        >
+          Показати незамовлені
+        </MenuItem>
       </Menu>
 
       <Dialog
