@@ -367,12 +367,12 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                                 <input
                                   id={`ord-input-${i.id}`}
                                   className={classes.numberInput}
-                                  value={i.orderedcount}
+                                  defaultValue={i.orderedcount}
                                   type="number"
                                   onFocus={(event) => {
                                     event.target.select();
                                   }}
-                                  onChange={(e) => {
+                                  onBlur={(e) => {
                                     handleOrderedQuantityChange(e, i.id);
                                   }}
                                 />
@@ -385,12 +385,12 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                                 <input
                                   id={`del-input-${i.id}`}
                                   className={classes.numberInput}
-                                  value={i.deliveredcount}
+                                  defaultValue={i.deliveredcount}
                                   type="number"
                                   onFocus={(event) => {
                                     event.target.select();
                                   }}
-                                  onChange={(e) => {
+                                  onBlur={(e) => {
                                     handleDeliveredQuantityChange(e, i.id);
                                   }}
                                 />
