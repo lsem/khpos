@@ -25,7 +25,7 @@ export default function ApplicationBar() {
   const classes = useStyles();
 
   return (
-    <AppBar position="sticky">
+    <AppBar position="static">
       <Toolbar>
         <IconButton
           edge="start"

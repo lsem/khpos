@@ -1,0 +1,25 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0
+}
+
+#root {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+#header {
+  flex: 0 1 auto;
+}
+
+#main {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+footer {
+  flex: 0 1 0px;
+}

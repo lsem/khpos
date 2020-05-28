@@ -22,8 +22,14 @@ function App() {
   return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ApplicationBar />
-        <OrderManagement />
+        <div id="header">
+          <ApplicationBar />
+        </div>
+        <div id="main">
+          <OrderManagement />
+        </div>
+        <div id="footer">
+        </div>
       </ThemeProvider>
   );
 }

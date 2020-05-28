@@ -16,7 +16,10 @@ import {
   InputLabel,
   FormControl,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
   Divider,
+  Paper,
   Menu,
 } from "@material-ui/core";
 import { Check, MoreVert, ExpandLess, ExpandMore } from "@material-ui/icons";
@@ -51,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
     left: theme.spacing(5),
   },
   optionsBar: {
+    position: "relative",
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
@@ -140,6 +144,49 @@ const useStyles = makeStyles((theme) => ({
   flexRight: {
     marginLeft: "auto",
   },
+  itemsTable: {
+    WebkitTapHighlightColor: "transparent",
+    display: "table",
+    width: "100%",
+    borderSpacing: 0,
+    cursor: "pointer",
+    tableLayout: "auto",
+    "& th": {
+      position: "sticky",
+      top: 0,
+      zIndex: 2,
+      backgroundColor: theme.palette.background.paper,
+      textAlign: "left",
+    },
+    "& th, td": {
+      padding: theme.spacing(2),
+      borderColor: theme.palette.divider,
+      borderStyle: "solid",
+      borderWidth: "0 0 1px 0",
+    },
+    "& tr": {
+      transition: "background-color 100ms linear",
+      "&:nth-child(even)": {
+        backgroundColor: theme.palette.background.default,
+      },
+      "&:nth-child(odd)": {
+        backgroundColor: theme.palette.background.paper,
+      },
+      "&:active": {
+        transition: "background-color 0ms linear",
+        backgroundColor: theme.palette.action.focus,
+      },
+    },
+  },
+  textAlignRight: {
+    textAlign: "right !important",
+  },
+  itemsMenuContainer: {
+    display: "flex",
+    flexDirection: "column",
+    margin: "0 10px",
+    backgroundColor: theme.palette.background.paper,
+  },
 }));
 
 //#endregion
@@ -153,10 +200,14 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   );
   const [sellPointId, setSellPointId] = React.useState("");
   const [messageBox, setMessageBox] = React.useState(false);
-  const [categoriesMenu, setCategoriesMenu] = React.useState([]);
+  const [showQuantityDialog, setShowQuantityDialog] = React.useState(false);
+  const [currentItemQuantity, setCurrentItemQuantity] = React.useState(0);
+  const [currentItemId, setCurrentItemId] = React.useState(null);
+  const [categoriesMenu, setCategoriesMenu] = React.useState({});
   const [items, setItems] = React.useState([]);
+  const [itemsView, setItemsView] = React.useState([]);
   const [anchorMenu, setAnchorMenu] = React.useState(null);
-  const [showUnordered, setShowUnordered] = React.useState(true);
+  const [showZeros, setShowZeros] = React.useState(true);
   //#endregion
 
   //#region EFFECTS
@@ -171,28 +222,37 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   React.useEffect(() => {
     if (order) {
       setItems(JSON.parse(JSON.stringify(order.items)));
-      setShowUnordered(order.status === "new");
+      setShowZeros(order.status === "new");
     }
   }, [order]);
 
   React.useEffect(() => {
-    setCategoriesMenu((categoriesMenu) =>
-      _(items)
-        .filter((i) => showUnordered || i.orderedcount)
-        .uniqBy((g) => {
-          return g.category;
-        })
-        .map((o) => {
-          let prevCatMenuItem = categoriesMenu.find(
-            (c) => c.category === o.category
-          );
-          return prevCatMenuItem
-            ? prevCatMenuItem
-            : { category: o.category, expanded: false };
-        })
-        .valueOf()
+    setItemsView(
+      items.filter(
+        (i) =>
+          categoriesMenu[i.category] &&
+          (showZeros || i.orderedcount + i.deliveredcount)
+      )
     );
-  }, [items, showUnordered]);
+  }, [items, categoriesMenu, showZeros]);
+
+  React.useEffect(() => {
+    setCategoriesMenu((categoriesMenu) => {
+      let object = {};
+      Object.assign(
+        object,
+        ..._(items)
+          .uniqBy((g) => g.category)
+          .map((o) => {
+            return categoriesMenu.hasOwnProperty(o.category)
+              ? { [o.category]: categoriesMenu[o.category] }
+              : { [o.category]: true };
+          })
+          .valueOf()
+      );
+      return object;
+    });
+  }, [items, showZeros]);
   //#endregion
 
   //#region UI HANDLERS
@@ -252,11 +312,43 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   };
 
   const handleHideUnordered = () => {
-    setShowUnordered(false);
+    setShowZeros(false);
   };
 
   const handleShowUnordered = () => {
-    setShowUnordered(true);
+    setShowZeros(true);
+  };
+
+  const handelCategoryCheck = (category, value) => {
+    setCategoriesMenu({
+      ...categoriesMenu,
+      [category]: value,
+    });
+  };
+
+  const handleItemClick = (itemId) => {
+    setCurrentItemQuantity(
+      items.find((i) => i.id === itemId)[
+        order.status === "new" ? "orderedcount" : "deliveredcount"
+      ]
+    );
+    setCurrentItemId(itemId);
+    setShowQuantityDialog(true);
+  };
+
+  const handleQuantityDialogClose = () => {
+    setItems(
+      items.map((i) =>
+        i.id === currentItemId
+          ? {
+              ...i,
+              ["new" ? "orderedcount" : "deliveredcount"]: currentItemQuantity,
+            }
+          : i
+      )
+    );
+    setCurrentItemId(null);
+    setShowQuantityDialog(false);
   };
   //#endregion
 
@@ -305,127 +397,55 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         </div>
 
         {!order ? null : (
-          <div className={classes.list}>
-            {categoriesMenu.map((c, i) => {
-              const categotyItems = items.filter(
-                (i) => i.category === c.category
-              );
-              const categorySummary = categotyItems.reduce(
-                (acc, cur) => acc + cur.orderedcount,
-                0
-              );
-              return (
-                <React.Fragment key={i}>
-                  <div
-                    className={classNames(classes.li, classes.categoryLi)}
-                    onClick={() => handleExpandClick(c)}
+          <Paper className={classes.list}>
+            <table
+              className={classNames(classes.itemsTable, classes.unselectable)}
+            >
+              <tbody>
+                <tr>
+                  <th>Товар</th>
+                  <th className={classes.textAlignRight}>Замовлено</th>
+                  {order.status === "new" ? null : (
+                    <th className={classes.textAlignRight}>Прийнято</th>
+                  )}
+                </tr>
+                {itemsView.map((item, i) => (
+                  <tr
+                    key={i}
+                    onClick={() => {
+                      handleItemClick(item.id);
+                    }}
                   >
-                    <Typography className={classes.flexLeft}>
-                      {c.category}{" "}
-                      {categorySummary ? `(${categorySummary})` : null}
-                    </Typography>
-                    <div className={classes.flexRight}>
-                      {c.expanded ? <ExpandLess /> : <ExpandMore />}
-                    </div>
-                  </div>
-                  <div
-                    className={classNames(
-                      classes.expandable,
-                      c.expanded
-                        ? classes.expandableVisible
-                        : classes.expandableHidden
+                    <td>{item.name}</td>
+                    <td className={classes.textAlignRight}>
+                      {item.orderedcount}
+                    </td>
+                    {order.status === "new" ? null : (
+                      <td className={classes.textAlignRight}>
+                        {item.deliveredcount}
+                      </td>
                     )}
-                  >
-                    {_(categotyItems)
-                      .filter((i) => showUnordered || i.orderedcount)
-                      .sortBy("name")
-                      .map((i) => {
-                        return (
-                          <div
-                            className={classNames(classes.li, classes.goodsLi)}
-                            key={i.id}
-                            onClick={(e) => {
-                              const ordInput = document.getElementById(
-                                `ord-input-${i.id}`
-                              );
-                              const delInput = document.getElementById(
-                                `del-input-${i.id}`
-                              );
-                              if (ordInput) ordInput.focus();
-                              if (delInput) delInput.focus();
-                            }}
-                          >
-                            <span
-                              style={{ marginRight: "auto", maxWidth: 200 }}
-                              className={classes.unselectable}
-                            >
-                              {i.name}
-                            </span>
-                            <div style={{ marginLeft: "auto" }}>
-                              {order.status !== "closed" &&
-                              order.status !== "processing" ? (
-                                <input
-                                  id={`ord-input-${i.id}`}
-                                  className={classes.numberInput}
-                                  defaultValue={i.orderedcount}
-                                  type="number"
-                                  onFocus={(event) => {
-                                    event.target.select();
-                                  }}
-                                  onBlur={(e) => {
-                                    handleOrderedQuantityChange(e, i.id);
-                                  }}
-                                />
-                              ) : (
-                                <span className={classes.listCellHint}>
-                                  замовлено: {i.orderedcount}
-                                </span>
-                              )}
-                              {order.status === "processing" ? (
-                                <input
-                                  id={`del-input-${i.id}`}
-                                  className={classes.numberInput}
-                                  defaultValue={i.deliveredcount}
-                                  type="number"
-                                  onFocus={(event) => {
-                                    event.target.select();
-                                  }}
-                                  onBlur={(e) => {
-                                    handleDeliveredQuantityChange(e, i.id);
-                                  }}
-                                />
-                              ) : null}
-                              {order.status === "closed" ? (
-                                <span className={classes.listCellHint}>
-                                  прийнято: {i.deliveredcount}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        );
-                      })
-                      .valueOf()}
-                    <Divider />
-                  </div>
-                </React.Fragment>
-              );
-            })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Paper>
+        )}
+
+        {sellPointId ? null : (
+          <Typography variant="h5" className={classes.actionHint}>
+            оберіть точку продажу
+          </Typography>
+        )}
+
+        {!(sellPointId && !order) ? null : (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <CircularProgress style={{ margin: "30px auto" }} />
           </div>
         )}
       </div>
 
-      {sellPointId ? null : (
-        <Typography variant="h5" className={classes.actionHint}>
-          оберіть точку продажу
-        </Typography>
-      )}
-
-      {!(sellPointId && !order) ? null : (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <CircularProgress style={{ margin: "30px auto" }} />
-        </div>
-      )}
-      {!items || !items.length ? null : (
+      {!Object.keys(categoriesMenu).length ? null : (
         <Fab
           color="default"
           className={classes.fabMenu}
@@ -446,39 +466,79 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         open={Boolean(anchorMenu)}
         onClose={handleMenuClose}
       >
-        <MenuItem
-          onClick={() => {
-            handleFoldAll();
-            handleMenuClose();
-          }}
-        >
-          Згорнути всі
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleUnfoldAll();
-            handleMenuClose();
-          }}
-        >
-          Розгорнути всі
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleHideUnordered();
-            handleMenuClose();
-          }}
-        >
-          Сховати незамовлені
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleShowUnordered();
-            handleMenuClose();
-          }}
-        >
-          Показати незамовлені
-        </MenuItem>
+        <div className={classes.itemsMenuContainer}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={showZeros}
+                onChange={(e) => {
+                  setShowZeros(e.target.checked);
+                }}
+                name="checkedB"
+                color="primary"
+              />
+            }
+            label="Показати '0'"
+          />
+
+          <Divider />
+
+          {Object.keys(categoriesMenu).map((k) => (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={categoriesMenu[k]}
+                  onChange={(e) => {
+                    handelCategoryCheck(k, e.target.checked);
+                  }}
+                  name="checkedB"
+                  color="primary"
+                />
+              }
+              label={k}
+            />
+          ))}
+        </div>
       </Menu>
+
+      <Dialog
+        open={showQuantityDialog}
+        onClose={() => {
+          handleQuantityDialogClose();
+        }}
+        aria-labelledby="order-quantity-dialog"
+      >
+        <DialogContent>
+          <DialogTitle id="order-quantity-dialog">
+            {order && order.status === "new" ? "Замовити" : "Прийняти"}{" "}
+            {() => {
+              const item = items.find((i) => i.id === currentItemId);
+              return item ? item.name : null
+            }}
+          </DialogTitle>
+          <TextField
+            type="number"
+            variant="outlined"
+            value={currentItemQuantity}
+            onChange={(e) => {
+              setCurrentItemQuantity(+e.target.value);
+            }}
+            autoFocus
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleQuantityDialogClose();
+            }}
+            color="primary"
+            //autoFocus
+          >
+            Так
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={messageBox}
