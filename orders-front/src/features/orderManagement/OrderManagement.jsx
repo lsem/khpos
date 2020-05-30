@@ -82,10 +82,18 @@ const useStyles = makeStyles((theme) => ({
       position: "sticky",
       top: 0,
       zIndex: 2,
-      backgroundColor: theme.palette.background.paper,
       textAlign: "left",
+      borderColor: theme.palette.divider,
+      borderStyle: "solid",
+      borderWidth: "0 0 1px 0",
+      transition: "background-color 200ms linear",
+      backgroundColor: theme.palette.background.paper,
     },
-    "& th, td": {
+    "& th:active": {
+      transition: "background-color 0ms linear",
+      backgroundColor: theme.palette.secondary.light,
+    },
+    "& td": {
       padding: theme.spacing(2),
       borderColor: theme.palette.divider,
       borderStyle: "solid",
@@ -278,6 +286,36 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   //#endregion
 
   //#region JSX
+  const generateTableHeader = (columnName, justifyContent, content) => {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        onClick={() => {
+          handleTableSort(columnName);
+        }}
+        bgcolor="transparent"
+        padding={2}
+        justifyContent={justifyContent}
+      >
+        {content}
+        <ArrowDropDown
+          className={classNames({
+            [classes.sortIconInvisible]: true,
+            [classes.sortIconAsc]:
+              tableSorting &&
+              tableSorting.column === columnName &&
+              tableSorting.order === "ASC",
+            [classes.sortIconDsc]:
+              tableSorting &&
+              tableSorting.column === columnName &&
+              tableSorting.order === "DSC",
+          })}
+        />
+      </Box>
+    );
+  };
+
   return (
     <React.Fragment>
       <div className={classes.root}>
@@ -328,87 +366,25 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
             >
               <tbody>
                 <tr>
+                  <th>{generateTableHeader("name", "flex-start", "Товари")}</th>
                   <th>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      onClick={() => {
-                        handleTableSort("name");
-                      }}
-                      bgcolor="transparent"
-                    >
-                      Товари
-                      <ArrowDropDown
-                        className={classNames({
-                          [classes.sortIconInvisible]: true,
-                          [classes.sortIconAsc]:
-                            tableSorting &&
-                            tableSorting.column === "name" &&
-                            tableSorting.order === "ASC",
-                          [classes.sortIconDsc]:
-                            tableSorting &&
-                            tableSorting.column === "name" &&
-                            tableSorting.order === "DSC",
-                        })}
-                      />
-                    </Box>
+                    {generateTableHeader(
+                      "orderedcount",
+                      "flex-end",
+                      "Замовлено"
+                    )}
                   </th>
-                  <th className={classes.textAlignRight}>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="flex-end"
-                      onClick={() => {
-                        handleTableSort("orderedcount");
-                      }}
-                      bgcolor="transparent"
-                    >
-                      Замовлено
-                      <ArrowDropDown
-                        className={classNames({
-                          [classes.sortIconInvisible]: true,
-                          [classes.sortIconAsc]:
-                            tableSorting &&
-                            tableSorting.column === "orderedcount" &&
-                            tableSorting.order === "ASC",
-                          [classes.sortIconDsc]:
-                            tableSorting &&
-                            tableSorting.column === "orderedcount" &&
-                            tableSorting.order === "DSC",
-                        })}
-                      />
-                    </Box>
-                  </th>
-
                   {order.status === "new" ? null : (
-                    <th className={classes.textAlignRight}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="flex-end"
-                        onClick={() => {
-                          handleTableSort("deliveredcount");
-                        }}
-                        bgcolor="transparent"
-                      >
-                        Прийнято
-                        <ArrowDropDown
-                          className={classNames({
-                            [classes.sortIconInvisible]: true,
-                            [classes.sortIconAsc]:
-                              tableSorting &&
-                              tableSorting.column === "deliveredcount" &&
-                              tableSorting.order === "ASC",
-                            [classes.sortIconDsc]:
-                              tableSorting &&
-                              tableSorting.column === "deliveredcount" &&
-                              tableSorting.order === "DSC",
-                          })}
-                        />
-                      </Box>
+                    <th>
+                      {generateTableHeader(
+                        "deliveredcount",
+                        "flex-end",
+                        "Прийнято"
+                      )}
                     </th>
                   )}
                 </tr>
+
                 {itemsView.map((item, i) => (
                   <tr
                     key={i}
