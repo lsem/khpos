@@ -1,9 +1,9 @@
 import * as joi from "joi";
 import {EntityID} from "types/core_types";
 import {OrderModel, OrderModelItem} from "types/domain_types";
-import {AbstractStorage} from "../../storage/AbstractStorage";
-import * as schemas from "../../types/schemas";
-import {UserIDSchema} from "../users/user_schemas";
+import {AbstractStorage} from "../storage/AbstractStorage";
+import * as schemas from "../types/schemas";
+import {UserIDSchema} from "./user_schemas";
 
 // TODO: Move to separate features.
 const POSIDSchema = schemas.TypedUUIDSchema("POS");
