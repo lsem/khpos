@@ -21,6 +21,7 @@ export async function createUser(storage: AbstractStorage, caller: Caller, userI
     userIdName : userIDName,
     userFullName : userFullName,
     telNumber : telNumber,
+    permissions : userPermissions
   });
   return newUserID;
 }
@@ -35,4 +36,10 @@ export async function getUser(storage: AbstractStorage, caller: Caller,
                               userID: EntityID): Promise<UserModel> {
   ensureCallToSelfOrAdmin(caller, userID);
   return storage.getUser(userID);
+}
+
+export async function changesUser(storage: AbstractStorage, caller: Caller, id: EntityID,
+                                  permissions: UserPermissions) {
+  ensureAdmin(caller);
+  await storage.updateUser(id, (user: UserModel) => { user.permissions = permissions; });
 }

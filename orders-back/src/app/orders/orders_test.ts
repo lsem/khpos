@@ -1,7 +1,11 @@
 import {assert} from "chai";
 import {InMemoryStorage} from "storage/InMemStorage";
 import {EntityID} from "types/core_types";
+import {PermissionFlags, UserPermissions} from "types/UserPermissions";
+
 import * as orders from "./orders";
+
+const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
 
 describe("[orders]", () => {
   it("validates input dates", async () => {
@@ -34,6 +38,7 @@ describe("[orders]", () => {
       userIdName : "nat",
       userFullName : "Наталія Панфорте",
       telNumber : "",
+      permissions : AnyUserPermissions
     });
 
     // Create some POS where user nat works.
@@ -50,6 +55,7 @@ describe("[orders]", () => {
       userIdName : "nat",
       userFullName : "Зоя Маріуполь",
       telNumber : "",
+      permissions : AnyUserPermissions
     });
 
     // Create another POS where zoya works.

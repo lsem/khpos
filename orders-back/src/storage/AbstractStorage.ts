@@ -12,6 +12,7 @@ interface AbstractStorage {
   getOrders(from: Date, to: Date): Promise<OrderModel[]>;
   insertUser(userID: EntityID, userModel: UserModel): Promise<void>;
   getUser(userID: EntityID): Promise<UserModel>;
+  updateUser(userID: EntityID, cb: (user: UserModel) => void): Promise<void>;
   getAllUsers(): Promise<ReadonlyArray<UserModel>>;
   findUserByIdName(idName: string): Promise<UserModel|undefined>;
 }

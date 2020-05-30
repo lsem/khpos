@@ -1,7 +1,8 @@
-import {NeedsAdminError} from "app/errors";
+import {NeedsAdminError, NotFoundError} from "app/errors";
 import {assert, expect} from "chai";
 import chai from 'chai';
-import chaiAsPromised from "chai-as-promised"
+import chaiAsPromised from "chai-as-promised";
+import chaiSubset from 'chai-subset';
 import _ from 'lodash';
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
@@ -11,34 +12,35 @@ import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 import * as users from "./users";
 
 chai.use(chaiAsPromised);
+chai.use(chaiSubset);
 
-const AuthorizedCaller =
-    new Caller(new EntityID('USR'), new UserPermissions(PermissionFlags.Admin, []));
+const AdminCaller =
+    new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
 describe("[users]", () => {
   it("should pass basic test", async () => {
     const storage = new InMemoryStorage();
     const user1Permissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
-    const user1ID = await users.createUser(storage, AuthorizedCaller, "Ната", user1Permissions,
+    const user1ID = await users.createUser(storage, AdminCaller, "Ната", user1Permissions,
                                            "Наталія Бушмак", "+380961112233");
-    assert.deepEqual(await users.getUser(storage, AuthorizedCaller, user1ID), {
+    assert.containSubset(await users.getUser(storage, AdminCaller, user1ID), {
       userID : user1ID,
       userIdName : "Ната",
       userFullName : "Наталія Бушмак",
       telNumber : "+380961112233",
     });
 
-    assert.deepEqual(await users.getAllUsers(storage, AuthorizedCaller), [ {
-                       userID : user1ID,
-                       userIdName : "Ната",
-                       userFullName : "Наталія Бушмак",
-                       telNumber : "+380961112233",
-                     } ]);
+    assert.containSubset(await users.getAllUsers(storage, AdminCaller), [ {
+                           userID : user1ID,
+                           userIdName : "Ната",
+                           userFullName : "Наталія Бушмак",
+                           telNumber : "+380961112233",
+                         } ]);
 
     const user2Permissions = _.clone(user1Permissions);
-    const user2ID = await users.createUser(storage, AuthorizedCaller, "Вас", user2Permissions,
+    const user2ID = await users.createUser(storage, AdminCaller, "Вас", user2Permissions,
                                            "Василь Тістоміс", "+380961112234");
-    assert.deepEqual(await users.getAllUsers(storage, AuthorizedCaller), [
+    assert.containSubset(await users.getAllUsers(storage, AdminCaller), [
       {
         userID : user1ID,
         userIdName : "Ната",
@@ -57,10 +59,10 @@ describe("[users]", () => {
   it("should disallow creating duplicate users", async () => {
     const storage = new InMemoryStorage();
     const userPermissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
-    const user1ID = await users.createUser(storage, AuthorizedCaller, "Ната", userPermissions,
+    const user1ID = await users.createUser(storage, AdminCaller, "Ната", userPermissions,
                                            "Наталія Бушмак", "+380961112233");
-    await expect(users.createUser(storage, AuthorizedCaller, "Ната", userPermissions,
-                                  "Наталія Бушмак", "+380961112233"))
+    await expect(users.createUser(storage, AdminCaller, "Ната", userPermissions, "Наталія Бушмак",
+                                  "+380961112233"))
         .to.be.rejectedWith(Error, 'User with such IDName already exists');
   });
 
@@ -93,10 +95,10 @@ describe("[users]", () => {
   it("should allow getting only self", async () => {
     const storage = new InMemoryStorage();
     const ivanPermissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
-    const ivanID = await users.createUser(storage, AuthorizedCaller, "ivan", ivanPermissions,
+    const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
                                           "Ivan Kruasan", "+33999333");
     const ihorPermissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
-    const ihorID = await users.createUser(storage, AuthorizedCaller, "ihor", ihorPermissions,
+    const ihorID = await users.createUser(storage, AdminCaller, "ihor", ihorPermissions,
                                           "Ihor Sharlot", "+33999333");
 
     const ivanAsCaller = new Caller(ivanID, ivanPermissions);
@@ -104,7 +106,7 @@ describe("[users]", () => {
     // Can read self.
     const self = await users.getUser(storage, ivanAsCaller, ivanID);
     // todo: change deepEqual to deepSubset (and for other cases too)
-    assert.deepEqual(self, {
+    assert.containSubset(self, {
       userID : ivanID,
       userIdName : 'ivan',
       userFullName : "Ivan Kruasan",
@@ -120,11 +122,91 @@ describe("[users]", () => {
         new Caller(new EntityID('USR'), new UserPermissions(PermissionFlags.Admin, []));
 
     const ihor = await users.getUser(storage, adminCaller, ihorID);
-    assert.deepEqual(ihor, {
+    assert.containSubset(ihor, {
       userID : ihorID,
       userIdName : 'ihor',
       userFullName : "Ihor Sharlot",
       telNumber : "+33999333"
     });
+  });
+
+  it("should return back proper permissions for user", async () => {
+    const storage = new InMemoryStorage();
+    const pos1ID = EntityID.makePOSID();
+
+    const ivanPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
+
+    const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
+                                          "Ivan Kruasan", "+33999333");
+    const retrievedUser = await users.getUser(storage, AdminCaller, ivanID);
+    assert.containSubset(retrievedUser, {
+      permissions : {mask : PermissionFlags.Read | PermissionFlags.Write, resources : [ pos1ID ]}
+    })
+  });
+
+  it("should allow admins to change permissions", async () => {
+    const storage = new InMemoryStorage();
+    const pos1ID = EntityID.makePOSID();
+
+    const ivanPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
+
+    const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
+                                          "Ivan Kruasan", "+33999333");
+
+    const pos2ID = EntityID.makePOSID();
+    const newPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID, pos2ID ]);
+
+    await users.changesUser(storage, AdminCaller, ivanID, newPermissions);
+
+    assert.containSubset(await users.getUser(storage, AdminCaller, ivanID), {
+      permissions :
+          {mask : PermissionFlags.Read | PermissionFlags.Write, resources : [ pos1ID, pos2ID ]}
+    });
+  });
+
+  it("should disallow to change permissions by self", async () => {
+    const storage = new InMemoryStorage();
+    const pos1ID = EntityID.makePOSID();
+
+    const ivanPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
+
+    const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
+                                          "Ivan Kruasan", "+33999333");
+
+    const pos2ID = EntityID.makePOSID();
+    const newPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID, pos2ID ]);
+
+    const ivanAsCaller = new Caller(ivanID, ivanPermissions);
+    await expect(users.changesUser(storage, ivanAsCaller, ivanID, newPermissions))
+        .to.rejectedWith(NeedsAdminError, "NeedsAdminError");
+  });
+
+  it("should return not found on attept tochange permissions of unexsting user", async () => {
+    const storage = new InMemoryStorage();
+    const pos1ID = EntityID.makePOSID();
+
+    const ivanPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
+
+    const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
+                                          "Ivan Kruasan", "+33999333");
+
+    const pos2ID = EntityID.makePOSID();
+    const newPermissions =
+        new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos2ID ]);
+
+    // Netiher admin
+    await expect(users.changesUser(storage, AdminCaller, EntityID.makeUserID(), newPermissions))
+        .to.rejectedWith(NotFoundError, "NotFoundError");
+
+    // Nor regular user
+    const ivanAsCaller = new Caller(ivanID, ivanPermissions);
+    await expect(users.changesUser(storage, ivanAsCaller, EntityID.makeUserID(), newPermissions))
+        .to.rejectedWith(NeedsAdminError);
   });
 });

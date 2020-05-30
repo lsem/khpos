@@ -1,3 +1,4 @@
+import {NotFoundError} from "app/errors";
 import _ from "lodash";
 
 import {EntityID} from "../types/core_types";
@@ -74,10 +75,20 @@ class InMemoryStorage implements AbstractStorage {
 
   async getUser(userID: EntityID): Promise<UserModel> {
     if (!this.users.has(userID.value)) {
+      // todo: fix this
       throw new Error('User does not exist');
     }
     // todo: return clone! add test!
     return this.users.get(userID.value)!;
+  }
+
+  async updateUser(userID: EntityID, cb: (user: UserModel) => void): Promise<void> {
+    if (!this.users.has(userID.value)) {
+      throw new NotFoundError();
+    }
+    const fetchedUser = _.clone(this.users.get(userID.value)!);
+    cb(fetchedUser);
+    this.users.set(userID.value, fetchedUser);
   }
 
   async findUserByIdName(idName: string): Promise<UserModel|undefined> {

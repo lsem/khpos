@@ -1,3 +1,10 @@
+- Get API for controlling which resources usage have
+- Implement products realistically
+- Support serialization
+- Create web front-end and adapt it to UI.
+- Support AlreadyExists/NotFound handling in storage and APIs.
+
+
 - Design and implement views serialization
 - Implement Users feature
 - Implement Products/Goods feature

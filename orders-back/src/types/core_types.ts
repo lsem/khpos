@@ -11,7 +11,7 @@ class EntityID {
       throw new Error("EntitityID tag shoudl have length of 3 chars");
     }
     // todo: validate tag.
-    this.value = tag + "-" + uuid.v1();
+    this.value = tag + "-" + uuid.v4();
   }
 
   static makeUserID(): EntityID { return new EntityID('USR'); }

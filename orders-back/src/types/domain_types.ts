@@ -1,4 +1,5 @@
 import {EntityID} from "./core_types";
+import { UserPermissions } from "./UserPermissions";
 
 // Defines model for POS
 interface POSModel {
@@ -11,6 +12,7 @@ interface UserModel {
   userIdName: string;
   userFullName: string;
   telNumber: string;
+  permissions: UserPermissions;
 }
 
 interface OrderModelItem {
