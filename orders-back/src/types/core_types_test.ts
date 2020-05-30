@@ -29,7 +29,7 @@ describe("[core_types]", () => {
   it("Internal entity id constructors should be valid", () => {
     EntityID.fromExisting(EntityID.makeUserID().value);
     EntityID.fromExisting(EntityID.makePOSID().value);
-    EntityID.fromExisting(EntityID.makeProductID().value);
+    EntityID.fromExisting(EntityID.makeGoodID().value);
     EntityID.fromExisting(EntityID.makeOrderID().value);
   })
 });

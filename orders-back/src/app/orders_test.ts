@@ -19,17 +19,13 @@ describe("[orders]", () => {
 
   it("should support basic scenario", async () => {
     const storage = new InMemoryStorage();
-    const product1 = EntityID.makeProductID();
-    storage.insertProduct(product1, {
-      id : product1,
-      productName : "Круасан з Моколадом",
-    });
+    const product1 = EntityID.makeGoodID();
+    storage.insertGood(product1,
+                       {id : product1, name : "Круасан з Моколадом", units : "it", available: true, removed: false});
 
-    const product2 = EntityID.makeProductID();
-    storage.insertProduct(product2, {
-      id : product2,
-      productName : "Шарлотка по Франківськи",
-    });
+    const product2 = EntityID.makeGoodID();
+    storage.insertGood(product2,
+                       {id : product2, name : "Шарлотка по Франківськи", units : "it", available: true, removed: false});
 
     // Create some user User1.
     const user1ID = EntityID.makeUserID();

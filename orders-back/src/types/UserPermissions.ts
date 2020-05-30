@@ -9,6 +9,8 @@ export enum PermissionFlags {
   SystemRead = 0x0008,
   SystemWrite = 0x0010,
   SystemAdmin = 0x0020,
+
+  ReadWrite = Read | Write,
 }
 
 export class UserPermissions {

@@ -5,7 +5,7 @@ import * as uuid from "uuid";
 
 import {TypedUUIDSchema2} from './schemas';
 
-const ValidTags = [ 'USR', 'POS', 'ORD', 'PRO' ];
+const ValidTags = [ 'USR', 'POS', 'ORD', 'GOO'];
 const ValidIDSSchema = TypedUUIDSchema2(ValidTags);
 
 // Wrapper around string.
@@ -24,7 +24,7 @@ class EntityID {
   static makeUserID(): EntityID { return EntityID.newTagged('USR'); }
   static makePOSID(): EntityID { return EntityID.newTagged('POS'); }
   static makeOrderID(): EntityID { return EntityID.newTagged('ORD'); }
-  static makeProductID(): EntityID { return EntityID.newTagged('PRO'); }
+  static makeGoodID(): EntityID { return EntityID.newTagged('GOO'); }
 
   static fromExisting(id: string): EntityID {
     const newID = new EntityID();

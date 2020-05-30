@@ -80,7 +80,7 @@ export async function getOrdersForDate(storage: AbstractStorage,
   for (const [goodID, count] of itemContsByGoodID.entries()) {
     items.push({
       productID : goodID,
-      productName : (await storage.getProductByID(goodID)).productName,
+      productName : (await storage.getGoodByID(goodID)).name,
       count : count,
       details : itemDetailsByGoodID.get(goodID)!
     });

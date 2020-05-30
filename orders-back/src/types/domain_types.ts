@@ -1,5 +1,5 @@
 import {EntityID} from "./core_types";
-import { UserPermissions } from "./UserPermissions";
+import {UserPermissions} from "./UserPermissions";
 
 // Defines model for POS
 interface POSModel {
@@ -27,9 +27,12 @@ interface OrderModel {
   items: OrderModelItem[];
 }
 
-interface ProductModel {
+interface GoodModel {
   id: EntityID;
-  productName: string;
+  name: string;
+  units: string;
+  available: boolean;
+  removed: boolean;
 }
 
-export {POSModel, UserModel, OrderModel, OrderModelItem, ProductModel};
+export {POSModel, UserModel, OrderModel, OrderModelItem, GoodModel};

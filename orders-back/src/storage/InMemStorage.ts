@@ -2,7 +2,7 @@ import {NotFoundError} from "app/errors";
 import _ from "lodash";
 
 import {EntityID} from "../types/core_types";
-import {OrderModel, POSModel, ProductModel, UserModel} from "../types/domain_types";
+import {GoodModel, OrderModel, POSModel, UserModel} from "../types/domain_types";
 
 import {AbstractStorage} from "./AbstractStorage";
 
@@ -10,20 +10,37 @@ class InMemoryStorage implements AbstractStorage {
   users = new Map<string, UserModel>();
   poss = new Map<string, POSModel>();
   orders = new Map<string, OrderModel>();
-  products = new Map<string, ProductModel>();
+  goods = new Map<string, GoodModel>();
 
-  //#region Products
-  async insertProduct(productID: EntityID, productModel: ProductModel): Promise<void> {
+  //#region Goods
+  async insertGood(productID: EntityID, good: GoodModel): Promise<void> {
     // todo: validate that not exists.
-    this.products.set(productID.value, productModel);
+    // todo: should I clone good here?
+    this.goods.set(productID.value, good);
   }
 
-  async getProductByID(id: EntityID): Promise<ProductModel> {
-    if (!this.products.has(id.value)) {
-      throw new Error("Does not exists!")
+  async getGoodByID(id: EntityID): Promise<GoodModel> {
+    if (!this.goods.has(id.value)) {
+      throw new NotFoundError();
     }
-    return this.products.get(id.value)!
+    return this.goods.get(id.value)!
   }
+
+  async getAllGoods(): Promise<ReadonlyArray<GoodModel>> {
+    return _.cloneDeep(Array.from(this.goods.values()));
+  }
+
+  async updateGood(id: EntityID, cb: (good: GoodModel) => GoodModel): Promise<void> {
+    if (!this.goods.has(id.value)) {
+      throw new NotFoundError();
+    }
+    const newGood = cb(this.goods.get(id.value)!);
+    if (newGood.id !== id) {
+      throw new Error("Changing ID is not allowed");
+    }
+    this.goods.set(id.value, newGood);
+  }
+
   //#endregion
 
   //#region POS
@@ -60,6 +77,7 @@ class InMemoryStorage implements AbstractStorage {
     for (const [id, model] of this.orders.entries()) {
       const modelToDate = truncateTime(model.toDate);
       if (modelToDate >= from && modelToDate <= to) {
+        // todo: for some reason changing to cloneDeep here breakes one of the test.
         results.push(_.clone(model));
       }
     }

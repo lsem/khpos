@@ -1,10 +1,11 @@
+import {NotFoundError} from "app/errors";
 import {assert, expect} from "chai";
 import chai from 'chai';
 import chaiAsPromised from "chai-as-promised";
 import chaiSubset from 'chai-subset';
 import {InMemoryStorage} from "storage/InMemStorage";
 import {EntityID} from "types/core_types";
-import {UserModel} from "types/domain_types";
+import {GoodModel, UserModel} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 chai.use(chaiAsPromised);
@@ -73,17 +74,53 @@ describe("[inmem.pos]",
                             {posID : id, posIDName : 'central'});
          })});
 
-describe("[inmem.products]",
-         () => {it("should allow to get previously stored product by same ID value ", async () => {
-           const storage = new InMemoryStorage();
-           const id = EntityID.makeProductID();
-           await storage.insertProduct(id, {id : id, productName : 'water'});
+describe("[inmem.goods]", () => {
+  it("should allow to get previously stored good by same ID value ", async () => {
+    const storage = new InMemoryStorage();
+    const id = EntityID.makeGoodID();
+    await storage.insertGood(
+        id, {id : id, name : "water", units : "it", available : true, removed : false});
 
-           // lets pretedend we get this id somewhere from client
-           const sameIdFromClient = EntityID.fromExisting(id.value);
-           assert.deepEqual(await storage.getProductByID(sameIdFromClient),
-                            {id : id, productName : 'water'});
-         })});
+    // lets pretedend we get this id somewhere from client
+    const sameIdFromClient = EntityID.fromExisting(id.value);
+    assert.deepEqual(await storage.getGoodByID(sameIdFromClient),
+                     {id : id, name : 'water', units : 'it', available : true, removed : false});
+  });
+
+  it("should raise NotFoundError if not found ", async () => {
+    const storage = new InMemoryStorage();
+    await expect(storage.getGoodByID(EntityID.makeGoodID())).to.be.rejectedWith(NotFoundError);
+  })
+
+  it("should return all previosly stored goods ", async () => {
+    const storage = new InMemoryStorage();
+    const id1 = EntityID.makeGoodID();
+    const id2 = EntityID.makeGoodID();
+    await storage.insertGood(
+        id1, {id : id1, name : "water", units : "it", available : true, removed : false});
+    await storage.insertGood(
+        id2, {id : id2, name : "wine", units : "it", available : true, removed : false});
+    const allGoods = await storage.getAllGoods();
+    assert.containSubset(allGoods, [ {id : id1, name : "water"}, {id : id2, name : "wine"} ]);
+    // make sure that modifed goods does not have spec-effects with references.
+    allGoods[0].name = "wine";
+    assert.containSubset(await storage.getAllGoods(),
+                         [ {id : id1, name : "water"}, {id : id2, name : "wine"} ]);
+  });
+
+  it("should allow updating goods", async () => {
+    const storage = new InMemoryStorage();
+    const id = EntityID.makeGoodID();
+    await storage.insertGood(
+        id, {id : id, name : "water", units : "litres", available : true, removed : false});
+    await storage.updateGood(id, (good: GoodModel) => {return { ...good, name: "wine" }});
+    assert.deepEqual(await storage.getGoodByID(id),
+                     {id : id, name : "wine", units : "litres", available : true, removed : false});
+    await expect(storage.updateGood(id, (good: GoodModel) => {
+      return { ...good, id: EntityID.makeGoodID() }
+    })).to.be.rejectedWith(Error, "Changing ID is not allowed");
+  });
+});
 
 describe(
     "[inmem.orders]",

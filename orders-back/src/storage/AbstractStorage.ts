@@ -1,10 +1,12 @@
 import {EntityID} from "../types/core_types";
-import {OrderModel, POSModel, ProductModel, UserModel} from "../types/domain_types";
+import {GoodModel, OrderModel, POSModel, UserModel} from "../types/domain_types";
 
 // Defines abstract storage interface.
 interface AbstractStorage {
-  insertProduct(productID: EntityID, productModel: ProductModel): Promise<void>;
-  getProductByID(id: EntityID): Promise<ProductModel>;
+  insertGood(productID: EntityID, good: GoodModel): Promise<void>;
+  getGoodByID(id: EntityID): Promise<GoodModel>;
+  getAllGoods(): Promise<ReadonlyArray<GoodModel>>;
+  updateGood(id: EntityID, cb: (good: GoodModel) => GoodModel): Promise<void>;
   insertPointOfSale(posID: EntityID, posModel: POSModel): Promise<void>;
   getPointOfSale(posID: EntityID): Promise<POSModel>;
   getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>>;
