@@ -1,14 +1,16 @@
+import {ensureCallToSelfOrAdmin} from 'app/ensure';
+import {NeedsAdminError} from 'app/errors';
 import {AbstractStorage} from 'storage/AbstractStorage';
+import {Caller} from 'types/Caller';
 import {EntityID} from 'types/core_types';
 import {UserModel} from 'types/domain_types';
-import {Issuer} from 'types/Issuer';
-import {PermissionFlags, UserPermissions} from 'types/Permissions';
+import {PermissionFlags, UserPermissions} from 'types/UserPermissions';
 
 // todo: add email.
-export async function createUser(storage: AbstractStorage, issuer: Issuer, userIDName: string,
+export async function createUser(storage: AbstractStorage, caller: Caller, userIDName: string,
                                  userPermissions: UserPermissions, userFullName: string,
                                  telNumber: string): Promise<EntityID> {
-  if (!(issuer.Permissions.mask & PermissionFlags.Admin)) {
+  if (!(caller.Permissions.mask & PermissionFlags.Admin)) {
     throw new Error("Not allowed")
   }
 
@@ -27,19 +29,15 @@ export async function createUser(storage: AbstractStorage, issuer: Issuer, userI
 }
 
 export async function getAllUsers(storage: AbstractStorage,
-                                  issuer: Issuer): Promise<ReadonlyArray<UserModel>> {
-  if (!(issuer.Permissions.mask & PermissionFlags.Admin)) {
+                                  caller: Caller): Promise<ReadonlyArray<UserModel>> {
+  if (!(caller.Permissions.mask & PermissionFlags.Admin)) {
     throw new Error("Not allowed")
   }
   return storage.getAllUsers();
 }
 
-export async function getUser(storage: AbstractStorage, issuer: Issuer,
+export async function getUser(storage: AbstractStorage, caller: Caller,
                               userID: EntityID): Promise<UserModel> {
-
-  const isAdmin = (issuer.Permissions.mask & PermissionFlags.Admin) > 0;
-  if (!isAdmin && (issuer.ID.innerStr !== userID.innerStr)) {
-    throw new Error("Not allowed")
-  }
+  ensureCallToSelfOrAdmin(caller, userID);
   return storage.getUser(userID);
 }
