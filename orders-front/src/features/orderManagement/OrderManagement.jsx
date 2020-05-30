@@ -31,6 +31,7 @@ import {
   thunkGetOrderFromApi,
   thunkGetSellPointsFromApi,
 } from "./orderManagementSlice";
+import PrintView from "./PrintView";
 //#endregion
 
 //#region STYLES
@@ -164,6 +165,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   const [anchorMenu, setAnchorMenu] = React.useState(null);
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
+  const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   //#endregion
 
   //#region EFFECTS
@@ -281,6 +283,14 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         column,
         order: "ASC",
       });
+    }
+  };
+
+  const handleShowSummaryClick = () => {
+    if (order && items.filter((i) => i.orderedcount > 0).length) {
+      setShowOrderSummary(true);
+    } else {
+      setMessageBox("Ви нічого не замовили");
     }
   };
   //#endregion
@@ -431,7 +441,11 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
           <MoreVert />
         </Fab>
       )}
-      <Fab color="primary" className={classes.fab}>
+      <Fab
+        color="primary"
+        className={classes.fab}
+        onClick={handleShowSummaryClick}
+      >
         <Check />
       </Fab>
 
@@ -561,6 +575,44 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {order ? (
+        <Dialog
+          fullScreen
+          open={showOrderSummary}
+          onClose={() => {
+            setShowOrderSummary(false);
+          }}
+        >
+          <PrintView
+            items={items}
+            orderStatus={order.status}
+            orderDate={moment(orderDate).format("DD.MM.YYYY")}
+            sellPoint={sellPoints.find((sp) => sp.id === sellPointId).name}
+          />
+
+          {order.status === "closed" ? null : (
+            <Box
+              display="flex"
+              justifyContent="center"
+              displayPrint="none"
+              margin="0 0 30px 0"
+            >
+              <Button
+                onClick={() => {
+                  setShowOrderSummary(false);
+                }}
+                color="secondary"
+              >
+                Назад
+              </Button>
+              <Button onClick={() => {}} color="primary">
+                Зберегти
+              </Button>
+            </Box>
+          )}
+        </Dialog>
+      ) : null}
     </React.Fragment>
   );
   //#endregion
