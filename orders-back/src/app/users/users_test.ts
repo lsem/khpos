@@ -105,13 +105,7 @@ describe("[users]", () => {
 
     // Can read self.
     const self = await users.getUser(storage, ivanAsCaller, ivanID);
-    // todo: change deepEqual to deepSubset (and for other cases too)
-    assert.containSubset(self, {
-      userID : ivanID,
-      userIdName : 'ivan',
-      userFullName : "Ivan Kruasan",
-      telNumber : "+33999333"
-    });
+    assert.containSubset(self, {userID : ivanID, userIdName : 'ivan'});
 
     // Cannot read ihor
     await expect(users.getUser(storage, ivanAsCaller, ihorID))
@@ -122,12 +116,7 @@ describe("[users]", () => {
         new Caller(new EntityID('USR'), new UserPermissions(PermissionFlags.Admin, []));
 
     const ihor = await users.getUser(storage, adminCaller, ihorID);
-    assert.containSubset(ihor, {
-      userID : ihorID,
-      userIdName : 'ihor',
-      userFullName : "Ihor Sharlot",
-      telNumber : "+33999333"
-    });
+    assert.containSubset(ihor, {userID : ihorID, userIdName : 'ihor'});
   });
 
   it("should return back proper permissions for user", async () => {
