@@ -1,7 +1,12 @@
-import {assert} from "chai";
+import {AlreadyExistsError} from "app/errors";
+import {assert, expect} from "chai";
+import chai from 'chai';
+import chaiAsPromised from "chai-as-promised"
 import {InMemoryStorage} from "storage/InMemStorage";
 
 import * as pos from "./pos";
+
+chai.use(chaiAsPromised);
 
 describe("[point-of-interests]", () => {
   it("should be possible to create point of sales and get listed them", async () => {
@@ -32,20 +37,7 @@ describe("[point-of-interests]", () => {
 
   it("Should disallow creating duplicate POSs", async () => {
     const storage = new InMemoryStorage();
-    // todo: For some reason chai-as-promised does not work for me here, find out why.
-    // See https://www.npmjs.com/package/chai-as-promised
-    // assert.isFulfilled(pos.createPOS(storage, "ЧУПРИНКИ1"));
-    // assert.isRejected(pos.createPOS(storage, "ЧУПРИНКИ1"), Error, "Haha");
-    let firstPassed = false;
-    try {
-      await pos.createPOS(storage, "ЧУПРИНКИ1");
-      firstPassed = true;
-      await pos.createPOS(storage, "ЧУПРИНКИ1");
-      assert.fail("Second executed while not supposed to");
-    } catch (err) {
-      assert.instanceOf(err, Error);
-      assert.equal(err.message, "POS IDName is not unique");
-      assert.isTrue(firstPassed);
-    }
+    await pos.createPOS(storage, "ЧУПРИНКИ1");
+    await expect(pos.createPOS(storage, "ЧУПРИНКИ1")).to.be.rejectedWith(AlreadyExistsError);
   });
 });

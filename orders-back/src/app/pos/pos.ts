@@ -2,13 +2,14 @@ import _ from "lodash";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {EntityID} from "types/core_types";
 import {POSModel} from "types/domain_types";
+import { AlreadyExistsError } from "app/errors";
 
 export async function createPOS(storage: AbstractStorage, posIDName: string): Promise<EntityID> {
   // todo: given solution to uniqness suffers from race conditionsm btw.
   const nonUnique = _.find(await storage.getAllPointsOfSale(),
                            (x: POSModel) => { return x.posIDName === posIDName; });
   if (nonUnique) {
-    throw new Error("POS IDName is not unique");
+    throw new AlreadyExistsError();
   }
   const newPOSID = new EntityID("POS");
   storage.insertPointOfSale(newPOSID, {
