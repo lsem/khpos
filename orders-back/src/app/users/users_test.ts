@@ -73,7 +73,7 @@ describe("[users]", () => {
 
     await expect(users.createUser(storage, NonAuthorizedCaller, "Ната", userPermissions,
                                   "Наталія Бушмак", "+380961112233"))
-        .to.be.rejectedWith(Error, 'Not allowed');
+        .to.be.rejectedWith(NeedsAdminError, 'NeedsAdminError');
 
     // Now try creating the same user with by Admin.
     const AdminUser =
@@ -87,7 +87,7 @@ describe("[users]", () => {
     const NonAuthorizedCaller = new Caller(
         new EntityID('USR'), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
     await expect(users.getAllUsers(storage, NonAuthorizedCaller))
-        .to.be.rejectedWith(Error, 'Not allowed')
+        .to.be.rejectedWith(NeedsAdminError, 'NeedsAdminError')
   });
 
   it("should allow getting only self", async () => {
