@@ -183,7 +183,7 @@ describe("[users]", () => {
 
     const ivanAsCaller = new Caller(ivanID, ivanPermissions);
     await expect(users.changesUser(storage, ivanAsCaller, ivanID, newPermissions))
-        .to.rejectedWith(NeedsAdminError, "NeedsAdminError");
+        .to.be.rejectedWith(NeedsAdminError, "NeedsAdminError");
   });
 
   it("should return not found on attept tochange permissions of unexsting user", async () => {
@@ -202,11 +202,11 @@ describe("[users]", () => {
 
     // Netiher admin
     await expect(users.changesUser(storage, AdminCaller, EntityID.makeUserID(), newPermissions))
-        .to.rejectedWith(NotFoundError, "NotFoundError");
+        .to.be.rejectedWith(NotFoundError, "NotFoundError");
 
     // Nor regular user
     const ivanAsCaller = new Caller(ivanID, ivanPermissions);
     await expect(users.changesUser(storage, ivanAsCaller, EntityID.makeUserID(), newPermissions))
-        .to.rejectedWith(NeedsAdminError);
+        .to.be.rejectedWith(NeedsAdminError);
   });
 });
