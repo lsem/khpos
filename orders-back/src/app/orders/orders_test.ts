@@ -19,20 +19,20 @@ describe("[orders]", () => {
 
   it("should support basic scenario", async () => {
     const storage = new InMemoryStorage();
-    const product1 = new EntityID("PRO");
+    const product1 = EntityID.makeProductID();
     storage.insertProduct(product1, {
       id : product1,
       productName : "Круасан з Моколадом",
     });
 
-    const product2 = new EntityID("PRO");
+    const product2 = EntityID.makeProductID();
     storage.insertProduct(product2, {
       id : product2,
       productName : "Шарлотка по Франківськи",
     });
 
     // Create some user User1.
-    const user1ID = new EntityID("USR");
+    const user1ID = EntityID.makeUserID();
     storage.insertUser(user1ID, {
       userID : user1ID,
       userIdName : "nat",
@@ -42,14 +42,14 @@ describe("[orders]", () => {
     });
 
     // Create some POS where user nat works.
-    const pos1ID = new EntityID("POS");
+    const pos1ID = EntityID.makePOSID();
     storage.insertPointOfSale(pos1ID, {
       posIDName : "ЮЛипи",
       posID : pos1ID,
     });
 
     // Create another User2.
-    const user2ID = new EntityID("USR");
+    const user2ID = EntityID.makeUserID();
     storage.insertUser(user2ID, {
       userID : user2ID,
       userIdName : "nat",
@@ -59,7 +59,7 @@ describe("[orders]", () => {
     });
 
     // Create another POS where zoya works.
-    const pos2ID = new EntityID("POS");
+    const pos2ID = EntityID.makePOSID();
     storage.insertPointOfSale(pos2ID, {
       posIDName : "Чупринки",
       posID : pos2ID,

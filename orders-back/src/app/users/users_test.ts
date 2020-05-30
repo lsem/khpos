@@ -71,7 +71,7 @@ describe("[users]", () => {
     const userPermissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
 
     const NonAuthorizedCaller = new Caller(
-        new EntityID('USR'), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
+        EntityID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
 
     await expect(users.createUser(storage, NonAuthorizedCaller, "Ната", userPermissions,
                                   "Наталія Бушмак", "+380961112233"))
@@ -79,7 +79,7 @@ describe("[users]", () => {
 
     // Now try creating the same user with by Admin.
     const AdminUser =
-        new Caller(new EntityID('USR'), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const user1ID = await users.createUser(storage, AdminUser, "Ната", userPermissions,
                                            "Наталія Бушмак", "+380961112233");
   });
@@ -87,7 +87,7 @@ describe("[users]", () => {
   it("should disallow getting users by non-authorized user", async () => {
     const storage = new InMemoryStorage();
     const NonAuthorizedCaller = new Caller(
-        new EntityID('USR'), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
+        EntityID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
     await expect(users.getAllUsers(storage, NonAuthorizedCaller))
         .to.be.rejectedWith(NeedsAdminError, 'NeedsAdminError')
   });
@@ -113,7 +113,7 @@ describe("[users]", () => {
 
     // Admin can read ihor.
     const adminCaller =
-        new Caller(new EntityID('USR'), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
     const ihor = await users.getUser(storage, adminCaller, ihorID);
     assert.containSubset(ihor, {userID : ihorID, userIdName : 'ihor'});

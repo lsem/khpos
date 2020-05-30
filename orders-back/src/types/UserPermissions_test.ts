@@ -44,8 +44,8 @@ class UserPermissions {
 
 describe("[permissions]", () => {
   it("usage example", () => {
-    const PointOfSale1ID = new EntityID('POS');
-    const PointOfSale2ID = new EntityID('POS');
+    const PointOfSale1ID = EntityID.makePOSID();
+    const PointOfSale2ID = EntityID.makePOSID();
 
     // This shop manager has rights to read "something" default but cannot create any orders
     // as changing orders requires write permission and write permission in turn requires subject

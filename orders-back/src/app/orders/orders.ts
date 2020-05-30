@@ -23,7 +23,7 @@ const OrderModelSchema = joi.object().keys({
 });
 
 export async function placeOrder(storage: AbstractStorage, orderData: OrderModel) {
-  const newOrderID = new EntityID("ORD");
+  const newOrderID = EntityID.makeOrderID();
   storage.insertOrder(newOrderID, orderData);
   return newOrderID;
 }

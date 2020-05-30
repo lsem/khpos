@@ -15,7 +15,7 @@ export async function createUser(storage: AbstractStorage, caller: Caller, userI
   if (maybeExisting) {
     throw new Error("User with such IDName already exists")
   }
-  const newUserID = new EntityID('USR');
+  const newUserID = EntityID.makeUserID();
   storage.insertUser(newUserID, {
     userID : newUserID,
     userIdName : userIDName,

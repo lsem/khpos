@@ -15,3 +15,7 @@ export class AlreadyExistsError extends Error {
 export class NotFoundError extends Error {
   constructor() { super('NotFoundError'); }
 }
+
+export class ValidationError extends Error {
+  constructor(details: string) { super('ValidationError: ' + details); }
+}
