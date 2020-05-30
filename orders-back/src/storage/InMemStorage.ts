@@ -6,38 +6,38 @@ import {OrderModel, POSModel, ProductModel, UserModel} from "../types/domain_typ
 import {AbstractStorage} from "./AbstractStorage";
 
 class InMemoryStorage implements AbstractStorage {
-  users = new Map<EntityID, UserModel>();
-  poss = new Map<EntityID, POSModel>();
-  orders = new Map<EntityID, OrderModel>();
-  products = new Map<EntityID, ProductModel>();
+  users = new Map<string, UserModel>();
+  poss = new Map<string, POSModel>();
+  orders = new Map<string, OrderModel>();
+  products = new Map<string, ProductModel>();
 
   //#region Products
   async insertProduct(productID: EntityID, productModel: ProductModel): Promise<void> {
     // todo: validate that not exists.
-    this.products.set(productID, productModel);
+    this.products.set(productID.value, productModel);
   }
 
   async getProductByID(id: EntityID): Promise<ProductModel> {
-    if (!this.products.has(id)) {
+    if (!this.products.has(id.value)) {
       throw new Error("Does not exists!")
     }
-    return this.products.get(id)!
+    return this.products.get(id.value)!
   }
   //#endregion
 
   //#region POS
   async insertPointOfSale(posID: EntityID, posModel: POSModel): Promise<void> {
-    if (this.poss.has(posID)) {
+    if (this.poss.has(posID.value)) {
       throw new Error("Already exists");
     }
-    this.poss.set(posID, posModel);
+    this.poss.set(posID.value, posModel);
   }
 
   async getPointOfSale(posID: EntityID): Promise<POSModel> {
-    if (!this.poss.has(posID)) {
+    if (!this.poss.has(posID.value)) {
       throw new Error("Does not exists!");
     }
-    return this.poss.get(posID)!;
+    return this.poss.get(posID.value)!;
   }
 
   async getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>> {
@@ -47,7 +47,7 @@ class InMemoryStorage implements AbstractStorage {
 
   //#region Orders
   async insertOrder(orderID: EntityID, orderModel: OrderModel): Promise<void> {
-    this.orders.set(orderID, orderModel);
+    this.orders.set(orderID.value, orderModel);
   }
 
   async getOrders(from: Date, to: Date): Promise<OrderModel[]> {
@@ -68,16 +68,16 @@ class InMemoryStorage implements AbstractStorage {
 
   //#region  Users
   async insertUser(userID: EntityID, userModel: UserModel): Promise<void> {
-    this.users.set(userID, userModel);
+    this.users.set(userID.value, userModel);
   }
   async getAllUsers(): Promise<readonly UserModel[]> { return Array.from(this.users.values()); }
 
   async getUser(userID: EntityID): Promise<UserModel> {
-    if (!this.users.has(userID)) {
+    if (!this.users.has(userID.value)) {
       throw new Error('User does not exist');
     }
     // todo: return clone! add test!
-    return this.users.get(userID)!;
+    return this.users.get(userID.value)!;
   }
 
   async findUserByIdName(idName: string): Promise<UserModel|undefined> {
