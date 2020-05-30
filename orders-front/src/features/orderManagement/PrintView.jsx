@@ -59,8 +59,14 @@ export default function PrintView({
               {itemsView[c].map((g, j) => (
                 <tr key={key++}>
                   <td>{g.name}</td>
-                  <td>{g.orderedcount}</td>
-                  {orderStatus === "new" ? null : <td>{g.deliveredcount}</td>}
+                  <td>
+                    {g.orderedcount} {g.units}
+                  </td>
+                  {orderStatus === "new" ? null : (
+                    <td>
+                      {g.deliveredcount} {g.units}
+                    </td>
+                  )}
                 </tr>
               ))}
             </React.Fragment>

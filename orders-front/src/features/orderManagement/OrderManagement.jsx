@@ -72,6 +72,10 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(6),
     color: theme.palette.text.hint,
   },
+  cellHint: {
+    color: theme.palette.text.hint,
+    marginLeft: 10
+  },
   itemsTable: {
     WebkitTapHighlightColor: "transparent",
     display: "table",
@@ -405,10 +409,12 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                     <td>{item.name}</td>
                     <td className={classes.textAlignRight}>
                       {item.orderedcount}
+                      <Typography variant="caption" className={classes.cellHint}>{item.units}</Typography>
                     </td>
                     {order.status === "new" ? null : (
                       <td className={classes.textAlignRight}>
                         {item.deliveredcount}
+                        <Typography variant="caption" className={classes.cellHint}>{item.units}</Typography>
                       </td>
                     )}
                   </tr>
