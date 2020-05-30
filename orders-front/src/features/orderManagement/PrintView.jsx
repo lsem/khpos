@@ -52,8 +52,8 @@ export default function PrintView({
             {orderStatus === "new" ? null : <th>Прийнято</th>}
           </tr>
           {Object.keys(itemsView).map((c, i) => (
-            <React.Fragment>
-              <tr key={key++}>
+            <React.Fragment key={i}>
+              <tr>
                 <th colSpan={orderStatus === "new" ? 2 : 3}>{c}</th>
               </tr>
               {itemsView[c].map((g, j) => (
