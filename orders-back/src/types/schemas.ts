@@ -16,3 +16,16 @@ export function TypedUUIDSchema2(tags: string[]) {
 }
 
 export const DateSchema = [ joi.date().iso().required(), joi.date().timestamp().required() ];
+
+export const GoodSchema = joi.object().keys({
+  posID : TypedUUIDSchema("POS").required(),
+  name : joi.string().required(),
+  units : joi.string().required(),
+  available : joi.boolean().required(),
+  removed : joi.boolean().required()
+});
+
+export const POSSchema = joi.object().keys({
+  posID : TypedUUIDSchema("POS").required(),
+  posIDName : joi.string().required(),
+});

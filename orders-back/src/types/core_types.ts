@@ -5,14 +5,19 @@ import * as uuid from "uuid";
 
 import {TypedUUIDSchema2} from './schemas';
 
-const ValidTags = [ 'USR', 'POS', 'ORD', 'GOO'];
+const ValidTags = [ 'USR', 'POS', 'ORD', 'GOO' ];
 const ValidIDSSchema = TypedUUIDSchema2(ValidTags);
 
 // Wrapper around string.
 class EntityID {
   value: string = "";
 
-  static newTagged(tag: string) {
+  static newTagged(tag: string, existingUUID: string|undefined = undefined) {
+    if (existingUUID) {
+      const newId = new EntityID();
+      newId.value = tag + "-" + existingUUID;
+      return newId;
+    }
     if (!ValidTags.find((t) => tag === t)) {
       throw new ValidationError(`tag ${tag} is valid for EntityID`);
     }
@@ -23,6 +28,7 @@ class EntityID {
 
   static makeUserID(): EntityID { return EntityID.newTagged('USR'); }
   static makePOSID(): EntityID { return EntityID.newTagged('POS'); }
+  static makeRawPOSID(uuid: string): EntityID { return EntityID.newTagged('POS', uuid); }
   static makeOrderID(): EntityID { return EntityID.newTagged('ORD'); }
   static makeGoodID(): EntityID { return EntityID.newTagged('GOO'); }
 
