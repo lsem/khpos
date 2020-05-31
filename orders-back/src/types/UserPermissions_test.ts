@@ -1,5 +1,5 @@
 import {assert} from "chai";
-import {EntityID} from "./core_types";
+import {EID} from "./core_types";
 
 // TODO: Entire permission systems must fit in one file with goods tests.
 
@@ -35,8 +35,8 @@ enum PermissionFlags {
 
 class UserPermissions {
   public readonly mask: PermissionFlags;
-  public readonly resources: EntityID[];
-  constructor(flags: PermissionFlags, resources: EntityID[]) {
+  public readonly resources: EID[];
+  constructor(flags: PermissionFlags, resources: EID[]) {
     this.mask = flags;
     this.resources = resources;
   }
@@ -44,8 +44,8 @@ class UserPermissions {
 
 describe("[permissions]", () => {
   it("usage example", () => {
-    const PointOfSale1ID = EntityID.makePOSID();
-    const PointOfSale2ID = EntityID.makePOSID();
+    const PointOfSale1ID = EID.makePOSID();
+    const PointOfSale2ID = EID.makePOSID();
 
     // This shop manager has rights to read "something" default but cannot create any orders
     // as changing orders requires write permission and write permission in turn requires subject

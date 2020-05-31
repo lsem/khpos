@@ -1,14 +1,14 @@
-import {EntityID} from "./core_types";
+import {EID} from "./core_types";
 import {UserPermissions} from "./UserPermissions";
 
 // Defines model for POS
 interface POSModel {
-  posID: EntityID;
+  posID: EID;
   posIDName: string;
 }
 
 interface UserModel {
-  userID: EntityID;
+  userID: EID;
   userIdName: string;
   userFullName: string;
   telNumber: string;
@@ -16,19 +16,19 @@ interface UserModel {
 }
 
 interface OrderModelItem {
-  id: EntityID; // can be product, ingridient, etc..
+  id: EID; // can be product, ingridient, etc..
   count: number;
 }
 
 interface OrderModel {
-  whoPlaced: EntityID;
+  whoPlaced: EID;
   toDate: Date;
-  posID: EntityID;
+  posID: EID;
   items: OrderModelItem[];
 }
 
 interface GoodModel {
-  id: EntityID;
+  id: EID;
   name: string;
   units: string;
   available: boolean;

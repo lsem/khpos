@@ -3,19 +3,19 @@ import chai from 'chai';
 import chaiAsPromised from "chai-as-promised"
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 import {AlreadyExistsError, NeedsAdminError, NotFoundError} from "./errors";
 import * as goods from "./goods";
 
-const AdminID = EntityID.makeUserID();
+const AdminID = EID.makeUserID();
 const AdminPermissions = new UserPermissions(PermissionFlags.Admin, []);
 const AdminAsCaller = new Caller(AdminID, AdminPermissions);
 
 function createUser(permissions: PermissionFlags,
-                    resources: EntityID[]): {ID: EntityID, caller: Caller} {
-  const id = EntityID.makeUserID();
+                    resources: EID[]): {ID: EID, caller: Caller} {
+  const id = EID.makeUserID();
   return {ID : id, caller : new Caller(id, new UserPermissions(permissions, resources))};
 }
 
@@ -41,7 +41,7 @@ describe("[goods]", () => {
 
   it("Should raise NotFound on attempt to get unexisting good", async () => {
     const storage = new InMemoryStorage();
-    await expect(goods.getGoodByID(storage, AdminAsCaller, EntityID.makeGoodID()))
+    await expect(goods.getGoodByID(storage, AdminAsCaller, EID.makeGoodID()))
         .to.be.rejectedWith(NotFoundError);
   });
 
@@ -89,13 +89,13 @@ describe("[goods]", () => {
 
   it("Should raise NotFound on attmept to deactive unexisting good", async () => {
     const storage = new InMemoryStorage();
-    await expect(goods.makeGoodUnavailable(storage, AdminAsCaller, EntityID.makeGoodID()))
+    await expect(goods.makeGoodUnavailable(storage, AdminAsCaller, EID.makeGoodID()))
         .to.be.rejectedWith(NotFoundError);
   });
 
   it("Should raise NotFound on attmept to remove unexisting good", async () => {
     const storage = new InMemoryStorage();
-    await expect(goods.removeGood(storage, AdminAsCaller, EntityID.makeGoodID()))
+    await expect(goods.removeGood(storage, AdminAsCaller, EID.makeGoodID()))
         .to.be.rejectedWith(NotFoundError);
   });
 });

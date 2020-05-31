@@ -1,7 +1,7 @@
 import _ from "lodash";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {Caller} from "types/Caller";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {GoodModel} from "types/domain_types";
 
 import {ensureAdmin} from "./ensure";
@@ -13,9 +13,9 @@ export function getAvailableGoods(storage: AbstractStorage,
 }
 
 export async function createGood(storage: AbstractStorage, caller: Caller, name: string,
-                                 units: string): Promise<EntityID> {
+                                 units: string): Promise<EID> {
   ensureAdmin(caller);
-  const id = EntityID.makeGoodID();
+  const id = EID.makeGoodID();
   const duplicate = _.find(await storage.getAllGoods(), (good: GoodModel) => good.name === name);
   if (!!duplicate) {
     throw new AlreadyExistsError();
@@ -25,18 +25,18 @@ export async function createGood(storage: AbstractStorage, caller: Caller, name:
 }
 
 export async function getGoodByID(storage: AbstractStorage, caller: Caller,
-                                  id: EntityID): Promise<GoodModel> {
+                                  id: EID): Promise<GoodModel> {
   return storage.getGoodByID(id);
 }
 
 export async function makeGoodUnavailable(storage: AbstractStorage, caller: Caller,
-                                          id: EntityID): Promise<void> {
+                                          id: EID): Promise<void> {
   ensureAdmin(caller);
   await storage.updateGood(id, (good) => { return {...good, available : false}; })
 }
 
 export async function removeGood(storage: AbstractStorage, caller: Caller,
-                                 id: EntityID): Promise<void> {
+                                 id: EID): Promise<void> {
   ensureAdmin(caller);
   await storage.updateGood(id, (good) => { return {...good, removed : true}; })
 }

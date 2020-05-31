@@ -1,5 +1,5 @@
 import {assert} from "chai";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {POSModel} from "types/domain_types";
 
 import {ValidationError} from "./errors";
@@ -10,7 +10,7 @@ function expectedJson(s: string) { return JSON.stringify(JSON.parse(s)); }
 describe("[serialize", () => {
   it("/POSModel]", () => {
     const sample: POSModel = {
-      posID : EntityID.makeRawPOSID("be684f10-a35d-11ea-bb37-0242ac130002"),
+      posID : EID.makeRawPOSID("be684f10-a35d-11ea-bb37-0242ac130002"),
       posIDName : 'чупринки'
     };
     assert.equal(

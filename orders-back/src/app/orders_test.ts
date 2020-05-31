@@ -1,6 +1,6 @@
 import {assert} from "chai";
 import {InMemoryStorage} from "storage/InMemStorage";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 import * as orders from "./orders";
@@ -19,16 +19,16 @@ describe("[orders]", () => {
 
   it("should support basic scenario", async () => {
     const storage = new InMemoryStorage();
-    const product1 = EntityID.makeGoodID();
+    const product1 = EID.makeGoodID();
     storage.insertGood(product1,
                        {id : product1, name : "Круасан з Моколадом", units : "it", available: true, removed: false});
 
-    const product2 = EntityID.makeGoodID();
+    const product2 = EID.makeGoodID();
     storage.insertGood(product2,
                        {id : product2, name : "Шарлотка по Франківськи", units : "it", available: true, removed: false});
 
     // Create some user User1.
-    const user1ID = EntityID.makeUserID();
+    const user1ID = EID.makeUserID();
     storage.insertUser(user1ID, {
       userID : user1ID,
       userIdName : "nat",
@@ -38,14 +38,14 @@ describe("[orders]", () => {
     });
 
     // Create some POS where user nat works.
-    const pos1ID = EntityID.makePOSID();
+    const pos1ID = EID.makePOSID();
     storage.insertPointOfSale(pos1ID, {
       posIDName : "ЮЛипи",
       posID : pos1ID,
     });
 
     // Create another User2.
-    const user2ID = EntityID.makeUserID();
+    const user2ID = EID.makeUserID();
     storage.insertUser(user2ID, {
       userID : user2ID,
       userIdName : "nat",
@@ -55,7 +55,7 @@ describe("[orders]", () => {
     });
 
     // Create another POS where zoya works.
-    const pos2ID = EntityID.makePOSID();
+    const pos2ID = EID.makePOSID();
     storage.insertPointOfSale(pos2ID, {
       posIDName : "Чупринки",
       posID : pos2ID,

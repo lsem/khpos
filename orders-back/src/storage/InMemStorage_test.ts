@@ -4,7 +4,7 @@ import chai from 'chai';
 import chaiAsPromised from "chai-as-promised";
 import chaiSubset from 'chai-subset';
 import {InMemoryStorage} from "storage/InMemStorage";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {GoodModel, UserModel} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
@@ -16,7 +16,7 @@ const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
 describe("[inmem.users]", () => {
   it("should allow to get preiosly stored user by same ID value ", async () => {
     const storage = new InMemoryStorage();
-    const id = EntityID.makeUserID();
+    const id = EID.makeUserID();
     await storage.insertUser(id, {
       userID : id,
       userIdName : 'sem',
@@ -26,7 +26,7 @@ describe("[inmem.users]", () => {
     });
 
     // lets pretedend we get this id somewhere from client
-    const sameIdFromClient = EntityID.fromExisting(id.value);
+    const sameIdFromClient = EID.fromExisting(id.value);
     assert.deepEqual(await storage.getUser(sameIdFromClient), {
       userID : id,
       userIdName : 'sem',
@@ -38,7 +38,7 @@ describe("[inmem.users]", () => {
 
   it("should update user coorectly", async () => {
     const storage = new InMemoryStorage();
-    const id = EntityID.makeUserID();
+    const id = EID.makeUserID();
     const initial = new UserPermissions(PermissionFlags.None, []);
     await storage.insertUser(id, {
       userID : id,
@@ -48,7 +48,7 @@ describe("[inmem.users]", () => {
       permissions : initial
     });
 
-    const resource = EntityID.makePOSID();
+    const resource = EID.makePOSID();
     const newPermissions = new UserPermissions(PermissionFlags.Write, [ resource ]);
     await storage.updateUser(id, (user: UserModel) => { user.permissions = newPermissions; })
 
@@ -56,7 +56,7 @@ describe("[inmem.users]", () => {
                          {permissions : {mask : PermissionFlags.Write, resources : [ resource ]}});
 
     // Verify that there is no unexpected spec-effects with references
-    newPermissions.resources.push(EntityID.makePOSID());
+    newPermissions.resources.push(EID.makePOSID());
     assert.containSubset(await storage.getUser(id),
                          {permissions : {mask : PermissionFlags.Write, resources : [ resource ]}});
   });
@@ -65,11 +65,11 @@ describe("[inmem.users]", () => {
 describe("[inmem.pos]",
          () => {it("should allow to get preiosly stored pos by same ID value ", async () => {
            const storage = new InMemoryStorage();
-           const id = EntityID.makePOSID();
+           const id = EID.makePOSID();
            await storage.insertPointOfSale(id, {posID : id, posIDName : 'central'});
 
            // lets pretedend we get this id somewhere from client
-           const sameIdFromClient = EntityID.fromExisting(id.value);
+           const sameIdFromClient = EID.fromExisting(id.value);
            assert.deepEqual(await storage.getPointOfSale(sameIdFromClient),
                             {posID : id, posIDName : 'central'});
          })});
@@ -77,25 +77,25 @@ describe("[inmem.pos]",
 describe("[inmem.goods]", () => {
   it("should allow to get previously stored good by same ID value ", async () => {
     const storage = new InMemoryStorage();
-    const id = EntityID.makeGoodID();
+    const id = EID.makeGoodID();
     await storage.insertGood(
         id, {id : id, name : "water", units : "it", available : true, removed : false});
 
     // lets pretedend we get this id somewhere from client
-    const sameIdFromClient = EntityID.fromExisting(id.value);
+    const sameIdFromClient = EID.fromExisting(id.value);
     assert.deepEqual(await storage.getGoodByID(sameIdFromClient),
                      {id : id, name : 'water', units : 'it', available : true, removed : false});
   });
 
   it("should raise NotFoundError if not found ", async () => {
     const storage = new InMemoryStorage();
-    await expect(storage.getGoodByID(EntityID.makeGoodID())).to.be.rejectedWith(NotFoundError);
+    await expect(storage.getGoodByID(EID.makeGoodID())).to.be.rejectedWith(NotFoundError);
   })
 
   it("should return all previosly stored goods ", async () => {
     const storage = new InMemoryStorage();
-    const id1 = EntityID.makeGoodID();
-    const id2 = EntityID.makeGoodID();
+    const id1 = EID.makeGoodID();
+    const id2 = EID.makeGoodID();
     await storage.insertGood(
         id1, {id : id1, name : "water", units : "it", available : true, removed : false});
     await storage.insertGood(
@@ -110,14 +110,14 @@ describe("[inmem.goods]", () => {
 
   it("should allow updating goods", async () => {
     const storage = new InMemoryStorage();
-    const id = EntityID.makeGoodID();
+    const id = EID.makeGoodID();
     await storage.insertGood(
         id, {id : id, name : "water", units : "litres", available : true, removed : false});
     await storage.updateGood(id, (good: GoodModel) => {return { ...good, name: "wine" }});
     assert.deepEqual(await storage.getGoodByID(id),
                      {id : id, name : "wine", units : "litres", available : true, removed : false});
     await expect(storage.updateGood(id, (good: GoodModel) => {
-      return { ...good, id: EntityID.makeGoodID() }
+      return { ...good, id: EID.makeGoodID() }
     })).to.be.rejectedWith(Error, "Changing ID is not allowed");
   });
 });
@@ -125,14 +125,14 @@ describe("[inmem.goods]", () => {
 describe(
     "[inmem.orders]",
     () => {it.skip("should allow to get previously stored order by same ID value ", async () => {
-      const posID = EntityID.makePOSID();
-      const userID = EntityID.makeUserID();
+      const posID = EID.makePOSID();
+      const userID = EID.makeUserID();
       const storage = new InMemoryStorage();
-      const id = EntityID.makeOrderID();
+      const id = EID.makeOrderID();
       await storage.insertOrder(
           id, {posID : posID, toDate : new Date("2020-05-05"), whoPlaced : userID, items : []});
 
       // lets pretedend we get this id somewhere from client
-      const sameIdFromClient = EntityID.fromExisting(id.value);
+      const sameIdFromClient = EID.fromExisting(id.value);
       // todo: not enough methods for veryfying this yet.
     })});

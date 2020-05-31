@@ -1,4 +1,4 @@
-import {EntityID} from "./core_types";
+import {EID} from "./core_types";
 
 export enum PermissionFlags {
   None = 0x0000,
@@ -15,8 +15,8 @@ export enum PermissionFlags {
 
 export class UserPermissions {
   public readonly mask: PermissionFlags;
-  public readonly resources: EntityID[];
-  constructor(flags: PermissionFlags, resources: EntityID[]) {
+  public readonly resources: EID[];
+  constructor(flags: PermissionFlags, resources: EID[]) {
     this.mask = flags;
     this.resources = resources;
   }

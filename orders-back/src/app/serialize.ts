@@ -1,5 +1,5 @@
 import * as joi from "joi";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {GoodModel, POSModel, UserModel} from "types/domain_types";
 import * as schemas from "types/schemas";
 import {ValidationError} from "./errors";
@@ -9,7 +9,7 @@ const nameof = <T>(name: keyof T) => name;
 function IDReplacerFor(name: string): (this: any, key: string, val: any) => any {
   return (key, val) => {
     if (key === name) {
-      return (val as EntityID).value;
+      return (val as EID).value;
     }
     return val;
   }

@@ -6,7 +6,7 @@ import chaiSubset from 'chai-subset';
 import _ from 'lodash';
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 import * as users from "./users";
@@ -15,7 +15,7 @@ chai.use(chaiAsPromised);
 chai.use(chaiSubset);
 
 const AdminCaller =
-    new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+    new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
 describe("[users]", () => {
   it("should pass basic test", async () => {
@@ -71,7 +71,7 @@ describe("[users]", () => {
     const userPermissions = new UserPermissions(PermissionFlags.Write | PermissionFlags.Write, []);
 
     const NonAuthorizedCaller = new Caller(
-        EntityID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
+        EID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
 
     await expect(users.createUser(storage, NonAuthorizedCaller, "Ната", userPermissions,
                                   "Наталія Бушмак", "+380961112233"))
@@ -79,7 +79,7 @@ describe("[users]", () => {
 
     // Now try creating the same user with by Admin.
     const AdminUser =
-        new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const user1ID = await users.createUser(storage, AdminUser, "Ната", userPermissions,
                                            "Наталія Бушмак", "+380961112233");
   });
@@ -87,7 +87,7 @@ describe("[users]", () => {
   it("should disallow getting users by non-authorized user", async () => {
     const storage = new InMemoryStorage();
     const NonAuthorizedCaller = new Caller(
-        EntityID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
+        EID.makeUserID(), new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, []));
     await expect(users.getAllUsers(storage, NonAuthorizedCaller))
         .to.be.rejectedWith(NeedsAdminError, 'NeedsAdminError')
   });
@@ -113,7 +113,7 @@ describe("[users]", () => {
 
     // Admin can read ihor.
     const adminCaller =
-        new Caller(EntityID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
     const ihor = await users.getUser(storage, adminCaller, ihorID);
     assert.containSubset(ihor, {userID : ihorID, userIdName : 'ihor'});
@@ -121,7 +121,7 @@ describe("[users]", () => {
 
   it("should return back proper permissions for user", async () => {
     const storage = new InMemoryStorage();
-    const pos1ID = EntityID.makePOSID();
+    const pos1ID = EID.makePOSID();
 
     const ivanPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
@@ -136,7 +136,7 @@ describe("[users]", () => {
 
   it("should allow admins to change permissions", async () => {
     const storage = new InMemoryStorage();
-    const pos1ID = EntityID.makePOSID();
+    const pos1ID = EID.makePOSID();
 
     const ivanPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
@@ -144,7 +144,7 @@ describe("[users]", () => {
     const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
                                           "Ivan Kruasan", "+33999333");
 
-    const pos2ID = EntityID.makePOSID();
+    const pos2ID = EID.makePOSID();
     const newPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID, pos2ID ]);
 
@@ -158,7 +158,7 @@ describe("[users]", () => {
 
   it("should disallow to change permissions by self", async () => {
     const storage = new InMemoryStorage();
-    const pos1ID = EntityID.makePOSID();
+    const pos1ID = EID.makePOSID();
 
     const ivanPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
@@ -166,7 +166,7 @@ describe("[users]", () => {
     const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
                                           "Ivan Kruasan", "+33999333");
 
-    const pos2ID = EntityID.makePOSID();
+    const pos2ID = EID.makePOSID();
     const newPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID, pos2ID ]);
 
@@ -177,7 +177,7 @@ describe("[users]", () => {
 
   it("should return not found on attept tochange permissions of unexsting user", async () => {
     const storage = new InMemoryStorage();
-    const pos1ID = EntityID.makePOSID();
+    const pos1ID = EID.makePOSID();
 
     const ivanPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos1ID ]);
@@ -185,17 +185,17 @@ describe("[users]", () => {
     const ivanID = await users.createUser(storage, AdminCaller, "ivan", ivanPermissions,
                                           "Ivan Kruasan", "+33999333");
 
-    const pos2ID = EntityID.makePOSID();
+    const pos2ID = EID.makePOSID();
     const newPermissions =
         new UserPermissions(PermissionFlags.Read | PermissionFlags.Write, [ pos2ID ]);
 
     // Netiher admin
-    await expect(users.changesUser(storage, AdminCaller, EntityID.makeUserID(), newPermissions))
+    await expect(users.changesUser(storage, AdminCaller, EID.makeUserID(), newPermissions))
         .to.be.rejectedWith(NotFoundError, "NotFoundError");
 
     // Nor regular user
     const ivanAsCaller = new Caller(ivanID, ivanPermissions);
-    await expect(users.changesUser(storage, ivanAsCaller, EntityID.makeUserID(), newPermissions))
+    await expect(users.changesUser(storage, ivanAsCaller, EID.makeUserID(), newPermissions))
         .to.be.rejectedWith(NeedsAdminError);
   });
 });

@@ -9,31 +9,31 @@ const ValidTags = [ 'USR', 'POS', 'ORD', 'GOO' ];
 const ValidIDSSchema = TypedUUIDSchema2(ValidTags);
 
 // Wrapper around string.
-class EntityID {
+class EID {
   value: string = "";
 
   static newTagged(tag: string, existingUUID: string|undefined = undefined) {
     if (existingUUID) {
-      const newId = new EntityID();
+      const newId = new EID();
       newId.value = tag + "-" + existingUUID;
       return newId;
     }
     if (!ValidTags.find((t) => tag === t)) {
-      throw new ValidationError(`tag ${tag} is valid for EntityID`);
+      throw new ValidationError(`tag ${tag} is valid for EID`);
     }
-    const newId = new EntityID();
+    const newId = new EID();
     newId.value = tag + "-" + uuid.v4();
     return newId;
   }
 
-  static makeUserID(): EntityID { return EntityID.newTagged('USR'); }
-  static makePOSID(): EntityID { return EntityID.newTagged('POS'); }
-  static makeRawPOSID(uuid: string): EntityID { return EntityID.newTagged('POS', uuid); }
-  static makeOrderID(): EntityID { return EntityID.newTagged('ORD'); }
-  static makeGoodID(): EntityID { return EntityID.newTagged('GOO'); }
+  static makeUserID(): EID { return EID.newTagged('USR'); }
+  static makePOSID(): EID { return EID.newTagged('POS'); }
+  static makeRawPOSID(uuid: string): EID { return EID.newTagged('POS', uuid); }
+  static makeOrderID(): EID { return EID.newTagged('ORD'); }
+  static makeGoodID(): EID { return EID.newTagged('GOO'); }
 
-  static fromExisting(id: string): EntityID {
-    const newID = new EntityID();
+  static fromExisting(id: string): EID {
+    const newID = new EID();
     const result = joi.validate(id, ValidIDSSchema);
     if (result.error) {
       throw new ValidationError(result.error.message);
@@ -44,7 +44,7 @@ class EntityID {
 
   toString() { return this.value; }
 
-  equals(other: EntityID) { return _.isEqual(this, other); }
+  equals(other: EID) { return _.isEqual(this, other); }
 }
 
-export {EntityID};
+export {EID};

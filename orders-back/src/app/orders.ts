@@ -1,5 +1,5 @@
 import * as joi from "joi";
-import {EntityID} from "types/core_types";
+import {EID} from "types/core_types";
 import {OrderModel, OrderModelItem} from "types/domain_types";
 import {AbstractStorage} from "../storage/AbstractStorage";
 import * as schemas from "../types/schemas";
@@ -23,18 +23,18 @@ const OrderModelSchema = joi.object().keys({
 });
 
 export async function placeOrder(storage: AbstractStorage, orderData: OrderModel) {
-  const newOrderID = EntityID.makeOrderID();
+  const newOrderID = EID.makeOrderID();
   storage.insertOrder(newOrderID, orderData);
   return newOrderID;
 }
 
 interface ItemDetails {
-  count: number, posIDName: string, posID: EntityID
+  count: number, posIDName: string, posID: EID
 }
 
 interface Item {
   productName: string;
-  productID: EntityID;
+  productID: EID;
   count: number;
   details: ReadonlyArray<ItemDetails>;
 }
@@ -55,8 +55,8 @@ export async function getOrdersForDate(storage: AbstractStorage,
 
   let items: Array<Item> = [];
 
-  let itemContsByGoodID = new Map<EntityID, number>();
-  let itemDetailsByGoodID = new Map<EntityID, Array<ItemDetails>>();
+  let itemContsByGoodID = new Map<EID, number>();
+  let itemDetailsByGoodID = new Map<EID, Array<ItemDetails>>();
 
   // Get all orders for all POSs for given date and produce combined POSs.
   const orders = await storage.getOrders(date, date);
