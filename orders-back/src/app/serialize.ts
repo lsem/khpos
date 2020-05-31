@@ -15,18 +15,26 @@ function IDReplacerFor(name: string): (this: any, key: string, val: any) => any 
   }
 }
 
+function serialize<T>(pos: T, name: keyof T) {
+  return JSON.stringify(pos, IDReplacerFor(name.toString()));
+}
+
+function deserialize<T>(maybeTJson: string, schema: joi.SchemaLike, name: keyof T): T {
+  const validationResult = joi.validate(maybeTJson, schema)
+  if (validationResult.error) {
+    throw new ValidationError(`Error: ${validationResult.error.message}; actual: ${maybeTJson}`);
+  }
+  const tJson = JSON.parse(maybeTJson);
+  tJson[name] = {value : tJson[name]};
+  return tJson as T;
+}
+
 export function serializePOS(pos: POSModel): string {
-  return JSON.stringify(pos, IDReplacerFor(nameof<POSModel>("posID")));
+  return serialize(pos, nameof<POSModel>("posID"));
 }
 
 export function deserializePOS(maybePOS: string): POSModel {
-  const validationResult = joi.validate(maybePOS, schemas.POSSchema)
-  if (validationResult.error) {
-    throw new ValidationError(`Error: ${validationResult.error.message}; actual: ${maybePOS}`);
-  }
-  const parsed = JSON.parse(maybePOS);
-  parsed.posID = {value : parsed.posID};
-  return parsed as POSModel;
+  return deserialize(maybePOS, schemas.POSSchema, nameof<POSModel>("posID"));
 }
 
 export function serializeUser(user: UserModel): string { return ""; }
