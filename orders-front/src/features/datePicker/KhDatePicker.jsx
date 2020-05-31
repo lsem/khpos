@@ -1,5 +1,6 @@
 import React from "react";
 import moment from "moment";
+import "moment/locale/uk";
 import { Button, ButtonGroup, Dialog } from "@material-ui/core";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { ArrowLeft, ArrowRight } from "@material-ui/icons";
@@ -40,14 +41,7 @@ export default function KhDatePicker({ value, onChange, style }) {
             setShowDialog(true);
           }}
         >
-          {moment(value).calendar({
-            sameDay: "[Today]",
-            nextDay: "[Tomorrow]",
-            nextWeek: "dddd",
-            lastDay: "[Yesterday]",
-            lastWeek: "[Last] dddd",
-            sameElse: "DD.MM.YYYY",
-          })}
+          {moment(value).calendar().split(" о")[0]}
         </Button>
         <Button onClick={increseDay} style={{ padding: 0 }}>
           <ArrowRight />
