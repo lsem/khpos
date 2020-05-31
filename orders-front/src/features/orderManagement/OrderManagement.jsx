@@ -11,10 +11,8 @@ import {
   DialogTitle,
   DialogActions,
   Button,
-  Select,
+  ButtonGroup,
   MenuItem,
-  InputLabel,
-  FormControl,
   CircularProgress,
   FormControlLabel,
   Checkbox,
@@ -32,6 +30,7 @@ import {
   thunkGetSellPointsFromApi,
 } from "./orderManagementSlice";
 import PrintView from "./PrintView";
+import KhDatePicker from "../datePicker/KhDatePicker";
 //#endregion
 
 //#region STYLES
@@ -61,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "center",
-    margin: "20px 0 5px 0",
+    margin: "16px 0",
   },
   formControl: {
     margin: theme.spacing(1),
@@ -74,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
   },
   cellHint: {
     color: theme.palette.text.hint,
-    marginLeft: 10
+    marginLeft: 10,
   },
   itemsTable: {
     WebkitTapHighlightColor: "transparent",
@@ -152,7 +151,7 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
+function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
   const classes = useStyles();
 
   //#region STATE
@@ -166,7 +165,8 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   const [categoriesMenu, setCategoriesMenu] = React.useState({});
   const [items, setItems] = React.useState([]);
   const [itemsView, setItemsView] = React.useState([]);
-  const [anchorMenu, setAnchorMenu] = React.useState(null);
+  const [anchorItemsMenu, setAnchorItemsMenu] = React.useState(null);
+  const [anchorPosMenu, setAnchorPosMenu] = React.useState(null);
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
@@ -178,7 +178,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
   }, [getSellPoints]);
 
   React.useEffect(() => {
-    if (sellPointId) getOrder(orderDate, sellPointId);
+    if (sellPointId) getOrder(moment(orderDate).valueOf(), sellPointId);
   }, [orderDate, sellPointId, getOrder]);
 
   React.useEffect(() => {
@@ -241,12 +241,20 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
 
   //#region UI HANDLERS
 
-  const handleMenuButtonClick = (event) => {
-    setAnchorMenu(event.currentTarget);
+  const handleItemsMenuButtonClick = (event) => {
+    setAnchorItemsMenu(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
-    setAnchorMenu(null);
+  const handleItemsMenuClose = () => {
+    setAnchorItemsMenu(null);
+  };
+
+  const handlePosMenuButtonClick = (event) => {
+    setAnchorPosMenu(event.currentTarget);
+  };
+
+  const handlePosMenuClose = () => {
+    setAnchorPosMenu(null);
   };
 
   const handelCategoryCheck = (category, value) => {
@@ -334,40 +342,28 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
     <React.Fragment>
       <div className={classes.root}>
         <div className={classes.optionsBar}>
-          <FormControl className={classes.formControl}>
-            <TextField
-              id="date"
-              label="Дата замовлення"
-              type="date"
-              defaultValue={moment(orderDate).format("YYYY-MM-DD")}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={(e) => {
-                setOrderDate(e.target.value);
-              }}
-            />
-          </FormControl>
+          <KhDatePicker
+            value={moment(orderDate).valueOf()}
+            onChange={setOrderDate}
+            style={{ margin: 5 }}
+          />
+
           {sellPoints ? (
-            <FormControl className={classes.formControl}>
-              <InputLabel id="select-sell-point-label">
-                Точка продажу
-              </InputLabel>
-              <Select
-                labelId="select-sell-point-label"
-                id="select-sell-point"
-                value={sellPointId}
-                onChange={(e) => {
-                  setSellPointId(e.target.value);
-                }}
-              >
-                {sellPoints.map((sp) => (
-                  <MenuItem key={sp.id} value={sp.id}>
-                    {sp.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <ButtonGroup
+              size="large"
+              color="primary"
+              aria-label="contained primary button group"
+              style={{ margin: 5 }}
+            >
+              <Button onClick={handlePosMenuButtonClick}>
+                {sellPointId
+                  ? sellPoints.find((pos) => pos.id === sellPointId).name
+                  : "Точка продажу..."}
+              </Button>
+              <Button onClick={handlePosMenuButtonClick} style={{ padding: 0 }}>
+                <ArrowDropDown />
+              </Button>
+            </ButtonGroup>
           ) : (
             <Typography>завантажується...</Typography>
           )}
@@ -409,12 +405,22 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
                     <td>{item.name}</td>
                     <td className={classes.textAlignRight}>
                       {item.orderedcount}
-                      <Typography variant="caption" className={classes.cellHint}>{item.units}</Typography>
+                      <Typography
+                        variant="caption"
+                        className={classes.cellHint}
+                      >
+                        {item.units}
+                      </Typography>
                     </td>
                     {order.status === "new" ? null : (
                       <td className={classes.textAlignRight}>
                         {item.deliveredcount}
-                        <Typography variant="caption" className={classes.cellHint}>{item.units}</Typography>
+                        <Typography
+                          variant="caption"
+                          className={classes.cellHint}
+                        >
+                          {item.units}
+                        </Typography>
                       </td>
                     )}
                   </tr>
@@ -441,7 +447,7 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
         <Fab
           color="default"
           className={classes.fabMenu}
-          onClick={handleMenuButtonClick}
+          onClick={handleItemsMenuButtonClick}
           size="small"
         >
           <MoreVert />
@@ -457,10 +463,10 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
 
       <Menu
         className={classes.itemsMenuContainer}
-        anchorEl={anchorMenu}
+        anchorEl={anchorItemsMenu}
         keepMounted
-        open={Boolean(anchorMenu)}
-        onClose={handleMenuClose}
+        open={Boolean(anchorItemsMenu)}
+        onClose={handleItemsMenuClose}
         disableAutoFocusItem
         variant="menu"
       >
@@ -494,6 +500,29 @@ function MakeOrder({ getOrder, getSellPoints, sellPoints, order }) {
             label={k}
           />
         ))}
+      </Menu>
+
+      <Menu
+        anchorEl={anchorPosMenu}
+        keepMounted
+        open={Boolean(anchorPosMenu)}
+        onClose={handlePosMenuClose}
+        disableAutoFocusItem
+        variant="menu"
+      >
+        {sellPoints
+          ? sellPoints.map((pos, i) => (
+              <MenuItem
+                key={i}
+                onClick={() => {
+                  setSellPointId(pos.id);
+                  handlePosMenuClose();
+                }}
+              >
+                {pos.name}
+              </MenuItem>
+            ))
+          : null}
       </Menu>
 
       <Dialog
@@ -639,4 +668,4 @@ const mapDispatchToProps = (dispatch) => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(MakeOrder);
+export default connect(mapStateToProps, mapDispatchToProps)(OrderManagement);
