@@ -31,6 +31,7 @@ class EID {
   static makeRawPOSID(uuid: string): EID { return EID.newTagged('POS', uuid); }
   static makeOrderID(): EID { return EID.newTagged('ORD'); }
   static makeGoodID(): EID { return EID.newTagged('GOO'); }
+  static makeRawGoodID(uuid: string): EID { return EID.newTagged('GOO', uuid); }
 
   static fromExisting(id: string): EID {
     const newID = new EID();

@@ -6,35 +6,40 @@ import {ValidationError} from "./errors";
 
 const nameof = <T>(name: keyof T) => name;
 
-function IDReplacerFor(name: string): (this: any, key: string, val: any) => any {
+function IDReplacerFor<T>(keys: Array<keyof T>): (this: any, key: string, val: any) => any {
   return (key, val) => {
-    if (key === name) {
-      return (val as EID).value;
+    for (let k of keys) {
+      if (key === k.toString()) {
+        return (val as EID).value;
+      }
     }
     return val;
   }
 }
 
-function serialize<T>(pos: T, name: keyof T) {
-  return JSON.stringify(pos, IDReplacerFor(name.toString()));
+export function serialize<T>(obj: T, idsKeys: Array<keyof T>) {
+  return JSON.stringify(obj, IDReplacerFor<T>(idsKeys));
 }
 
-function deserialize<T>(maybeTJson: string, schema: joi.SchemaLike, name: keyof T): T {
+export function deserialize<T>(maybeTJson: string, schema: joi.SchemaLike,
+                               idsKeys: Array<keyof T>): T {
   const validationResult = joi.validate(maybeTJson, schema)
   if (validationResult.error) {
     throw new ValidationError(`Error: ${validationResult.error.message}; actual: ${maybeTJson}`);
   }
   const tJson = JSON.parse(maybeTJson);
-  tJson[name] = {value : tJson[name]};
+  for (let k of idsKeys) {
+    tJson[k] = {value : tJson[k]};
+  }
   return tJson as T;
 }
 
-export function serializePOS(pos: POSModel): string {
-  return serialize(pos, nameof<POSModel>("posID"));
-}
-
+export function serializePOS(pos: POSModel): string { return serialize(pos, [ "posID" ]); }
 export function deserializePOS(maybePOS: string): POSModel {
-  return deserialize(maybePOS, schemas.POSSchema, nameof<POSModel>("posID"));
+  return deserialize(maybePOS, schemas.POSSchema, [ "posID" ]);
 }
 
-export function serializeUser(user: UserModel): string { return ""; }
+export function serializeGood(good: GoodModel): string { return serialize(good, [ "id" ]); }
+export function deserializeGood(s: string): GoodModel {
+  return deserialize(s, schemas.GoodSchema, [ "id" ]);
+}
