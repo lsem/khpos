@@ -5,7 +5,7 @@ import moment from "moment";
 import itemsSample from "../../samples/orderManagement.json";
 import sellPointsSample from "../../samples/sellPoints.json";
 
-export const goodsSlice = createSlice({
+export const orderManagementSlice = createSlice({
   name: "orderManagement",
   initialState: {
     order: null,
@@ -46,7 +46,7 @@ const {
   getSellPointsFromApi,
   setSellPoints,
   setSellPointsError,
-} = goodsSlice.actions;
+} = orderManagementSlice.actions;
 
 //temp helper
 function getRandomInt(min, max) {
@@ -115,4 +115,4 @@ export const thunkGetSellPointsFromApi = () => (dispatch) => {
     });
 };
 
-export default goodsSlice.reducer;
+export default orderManagementSlice.reducer;
