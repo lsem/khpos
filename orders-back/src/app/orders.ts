@@ -28,35 +28,22 @@ export async function placeOrder(storage: AbstractStorage, orderData: OrderModel
   return newOrderID;
 }
 
-interface ItemDetails {
-  count: number, posIDName: string, posID: EID
-}
-
-interface Item {
-  productName: string;
-  productID: EID;
-  count: number;
-  details: ReadonlyArray<ItemDetails>;
-}
-
 export interface CombinedOrderView {
   toDate: Date;
-  items: ReadonlyArray<Item>;
+  items: ReadonlyArray<{
+    productName : string; productID : EID; count : number;
+    details : ReadonlyArray<{count : number, posIDName: string, posID: EID}>;
+  }>;
 }
 
-// export async function getOrderForDateAndPOS(storage: AbstractStorage, date: Date) {
-
-// Returns all orders, for all POSs.
-// Function designed specifically for case when ProductionShop queries what is to be produced
-// for given day.
 export async function getOrdersForDate(storage: AbstractStorage,
                                        date: Date): Promise<CombinedOrderView> {
   joi.assert(date, schemas.DateSchema);
 
-  let items: Array<Item> = [];
+  let items: Array<CombinedOrderView['items'][0]> = [];
 
   let itemContsByGoodID = new Map<EID, number>();
-  let itemDetailsByGoodID = new Map<EID, Array<ItemDetails>>();
+  let itemDetailsByGoodID = new Map<EID, Array<CombinedOrderView['items'][0]['details'][0]>>();
 
   // Get all orders for all POSs for given date and produce combined POSs.
   const orders = await storage.getOrders(date, date);
@@ -90,5 +77,6 @@ export async function getOrdersForDate(storage: AbstractStorage,
     toDate : date,
     items : items,
   };
+
   return result;
 }
