@@ -3,13 +3,11 @@ import moment from "moment";
 
 //temp samples
 import itemsSample from "../../samples/orderManagement.json";
-import sellPointsSample from "../../samples/sellPoints.json";
 
 export const orderManagementSlice = createSlice({
   name: "orderManagement",
   initialState: {
     order: null,
-    sellPoints: null,
     errorMessage: null,
   },
   reducers: {
@@ -24,17 +22,6 @@ export const orderManagementSlice = createSlice({
       state.order = null;
       state.errorMessage = action.payload;
     },
-    getSellPointsFromApi: (state) => {
-      state.sellPoints = null;
-    },
-    setSellPoints: (state, action) => {
-      state.sellPoints = action.payload;
-      state.errorMessage = null;
-    },
-    setSellPointsError: (state, action) => {
-      state.sellPoints = null;
-      state.errorMessage = action.payload;
-    },
   },
 });
 
@@ -43,9 +30,6 @@ const {
   getOrderFromApi,
   setOrder,
   setOrderError,
-  getSellPointsFromApi,
-  setSellPoints,
-  setSellPointsError,
 } = orderManagementSlice.actions;
 
 //temp helper
@@ -96,22 +80,7 @@ export const thunkGetOrderFromApi = (date, sellPointId) => (dispatch) => {
       );
     })
     .catch((e) => {
-      dispatch(setOrderError(`Не вдалося отримати товари з сервера: ${e}`));
-    });
-};
-
-export const thunkGetSellPointsFromApi = () => (dispatch) => {
-  dispatch(getSellPointsFromApi());
-  new Promise((resolve) => {
-    setTimeout(resolve, 1000);
-  })
-    .then(() => {
-      dispatch(setSellPoints(sellPointsSample));
-    })
-    .catch((e) => {
-      dispatch(
-        setSellPointsError(`Не вдалося отримати точки продажу з сервера: ${e}`)
-      );
+      dispatch(setOrderError(`Не вдалося отримати замовлення з сервера: ${e}`));
     });
 };
 
