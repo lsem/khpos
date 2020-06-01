@@ -19,7 +19,8 @@ function PosSelect({
   variant,
   size,
   addAll,
-  style
+  allSelectedByDefault,
+  style,
 }) {
   const classes = useStyles();
   const [itemsView, setItemsView] = React.useState(null);
@@ -33,17 +34,20 @@ function PosSelect({
   React.useEffect(() => {
     if (!posItems) return;
     if (addAll) {
-      setItemsView([{ id: AllPosId, name: "ВСІ" }, ...posItems]);
+      const allPos = { id: AllPosId, name: "ВСІ" };
+      setItemsView([allPos, ...posItems]);
+      if (allSelectedByDefault) {
+        setSelectedPos(allPos);
+      }
     } else {
       setItemsView([...posItems]);
     }
-  }, [posItems, addAll]);
+  }, [posItems, addAll, allSelectedByDefault]);
 
-  const handleChange = (pos) => {
-    setSelectedPos(pos);
-    onChange && onChange(pos);
+  React.useEffect(() => {
+    onChange && onChange(selectedPos);
     setAnchorPosMenu(null);
-  };
+  }, [selectedPos, onChange]);
 
   return (
     <div className={classes.root} style={style}>
@@ -74,7 +78,7 @@ function PosSelect({
                 key={i}
                 value={p.id}
                 onClick={() => {
-                  handleChange(p);
+                  setSelectedPos(p);
                 }}
               >
                 {p.name}
