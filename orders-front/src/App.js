@@ -3,7 +3,7 @@ import React from "react";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
-import ApplicationBar from "./features/ApplicationBar";
+import ApplicationBar from "./features/appBar/ApplicationBar";
 import OrderManagement from "./features/orderManagement/OrderManagement";
 import OrderProduction from "./features/orderProduction/OrderProduction";
 
