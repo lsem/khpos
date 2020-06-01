@@ -11,8 +11,6 @@ import {
   DialogTitle,
   DialogActions,
   Button,
-  ButtonGroup,
-  MenuItem,
   CircularProgress,
   FormControlLabel,
   Checkbox,
@@ -25,12 +23,10 @@ import { Check, MoreVert, ArrowDropDown } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import {
-  thunkGetOrderFromApi,
-  thunkGetSellPointsFromApi,
-} from "./orderManagementSlice";
+import {  thunkGetOrderFromApi } from "./orderManagementSlice";
 import PrintView from "./PrintView";
 import KhDatePicker from "../datePicker/KhDatePicker";
+import PosSelect from "../pos/PosSelect";
 //#endregion
 
 //#region STYLES
@@ -151,14 +147,14 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
+function OrderManagement({ getOrder, order }) {
   const classes = useStyles();
 
   //#region STATE
   const [orderDate, setOrderDate] = React.useState(
     moment().add(1, "days").valueOf()
   );
-  const [sellPointId, setSellPointId] = React.useState("");
+  const [pos, setPos] = React.useState(null);
   const [messageBox, setMessageBox] = React.useState(false);
   const [showQuantityDialog, setShowQuantityDialog] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
@@ -166,7 +162,6 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
   const [items, setItems] = React.useState([]);
   const [itemsView, setItemsView] = React.useState([]);
   const [anchorItemsMenu, setAnchorItemsMenu] = React.useState(null);
-  const [anchorPosMenu, setAnchorPosMenu] = React.useState(null);
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
@@ -174,12 +169,8 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
 
   //#region EFFECTS
   React.useEffect(() => {
-    getSellPoints();
-  }, [getSellPoints]);
-
-  React.useEffect(() => {
-    if (sellPointId) getOrder(moment(orderDate).valueOf(), sellPointId);
-  }, [orderDate, sellPointId, getOrder]);
+    if (pos) getOrder(moment(orderDate).valueOf(), pos.id);
+  }, [orderDate, pos, getOrder]);
 
   React.useEffect(() => {
     if (order) {
@@ -247,14 +238,6 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
 
   const handleItemsMenuClose = () => {
     setAnchorItemsMenu(null);
-  };
-
-  const handlePosMenuButtonClick = (event) => {
-    setAnchorPosMenu(event.currentTarget);
-  };
-
-  const handlePosMenuClose = () => {
-    setAnchorPosMenu(null);
   };
 
   const handelCategoryCheck = (category, value) => {
@@ -348,25 +331,7 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
             style={{ margin: 5 }}
           />
 
-          {sellPoints ? (
-            <ButtonGroup
-              size="large"
-              color="primary"
-              aria-label="contained primary button group"
-              style={{ margin: 5 }}
-            >
-              <Button onClick={handlePosMenuButtonClick}>
-                {sellPointId
-                  ? sellPoints.find((pos) => pos.id === sellPointId).name
-                  : "Точка продажу..."}
-              </Button>
-              <Button onClick={handlePosMenuButtonClick} style={{ padding: 0 }}>
-                <ArrowDropDown />
-              </Button>
-            </ButtonGroup>
-          ) : (
-            <Typography>завантажується...</Typography>
-          )}
+          <PosSelect style={{ margin: 5 }} onChange={setPos}/>
         </div>
 
         {!order ? null : (
@@ -430,13 +395,13 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
           </Paper>
         )}
 
-        {sellPointId ? null : (
+        {pos ? null : (
           <Typography variant="h5" className={classes.actionHint}>
             оберіть точку продажу
           </Typography>
         )}
 
-        {!(sellPointId && !order) ? null : (
+        {!(pos && !order) ? null : (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <CircularProgress style={{ margin: "30px auto" }} />
           </div>
@@ -500,29 +465,6 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
             label={k}
           />
         ))}
-      </Menu>
-
-      <Menu
-        anchorEl={anchorPosMenu}
-        keepMounted
-        open={Boolean(anchorPosMenu)}
-        onClose={handlePosMenuClose}
-        disableAutoFocusItem
-        variant="menu"
-      >
-        {sellPoints
-          ? sellPoints.map((pos, i) => (
-              <MenuItem
-                key={i}
-                onClick={() => {
-                  setSellPointId(pos.id);
-                  handlePosMenuClose();
-                }}
-              >
-                {pos.name}
-              </MenuItem>
-            ))
-          : null}
       </Menu>
 
       <Dialog
@@ -623,7 +565,7 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
             items={items}
             orderStatus={order.status}
             orderDate={moment(orderDate).format("DD.MM.YYYY")}
-            sellPoint={sellPoints.find((sp) => sp.id === sellPointId).name}
+            sellPoint={pos.name}
           />
 
           {order.status === "closed" ? null : (
@@ -655,16 +597,12 @@ function OrderManagement({ getOrder, getSellPoints, sellPoints, order }) {
 
 const mapStateToProps = (state) => ({
   order: state.orderManagement.order,
-  sellPoints: state.orderManagement.sellPoints,
   error: state.orderManagement.errorMessage,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getOrder: (date, sellPointId) => {
     dispatch(thunkGetOrderFromApi(date, sellPointId));
-  },
-  getSellPoints: () => {
-    dispatch(thunkGetSellPointsFromApi());
   },
 });
 
