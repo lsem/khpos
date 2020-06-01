@@ -4,6 +4,7 @@
     {
       "productID": "PRO-9b964660-9dc0-11ea-9f50-751d146c6e34",
       "productName": "Круасан з Шоколадом",
+      "category": "КРУАСАНИ",
       "count": 60,
       "units": "шт.",
       "details": [
@@ -22,6 +23,7 @@
     {
       "productID": "PRO-9b964661-9dc0-11ea-9f50-751d146c6e34",
       "productName": "Шарлотка по Франківськи",
+      "category": "ПИРОГИ СОЛОДКІ",
       "count": 100,
       "units": "шт.",
       "details": [
