@@ -6,9 +6,21 @@ import _ from "lodash";
 
 import { thunkGetAggregatedFromApi } from "./orderProductionSlice";
 import { makeStyles } from "@material-ui/core/styles";
-import { Box, Typography, Paper, CircularProgress } from "@material-ui/core";
-import { ArrowDropDown } from "@material-ui/icons";
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Fab,
+  Menu,
+  FormControlLabel,
+  Checkbox,
+  Dialog,
+} from "@material-ui/core";
+import { ArrowDropDown, MoreVert, Print } from "@material-ui/icons";
 import KhDatePicker from "../datePicker/KhDatePicker";
+import PosSelect, { AllPosId } from "../pos/PosSelect";
+import ItemDetails from "./ItemDetails";
 
 //#region STYLES
 
@@ -131,6 +143,7 @@ const useStyles = makeStyles((theme) => ({
 function OrderProduction({ aggregated, getAggregated }) {
   const classes = useStyles();
 
+  const [pos, setPos] = React.useState(null);
   const [date, setDate] = React.useState(moment().valueOf());
   const [items, setItems] = React.useState([]);
   const [itemsView, setItemsView] = React.useState([]);
@@ -138,6 +151,10 @@ function OrderProduction({ aggregated, getAggregated }) {
   const [tableSorting, setTableSorting] = React.useState(null);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [categoriesMenu, setCategoriesMenu] = React.useState({});
+  const [anchorItemsMenu, setAnchorItemsMenu] = React.useState(null);
+  const [showItemDetailsDialog, setShowItemDetailsDialog] = React.useState(
+    false
+  );
 
   //#region EFFECTS
   React.useEffect(() => {
@@ -154,8 +171,21 @@ function OrderProduction({ aggregated, getAggregated }) {
   }, [aggregated]);
 
   React.useEffect(() => {
-    setItemsView([...items]);
-  }, [items]);
+    if (!(items && pos)) return;
+
+    if (pos.id === AllPosId) {
+      setItemsView([...items]);
+    } else {
+      const fromDetails = [];
+
+      items.forEach((i) => {
+        const foundInDetails = i.details.find((d) => d.posID === pos.id);
+        if (foundInDetails)
+          fromDetails.push({ ...i, count: foundInDetails.count });
+      });
+      setItemsView(fromDetails);
+    }
+  }, [items, pos]);
 
   React.useEffect(() => {
     const itemsViewFromItems = items.filter((i) => categoriesMenu[i.category]);
@@ -206,6 +236,7 @@ function OrderProduction({ aggregated, getAggregated }) {
   //#region UI HANDLERS
   const handleItemClick = (item) => {
     setSelectedItem({ ...item });
+    setShowItemDetailsDialog(true);
   };
 
   const handleTableSort = (column) => {
@@ -223,6 +254,21 @@ function OrderProduction({ aggregated, getAggregated }) {
         order: "ASC",
       });
     }
+  };
+
+  const handleItemsMenuButtonClick = (event) => {
+    setAnchorItemsMenu(event.currentTarget);
+  };
+
+  const handleItemsMenuClose = () => {
+    setAnchorItemsMenu(null);
+  };
+
+  const handelCategoryCheck = (category, value) => {
+    setCategoriesMenu({
+      ...categoriesMenu,
+      [category]: value,
+    });
   };
   //#endregion
 
@@ -267,6 +313,12 @@ function OrderProduction({ aggregated, getAggregated }) {
           margin="16px 0"
         >
           <KhDatePicker value={date} onChange={setDate} />
+          <PosSelect
+            style={{ margin: 5 }}
+            onChange={setPos}
+            addAll
+            allSelectedByDefault
+          />
         </Box>
 
         {!aggregated ? null : (
@@ -320,6 +372,54 @@ function OrderProduction({ aggregated, getAggregated }) {
             display: showSpinner ? "block" : "none",
           }}
         />
+
+        {!Object.keys(categoriesMenu).length ? null : (
+          <Fab
+            color="default"
+            className={classes.fabMenu}
+            onClick={handleItemsMenuButtonClick}
+            size="small"
+          >
+            <MoreVert />
+          </Fab>
+        )}
+        <Fab color="primary" className={classes.fab}>
+          <Print />
+        </Fab>
+
+        <Menu
+          className={classes.itemsMenuContainer}
+          anchorEl={anchorItemsMenu}
+          keepMounted
+          open={Boolean(anchorItemsMenu)}
+          onClose={handleItemsMenuClose}
+          disableAutoFocusItem
+          variant="menu"
+        >
+          {Object.keys(categoriesMenu).map((k, i) => (
+            <FormControlLabel
+              key={i}
+              control={
+                <Checkbox
+                  checked={categoriesMenu[k]}
+                  onChange={(e) => {
+                    handelCategoryCheck(k, e.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              label={k}
+            />
+          ))}
+        </Menu>
+        <Dialog
+          open={showItemDetailsDialog}
+          onClose={() => {
+            setShowItemDetailsDialog(false);
+          }}
+        >
+          <ItemDetails item={selectedItem} />
+        </Dialog>
       </div>
     </React.Fragment>
   );
