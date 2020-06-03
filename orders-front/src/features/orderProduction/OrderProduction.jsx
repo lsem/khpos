@@ -36,12 +36,12 @@ const useStyles = makeStyles((theme) => ({
   fab: {
     position: "fixed",
     bottom: theme.spacing(4),
-    left: theme.spacing(4),
+    right: theme.spacing(4),
   },
   fabMenu: {
     position: "fixed",
     bottom: theme.spacing(12),
-    left: theme.spacing(5),
+    right: theme.spacing(5),
   },
   optionsBar: {
     position: "relative",
