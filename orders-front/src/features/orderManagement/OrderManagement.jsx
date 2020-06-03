@@ -334,7 +334,7 @@ function OrderManagement({ getOrder, order }) {
           <PosSelect style={{ margin: 5 }} onChange={setPos}/>
         </div>
 
-        {!order ? null : (
+        {!(order && pos) ? null : (
           <Paper className={classes.list}>
             <table
               className={classNames(classes.itemsTable, classes.unselectable)}
@@ -553,7 +553,7 @@ function OrderManagement({ getOrder, order }) {
         </DialogActions>
       </Dialog>
 
-      {order ? (
+      {order && pos ? (
         <Dialog
           fullScreen
           open={showOrderSummary}
