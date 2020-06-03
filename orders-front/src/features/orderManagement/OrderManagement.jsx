@@ -1,5 +1,6 @@
 //#region IMPORTS
 import React from "react";
+import { Prompt } from "react-router-dom";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -23,7 +24,7 @@ import { Check, MoreVert, ArrowDropDown } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import {  thunkGetOrderFromApi } from "./orderManagementSlice";
+import { thunkGetOrderFromApi } from "./orderManagementSlice";
 import PrintView from "./PrintView";
 import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
@@ -35,8 +36,8 @@ const useStyles = makeStyles((theme) => ({
   root: {
     margin: "0 16px",
     [theme.breakpoints.down("xs")]: {
-      margin: 0
-    }
+      margin: 0,
+    },
   },
   unselectable: {
     userSelect: "none",
@@ -170,6 +171,7 @@ function OrderManagement({ getOrder, order }) {
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
+  const [userMadeChanges, setUserMadeChanges] = React.useState(false);
   //#endregion
 
   //#region EFFECTS
@@ -293,6 +295,14 @@ function OrderManagement({ getOrder, order }) {
       setMessageBox("Ви нічого не замовили");
     }
   };
+
+  const handleItemQuantityChange = (quantity) => {
+    setSelectedItem({
+      ...selectedItem,
+      [order.status === "new" ? "orderedcount" : "deliveredcount"]: quantity,
+    });
+    userMadeChanges || setUserMadeChanges(true);
+  };
   //#endregion
 
   //#region JSX
@@ -336,7 +346,7 @@ function OrderManagement({ getOrder, order }) {
             style={{ margin: 5 }}
           />
 
-          <PosSelect style={{ margin: 5 }} onChange={setPos}/>
+          <PosSelect style={{ margin: 5 }} onChange={setPos} />
         </div>
 
         {!(order && pos) ? null : (
@@ -497,12 +507,7 @@ function OrderManagement({ getOrder, order }) {
                   }
                   inputProps={{ min: 0 }}
                   onChange={(e) => {
-                    setSelectedItem({
-                      ...selectedItem,
-                      [order.status === "new"
-                        ? "orderedcount"
-                        : "deliveredcount"]: +e.target.value,
-                    });
+                    handleItemQuantityChange(+e.target.value);
                   }}
                   autoFocus
                   onKeyPress={(e) => {
@@ -595,6 +600,11 @@ function OrderManagement({ getOrder, order }) {
           )}
         </Dialog>
       ) : null}
+
+      <Prompt
+        when={userMadeChanges}
+        message={() => "Впевнені що не бажаєте зберегти замовлення?"}
+      />
     </React.Fragment>
   );
   //#endregion
