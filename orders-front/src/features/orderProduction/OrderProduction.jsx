@@ -25,7 +25,12 @@ import ItemDetails from "./ItemDetails";
 //#region STYLES
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    margin: "0 16px",
+    [theme.breakpoints.down("xs")]: {
+      margin: 0
+    }
+  },
   unselectable: {
     userSelect: "none",
   },
