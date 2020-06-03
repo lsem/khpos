@@ -2,10 +2,18 @@ import React from "react";
 //import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
 import OrderManagement from "./features/orderManagement/OrderManagement";
 import OrderProduction from "./features/orderProduction/OrderProduction";
+import AppMainMenu from "./features/appMainMenu/AppMainMenu";
+import routeConsts from "./constants/routes";
 
 function App() {
   //const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -26,17 +34,43 @@ function App() {
     },
   });
 
+  const [showMenuDrawer, setShowMenuDrawer] = React.useState(false);
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <div id="header">
-        <ApplicationBar />
-      </div>
-      <div id="main">
-        <OrderProduction />
-      </div>
-      <div id="footer"></div>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <header id="header">
+          <ApplicationBar
+            openMenuDrawer={() => {
+              setShowMenuDrawer(true);
+            }}
+          />
+        </header>
+        <main id="main">
+          <nav id="main-menu">
+            <AppMainMenu
+              showDrawer={showMenuDrawer}
+              closeDrawer={() => {
+                setShowMenuDrawer(false);
+              }}
+            />
+          </nav>
+          <section id="main-content">
+            <Switch>
+              <Redirect from="/" to={`/${routeConsts.orderManagement}`} exact/>
+              <Route path={`/${routeConsts.orderManagement}`}>
+                <OrderManagement />
+              </Route>
+              <Route path={`/${routeConsts.orderProduction}`}>
+                <OrderProduction />
+              </Route>
+            </Switch>
+          </section>
+        </main>
+        <footer id="footer"></footer>
+      </ThemeProvider>
+    </Router>
   );
 }
 
