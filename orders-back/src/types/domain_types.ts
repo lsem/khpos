@@ -27,6 +27,16 @@ interface OrderModel {
   items: OrderModelItem[];
 }
 
+export interface DayOrderItem {
+  goodID: EID;
+  ordered: number;
+}
+
+export interface DayOrderModel {
+  // keep a copy of goods for this day (todo: can be optimized? to store only references to some goods snaphot?)
+  items: ReadonlyArray<DayOrderItem>;
+}
+
 interface GoodModel {
   id: EID;
   name: string;

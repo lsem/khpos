@@ -1,16 +1,19 @@
-import {NotFoundError} from "app/errors";
+import {AlreadyExistsError, NotFoundError} from "app/errors";
 import _ from "lodash";
 
-import {EID} from "../types/core_types";
-import {GoodModel, OrderModel, POSModel, UserModel} from "../types/domain_types";
+import {Day, EID} from "../types/core_types";
+import {DayOrderModel, GoodModel, OrderModel, POSModel, UserModel} from "../types/domain_types";
 
 import {AbstractStorage} from "./AbstractStorage";
+
+function makeKey(day: Day, posID: EID) { return `${day.val.toString()}-${posID}`; }
 
 class InMemoryStorage implements AbstractStorage {
   users = new Map<string, UserModel>();
   poss = new Map<string, POSModel>();
   orders = new Map<string, OrderModel>();
   goods = new Map<string, GoodModel>();
+  dayOrders = new Map<string, DayOrderModel>();
 
   //#region Goods
   async insertGood(productID: EID, good: GoodModel): Promise<void> {
@@ -21,7 +24,7 @@ class InMemoryStorage implements AbstractStorage {
 
   async getGoodByID(id: EID): Promise<GoodModel> {
     if (!this.goods.has(id.value)) {
-      throw new NotFoundError();
+      throw new NotFoundError('Good: ' + id.value);
     }
     return this.goods.get(id.value)!
   }
@@ -116,6 +119,41 @@ class InMemoryStorage implements AbstractStorage {
   }
 
   //#endregion
+
+  async insertOrderForDay(day: Day, posID: EID, order: DayOrderModel): Promise<void> {
+    const key = makeKey(day, posID);
+    if (this.dayOrders.get(key)) {
+      throw new AlreadyExistsError();
+    }
+    this.dayOrders.set(key, order);
+  }
+
+  async getOrderForDay(day: Day, posID: EID): Promise<DayOrderModel|undefined> {
+    const key = makeKey(day, posID);
+    if (this.dayOrders.get(key)) {
+      return this.dayOrders.get(key)!;
+    } else {
+      return undefined;
+    }
+  }
+
+  async updateOrderForDay(day: Day, cb: (order: DayOrderModel) => DayOrderModel): Promise<void> {
+    const key = day.val.toString();
+    if (!this.dayOrders.get(key)) {
+      throw new NotFoundError();
+    }
+    const order = this.dayOrders.get(day.val.toString())!;
+    const changedOrder = cb(order);
+    this.dayOrders.set(key, changedOrder);
+  }
+
+  async replaceOrderForDay(day: Day, posID: EID, model: DayOrderModel): Promise<void> {
+    const key = makeKey(day, posID);
+    if (!this.dayOrders.get(key)) {
+      throw new NotFoundError();
+    }
+    this.dayOrders.set(key, model);
+  }
 }
 
 export {InMemoryStorage};

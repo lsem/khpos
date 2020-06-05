@@ -1,9 +1,14 @@
-import {assert} from "chai";
+import {assert, expect} from "chai";
+import {example} from "joi";
 import {InMemoryStorage} from "storage/InMemStorage";
-import {EID} from "types/core_types";
+import {Caller} from "types/Caller";
+import {Day, EID} from "types/core_types";
+import {POSModel} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
+import {NotAllowed, NotFoundError} from "./errors";
 import * as orders from "./orders";
+import * as pos from "./pos";
 
 const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
 
@@ -20,12 +25,22 @@ describe("[orders]", () => {
   it("should support basic scenario", async () => {
     const storage = new InMemoryStorage();
     const product1 = EID.makeGoodID();
-    storage.insertGood(product1,
-                       {id : product1, name : "Круасан з Моколадом", units : "it", available: true, removed: false});
+    storage.insertGood(product1, {
+      id : product1,
+      name : "Круасан з Моколадом",
+      units : "it",
+      available : true,
+      removed : false
+    });
 
     const product2 = EID.makeGoodID();
-    storage.insertGood(product2,
-                       {id : product2, name : "Шарлотка по Франківськи", units : "it", available: true, removed: false});
+    storage.insertGood(product2, {
+      id : product2,
+      name : "Шарлотка по Франківськи",
+      units : "it",
+      available : true,
+      removed : false
+    });
 
     // Create some user User1.
     const user1ID = EID.makeUserID();
@@ -115,5 +130,144 @@ describe("[orders]", () => {
 
     // json example
     // console.log(JSON.stringify(await orders.getOrdersForDate(storage, new Date("2020-05-28"))));
+  });
+
+  it("basic test for placing order", async () => {
+    const storage = new InMemoryStorage();
+
+    const POS = EID.makePOSID();
+    await storage.insertPointOfSale(POS, {posID : POS, posIDName : "Чупринки"});
+
+    const natashaTheUser =
+        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS ]));
+
+    const sharlotteID = EID.makeGoodID();
+    await storage.insertGood(
+        sharlotteID,
+        {id : sharlotteID, name : "Шарлотка", available : true, removed : true, units : "шт"});
+    const panforteID = EID.makeGoodID();
+    await storage.insertGood(
+        panforteID,
+        {id : panforteID, name : "Панфорте", available : true, removed : true, units : "шт"});
+
+    const today = Day.fromDate(new Date());
+
+    // Open day corresponds to similar button on UI.
+    await orders.openDay(storage, natashaTheUser, today, POS);
+
+    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+      items : [
+        {goodID : sharlotteID, goodName : "Шарлотка", ordered : 0},
+        {goodID : panforteID, goodName : "Панфорте", ordered : 0}
+      ]
+    });
+
+    await orders.changeDay(storage, natashaTheUser, today, POS,
+                                   {items : [ {goodID : panforteID, ordered : 5} ]});
+
+    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+      items : [
+        {goodID : sharlotteID, goodName : "Шарлотка", ordered : 0},
+        {goodID : panforteID, goodName : "Панфорте", ordered : 5}
+      ]
+    });
+
+    await orders.changeDay(
+        storage, natashaTheUser, today, POS,
+        {items : [ {goodID : panforteID, ordered : 2}, {goodID : sharlotteID, ordered : 1} ]});
+
+    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+      items : [
+        {goodID : sharlotteID, goodName : "Шарлотка", ordered : 1},
+        {goodID : panforteID, goodName : "Панфорте", ordered : 2}
+      ]
+    });
+  });
+
+  it("should apply operations only to specified POS", async () => {
+    const storage = new InMemoryStorage();
+    // POSs
+    const POS1 = EID.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const POS2 = EID.makePOSID();
+    await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Липи"});
+
+    const natashaTheUser = new Caller(
+        EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
+
+    const today = Day.fromDate(new Date());
+
+    // Natasha opens a day for pos1.
+    await orders.openDay(storage, natashaTheUser, today, POS1);
+
+    // Day for POS1 is opened, but for POS2 is not.
+    await orders.getDay(storage, natashaTheUser, today, POS1);
+
+    // Day for POS1 is opened, but for POS2 is not.
+    await expect(orders.getDay(storage, natashaTheUser, today, POS2))
+        .to.be.rejectedWith(NotFoundError);
+
+    // Natasha opens a day for pos2.
+    await orders.openDay(storage, natashaTheUser, today, POS2);
+
+    // Now pos2 day is opened.
+    await orders.getDay(storage, natashaTheUser, today, POS2);
+  });
+
+  // todo: test for opening already opened day.
+
+  it("should check access to APIs", async () => {
+    const storage = new InMemoryStorage();
+
+    // POSs
+    const POS1 = EID.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const POS2 = EID.makePOSID();
+    await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Липи"});
+
+    const POS3 = EID.makePOSID();
+    await storage.insertPointOfSale(POS3, {posID : POS3, posIDName : "Левицького"});
+
+    // Users/Callers
+    const natashaTheUser =
+        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS2 ]));
+    const nastiaTheUser =
+        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1 ]));
+    const adminUser = new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    // Goods
+    const sharlotteID = EID.makeGoodID();
+    await storage.insertGood(
+        sharlotteID,
+        {id : sharlotteID, name : "Шарлотка", available : true, removed : true, units : "шт"});
+    const panforteID = EID.makeGoodID();
+    await storage.insertGood(
+        panforteID,
+        {id : panforteID, name : "Панфорте", available : true, removed : true, units : "шт"});
+
+    const today = Day.fromDate(new Date());
+
+    // Natasha has access to POS2
+    await orders.openDay(storage, natashaTheUser, today, POS2);
+
+    // Nastia does not have access POS2
+    await expect(orders.openDay(storage, nastiaTheUser, today, POS2))
+        .to.be.rejectedWith(NotAllowed);
+
+    // Natasha can make changes for POS2
+    await orders.changeDay(storage, natashaTheUser, today, POS2,
+                                   {items : [ {goodID : panforteID, ordered : 5} ]});
+
+    // Nastia can't make changes for POS2
+    await expect(orders.changeDay(storage, nastiaTheUser, today, POS2, {
+      items : [ {goodID : panforteID, ordered : 5} ]
+    })).to.be.rejectedWith(NotAllowed);
+
+    // Admins allowed to change anything
+    await orders.openDay(storage, adminUser, today, POS3);
+    await orders.changeDay(storage, adminUser, today, POS2,
+                                   {items : [ {goodID : panforteID, ordered : 5} ]});
   });
 });

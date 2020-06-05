@@ -48,4 +48,17 @@ class EID {
   equals(other: EID) { return _.isEqual(this, other); }
 }
 
+export class Day {
+  val: number;
+  constructor(daysSinceEpoch: number) { this.val = daysSinceEpoch; }
+  static fromDate(date: Date) {
+    if (!(date instanceof Date && !isNaN(date as any))) {
+      throw "Invalid date";
+    }
+    return new Day(Math.floor((date.getTime() / 1000) / 86400));
+  }
+
+  static today() { return Day.fromDate(new Date()); }
+};
+
 export {EID};

@@ -3,7 +3,7 @@ import {assert, expect} from "chai";
 import chai from 'chai';
 import chaiAsPromised from "chai-as-promised";
 
-import {EID} from "./core_types";
+import {Day, EID} from "./core_types";
 
 chai.use(chaiAsPromised);
 
@@ -30,4 +30,11 @@ describe("[core_types]", () => {
     EID.fromExisting(EID.makeGoodID().value);
     EID.fromExisting(EID.makeOrderID().value);
   })
+
+  it("Should construct days from date properly", () => {
+    assert.equal(Day.fromDate(new Date("1970-01-01")).val, 0);
+    assert.equal(Day.fromDate(new Date("1970-01-02")).val, 1);
+    assert.equal(Day.fromDate(new Date("1971-01-01")).val, 365);
+    assert.equal(Day.fromDate(new Date("2020-01-01")).val, 18262);
+  });
 });
