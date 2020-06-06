@@ -10,6 +10,9 @@ export enum PermissionFlags {
   SystemWrite = 0x0010,
   SystemAdmin = 0x0020,
 
+  IsProdStaff = 0x0040,
+  IsShopManager = 0x0080,
+
   ReadWrite = Read | Write,
 }
 

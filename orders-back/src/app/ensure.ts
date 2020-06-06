@@ -3,9 +3,11 @@ import {Caller} from "types/Caller";
 import {EID} from "types/core_types";
 import {PermissionFlags} from "types/UserPermissions";
 
-import {NeedsAdminError, NotAllowed} from "./errors";
+import {NeedsAdminError, NotAllowedError} from "./errors";
 
-function isAdmin(caller: Caller) { return (caller.Permissions.mask & PermissionFlags.Admin) > 0; }
+export function isAdmin(caller: Caller) {
+  return (caller.Permissions.mask & PermissionFlags.Admin) > 0;
+}
 
 export function ensureCallToSelfOrAdmin(caller: Caller, callTo: EID) {
   if (!isAdmin(caller) && !caller.ID.equals(callTo)) {
@@ -19,8 +21,12 @@ export function ensureAdmin(caller: Caller) {
   }
 }
 
-export function ensureHasAccessToPOS(caller: Caller, posID: EID) {
+export function callerHasAccessToResource(caller: Caller, resourceID: EID) {
+  return _.find(caller.Permissions.resources, _.matches(resourceID))
+}
+
+export function ensureHasAccessToPOSOrAdmin(caller: Caller, posID: EID) {
   if (!isAdmin(caller) && !_.find(caller.Permissions.resources, _.matches(posID))) {
-    throw new NotAllowed('opening day for pos ' + posID);
+    throw new NotAllowedError('access to pos ' + posID);
   }
 }

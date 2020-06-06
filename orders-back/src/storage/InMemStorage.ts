@@ -137,12 +137,13 @@ class InMemoryStorage implements AbstractStorage {
     }
   }
 
-  async updateOrderForDay(day: Day, cb: (order: DayOrderModel) => DayOrderModel): Promise<void> {
-    const key = day.val.toString();
+  async updateOrderForDay(day: Day, posID: EID,
+                          cb: (order: DayOrderModel) => DayOrderModel): Promise<void> {
+    const key = makeKey(day, posID);
     if (!this.dayOrders.get(key)) {
-      throw new NotFoundError();
+      throw new NotFoundError(`day/pos ${key} to update`);
     }
-    const order = this.dayOrders.get(day.val.toString())!;
+    const order = this.dayOrders.get(key)!;
     const changedOrder = cb(order);
     this.dayOrders.set(key, changedOrder);
   }

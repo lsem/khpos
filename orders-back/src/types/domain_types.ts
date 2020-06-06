@@ -32,9 +32,17 @@ export interface DayOrderItem {
   ordered: number;
 }
 
+export enum DayStatus {
+  "not_opened",
+  "openned",
+  "closed",
+  "finalized"
+}
 export interface DayOrderModel {
-  // keep a copy of goods for this day (todo: can be optimized? to store only references to some goods snaphot?)
+  // keep a copy of goods for this day (todo: can be optimized? to store only references to some
+  // goods snaphot?)
   items: ReadonlyArray<DayOrderItem>;
+  status: DayStatus;
 }
 
 interface GoodModel {

@@ -8,8 +8,8 @@ export class NeedsAdminError extends AuthorizationError {
   constructor() { super('NeedsAdminError'); }
 }
 
-export class NotAllowed extends AuthorizationError {
-  constructor(what: string = "") { super(`NotAllowed: ${what}`); }
+export class NotAllowedError extends AuthorizationError {
+  constructor(what: string = "") { super(`NotAllowedError: ${what}`); }
 }
 
 export class AlreadyExistsError extends Error {
@@ -24,6 +24,6 @@ export class ValidationError extends Error {
   constructor(details: string) { super('ValidationError: ' + details); }
 }
 
-export class OperationNotAllowed extends Error {
-  constructor(what: string) { super(`OperationNotAllowed: ${what}`); }
+export class InvalidOperationError extends Error {
+  constructor(what: string) { super(`InvalidOperationError: ${what}`); }
 }

@@ -20,7 +20,8 @@ interface AbstractStorage {
 
   getOrderForDay(day: Day, posID: EID): Promise<DayOrderModel|undefined>;
   insertOrderForDay(day: Day, posID: EID, order: DayOrderModel): Promise<void>;
-  updateOrderForDay(day: Day, cb: (order: DayOrderModel) => DayOrderModel): Promise<void>;
+  updateOrderForDay(day: Day, posID: EID,
+                    cb: (order: DayOrderModel) => DayOrderModel): Promise<void>;
   replaceOrderForDay(day: Day,  posID: EID, model: DayOrderModel): Promise<void>;
 }
 
