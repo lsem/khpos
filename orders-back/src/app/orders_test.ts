@@ -330,6 +330,12 @@ describe("[orders]", () => {
     await expect(orders.closeDay(storage, staffCaller, today, POS1))
         .to.be.rejectedWith(InvalidOperationError);
 
+    // Days that have never been opened (not created at all) can't be closed.
+    await expect(orders.closeDay(storage, staffCaller, new Day(Day.today().val + 1), POS1))
+        .to.be.rejectedWith(InvalidOperationError);
+    await expect(orders.closeDay(storage, staffCaller, new Day(Day.today().val - 1), POS1))
+        .to.be.rejectedWith(InvalidOperationError);
+
     // Finalized can't be closed
     await storage.updateOrderForDay(
         today, POS1, (day) => {return { items: day.items, status: DayStatus.finalized }});
@@ -353,6 +359,12 @@ describe("[orders]", () => {
     const today = Day.fromDate(new Date());
 
     await storage.insertOrderForDay(today, POS1, {status : DayStatus.not_opened, items : []});
+
+    // Days that have never been opened (not created at all) can't be finalized
+    await expect(orders.finalizeDay(storage, shopManagerCaller, new Day(Day.today().val + 1), POS1))
+        .to.be.rejectedWith(InvalidOperationError);
+    await expect(orders.finalizeDay(storage, shopManagerCaller, new Day(Day.today().val - 1), POS1))
+        .to.be.rejectedWith(InvalidOperationError);
 
     // Cannot close not_opened
     await expect(orders.closeDay(storage, prodStaffCaller, today, POS1))

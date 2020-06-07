@@ -164,13 +164,12 @@ export async function closeDay(storage: AbstractStorage, caller: Caller, day: Da
   if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
     throw new NotAllowedError(`closing day ${day.val}`);
   }
-  // todo: add tes for this
+
   const dayModel = await storage.getOrderForDay(day, posID);
   if (!dayModel) {
     throw new InvalidOperationError(`day must be openned to close it`);
   }
   await storage.updateOrderForDay(day, posID, (dayModel) => {
-    // todo: add test
     if (dayModel.status !== DayStatus.openned) {
       throw new InvalidOperationError(`day must be openned to close it`);
     }
@@ -191,7 +190,6 @@ export async function finalizeDay(storage: AbstractStorage, caller: Caller, day:
 
   // todo add test that natasha can close, while production stuff cannot.
   await storage.updateOrderForDay(day, posID, (dayModel) => {
-    // todo: add test
     if (dayModel.status !== DayStatus.closed) {
       throw new InvalidOperationError(`day must be closed to finalize it`);
     }
