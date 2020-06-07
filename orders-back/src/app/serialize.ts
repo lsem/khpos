@@ -6,13 +6,14 @@ import {ValidationError} from "./errors";
 
 export function serialize<T>(obj: T) { return JSON.stringify(obj); }
 
-export function deserialize<T>(maybeTJson: string, schema: joi.SchemaLike): T {
+// Assuming it is already deserialized by upstream web framework infrastrcuture,
+// this method validates and casts object.
+export function deserialize<T>(maybeTJson: any, schema: joi.SchemaLike): T {
   const validationResult = joi.validate(maybeTJson, schema)
   if (validationResult.error) {
     throw new ValidationError(`Error: ${validationResult.error.message}; actual: ${maybeTJson}`);
   }
-  const tJson = JSON.parse(maybeTJson);
-  return tJson as T;
+  return maybeTJson as T;
 }
 
 export function serializePOS(pos: POSModel): string { return serialize(pos); }

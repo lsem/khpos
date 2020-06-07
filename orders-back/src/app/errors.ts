@@ -1,7 +1,7 @@
 // Defines classes of errors that we want to distinguish. Keep minimal.
 
 export class AuthorizationError extends Error {
-  constructor(message: string) { super(message); }
+  constructor(what: string = "") { super(`AuthorizationError: ${what}`); }
 }
 
 export class NeedsAdminError extends AuthorizationError {
@@ -13,7 +13,7 @@ export class NotAllowedError extends AuthorizationError {
 }
 
 export class AlreadyExistsError extends Error {
-  constructor() { super('AlreadyExistsError'); }
+  constructor(what: string = "") { super(`AlreadyExistsError: ${what}`); }
 }
 
 export class NotFoundError extends Error {
@@ -21,9 +21,9 @@ export class NotFoundError extends Error {
 }
 
 export class ValidationError extends Error {
-  constructor(details: string) { super('ValidationError: ' + details); }
+  constructor(details: string = "") { super('ValidationError: ' + details); }
 }
 
 export class InvalidOperationError extends Error {
-  constructor(what: string) { super(`InvalidOperationError: ${what}`); }
+  constructor(what: string = "") { super(`InvalidOperationError: ${what}`); }
 }

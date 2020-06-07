@@ -23,7 +23,7 @@ describe("[serialize", () => {
       b : true,
       id2 : EIDFac.makeRawGoodID("be684f10-a35d-11ea-bb37-0242ac130002")
     };
-    const serialzied = serialize<Example>(example, [ 'id1', 'id2' ]);
+    const serialzied = serialize<Example>(example);
     const expectedSerializedExample =
         `{"id1":"POS-be684f10-a35d-11ea-bb37-0242ac130002","s":"I am example","b":true,"id2":"GOO-be684f10-a35d-11ea-bb37-0242ac130002"}`;
     assert.deepEqual(serialzied, expectedJson(expectedSerializedExample));

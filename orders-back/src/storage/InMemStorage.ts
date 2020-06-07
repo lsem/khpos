@@ -49,14 +49,14 @@ class InMemoryStorage implements AbstractStorage {
   //#region POS
   async insertPointOfSale(posID: EID, posModel: POSModel): Promise<void> {
     if (this.poss.has(posID)) {
-      throw new Error("Already exists");
+      throw new AlreadyExistsError("POS with ID " + posID);
     }
     this.poss.set(posID, posModel);
   }
 
   async getPointOfSale(posID: EID): Promise<POSModel> {
     if (!this.poss.has(posID)) {
-      throw new Error("Does not exists!");
+      throw new NotFoundError("POS with ID " + posID);
     }
     return this.poss.get(posID)!;
   }

@@ -29,3 +29,4 @@ export const POSSchema = joi.object().keys({
   posID : TypedUUIDSchema("POS").required(),
   posIDName : joi.string().required(),
 });
+

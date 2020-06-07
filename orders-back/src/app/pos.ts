@@ -5,6 +5,7 @@ import {Caller} from "types/Caller";
 import {EID, EIDFac} from "types/core_types";
 import {POSModel} from "types/domain_types";
 import {PermissionFlags} from "types/UserPermissions";
+import {POSCollectionViewModel, SinglePOSViewModel} from "types/viewModels";
 
 export async function createPOS(storage: AbstractStorage, posIDName: string): Promise<EID> {
   // todo: given solution to uniqness suffers from race conditionsm btw.
@@ -21,6 +22,16 @@ export async function createPOS(storage: AbstractStorage, posIDName: string): Pr
   return newPOSID;
 }
 
+export async function queryAllPOS(storage: AbstractStorage,
+                                  caller: Caller): Promise<POSCollectionViewModel> {
+  const allPOS = await getAllPOS(storage, caller);
+  return {
+    items: _.map(
+        allPOS,
+        (p: POSModel): SinglePOSViewModel => {return { posID: p.posID, posIDName: p.posIDName }})
+  }
+}
+
 export async function getAllPOS(storage: AbstractStorage,
                                 caller: Caller): Promise<ReadonlyArray<POSModel>> {
   const allPOS = await storage.getAllPointsOfSale();
@@ -32,5 +43,5 @@ export async function getAllPOS(storage: AbstractStorage,
 }
 
 export async function getPOSByID(storage: AbstractStorage, id: EID): Promise<POSModel> {
-  return storage.getPointOfSale(id);
+  return await storage.getPointOfSale(id);
 }
