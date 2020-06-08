@@ -629,8 +629,23 @@ describe("[orders]", () => {
         .to.be.rejectedWith(InvalidOperationError);
   });
 
-  it("should not allow doing operations on unexisting POS",
-     async () => { assert.fail("not implemented and known to be a bug"); });
+  it("should not allow doing operations on unexisting POS", async () => {
+    // test
+    const storage = new InMemoryStorage();
+
+    // Users/Callers
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    // todo: these tests can be improved to not relly on fact that POS checks
+    // are done before anything else.
+    await expect(orders.openDay(storage, adminCaller, Day.today(), EIDFac.makePOSID()))
+        .to.be.rejectedWith(NotFoundError, "POS");
+    await expect(orders.closeDay(storage, adminCaller, Day.today(), EIDFac.makePOSID()))
+        .to.be.rejectedWith(NotFoundError, "POS");
+    await expect(orders.finalizeDay(storage, adminCaller, Day.today(), EIDFac.makePOSID()))
+        .to.be.rejectedWith(NotFoundError, "POS");
+  });
 
   // TODO: good coverege of function changes for changing items, detecting conflicts,
   // concurrency issues, audit, notifications.

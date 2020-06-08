@@ -11,6 +11,7 @@ import {
   OrderModelItem
 } from "types/domain_types";
 import {PermissionFlags} from "types/UserPermissions";
+import {ChangeDayViewModel, DayViewModel} from "types/viewModels";
 
 import {AbstractStorage} from "../storage/AbstractStorage";
 import * as schemas from "../types/schemas";
@@ -27,7 +28,6 @@ import {
   NotFoundError
 } from "./errors";
 import {UserIDSchema} from "./user_schemas";
-import { ChangeDayViewModel, DayViewModel } from "types/viewModels";
 
 // TODO: Move to separate features.
 const POSIDSchema = schemas.TypedUUIDSchema("POS");
@@ -105,7 +105,6 @@ export async function getOrdersForDate(storage: AbstractStorage,
   return result;
 }
 
-
 async function viewModelForDay(storage: AbstractStorage,
                                model: DayOrderModel): Promise<DayViewModel> {
   type OneItem = DayViewModel['items'][0];
@@ -137,6 +136,9 @@ export async function openDay(storage: AbstractStorage, caller: Caller, day: Day
                               posID: EID): Promise<void> {
   ensureHasAccessToPOSOrAdmin(caller, posID);
 
+  // Call to POS to verify this POS exists
+  await storage.getPointOfSale(posID);
+
   if (day.val < Day.today().val) {
     throw new InvalidOperationError("Openning past days not allowed");
   }
@@ -158,6 +160,9 @@ export async function closeDay(storage: AbstractStorage, caller: Caller, day: Da
     throw new NotAllowedError(`closing day ${day.val}`);
   }
 
+  // Call to POS to verify this POS exists
+  await storage.getPointOfSale(posID);
+
   const dayModel = await storage.getOrderForDay(day, posID);
   if (!dayModel) {
     throw new InvalidOperationError(`day must be openned to close it`);
@@ -175,6 +180,9 @@ export async function finalizeDay(storage: AbstractStorage, caller: Caller, day:
     throw new NotAllowedError(`closing day ${day.val}`);
   }
   ensureHasAccessToPOSOrAdmin(caller, posID);
+
+  // Call to POS to verify this POS exists
+  await storage.getPointOfSale(posID);
 
   const dayModel = await storage.getOrderForDay(day, posID);
   if (!dayModel) {
