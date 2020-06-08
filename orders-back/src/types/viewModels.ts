@@ -14,8 +14,8 @@ export interface SinglePOSViewModel {
   posID: EID;
 }
 
-export const SinglePOSViewModelSchema =
-    joi.object().keys({posIDName : joi.string().required(), posID : TypedUUIDSchema('POS')});
+export const SinglePOSViewModelSchema = joi.object().keys(
+    {posIDName : joi.string().required(), posID : TypedUUIDSchema('POS').required()});
 
 export interface POSCollectionViewModel {
   items: ReadonlyArray<SinglePOSViewModel>;
