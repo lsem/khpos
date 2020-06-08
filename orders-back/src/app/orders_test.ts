@@ -138,8 +138,8 @@ describe("[orders]", () => {
     const POS = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS, {posID : POS, posIDName : "Чупринки"});
 
-    const natashaTheUser =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS ]));
+    const natashaTheUser = new Caller(EIDFac.makeUserID(),
+                                      new UserPermissions(PermissionFlags.IsShopManager, [ POS ]));
 
     const sharlotteID = EIDFac.makeGoodID();
     await storage.insertGood(
@@ -225,11 +225,12 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS3, {posID : POS3, posIDName : "Левицького"});
 
     // Users/Callers
-    const natashaTheUser =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS2 ]));
-    const nastiaTheUser =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
-    const adminUser = new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+    const natashaTheUser = new Caller(EIDFac.makeUserID(),
+                                      new UserPermissions(PermissionFlags.IsShopManager, [ POS2 ]));
+    const nastiaTheUser = new Caller(EIDFac.makeUserID(),
+                                     new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const adminUser =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
     // Goods
     const sharlotteID = EIDFac.makeGoodID();
@@ -273,8 +274,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const natashaTheUser =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const natashaTheUser = new Caller(EIDFac.makeUserID(),
+                                      new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -353,8 +354,8 @@ describe("[orders]", () => {
     const prodStaffCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -439,8 +440,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Чупринки2"});
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -485,8 +486,8 @@ describe("[orders]", () => {
     const POS1 = await pos.createPOS(storage, "Чупринки");
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -536,8 +537,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -589,8 +590,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.today();
     const yesterday = new Day(today.val - 1);
@@ -613,8 +614,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.today();
     const futureDoday = new Day(today.val + 1);
@@ -627,6 +628,9 @@ describe("[orders]", () => {
     await expect(orders.openDay(storage, shopManagerCaller, futureDoday, POS1))
         .to.be.rejectedWith(InvalidOperationError);
   });
+
+  it("should not allow doing operations on unexisting POS",
+     async () => { assert.fail("not implemented and known to be a bug"); });
 
   // TODO: good coverege of function changes for changing items, detecting conflicts,
   // concurrency issues, audit, notifications.

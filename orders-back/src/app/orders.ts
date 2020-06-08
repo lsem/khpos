@@ -27,6 +27,7 @@ import {
   NotFoundError
 } from "./errors";
 import {UserIDSchema} from "./user_schemas";
+import { ChangeDayViewModel, DayViewModel } from "types/viewModels";
 
 // TODO: Move to separate features.
 const POSIDSchema = schemas.TypedUUIDSchema("POS");
@@ -104,14 +105,6 @@ export async function getOrdersForDate(storage: AbstractStorage,
   return result;
 }
 
-export interface DayViewModel {
-  status: DayStatus;
-  items: ReadonlyArray<{goodID : EID; goodName : string; ordered : number; units : string}>
-}
-
-export interface ChangeDayViewModel {
-  items: ReadonlyArray<{goodID : EID; ordered : number;}>
-}
 
 async function viewModelForDay(storage: AbstractStorage,
                                model: DayOrderModel): Promise<DayViewModel> {
