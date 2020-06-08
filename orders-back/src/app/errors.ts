@@ -27,3 +27,7 @@ export class ValidationError extends Error {
 export class InvalidOperationError extends Error {
   constructor(what: string = "") { super(`InvalidOperationError: ${what}`); }
 }
+
+export class BadArgsError extends Error {
+  constructor(what: string = "") { super(`Bad arguments: ${what}`); }
+}

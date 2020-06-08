@@ -32,6 +32,8 @@ export function mapErrorToHTTP(err: Error): number {
     return 400;
   } else if (err instanceof errors.InvalidOperationError) {
     return 400;
+  } else if (err instanceof errors.BadArgsError) {
+    return 400;
   } else if (err instanceof errors.AlreadyExistsError) {
     return 409;
   } else if (err instanceof errors.NotAllowedError) {

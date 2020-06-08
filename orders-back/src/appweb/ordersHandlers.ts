@@ -1,3 +1,4 @@
+import {BadArgsError} from 'app/errors';
 import * as orders from 'app/orders';
 import {deserialize, serialize} from "app/serialize";
 import express from "express";
@@ -17,13 +18,11 @@ export function registerOrdersHandlers(expressApp: express.Application, c: Compo
 
 function parseDate(value: string) {
   if (!value) {
-    // todo: raise bad request/params
-    throw new Error("date value is not defined or null");
+    throw new BadArgsError("date value is not defined or null");
   }
   const parsed = Date.parse(value);
   if (isNaN(parsed)) {
-    // todo: raise bad request/params
-    throw new Error("Parsing date failed");
+    throw new BadArgsError("Parsing date failed");
   }
   return new Date(parsed)
 }

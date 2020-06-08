@@ -11,6 +11,7 @@ describe("[webMain]", () => {
     assert.equal(mapErrorToHTTP(new errors.AlreadyExistsError()), 409);
     assert.equal(mapErrorToHTTP(new errors.ValidationError()), 400);
     assert.equal(mapErrorToHTTP(new errors.InvalidOperationError()), 400);
+    assert.equal(mapErrorToHTTP(new errors.BadArgsError()), 400);
     assert.equal(mapErrorToHTTP(new Error()), 501);
   });
 });
