@@ -1,7 +1,7 @@
 import * as joi from "joi";
 import _ from "lodash";
 import {Caller} from "types/Caller";
-import {Day, EID} from "types/core_types";
+import {Day, EID, EIDFac} from "types/core_types";
 import {
   DayOrderItem,
   DayOrderModel,
@@ -46,7 +46,7 @@ const OrderModelSchema = joi.object().keys({
 });
 
 export async function placeOrder(storage: AbstractStorage, orderData: OrderModel) {
-  const newOrderID = EID.makeOrderID();
+  const newOrderID = EIDFac.makeOrderID();
   storage.insertOrder(newOrderID, orderData);
   return newOrderID;
 }

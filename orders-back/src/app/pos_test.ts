@@ -4,14 +4,14 @@ import chai from 'chai';
 import chaiAsPromised from "chai-as-promised"
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
-import {EID} from "types/core_types";
+import {EID, EIDFac} from "types/core_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 import * as pos from "./pos";
 
 chai.use(chaiAsPromised);
 
-const AdminID = EID.makeUserID();
+const AdminID = EIDFac.makeUserID();
 const AdminReadonlyPermissions = new UserPermissions(PermissionFlags.Admin, []);
 const AdminUserAsCaller = new Caller(AdminID, AdminReadonlyPermissions);
 
@@ -51,7 +51,7 @@ describe("[point-of-interests]", () => {
   it("Should get access only to allowed POS", async () => {
     const storage = new InMemoryStorage();
     const pos1ID = await pos.createPOS(storage, "чупринки");
-    const shopManagerID = EID.makeUserID();
+    const shopManagerID = EIDFac.makeUserID();
     const shopManagerReadonlyPermissions = new UserPermissions(PermissionFlags.Read, []);
     const shopManagerUserAsCaller = new Caller(shopManagerID, shopManagerReadonlyPermissions);
     const accessiblePOS = await pos.getAllPOS(storage, shopManagerUserAsCaller);
@@ -65,7 +65,7 @@ describe("[point-of-interests]", () => {
   it("Admin allowed to read all POS", async () => {
     const storage = new InMemoryStorage();
     const pos1ID = await pos.createPOS(storage, "чупринки");
-    const AdminID = EID.makeUserID();
+    const AdminID = EIDFac.makeUserID();
     const AdminReadonlyPermissions = new UserPermissions(PermissionFlags.Admin, []);
     const AdminUserAsCaller = new Caller(AdminID, AdminReadonlyPermissions);
     const accessiblePOS = await pos.getAllPOS(storage, AdminUserAsCaller);

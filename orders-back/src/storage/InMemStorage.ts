@@ -19,14 +19,14 @@ class InMemoryStorage implements AbstractStorage {
   async insertGood(productID: EID, good: GoodModel): Promise<void> {
     // todo: validate that not exists.
     // todo: should I clone good here?
-    this.goods.set(productID.value, good);
+    this.goods.set(productID, good);
   }
 
   async getGoodByID(id: EID): Promise<GoodModel> {
-    if (!this.goods.has(id.value)) {
-      throw new NotFoundError('Good: ' + id.value);
+    if (!this.goods.has(id)) {
+      throw new NotFoundError('Good: ' + id);
     }
-    return this.goods.get(id.value)!
+    return this.goods.get(id)!
   }
 
   async getAllGoods(): Promise<ReadonlyArray<GoodModel>> {
@@ -34,31 +34,31 @@ class InMemoryStorage implements AbstractStorage {
   }
 
   async updateGood(id: EID, cb: (good: GoodModel) => GoodModel): Promise<void> {
-    if (!this.goods.has(id.value)) {
+    if (!this.goods.has(id)) {
       throw new NotFoundError();
     }
-    const newGood = cb(this.goods.get(id.value)!);
+    const newGood = cb(this.goods.get(id)!);
     if (newGood.id !== id) {
       throw new Error("Changing ID is not allowed");
     }
-    this.goods.set(id.value, newGood);
+    this.goods.set(id, newGood);
   }
 
   //#endregion
 
   //#region POS
   async insertPointOfSale(posID: EID, posModel: POSModel): Promise<void> {
-    if (this.poss.has(posID.value)) {
+    if (this.poss.has(posID)) {
       throw new Error("Already exists");
     }
-    this.poss.set(posID.value, posModel);
+    this.poss.set(posID, posModel);
   }
 
   async getPointOfSale(posID: EID): Promise<POSModel> {
-    if (!this.poss.has(posID.value)) {
+    if (!this.poss.has(posID)) {
       throw new Error("Does not exists!");
     }
-    return this.poss.get(posID.value)!;
+    return this.poss.get(posID)!;
   }
 
   async getAllPointsOfSale(): Promise<ReadonlyArray<POSModel>> {
@@ -68,7 +68,7 @@ class InMemoryStorage implements AbstractStorage {
 
   //#region Orders
   async insertOrder(orderID: EID, orderModel: OrderModel): Promise<void> {
-    this.orders.set(orderID.value, orderModel);
+    this.orders.set(orderID, orderModel);
   }
 
   async getOrders(from: Date, to: Date): Promise<OrderModel[]> {
@@ -90,26 +90,26 @@ class InMemoryStorage implements AbstractStorage {
 
   //#region  Users
   async insertUser(userID: EID, userModel: UserModel): Promise<void> {
-    this.users.set(userID.value, userModel);
+    this.users.set(userID, userModel);
   }
   async getAllUsers(): Promise<readonly UserModel[]> { return Array.from(this.users.values()); }
 
   async getUser(userID: EID): Promise<UserModel> {
-    if (!this.users.has(userID.value)) {
+    if (!this.users.has(userID)) {
       // todo: fix this
       throw new Error('User does not exist');
     }
     // todo: return clone! add test!
-    return this.users.get(userID.value)!;
+    return this.users.get(userID)!;
   }
 
   async updateUser(userID: EID, cb: (user: UserModel) => void): Promise<void> {
-    if (!this.users.has(userID.value)) {
+    if (!this.users.has(userID)) {
       throw new NotFoundError();
     }
-    const fetchedUser = _.clone(this.users.get(userID.value)!);
+    const fetchedUser = _.clone(this.users.get(userID)!);
     cb(fetchedUser);
-    this.users.set(userID.value, fetchedUser);
+    this.users.set(userID, fetchedUser);
   }
 
   async findUserByIdName(idName: string): Promise<UserModel|undefined> {

@@ -10,7 +10,7 @@ export function isAdmin(caller: Caller) {
 }
 
 export function ensureCallToSelfOrAdmin(caller: Caller, callTo: EID) {
-  if (!isAdmin(caller) && !caller.ID.equals(callTo)) {
+  if (!isAdmin(caller) && caller.ID !== callTo) {
     throw new NeedsAdminError();
   }
 }

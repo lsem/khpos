@@ -1,7 +1,7 @@
 import _ from "lodash";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {Caller} from "types/Caller";
-import {EID} from "types/core_types";
+import {EID, EIDFac} from "types/core_types";
 import {GoodModel} from "types/domain_types";
 
 import {ensureAdmin} from "./ensure";
@@ -15,7 +15,7 @@ export function getAvailableGoods(storage: AbstractStorage,
 export async function createGood(storage: AbstractStorage, caller: Caller, name: string,
                                  units: string): Promise<EID> {
   ensureAdmin(caller);
-  const id = EID.makeGoodID();
+  const id = EIDFac.makeGoodID();
   const duplicate = _.find(await storage.getAllGoods(), (good: GoodModel) => good.name === name);
   if (!!duplicate) {
     throw new AlreadyExistsError();

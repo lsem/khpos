@@ -1,7 +1,7 @@
 import {assert, expect} from "chai";
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
-import {Day, EID} from "types/core_types";
+import {Day, EID, EIDFac} from "types/core_types";
 import {DayStatus, POSModel} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
@@ -24,7 +24,7 @@ describe("[orders]", () => {
 
   it("should support basic scenario", async () => {
     const storage = new InMemoryStorage();
-    const product1 = EID.makeGoodID();
+    const product1 = EIDFac.makeGoodID();
     storage.insertGood(product1, {
       id : product1,
       name : "Круасан з Моколадом",
@@ -33,7 +33,7 @@ describe("[orders]", () => {
       removed : false
     });
 
-    const product2 = EID.makeGoodID();
+    const product2 = EIDFac.makeGoodID();
     storage.insertGood(product2, {
       id : product2,
       name : "Шарлотка по Франківськи",
@@ -43,7 +43,7 @@ describe("[orders]", () => {
     });
 
     // Create some user User1.
-    const user1ID = EID.makeUserID();
+    const user1ID = EIDFac.makeUserID();
     storage.insertUser(user1ID, {
       userID : user1ID,
       userIdName : "nat",
@@ -53,14 +53,14 @@ describe("[orders]", () => {
     });
 
     // Create some POS where user nat works.
-    const pos1ID = EID.makePOSID();
+    const pos1ID = EIDFac.makePOSID();
     storage.insertPointOfSale(pos1ID, {
       posIDName : "ЮЛипи",
       posID : pos1ID,
     });
 
     // Create another User2.
-    const user2ID = EID.makeUserID();
+    const user2ID = EIDFac.makeUserID();
     storage.insertUser(user2ID, {
       userID : user2ID,
       userIdName : "nat",
@@ -70,7 +70,7 @@ describe("[orders]", () => {
     });
 
     // Create another POS where zoya works.
-    const pos2ID = EID.makePOSID();
+    const pos2ID = EIDFac.makePOSID();
     storage.insertPointOfSale(pos2ID, {
       posIDName : "Чупринки",
       posID : pos2ID,
@@ -135,17 +135,17 @@ describe("[orders]", () => {
   it("basic test for placing order", async () => {
     const storage = new InMemoryStorage();
 
-    const POS = EID.makePOSID();
+    const POS = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS, {posID : POS, posIDName : "Чупринки"});
 
     const natashaTheUser =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS ]));
 
-    const sharlotteID = EID.makeGoodID();
+    const sharlotteID = EIDFac.makeGoodID();
     await storage.insertGood(
         sharlotteID,
         {id : sharlotteID, name : "Шарлотка", available : true, removed : false, units : "шт"});
-    const panforteID = EID.makeGoodID();
+    const panforteID = EIDFac.makeGoodID();
     await storage.insertGood(
         panforteID,
         {id : panforteID, name : "Панфорте", available : true, removed : false, units : "шт"});
@@ -187,14 +187,14 @@ describe("[orders]", () => {
   it("should apply operations only to specified POS", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
-    const POS2 = EID.makePOSID();
+    const POS2 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Липи"});
 
     const natashaTheUser = new Caller(
-        EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -215,28 +215,28 @@ describe("[orders]", () => {
     const storage = new InMemoryStorage();
 
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
-    const POS2 = EID.makePOSID();
+    const POS2 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Липи"});
 
-    const POS3 = EID.makePOSID();
+    const POS3 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS3, {posID : POS3, posIDName : "Левицького"});
 
     // Users/Callers
     const natashaTheUser =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS2 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS2 ]));
     const nastiaTheUser =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
-    const adminUser = new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const adminUser = new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
     // Goods
-    const sharlotteID = EID.makeGoodID();
+    const sharlotteID = EIDFac.makeGoodID();
     await storage.insertGood(
         sharlotteID,
         {id : sharlotteID, name : "Шарлотка", available : true, removed : false, units : "шт"});
-    const panforteID = EID.makeGoodID();
+    const panforteID = EIDFac.makeGoodID();
     await storage.insertGood(
         panforteID,
         {id : panforteID, name : "Панфорте", available : true, removed : false, units : "шт"});
@@ -269,12 +269,12 @@ describe("[orders]", () => {
     const storage = new InMemoryStorage();
 
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const natashaTheUser =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -293,7 +293,7 @@ describe("[orders]", () => {
 
     // User with IsProductionStuff permission can close a day if he has access to this resource.
     const bohdanTheUser =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, [ POS1 ]));
 
     await orders.closeDay(storage, bohdanTheUser, today, POS1);
     assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS1),
@@ -308,12 +308,12 @@ describe("[orders]", () => {
   it("only opened days can be closed", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const caller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, [ POS1 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -322,7 +322,7 @@ describe("[orders]", () => {
     assert.containSubset(await storage.getOrderForDay(today, POS1), {status : DayStatus.openned});
 
     const staffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     await orders.closeDay(storage, staffCaller, today, POS1);
 
@@ -346,15 +346,15 @@ describe("[orders]", () => {
   it("only closed days can be fianlized", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const prodStaffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.fromDate(new Date());
 
@@ -391,18 +391,18 @@ describe("[orders]", () => {
   it("day can be closed only by stuff or admin", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
-    const POS2 = EID.makePOSID();
+    const POS2 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Чупринки2"});
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1 ]));
     const adminCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     const today = Day.fromDate(new Date());
 
@@ -433,18 +433,18 @@ describe("[orders]", () => {
   it("day can be fianlized only by shop manager or admin", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
-    const POS2 = EID.makePOSID();
+    const POS2 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Чупринки2"});
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     const today = Day.fromDate(new Date());
 
@@ -486,13 +486,13 @@ describe("[orders]", () => {
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
     const otherCaller =
-        new Caller(EID.makeUserID(),
+        new Caller(EIDFac.makeUserID(),
                    new UserPermissions(~(PermissionFlags.IsShopManager |
                                          PermissionFlags.IsProdStaff | PermissionFlags.Admin),
                                        []));
@@ -532,16 +532,16 @@ describe("[orders]", () => {
   it("should allow changing only opened day", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     const today = Day.today();
 
@@ -585,12 +585,12 @@ describe("[orders]", () => {
   it("opening past days or days from too far future not alowed", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.today();
     const yesterday = new Day(today.val - 1);
@@ -609,12 +609,12 @@ describe("[orders]", () => {
   it("opening day that is already opened is invalid operation", async () => {
     const storage = new InMemoryStorage();
     // POSs
-    const POS1 = EID.makePOSID();
+    const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
     const shopManagerCaller =
-        new Caller(EID.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
     const today = Day.today();
     const futureDoday = new Day(today.val + 1);

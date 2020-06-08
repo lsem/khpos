@@ -8,44 +8,36 @@ import {TypedUUIDSchema2} from './schemas';
 const ValidTags = [ 'USR', 'POS', 'ORD', 'GOO' ];
 const ValidIDSSchema = TypedUUIDSchema2(ValidTags);
 
+export type EID = string;
+
 // Wrapper around string.
-class EID {
+export class EIDFac {
   value: string = "";
 
   static newTagged(tag: string, existingUUID: string|undefined = undefined) {
     if (existingUUID) {
-      const newId = new EID();
-      newId.value = tag + "-" + existingUUID;
-      return newId;
+      return tag + "-" + existingUUID;
     }
     if (!ValidTags.find((t) => tag === t)) {
       throw new ValidationError(`tag ${tag} is valid for EID`);
     }
-    const newId = new EID();
-    newId.value = tag + "-" + uuid.v4();
-    return newId;
+    return tag + "-" + uuid.v4();
   }
 
-  static makeUserID(): EID { return EID.newTagged('USR'); }
-  static makePOSID(): EID { return EID.newTagged('POS'); }
-  static makeRawPOSID(uuid: string): EID { return EID.newTagged('POS', uuid); }
-  static makeOrderID(): EID { return EID.newTagged('ORD'); }
-  static makeGoodID(): EID { return EID.newTagged('GOO'); }
-  static makeRawGoodID(uuid: string): EID { return EID.newTagged('GOO', uuid); }
+  static makeUserID(): EID { return EIDFac.newTagged('USR'); }
+  static makePOSID(): EID { return EIDFac.newTagged('POS'); }
+  static makeRawPOSID(uuid: string): EID { return EIDFac.newTagged('POS', uuid); }
+  static makeOrderID(): EID { return EIDFac.newTagged('ORD'); }
+  static makeGoodID(): EID { return EIDFac.newTagged('GOO'); }
+  static makeRawGoodID(uuid: string): EID { return EIDFac.newTagged('GOO', uuid); }
 
   static fromExisting(id: string): EID {
-    const newID = new EID();
     const result = joi.validate(id, ValidIDSSchema);
     if (result.error) {
       throw new ValidationError(result.error.message);
     }
-    newID.value = id;
-    return newID;
+    return id;
   }
-
-  toString() { return this.value; }
-
-  equals(other: EID) { return _.isEqual(this, other); }
 }
 
 export class Day {
@@ -61,4 +53,3 @@ export class Day {
   static today() { return Day.fromDate(new Date()); }
 };
 
-export {EID};

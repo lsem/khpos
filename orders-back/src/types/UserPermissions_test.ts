@@ -1,5 +1,5 @@
 import {assert} from "chai";
-import {EID} from "./core_types";
+import {EID, EIDFac} from "./core_types";
 
 // TODO: Entire permission systems must fit in one file with goods tests.
 
@@ -44,8 +44,8 @@ class UserPermissions {
 
 describe("[permissions]", () => {
   it("usage example", () => {
-    const PointOfSale1ID = EID.makePOSID();
-    const PointOfSale2ID = EID.makePOSID();
+    const PointOfSale1ID = EIDFac.makePOSID();
+    const PointOfSale2ID = EIDFac.makePOSID();
 
     // This shop manager has rights to read "something" default but cannot create any orders
     // as changing orders requires write permission and write permission in turn requires subject

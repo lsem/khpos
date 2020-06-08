@@ -1,7 +1,7 @@
 import {ensureAdmin, ensureCallToSelfOrAdmin} from 'app/ensure';
 import {AbstractStorage} from 'storage/AbstractStorage';
 import {Caller} from 'types/Caller';
-import {EID} from 'types/core_types';
+import {EID, EIDFac} from 'types/core_types';
 import {UserModel} from 'types/domain_types';
 import {UserPermissions} from 'types/UserPermissions';
 
@@ -15,7 +15,7 @@ export async function createUser(storage: AbstractStorage, caller: Caller, userI
   if (maybeExisting) {
     throw new Error("User with such IDName already exists")
   }
-  const newUserID = EID.makeUserID();
+  const newUserID = EIDFac.makeUserID();
   storage.insertUser(newUserID, {
     userID : newUserID,
     userIdName : userIDName,

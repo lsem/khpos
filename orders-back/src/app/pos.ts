@@ -2,7 +2,7 @@ import {AlreadyExistsError} from "app/errors";
 import _ from "lodash";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {Caller} from "types/Caller";
-import {EID} from "types/core_types";
+import {EID, EIDFac} from "types/core_types";
 import {POSModel} from "types/domain_types";
 import {PermissionFlags} from "types/UserPermissions";
 
@@ -13,7 +13,7 @@ export async function createPOS(storage: AbstractStorage, posIDName: string): Pr
   if (nonUnique) {
     throw new AlreadyExistsError();
   }
-  const newPOSID = EID.makePOSID();
+  const newPOSID = EIDFac.makePOSID();
   storage.insertPointOfSale(newPOSID, {
     posIDName : posIDName,
     posID : newPOSID,
@@ -28,7 +28,7 @@ export async function getAllPOS(storage: AbstractStorage,
     return allPOS;
   }
   return _.filter(
-      allPOS, (pos) => !!_.find(caller.Permissions.resources, (r) => r.value == pos.posID.value));
+      allPOS, (pos) => !!_.find(caller.Permissions.resources, (r) => r == pos.posID));
 }
 
 export async function getPOSByID(storage: AbstractStorage, id: EID): Promise<POSModel> {
