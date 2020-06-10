@@ -187,6 +187,7 @@ function OrderManagement({ getDay, saveDay, order, error }) {
       );
       setShowZeros(order.status === orderStatuses.OPENED);
       setTableSorting(null);
+      setUserMadeChanges(false);
     }
   }, [order]);
 
