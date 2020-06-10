@@ -2,7 +2,7 @@
 import React from "react";
 import { Prompt } from "react-router-dom";
 import { connect } from "react-redux";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   TextField,
   Fab,
@@ -19,15 +19,18 @@ import {
   Paper,
   Menu,
   Box,
+  Snackbar,
+  SnackbarContent,
 } from "@material-ui/core";
 import { Check, MoreVert, ArrowDropDown } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import { thunkGetOrderFromApi } from "./orderManagementSlice";
+import { thunkApiGetDay, thunkApiPatchDay } from "./orderManagementSlice";
 import PrintView from "./PrintView";
 import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
+import orderStatuses from "../../constants/orderStatuses";
 //#endregion
 
 //#region STYLES
@@ -45,16 +48,6 @@ const useStyles = makeStyles((theme) => ({
   list: {
     maxWidth: 800,
     margin: "0 auto",
-  },
-  fab: {
-    position: "fixed",
-    bottom: theme.spacing(4),
-    right: theme.spacing(4),
-  },
-  fabMenu: {
-    position: "fixed",
-    bottom: theme.spacing(12),
-    right: theme.spacing(5),
   },
   optionsBar: {
     position: "relative",
@@ -149,12 +142,16 @@ const useStyles = makeStyles((theme) => ({
     transition: "transform 100ms linear",
     transform: "rotate(-180deg)",
   },
+  fab: {
+    margin: 5,
+  },
 }));
 
 //#endregion
 
-function OrderManagement({ getOrder, order }) {
+function OrderManagement({ getDay, saveDay, order, error }) {
   const classes = useStyles();
+  const theme = useTheme();
 
   //#region STATE
   const [orderDate, setOrderDate] = React.useState(
@@ -172,26 +169,30 @@ function OrderManagement({ getOrder, order }) {
   const [tableSorting, setTableSorting] = React.useState(null);
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   const [userMadeChanges, setUserMadeChanges] = React.useState(false);
+  const [showErrorToast, setShowErrorToast] = React.useState(false);
   //#endregion
 
   //#region EFFECTS
   React.useEffect(() => {
-    if (pos) getOrder(moment(orderDate).valueOf(), pos.id);
-  }, [orderDate, pos, getOrder]);
+    if (pos) getDay(moment(orderDate).valueOf(), pos.posID);
+  }, [orderDate, pos, getDay]);
 
   React.useEffect(() => {
     if (order) {
-      setItems(JSON.parse(JSON.stringify(order.items)));
-      setShowZeros(order.status === "new");
+      setItems(
+        JSON.parse(JSON.stringify(order.items)).map((i) => ({
+          ...i,
+          oldCount: i.count,
+        }))
+      );
+      setShowZeros(order.status === orderStatuses.OPENED);
       setTableSorting(null);
     }
   }, [order]);
 
   React.useEffect(() => {
     const itemsViewFromItems = items.filter(
-      (i) =>
-        categoriesMenu[i.category] &&
-        (showZeros || i.orderedcount + i.deliveredcount)
+      (i) => categoriesMenu[i.category] && (showZeros || i.count)
     );
     if (tableSorting && tableSorting.order === "ASC") {
       itemsViewFromItems.sort((a, b) => {
@@ -235,6 +236,10 @@ function OrderManagement({ getOrder, order }) {
       return object;
     });
   }, [items, showZeros]);
+
+  React.useEffect(() => {
+    error && setShowErrorToast(true);
+  }, [error]);
   //#endregion
 
   //#region UI HANDLERS
@@ -255,7 +260,7 @@ function OrderManagement({ getOrder, order }) {
   };
 
   const handleItemClick = (item) => {
-    if (["new", "processing"].includes(order.status)) {
+    if (order.status !== orderStatuses.FINALIZED) {
       setSelectedItem({ ...item });
       setShowQuantityDialog(true);
     }
@@ -264,7 +269,9 @@ function OrderManagement({ getOrder, order }) {
   const handleQuantityDialogClose = (confirmed) => {
     if (confirmed) {
       setItems(
-        items.map((i) => (i.id === selectedItem.id ? { ...selectedItem } : i))
+        items.map((i) =>
+          i.goodID === selectedItem.goodID ? { ...selectedItem } : i
+        )
       );
     }
     setSelectedItem(null);
@@ -289,19 +296,26 @@ function OrderManagement({ getOrder, order }) {
   };
 
   const handleShowSummaryClick = () => {
-    if (order && items.filter((i) => i.orderedcount > 0).length) {
-      setShowOrderSummary(true);
-    } else {
-      setMessageBox("Ви нічого не замовили");
-    }
+    setShowOrderSummary(true);
   };
 
   const handleItemQuantityChange = (quantity) => {
     setSelectedItem({
       ...selectedItem,
-      [order.status === "new" ? "orderedcount" : "deliveredcount"]: quantity,
+      count: quantity,
     });
     userMadeChanges || setUserMadeChanges(true);
+  };
+
+  const handleSaveDayClick = () => {
+    saveDay(
+      orderDate,
+      pos.posID,
+      items
+        .filter((i) => i.count && i.oldCount !== i.count)
+        .map((i) => ({ goodID: i.goodID, count: i.count }))
+    );
+    setShowOrderSummary(false);
   };
   //#endregion
 
@@ -336,6 +350,17 @@ function OrderManagement({ getOrder, order }) {
     );
   };
 
+  const calcCountCoumnHederFromOrderStatus = () => {
+    switch (order.status) {
+      case orderStatuses.OPENED:
+        return "Замовити";
+      case orderStatuses.CLOSED:
+        return "Замовлено";
+      default:
+        return "Прийнято";
+    }
+  };
+
   return (
     <React.Fragment>
       <div className={classes.root}>
@@ -356,23 +381,16 @@ function OrderManagement({ getOrder, order }) {
             >
               <tbody>
                 <tr>
-                  <th>{generateTableHeader("name", "flex-start", "Товари")}</th>
+                  <th>
+                    {generateTableHeader("goodName", "flex-start", "Товари")}
+                  </th>
                   <th>
                     {generateTableHeader(
-                      "orderedcount",
+                      "count",
                       "flex-end",
-                      "Замовлено"
+                      calcCountCoumnHederFromOrderStatus()
                     )}
                   </th>
-                  {order.status === "new" ? null : (
-                    <th>
-                      {generateTableHeader(
-                        "deliveredcount",
-                        "flex-end",
-                        "Прийнято"
-                      )}
-                    </th>
-                  )}
                 </tr>
 
                 {itemsView.map((item, i) => (
@@ -382,9 +400,9 @@ function OrderManagement({ getOrder, order }) {
                       handleItemClick(item);
                     }}
                   >
-                    <td>{item.name}</td>
+                    <td>{item.goodName}</td>
                     <td className={classes.textAlignRight}>
-                      {item.orderedcount}
+                      {item.count}
                       <Typography
                         variant="caption"
                         className={classes.cellHint}
@@ -392,17 +410,6 @@ function OrderManagement({ getOrder, order }) {
                         {item.units}
                       </Typography>
                     </td>
-                    {order.status === "new" ? null : (
-                      <td className={classes.textAlignRight}>
-                        {item.deliveredcount}
-                        <Typography
-                          variant="caption"
-                          className={classes.cellHint}
-                        >
-                          {item.units}
-                        </Typography>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
@@ -416,30 +423,42 @@ function OrderManagement({ getOrder, order }) {
           </Typography>
         )}
 
-        {!(pos && !order) ? null : (
+        {!(pos && !order && !error) ? null : (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <CircularProgress style={{ margin: "30px auto" }} />
           </div>
         )}
       </div>
 
-      {!Object.keys(categoriesMenu).length ? null : (
-        <Fab
-          color="default"
-          className={classes.fabMenu}
-          onClick={handleItemsMenuButtonClick}
-          size="small"
-        >
-          <MoreVert />
-        </Fab>
-      )}
-      <Fab
-        color="primary"
-        className={classes.fab}
-        onClick={handleShowSummaryClick}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        position="fixed"
+        bottom={theme.spacing(4)}
+        right={theme.spacing(4)}
       >
-        <Check />
-      </Fab>
+        {!Object.keys(categoriesMenu).length ? null : (
+          <Fab
+            color="default"
+            onClick={handleItemsMenuButtonClick}
+            size="small"
+            className={classes.fab}
+          >
+            <MoreVert />
+          </Fab>
+        )}
+        {!userMadeChanges ? null : (
+          <Fab
+            color="primary"
+            onClick={handleShowSummaryClick}
+            className={classes.fab}
+          >
+            <Check />
+          </Fab>
+        )}
+      </Box>
 
       <Menu
         className={classes.itemsMenuContainer}
@@ -492,19 +511,14 @@ function OrderManagement({ getOrder, order }) {
         {order && selectedItem ? (
           <React.Fragment>
             <DialogTitle id="order-quantity-dialog">
-              {order.status === "new" ? "Замовити" : "Прийняти"}{" "}
-              {selectedItem.name}
+              {selectedItem.goodName}
             </DialogTitle>
             <DialogContent>
               <Box display="flex" justifyContent="center">
                 <TextField
                   type="number"
                   variant="outlined"
-                  value={
-                    order.status === "new"
-                      ? selectedItem.orderedcount
-                      : selectedItem.deliveredcount
-                  }
+                  value={selectedItem.count}
                   inputProps={{ min: 0 }}
                   onChange={(e) => {
                     handleItemQuantityChange(+e.target.value);
@@ -573,9 +587,8 @@ function OrderManagement({ getOrder, order }) {
         >
           <PrintView
             items={items}
-            orderStatus={order.status}
             orderDate={moment(orderDate).format("DD.MM.YYYY")}
-            sellPoint={pos.name}
+            pos={pos.posIDName}
           />
 
           {order.status === "closed" ? null : (
@@ -593,7 +606,7 @@ function OrderManagement({ getOrder, order }) {
               >
                 Назад
               </Button>
-              <Button onClick={() => {}} color="primary">
+              <Button onClick={handleSaveDayClick} color="primary">
                 Зберегти
               </Button>
             </Box>
@@ -605,6 +618,25 @@ function OrderManagement({ getOrder, order }) {
         when={userMadeChanges}
         message={() => "Впевнені що не бажаєте зберегти замовлення?"}
       />
+
+      <Snackbar
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        open={showErrorToast}
+        onClose={() => {
+          setShowErrorToast(false);
+        }}
+      >
+        <SnackbarContent
+          style={{
+            backgroundColor: theme.palette.error.main,
+            textAlign: "center",
+          }}
+          message={<Typography id="client-snackbar">{error}</Typography>}
+        />
+      </Snackbar>
     </React.Fragment>
   );
   //#endregion
@@ -616,8 +648,11 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getOrder: (date, sellPointId) => {
-    dispatch(thunkGetOrderFromApi(date, sellPointId));
+  getDay: (date, posID) => {
+    dispatch(thunkApiGetDay(date, posID));
+  },
+  saveDay: (date, posID, items) => {
+    dispatch(thunkApiPatchDay(date, posID, items));
   },
 });
 

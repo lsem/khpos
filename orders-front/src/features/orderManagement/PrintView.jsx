@@ -27,14 +27,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PrintView({
   items,
-  orderStatus,
   orderDate,
-  sellPoint,
+  pos,
 }) {
   const classes = useStyles();
 
   const itemsView = _(items)
-    .filter((i) => i.orderedcount + i.deliveredcount > 0)
+    .filter((i) => i.oldCount + i.count > 0 && i.oldCount !== i.count)
     .groupBy("category")
     .valueOf();
 
@@ -42,31 +41,29 @@ export default function PrintView({
 
   return (
     <div className={classes.root}>
-      <Typography variant="h5">{sellPoint}</Typography>
+      <Typography variant="h5">{pos}</Typography>
       <Typography variant="h5">{orderDate}</Typography>
       <table>
         <tbody>
           <tr>
             <th>Товар</th>
-            <th>Замовлено</th>
-            {orderStatus === "new" ? null : <th>Прийнято</th>}
+            <th>До</th>
+            <th>Після</th>
           </tr>
           {Object.keys(itemsView).map((c, i) => (
             <React.Fragment key={i}>
               <tr>
-                <th colSpan={orderStatus === "new" ? 2 : 3}>{c}</th>
+                <th colSpan={3}>{c}</th>
               </tr>
               {itemsView[c].map((g, j) => (
                 <tr key={key++}>
-                  <td>{g.name}</td>
+                  <td>{g.goodName}</td>
                   <td>
-                    {g.orderedcount} {g.units}
+                    {g.oldCount} {g.units}
                   </td>
-                  {orderStatus === "new" ? null : (
-                    <td>
-                      {g.deliveredcount} {g.units}
-                    </td>
-                  )}
+                  <td>
+                    {g.count} {g.units}
+                  </td>
                 </tr>
               ))}
             </React.Fragment>
