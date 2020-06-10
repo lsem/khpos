@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import sellPointsSample from "../../samples/sellPoints.json";
+import axios from "axios";
 
 export const posSlice = createSlice({
   name: "pos",
@@ -13,7 +13,7 @@ export const posSlice = createSlice({
       state.items = null;
     },
     setPos: (state, action) => {
-      state.items = action.payload;
+      state.items = action.payload.items;
       state.errorMessage = null;
     },
     setPosError: (state, action) => {
@@ -29,11 +29,11 @@ const { getPosFromApi, setPos, setPosError } = posSlice.actions;
 //thunks
 export const thunkGetPosFromApi = () => (dispatch) => {
   dispatch(getPosFromApi());
-  new Promise((resolve) => {
-    setTimeout(resolve, 1000);
-  })
-    .then(() => {
-      dispatch(setPos(sellPointsSample));
+
+  axios
+    .get("/pos")
+    .then((response) => {
+      dispatch(setPos(response.data));
     })
     .catch((e) => {
       dispatch(

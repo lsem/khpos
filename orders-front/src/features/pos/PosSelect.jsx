@@ -34,7 +34,7 @@ function PosSelect({
   React.useEffect(() => {
     if (!posItems) return;
     if (addAll) {
-      const allPos = { id: AllPosId, name: "ВСІ" };
+      const allPos = { posID: AllPosId, posIDName: "ВСІ" };
       setItemsView([allPos, ...posItems]);
       if (allSelectedByDefault) {
         setSelectedPos(allPos);
@@ -59,7 +59,7 @@ function PosSelect({
           setAnchorPosMenu(e.currentTarget);
         }}
       >
-        {selectedPos ? selectedPos.name : "Точка продажу.."}
+        {selectedPos ? selectedPos.posIDName : "Точка продажу.."}
         <ArrowDropDown style={{ margin: "0 -10px 0 10px" }} />
       </Button>
       <Menu
@@ -76,12 +76,12 @@ function PosSelect({
           ? itemsView.map((p, i) => (
               <MenuItem
                 key={i}
-                value={p.id}
+                value={p.posID}
                 onClick={() => {
                   setSelectedPos(p);
                 }}
               >
-                {p.name}
+                {p.posIDName}
               </MenuItem>
             ))
           : null}
