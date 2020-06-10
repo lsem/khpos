@@ -94,7 +94,7 @@ if (require.main === module) {
   populateSampleGoods(storage);
   const app = express();
   app.use(cors());
-  app.use(morgan("tiny"));
+  app.use(morgan(":date[iso] :method :url :status :response-time[digits] ms"));
   app.use(express.json());
   registerPOSHandlers(app, {storage : storage});
   registerOrdersHandlers(app, {storage : storage});
