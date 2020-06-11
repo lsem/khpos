@@ -31,6 +31,7 @@ import PrintView from "./PrintView";
 import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
 import orderStatuses from "../../constants/orderStatuses";
+import { useMessageBox } from "../messageBox/MessageBoxService";
 //#endregion
 
 //#region STYLES
@@ -152,13 +153,13 @@ const useStyles = makeStyles((theme) => ({
 function OrderManagement({ getDay, saveDay, order, error }) {
   const classes = useStyles();
   const theme = useTheme();
+  const messageBox = useMessageBox();
 
   //#region STATE
   const [orderDate, setOrderDate] = React.useState(
     moment().add(1, "days").valueOf()
   );
   const [pos, setPos] = React.useState(null);
-  const [messageBox, setMessageBox] = React.useState(false);
   const [showQuantityDialog, setShowQuantityDialog] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [categoriesMenu, setCategoriesMenu] = React.useState({});
@@ -244,6 +245,40 @@ function OrderManagement({ getDay, saveDay, order, error }) {
   //#endregion
 
   //#region UI HANDLERS
+
+  const handleDateChange = (date) => {
+    if (userMadeChanges) {
+      messageBox({
+        variant: "prompt",
+        catchOnCancel: true,
+        title: "Незбережені зміни",
+        description: "В замовленні є незбережені зміни. Відхилити?",
+      })
+        .then(() => {
+          setOrderDate(date);
+        })
+        .catch(() => {});
+    } else {
+      setOrderDate(date);
+    }
+  };
+
+  const handlePosChange = (newPos) => {
+    if (userMadeChanges) {
+      messageBox({
+        variant: "prompt",
+        catchOnCancel: true,
+        title: "Незбережені зміни",
+        description: "В замовленні є незбережені зміни. Відхилити?",
+      })
+        .then(() => {
+          setPos(newPos);
+        })
+        .catch(() => {});
+    } else {
+      setPos(newPos);
+    }
+  };
 
   const handleItemsMenuButtonClick = (event) => {
     setAnchorItemsMenu(event.currentTarget);
@@ -368,11 +403,15 @@ function OrderManagement({ getDay, saveDay, order, error }) {
         <div className={classes.optionsBar}>
           <KhDatePicker
             value={moment(orderDate).valueOf()}
-            onChange={setOrderDate}
+            onChange={handleDateChange}
             style={{ margin: 5 }}
           />
 
-          <PosSelect style={{ margin: 5 }} onChange={setPos} />
+          <PosSelect
+            style={{ margin: 5 }}
+            onChange={handlePosChange}
+            value={pos}
+          />
         </div>
 
         {!(order && pos) ? null : (
@@ -555,25 +594,6 @@ function OrderManagement({ getDay, saveDay, order, error }) {
             color="primary"
           >
             Так
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={messageBox}
-        onClose={() => setMessageBox(false)}
-        aria-labelledby="alert-dialog-title"
-      >
-        <DialogContent>
-          <DialogTitle id="alert-dialog-title">{messageBox}</DialogTitle>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setMessageBox(false)}
-            color="primary"
-            autoFocus
-          >
-            Зрозуміло
           </Button>
         </DialogActions>
       </Dialog>
