@@ -25,7 +25,6 @@ export const orderManagementSlice = createSlice({
       state.errorMessage = null;
     },
     setOrderError: (state, action) => {
-      state.order = null;
       state.errorMessage = action.payload;
     },
   },
@@ -63,6 +62,11 @@ export const thunkApiGetDay = (date, posId) => (dispatch) => {
               category: "fake",
               count: i.ordered,
             })),
+            avaliableActions: [
+              { id: "open", name: "Відкрите" },
+              { id: "close", name: "Закрите" },
+              { id: "finalize", name: "Прийняте" },
+            ],
           })
         );
       }
@@ -80,14 +84,16 @@ export const thunkChangeDayStatus = (date, posId, status) => (dispatch) => {
   dispatch(apiChangeDayStatus());
 
   axios
-    .post(`/dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`)
+    .post(
+      `/dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`
+    )
     .then(() => {
       dispatch(thunkApiGetDay(date, posId));
     })
     .catch((e) => {
       dispatch(
         setOrderError(
-          `Не вдалося отримати замовлення з сервера: ${extractError(e)}`
+          `Не вдалося змінити статус замовлення: ${extractError(e)}`
         )
       );
     });

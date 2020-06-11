@@ -21,12 +21,17 @@ import {
   Box,
   Snackbar,
   SnackbarContent,
+  MenuItem,
 } from "@material-ui/core";
 import { Check, MoreVert, ArrowDropDown } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
-import { thunkApiGetDay, thunkApiPatchDay } from "./orderManagementSlice";
+import {
+  thunkApiGetDay,
+  thunkApiPatchDay,
+  thunkChangeDayStatus,
+} from "./orderManagementSlice";
 import PrintView from "./PrintView";
 import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
@@ -150,7 +155,7 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function OrderManagement({ getDay, saveDay, order, error }) {
+function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const classes = useStyles();
   const theme = useTheme();
   const messageBox = useMessageBox();
@@ -353,6 +358,24 @@ function OrderManagement({ getDay, saveDay, order, error }) {
     );
     setShowOrderSummary(false);
   };
+
+  const handleChangeOrderStatus = (status) => {
+    if (userMadeChanges) {
+      messageBox({
+        variant: "prompt",
+        catchOnCancel: true,
+        title: "Незбережені зміни",
+        description: "В замовленні є незбережені зміни. Відхилити?",
+      })
+        .then(() => {
+          changeDayStatus(orderDate, pos.posID, status);
+        })
+        .catch(() => {});
+    } else {
+      changeDayStatus(orderDate, pos.posID, status);
+    }
+    setAnchorItemsMenu(null);
+  };
   //#endregion
 
   //#region JSX
@@ -509,6 +532,23 @@ function OrderManagement({ getDay, saveDay, order, error }) {
         disableAutoFocusItem
         variant="menu"
       >
+
+        <MenuItem disabled>Змінити статус:</MenuItem>
+
+        {order &&
+          order.avaliableActions.map((a, i) => (
+            <MenuItem
+              key={i}
+              onClick={() => {
+                handleChangeOrderStatus(a.id);
+              }}
+            >
+              {a.name}
+            </MenuItem>
+          ))}
+
+        <Divider />
+
         <FormControlLabel
           control={
             <Checkbox
@@ -674,6 +714,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   saveDay: (date, posID, items) => {
     dispatch(thunkApiPatchDay(date, posID, items));
+  },
+  changeDayStatus: (date, posID, status) => {
+    dispatch(thunkChangeDayStatus(date, posID, status));
   },
 });
 
