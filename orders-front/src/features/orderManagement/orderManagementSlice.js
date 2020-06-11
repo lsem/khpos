@@ -14,7 +14,7 @@ export const orderManagementSlice = createSlice({
     apiGetDay: (state) => {
       state.errorMessage = null;
     },
-    apiOpenDay: (state) => {
+    apiChangeDayStatus: (state) => {
       state.errorMessage = null;
     },
     apiPatchDay: (state) => {
@@ -34,7 +34,7 @@ export const orderManagementSlice = createSlice({
 //actions
 const {
   apiGetDay,
-  apiOpenDay,
+  apiChangeDayStatus,
   apiPatchDay,
   setOrder,
   setOrderError,
@@ -53,7 +53,7 @@ export const thunkApiGetDay = (date, posId) => (dispatch) => {
     .get(`/dayorder/${posId}?day=${moment(date).format("YYYY-MM-DD")}`)
     .then((response) => {
       if (response.data.status === orderStatuses.NOT_OPENED) {
-        dispatch(thunkApiOpenDay(date, posId));
+        dispatch(thunkChangeDayStatus(date, posId, "open"));
       } else {
         dispatch(
           setOrder({
@@ -76,11 +76,11 @@ export const thunkApiGetDay = (date, posId) => (dispatch) => {
     });
 };
 
-export const thunkApiOpenDay = (date, posId) => (dispatch) => {
-  dispatch(apiOpenDay());
+export const thunkChangeDayStatus = (date, posId, status) => (dispatch) => {
+  dispatch(apiChangeDayStatus());
 
   axios
-    .post(`/dayorder/${posId}/open?day=${moment(date).format("YYYY-MM-DD")}`)
+    .post(`/dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`)
     .then(() => {
       dispatch(thunkApiGetDay(date, posId));
     })
