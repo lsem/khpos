@@ -21,10 +21,10 @@ function PosSelect({
   addAll,
   allSelectedByDefault,
   style,
+  value,
 }) {
   const classes = useStyles();
   const [itemsView, setItemsView] = React.useState(null);
-  const [selectedPos, setSelectedPos] = React.useState(null);
   const [anchorPosMenu, setAnchorPosMenu] = React.useState(null);
 
   React.useEffect(() => {
@@ -37,17 +37,16 @@ function PosSelect({
       const allPos = { posID: AllPosId, posIDName: "ВСІ" };
       setItemsView([allPos, ...posItems]);
       if (allSelectedByDefault) {
-        setSelectedPos(allPos);
+        onChange && onChange(allPos);
       }
     } else {
       setItemsView([...posItems]);
     }
-  }, [posItems, addAll, allSelectedByDefault]);
+  }, [posItems, addAll, allSelectedByDefault, onChange]);
 
   React.useEffect(() => {
-    onChange && onChange(selectedPos);
     setAnchorPosMenu(null);
-  }, [selectedPos, onChange]);
+  }, [value]);
 
   return (
     <div className={classes.root} style={style}>
@@ -59,7 +58,7 @@ function PosSelect({
           setAnchorPosMenu(e.currentTarget);
         }}
       >
-        {selectedPos ? selectedPos.posIDName : "Точка продажу.."}
+        {value ? value.posIDName : "Точка продажу.."}
         <ArrowDropDown style={{ margin: "0 -10px 0 10px" }} />
       </Button>
       <Menu
@@ -67,6 +66,9 @@ function PosSelect({
         keepMounted
         open={Boolean(anchorPosMenu)}
         onClose={() => {
+          setAnchorPosMenu(null);
+        }}
+        onBlur={() => {
           setAnchorPosMenu(null);
         }}
         disableAutoFocusItem
@@ -78,7 +80,7 @@ function PosSelect({
                 key={i}
                 value={p.posID}
                 onClick={() => {
-                  setSelectedPos(p);
+                  onChange && onChange(p);
                 }}
               >
                 {p.posIDName}
