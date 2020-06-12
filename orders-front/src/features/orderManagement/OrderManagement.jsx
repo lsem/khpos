@@ -22,8 +22,9 @@ import {
   Snackbar,
   SnackbarContent,
   MenuItem,
+  InputAdornment,
 } from "@material-ui/core";
-import { Check, MoreVert, ArrowDropDown } from "@material-ui/icons";
+import { Check, MoreVert, ArrowDropDown, Search } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import classNames from "classnames";
@@ -91,12 +92,7 @@ const useStyles = makeStyles((theme) => ({
       borderColor: theme.palette.divider,
       borderStyle: "solid",
       borderWidth: "0 0 1px 0",
-      transition: "background-color 200ms linear",
       backgroundColor: theme.palette.background.paper,
-    },
-    "& th:active": {
-      transition: "background-color 0ms linear",
-      backgroundColor: theme.palette.secondary.light,
     },
     "& td": {
       padding: theme.spacing(2),
@@ -176,6 +172,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   const [userMadeChanges, setUserMadeChanges] = React.useState(false);
   const [showErrorToast, setShowErrorToast] = React.useState(false);
+  const [searchString, setSearchString] = React.useState("");
   //#endregion
 
   //#region EFFECTS
@@ -199,7 +196,10 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
   React.useEffect(() => {
     const itemsViewFromItems = items.filter(
-      (i) => categoriesMenu[i.category] && (showZeros || i.count)
+      (i) =>
+        categoriesMenu[i.category] &&
+        (showZeros || i.count) &&
+        i.goodName.toLowerCase().includes(searchString.toLowerCase())
     );
     if (tableSorting && tableSorting.order === "ASC") {
       itemsViewFromItems.sort((a, b) => {
@@ -224,7 +224,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
       });
     }
     setItemsView(itemsViewFromItems);
-  }, [items, categoriesMenu, showZeros, tableSorting]);
+  }, [items, categoriesMenu, showZeros, tableSorting, searchString]);
 
   React.useEffect(() => {
     setCategoriesMenu((categoriesMenu) => {
@@ -250,6 +250,12 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   //#endregion
 
   //#region UI HANDLERS
+  const searchHandler = React.useCallback(
+    _.debounce((str) => {
+      setSearchString(str);
+    }, 300),
+    [setSearchString]
+  );
 
   const handleDateChange = (date) => {
     if (userMadeChanges) {
@@ -384,14 +390,17 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
       <Box
         display="flex"
         alignItems="center"
-        onClick={() => {
-          handleTableSort(columnName);
-        }}
         bgcolor="transparent"
         padding={2}
         justifyContent={justifyContent}
       >
-        {content}
+        <span
+          onClick={() => {
+            handleTableSort(columnName);
+          }}
+        >
+          {content}
+        </span>
         <ArrowDropDown
           className={classNames({
             [classes.sortIconInvisible]: true,
@@ -405,6 +414,22 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
               tableSorting.order === "DSC",
           })}
         />
+        {columnName === "goodName" && (
+          <TextField
+            className={classes.margin}
+            type="search"
+            onChange={(e) => {
+              searchHandler(e.target.value);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="disabled" />
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
       </Box>
     );
   };
@@ -532,7 +557,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
         disableAutoFocusItem
         variant="menu"
       >
-
         <MenuItem disabled>Змінити статус:</MenuItem>
 
         {order &&
