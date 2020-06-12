@@ -9,6 +9,7 @@ import axios from "axios";
 
 axios.defaults.baseURL = "http://localhost:5500";
 axios.defaults.headers.common["Content-Type"] = "application/json";
+axios.defaults.headers.common["Cache-Control"] = "no-cache";
 
 ReactDOM.render(
   <React.StrictMode>
