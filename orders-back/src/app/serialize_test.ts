@@ -29,7 +29,7 @@ describe("[serialize", () => {
     assert.deepEqual(serialzied, expectedJson(expectedSerializedExample));
   });
 
-  it("/POSModel]", () => {
+  it.skip("/POSModel]", () => {
     const sample: POSModel = {
       posID : EIDFac.makeRawPOSID("be684f10-a35d-11ea-bb37-0242ac130002"),
       posIDName : 'чупринки'
@@ -52,7 +52,7 @@ describe("[serialize", () => {
         ValidationError);
   });
 
-  it("/GoodModel]", () => {
+  it.skip("/GoodModel]", () => {
     const sample: GoodModel = {
       id : EIDFac.makeRawGoodID("be684f10-a35d-11ea-bb37-0242ac130002"),
       name : 'Шарлотка',

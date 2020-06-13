@@ -1,4 +1,5 @@
 import {AlreadyExistsError, NotFoundError} from "app/errors";
+import {DayEvent} from "app/orders";
 import _ from "lodash";
 
 import {Day, EID} from "../types/core_types";
@@ -14,6 +15,7 @@ class InMemoryStorage implements AbstractStorage {
   orders = new Map<string, OrderModel>();
   goods = new Map<string, GoodModel>();
   dayOrders = new Map<string, DayOrderModel>();
+  dayEvents = new Map<string, DayEvent[]>();
 
   //#region Goods
   async insertGood(productID: EID, good: GoodModel): Promise<void> {
@@ -120,40 +122,26 @@ class InMemoryStorage implements AbstractStorage {
 
   //#endregion
 
-  async insertOrderForDay(day: Day, posID: EID, order: DayOrderModel): Promise<void> {
-    const key = makeKey(day, posID);
-    if (this.dayOrders.get(key)) {
-      throw new AlreadyExistsError();
+  async fetchDayEvents(streamID: string): Promise<DayEvent[]> {
+    const key = streamID;
+    if (!this.dayEvents.has(key)) {
+      throw new NotFoundError("fetch day events");
     }
-    this.dayOrders.set(key, order);
+    return this.dayEvents.get(key)!
   }
 
-  async getOrderForDay(day: Day, posID: EID): Promise<DayOrderModel|undefined> {
-    const key = makeKey(day, posID);
-    if (this.dayOrders.get(key)) {
-      return this.dayOrders.get(key)!;
-    } else {
-      return undefined;
+  async appendDayEvents(streamID: string, version: number, events: DayEvent[]): Promise<void> {
+    const key = streamID;
+    if (!this.dayEvents.has(key)) {
+      this.dayEvents.set(key, []);
     }
-  }
-
-  async updateOrderForDay(day: Day, posID: EID,
-                          cb: (order: DayOrderModel) => DayOrderModel): Promise<void> {
-    const key = makeKey(day, posID);
-    if (!this.dayOrders.get(key)) {
-      throw new NotFoundError(`day/pos ${key} to update`);
+    const existingEvents = this.dayEvents.get(key)!;
+    // user expects that current stream version is /version/
+    if (existingEvents.length != version) {
+      throw new Error(
+          `Stream version has changed. Expected: ${version}, actual: ${existingEvents.length}`);
     }
-    const order = this.dayOrders.get(key)!;
-    const changedOrder = cb(order);
-    this.dayOrders.set(key, changedOrder);
-  }
-
-  async replaceOrderForDay(day: Day, posID: EID, model: DayOrderModel): Promise<void> {
-    const key = makeKey(day, posID);
-    if (!this.dayOrders.get(key)) {
-      throw new NotFoundError();
-    }
-    this.dayOrders.set(key, model);
+    this.dayEvents.set(key, this.dayEvents.get(key)!.concat(events));
   }
 }
 

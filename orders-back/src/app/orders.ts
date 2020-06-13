@@ -1,5 +1,7 @@
+import {EventEmitter} from "events";
 import * as joi from "joi";
 import _ from "lodash";
+import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
 import {Day, EID, EIDFac} from "types/core_types";
 import {
@@ -23,6 +25,7 @@ import {
   isAdmin
 } from "./ensure";
 import {
+  AlreadyExistsError,
   InvalidOperationError as InvalidOperationError,
   NotAllowedError,
   NotFoundError
@@ -106,142 +109,322 @@ export async function getOrdersForDate(storage: AbstractStorage,
 }
 
 async function viewModelForDay(storage: AbstractStorage,
-                               model: DayOrderModel): Promise<DayViewModel> {
+                               dayAggregate: DayAggregate): Promise<DayViewModel> {
   type OneItem = DayViewModel['items'][0];
-  const viewItems =
-      await Promise.all(_.map(model.items, async(item: DayOrderItem): Promise<OneItem> => {
-        const good = await storage.getGoodByID(item.goodID);
+  const viewItems = await Promise.all(
+      _.map(dayAggregate.items, async(item: {good: EID, amount: number}): Promise<OneItem> => {
+        const good = await storage.getGoodByID(item.good);
         return {
-          goodID : item.goodID,
+          goodID : item.good,
           goodName : good.name,
-          ordered : item.ordered,
+          ordered : item.amount,
           units : good.units
         };
       }));
-  return {status : model.status, items : viewItems};
+  return {status : dayAggregate.status, items : viewItems};
 }
 
 export async function getDay(storage: AbstractStorage, caller: Caller, day: Day,
                              posID: EID): Promise<DayViewModel> {
   // todo: here authentication check is missing but it looks not as bad.
-  const maybeOrder = await storage.getOrderForDay(day, posID);
-  if (!maybeOrder) {
-    return { status: DayStatus.not_opened, items: [] }
+  let dayAggregate = null;
+  try {
+    dayAggregate = await loadDayAggregate(storage, day, posID);
+  } catch (e) {
+    if (e instanceof NotFoundError) {
+      return {status : DayStatus.not_opened, items : []};
+    } else {
+      throw e;
+    }
   }
-  return viewModelForDay(storage, maybeOrder!);
+  return await viewModelForDay(storage, dayAggregate);
 }
 
-// Openning day means that we create order from currently available goods with all zeoros.
 export async function openDay(storage: AbstractStorage, caller: Caller, day: Day,
                               posID: EID): Promise<void> {
-  ensureHasAccessToPOSOrAdmin(caller, posID);
 
-  // Call to POS to verify this POS exists
+  // Call to POS to verify this POS exists (todo: verify if this is ok)
   await storage.getPointOfSale(posID);
 
-  if (day.val < Day.today().val) {
-    throw new InvalidOperationError("Openning past days not allowed");
+  // how to verify that this one does not exist yet?
+  try {
+    await loadDayAggregate(storage, day, posID);
+    throw new InvalidOperationError("cannot open day that is already open");
+  } catch (e) {
+    if (!(e instanceof NotFoundError)) {
+      throw e;
+    }
   }
-  if ((day.val - Day.today().val) > 31) {
-    throw new InvalidOperationError("Can't create order for more than 31 days ahead");
-  }
-  const existingOrder = await storage.getOrderForDay(day, posID);
-  if (existingOrder) {
-    throw new InvalidOperationError("Day already epened");
-  }
+
   const goods = _.filter(await storage.getAllGoods(), (g) => !g.removed && g.available);
-  const items =
-      _.map(goods, (g: GoodModel): DayOrderItem => { return {goodID : g.id, ordered : 0}; });
-  await storage.insertOrderForDay(day, posID, {status : DayStatus.openned, items : items});
+  const goodIDS = _.map(goods, (g) => g.id);
+
+  const aggregate = DayAggregate.create(posID, caller, day, goodIDS);
+  await saveDayAggregate(storage, aggregate);
 }
 
 export async function closeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID) {
-  if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
-    throw new NotAllowedError(`closing day ${day.val}`);
-  }
-
   // Call to POS to verify this POS exists
   await storage.getPointOfSale(posID);
 
-  const dayModel = await storage.getOrderForDay(day, posID);
-  if (!dayModel) {
-    throw new InvalidOperationError(`day must be openned to close it`);
-  }
-  await storage.updateOrderForDay(day, posID, (dayModel) => {
-    if (dayModel.status !== DayStatus.openned) {
+  let dayAggregate;
+  try {
+    dayAggregate = await loadDayAggregate(storage, day, posID);
+  } catch (e) {
+    if (e instanceof NotFoundError) {
       throw new InvalidOperationError(`day must be openned to close it`);
+    } else {
+      throw e;
     }
-    return { status: DayStatus.closed, items: dayModel.items }
-  });
+  }
+
+  dayAggregate.closeDay(caller);
+  await saveDayAggregate(storage, dayAggregate);
 }
 
 export async function finalizeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID) {
-  if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsShopManager) == 0) {
-    throw new NotAllowedError(`closing day ${day.val}`);
-  }
-  ensureHasAccessToPOSOrAdmin(caller, posID);
-
-  // Call to POS to verify this POS exists
   await storage.getPointOfSale(posID);
-
-  const dayModel = await storage.getOrderForDay(day, posID);
-  if (!dayModel) {
-    throw new InvalidOperationError(`day must be openned to finalize it`);
+  let dayAggregate;
+  try {
+    dayAggregate = await loadDayAggregate(storage, day, posID);
+  } catch (e) {
+    if (e instanceof NotFoundError) {
+      throw new InvalidOperationError(`day must be openned to finalize it`);
+    } else {
+      throw e;
+    }
   }
 
-  // todo add test that natasha can close, while production stuff cannot.
-  await storage.updateOrderForDay(day, posID, (dayModel) => {
-    if (dayModel.status !== DayStatus.closed) {
-      throw new InvalidOperationError(`day must be closed to finalize it`);
-    }
-    return { status: DayStatus.finalized, items: dayModel.items }
-  });
+  dayAggregate.finalizeDay(caller);
+  await saveDayAggregate(storage, dayAggregate);
 }
 
-// Accepts edited previously returned from getGoodsForDay. Client can send
-// only that items that were changed or entire set.
 export async function changeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID,
                                 changeViewModel: ChangeDayViewModel): Promise<void> {
-  if (!(isAdmin(caller) || ((caller.Permissions.mask & PermissionFlags.IsProdStaff) > 0) ||
-        (((caller.Permissions.mask & PermissionFlags.IsShopManager) > 0) &&
-         callerHasAccessToResource(caller, posID)))) {
-    throw new NotAllowedError("to change day");
-  }
-
-  const maybeDay = await storage.getOrderForDay(day, posID);
-  if (!maybeDay) {
-    throw new InvalidOperationError(`day must be openned to change it`);
-  }
-
-  if (maybeDay.status !== DayStatus.openned) {
-    throw new InvalidOperationError("cannot change status in non-openned status");
-  }
-
-  // todo: handle changed to already closed order which must be something like that:
-  //   if it is already closed. then, we should mark desired change and notify stakeholders
-  //   about it. this change can be later accepted or not.
-  //   Apart from this, this should invalidate views of subscribed parties which should receive
-  //   notfication.
-  // todo: handle concurrency issue
-  for (let x of changeViewModel.items) {
-    const goodInOrder = _.find(maybeDay!.items, {goodID : x.goodID})
-    if (!goodInOrder) {
-      throw new InvalidOperationError(
-          `Attempt to change item ${x.goodID} that is not available in order`);
-    }
-    if (goodInOrder!.ordered != x.ordered) {
-      // changed, validate it.
-      if (x.ordered < 0) {
-        throw new InvalidOperationError(`Changing ${x.goodID} to value ${x.ordered} not allowed`);
-      }
-      // todo: min/max?
-      // todo: raise event?
-      goodInOrder.ordered = x.ordered;
+  let dayAggregate;
+  try {
+    dayAggregate = await loadDayAggregate(storage, day, posID);
+  } catch (e) {
+    if (e instanceof NotFoundError) {
+      throw new InvalidOperationError(`day must be openned to change it`);
+    } else {
+      throw e;
     }
   }
-  // todo: handle concurrency issue
-  await storage.replaceOrderForDay(day, posID, maybeDay!);
+  type OneItemT = ChangeDayViewModel['items'][0];
+  const internalChanges = changeViewModel.items.map(
+      (x: OneItemT): DayChange => {return { good: x.goodID, amount: x.ordered }});
+  dayAggregate.editDay(caller, internalChanges);
+  await saveDayAggregate(storage, dayAggregate);
 }
 
 // Returns grouped summary for all pos.
 export async function getTotalGoodsForDay() {}
+
+export enum EventType {
+  DayCreated,
+  DayOpened,
+  DayClosed,
+  DayFinalized,
+  DayEdited,
+  DayEditApproved,
+  DayEditRejected
+}
+
+export class DayEvent {
+  constructor(public type: EventType) {}
+}
+
+export class DayCreated extends DayEvent {
+  constructor(public pos: EID, public day: Day) { super(EventType.DayCreated); }
+}
+
+export class DayOpened extends DayEvent {
+  constructor(public goods: EID[]) { super(EventType.DayOpened); }
+}
+
+export class DayClosed extends DayEvent {
+  constructor() { super(EventType.DayClosed); }
+}
+
+export class DayFinalized extends DayEvent {
+  constructor() { super(EventType.DayFinalized); }
+}
+
+export interface DayChange {
+  good: EID, amount: number
+}
+
+// Day edited keeps bulk chanbges but not individial change since
+// this seems to be more natural and enables to undo entire (bulk) change operation.
+export class DayEdited extends DayEvent {
+  constructor(public changes: DayChange[]) { super(EventType.DayEdited); }
+}
+
+export class DayEditApproved extends DayEvent {
+  constructor() { super(EventType.DayEditApproved); }
+}
+
+export class DayEditRejected extends DayEvent {
+  constructor() { super(EventType.DayEditRejected); }
+}
+
+export async function loadDayAggregate(storage: AbstractStorage, day: Day,
+                                       pos: EID): Promise<DayAggregate> {
+  const streamID = `${day.val.toString()}-${pos}`;
+  const events = await storage.fetchDayEvents(streamID);
+  const dayAggregate = new DayAggregate();
+  dayAggregate.applyHistory(events);
+  return dayAggregate;
+}
+
+export async function saveDayAggregate(storage: AbstractStorage, aggregate: DayAggregate) {
+  const expectedVersion = aggregate.version - aggregate.uncommittedEvents.length;
+  const streamID = `${aggregate.day.val.toString()}-${aggregate.posID}`;
+  await storage.appendDayEvents(streamID, expectedVersion, aggregate.uncommittedEvents);
+}
+
+interface Dict<T> {
+  [Key: string]: T;
+}
+
+type EventHandlerFn = (e: DayEvent) => void;
+
+export class DayAggregate {
+  version: number = 0;
+  map: Dict<EventHandlerFn> = {};
+  public status: DayStatus = DayStatus.not_opened;
+  items: Record<EID, {good : EID, amount: number}> = {};
+  posID: EID = "";
+  public uncommittedEvents: DayEvent[] = [];
+  day: Day = Day.invalid();
+
+  constructor() { this.registerEventHandlers(); }
+
+  // Create opens the day since it seems like it does not make sense to create day without opening
+  // it.
+  static create(posID: EID, caller: Caller, day: Day, goodsForDay: EID[]): DayAggregate {
+    // todo: make sure values are not nulls.
+    ensureHasAccessToPOSOrAdmin(caller, posID);
+    const dayAggregate = new DayAggregate();
+    dayAggregate.raise(new DayCreated(posID, day));
+    dayAggregate.openDay(caller, goodsForDay);
+    return dayAggregate;
+  }
+
+  //#region Event handlers / service CQRS methods.
+  applyHistory(events: DayEvent[]) {
+    for (let e of events) {
+      this.apply(e);
+    }
+  }
+
+  raise(e: DayEvent) {
+    this.apply(e);
+    this.uncommittedEvents.push(e);
+  }
+
+  registerEventHandlers() {
+    this.map[EventType.DayCreated.toString()] = (e) => this.onCreated(e as DayCreated);
+    this.map[EventType.DayOpened.toString()] = (e) => this.onOpened(e as DayOpened);
+    this.map[EventType.DayClosed.toString()] = (e) => this.onClosed(e as DayClosed);
+    this.map[EventType.DayFinalized.toString()] = (e) => this.onFinalized(e as DayFinalized);
+    this.map[EventType.DayEdited.toString()] = (e) => this.onEdited(e as DayEdited);
+  }
+
+  apply(e: DayEvent) {
+    const handler = this.map[e.type.toString()];
+    // todo: verify handler exists and this method works.
+    if (!handler) {
+      throw new InvalidOperationError("Logic error!"); // todo: add dedicated LogicError for this
+    }
+    handler(e);
+    this.version++;
+  }
+
+  onCreated(e: DayCreated) {
+    this.status = DayStatus.not_opened;
+    this.day = e.day;
+    this.posID = e.pos;
+  }
+
+  onOpened(e: DayOpened) {
+    for (let x of e.goods) {
+      this.items[x] = {good : x, amount : 0};
+    }
+    this.status = DayStatus.openned;
+  }
+  onClosed(e: DayClosed) { this.status = DayStatus.closed; }
+  onFinalized(e: DayFinalized) { this.status = DayStatus.finalized; }
+  onEdited(e: DayEdited) {
+    for (let change of e.changes) {
+      this.items[change.good].good = change.good;
+      this.items[change.good].amount = change.amount;
+    }
+  }
+  //#endregion
+
+  itemValues() { return _.values(this.items); }
+
+  openDay(caller: Caller, goods: EID[]) {
+    ensureHasAccessToPOSOrAdmin(caller, this.posID);
+
+    if (this.day.val < Day.today().val) {
+      throw new InvalidOperationError("Openning past days not allowed");
+    }
+    if ((this.day.val - Day.today().val) > 31) {
+      throw new InvalidOperationError("Can't create order for more than 31 days ahead");
+    }
+    if (this.status == DayStatus.openned) {
+      throw new InvalidOperationError("Day already epened");
+    }
+    this.raise(new DayOpened(goods));
+  }
+
+  closeDay(caller: Caller) {
+    // ...
+    if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
+      throw new NotAllowedError(`closing day ${this.day.val}`);
+    }
+
+    if (this.status != DayStatus.openned) {
+      throw new InvalidOperationError(`day must be openned to close it`);
+    }
+
+    this.raise(new DayClosed());
+  }
+
+  finalizeDay(caller: Caller) {
+    if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsShopManager) == 0) {
+      throw new NotAllowedError(`finalizing day ${this.day.val}`);
+    }
+    ensureHasAccessToPOSOrAdmin(caller, this.posID);
+
+    if (this.status != DayStatus.closed) {
+      throw new InvalidOperationError(`day must be closed to finalize it`);
+    }
+
+    this.raise(new DayFinalized());
+  }
+
+  editDay(caller: Caller, changes: DayChange[]) {
+    if (!(isAdmin(caller) || ((caller.Permissions.mask & PermissionFlags.IsProdStaff) > 0) ||
+          (((caller.Permissions.mask & PermissionFlags.IsShopManager) > 0) &&
+           callerHasAccessToResource(caller, this.posID)))) {
+      throw new NotAllowedError("to change day");
+    }
+
+    if (this.status !== DayStatus.openned) {
+      throw new InvalidOperationError("cannot change status in non-openned status");
+    }
+
+    for (let change of changes) {
+      if (!_.find(Object.keys(this.items), _.matches(change.good))) {
+        throw new InvalidOperationError(
+            `Attempt to change item ${change.good} that is not available in order`);
+      }
+    }
+
+    this.raise(new DayEdited(changes));
+  }
+}

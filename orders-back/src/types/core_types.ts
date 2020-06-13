@@ -51,5 +51,5 @@ export class Day {
   }
 
   static today() { return Day.fromDate(new Date()); }
+  static invalid() { return new Day(-1); }
 };
-

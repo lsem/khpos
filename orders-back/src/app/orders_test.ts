@@ -1,4 +1,5 @@
 import {assert, expect} from "chai";
+import _ from "lodash";
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
 import {Day, EID, EIDFac} from "types/core_types";
@@ -8,6 +9,7 @@ import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 import {InvalidOperationError, NotAllowedError, NotFoundError} from "./errors";
 import {createGood} from "./goods";
 import * as orders from "./orders";
+import {DayAggregate} from "./orders";
 import * as pos from "./pos";
 
 const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
@@ -153,6 +155,8 @@ describe("[orders]", () => {
     const today = Day.fromDate(new Date());
 
     // Open day corresponds to similar button on UI.
+    // await orders.openDay(storage, natashaTheUser, today, POS);
+
     await orders.openDay(storage, natashaTheUser, today, POS);
 
     assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
@@ -186,29 +190,36 @@ describe("[orders]", () => {
 
   it("should apply operations only to specified POS", async () => {
     const storage = new InMemoryStorage();
-    // POSs
     const POS1 = EIDFac.makePOSID();
-    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
-
     const POS2 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Липи"});
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
-    const natashaTheUser = new Caller(
+    const shopManagerCaller = new Caller(
         EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
 
-    const today = Day.fromDate(new Date());
+    const today = Day.today();
 
-    // Natasha opens a day for pos1.
-    await orders.openDay(storage, natashaTheUser, today, POS1);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.not_opened);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS2)).status,
+                 DayStatus.not_opened);
 
-    // Day for POS1 is opened, but for POS2 is not.
-    await orders.getDay(storage, natashaTheUser, today, POS1);
+    // Shop manager opens a day for pos1.
+    await orders.openDay(storage, shopManagerCaller, today, POS1);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.openned);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS2)).status,
+                 DayStatus.not_opened);
 
-    // Natasha opens a day for pos2.
-    await orders.openDay(storage, natashaTheUser, today, POS2);
+    // Shop manager opens a day for pos2 and it shoudl become openend
+    await orders.openDay(storage, shopManagerCaller, today, POS2);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.openned);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS2)).status,
+                 DayStatus.openned);
 
-    // Now pos2 day is opened.
-    await orders.getDay(storage, natashaTheUser, today, POS2);
+    // todo: the same test can exist for different days of one pos.
   });
 
   it("should check access to APIs", async () => {
@@ -247,8 +258,8 @@ describe("[orders]", () => {
     // Natasha has access to POS2
     await orders.openDay(storage, natashaTheUser, today, POS2);
 
-    // Nastia does not have access POS2
-    await expect(orders.openDay(storage, nastiaTheUser, today, POS2))
+    // Nastia does not have access POS3
+    await expect(orders.openDay(storage, nastiaTheUser, today, POS3))
         .to.be.rejectedWith(NotAllowedError);
 
     // Natasha can make changes for POS2
@@ -300,7 +311,7 @@ describe("[orders]", () => {
     assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS1),
                          {status : DayStatus.closed});
 
-    // Natasha (todo: or admin) can finalize a day (is done upon receiving goods).
+    // // Natasha (todo: or admin) can finalize a day (is done upon receiving goods).
     await orders.finalizeDay(storage, natashaTheUser, today, POS1);
     assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS1),
                          {status : DayStatus.finalized});
@@ -313,21 +324,16 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const caller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, [ POS1 ]));
-
-    const today = Day.fromDate(new Date());
-
-    await orders.openDay(storage, caller, today, POS1);
-
-    assert.containSubset(await storage.getOrderForDay(today, POS1), {status : DayStatus.openned});
-
+    const caller = new Caller(EIDFac.makeUserID(),
+                              new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const staffCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
 
-    await orders.closeDay(storage, staffCaller, today, POS1);
+    const today = Day.fromDate(new Date());
 
     // What is already closed can't be closed.
+    await orders.openDay(storage, caller, today, POS1);
+    await orders.closeDay(storage, staffCaller, today, POS1);
     await expect(orders.closeDay(storage, staffCaller, today, POS1))
         .to.be.rejectedWith(InvalidOperationError);
 
@@ -338,9 +344,11 @@ describe("[orders]", () => {
         .to.be.rejectedWith(InvalidOperationError);
 
     // Finalized can't be closed
-    await storage.updateOrderForDay(
-        today, POS1, (day) => {return { items: day.items, status: DayStatus.finalized }});
-    await expect(orders.closeDay(storage, staffCaller, today, POS1))
+    const dayAftertomorrow = new Day(Day.today().val + 2);
+    await orders.openDay(storage, caller, dayAftertomorrow, POS1);
+    await orders.closeDay(storage, staffCaller, dayAftertomorrow, POS1);
+    await orders.finalizeDay(storage, caller, dayAftertomorrow, POS1);
+    await expect(orders.closeDay(storage, staffCaller, dayAftertomorrow, POS1))
         .to.be.rejectedWith(InvalidOperationError);
   });
 
@@ -357,36 +365,57 @@ describe("[orders]", () => {
     const shopManagerCaller = new Caller(
         EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
 
-    const today = Day.fromDate(new Date());
-
-    await storage.insertOrderForDay(today, POS1, {status : DayStatus.not_opened, items : []});
-
     // Days that have never been opened (not created at all) can't be finalized
     await expect(orders.finalizeDay(storage, shopManagerCaller, new Day(Day.today().val + 1), POS1))
         .to.be.rejectedWith(InvalidOperationError);
     await expect(orders.finalizeDay(storage, shopManagerCaller, new Day(Day.today().val - 1), POS1))
         .to.be.rejectedWith(InvalidOperationError);
 
-    // Cannot close not_opened
-    await expect(orders.closeDay(storage, prodStaffCaller, today, POS1))
+    // Open cannot be finalized
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS1);
+    await expect(orders.finalizeDay(storage, shopManagerCaller, Day.today(), POS1))
         .to.be.rejectedWith(InvalidOperationError);
-    assert.equal((await orders.getDay(storage, prodStaffCaller, today, POS1)).status,
+
+    // Finalized cannot be finalized (is not critical and can be changed to allow it).
+    await orders.closeDay(storage, prodStaffCaller, Day.today(), POS1);
+    await orders.finalizeDay(storage, shopManagerCaller, Day.today(), POS1);
+    await expect(orders.finalizeDay(storage, shopManagerCaller, Day.today(), POS1))
+        .to.be.rejectedWith(InvalidOperationError);
+  });
+
+  it("day can be opened only by shop manager or admin", async () => {
+    const storage = new InMemoryStorage();
+    // POSs
+    const POS1 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+    const POS2 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Чупринки2"});
+
+    // Users/Callers
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+    const staffCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+
+    const today = Day.fromDate(new Date());
+
+    // Staff member cannot open day
+    await expect(orders.openDay(storage, staffCaller, today, POS1))
+        .to.be.rejectedWith(NotAllowedError);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
                  DayStatus.not_opened);
 
-    // Openned can be closed
-    await storage.updateOrderForDay(
-        today, POS1, (day) => {return { items: day.items, status: DayStatus.openned }});
-    await orders.closeDay(storage, prodStaffCaller, today, POS1);
-    assert.equal((await orders.getDay(storage, prodStaffCaller, today, POS1)).status,
-                 DayStatus.closed);
+    // Shop manager can open day.
+    await orders.openDay(storage, shopManagerCaller, today, POS1);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.openned);
 
-    // Finalized can't be closed
-    await storage.updateOrderForDay(
-        today, POS1, (day) => {return { items: day.items, status: DayStatus.finalized }});
-    await expect(orders.closeDay(storage, prodStaffCaller, today, POS1))
-        .to.be.rejectedWith(InvalidOperationError);
-    assert.equal((await orders.getDay(storage, prodStaffCaller, today, POS1)).status,
-                 DayStatus.finalized);
+    // Admin can open day.
+    await orders.openDay(storage, adminCaller, today, POS2);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.openned);
   });
 
   it("day can be closed only by stuff or admin", async () => {
@@ -398,8 +427,8 @@ describe("[orders]", () => {
     await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Чупринки2"});
 
     // Users/Callers
-    const shopManagerCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1 ]));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.ReadWrite, [ POS1, POS2 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -408,30 +437,28 @@ describe("[orders]", () => {
     const today = Day.fromDate(new Date());
 
     // Assuming we have some opened day
-    await storage.insertOrderForDay(today, POS1, {status : DayStatus.openned, items : []});
+    await orders.openDay(storage, shopManagerCaller, today, POS1);
 
-    // Regular user can't close the day.
+    // Shop manager can't close the day.
     await expect(orders.closeDay(storage, shopManagerCaller, today, POS1))
         .to.be.rejectedWith(NotAllowedError);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.openned});
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.openned);
 
     // Admin users can close the day.
     await orders.closeDay(storage, adminCaller, today, POS1);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.closed});
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.closed);
 
-    // make it openned back
-    storage.updateOrderForDay(today, POS1,
-                              (day) => {return { items: day.items, status: DayStatus.openned }});
-
-    // PRoduction Staff can close the day (even without explict access to POS1 in resources[])
-    await orders.closeDay(storage, adminCaller, today, POS1);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.closed});
+    // The same expectations for Staff member
+    // Assuming we have some opened day
+    await orders.openDay(storage, shopManagerCaller, today, POS2);
+    await orders.closeDay(storage, staffCaller, today, POS2);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS2)).status,
+                 DayStatus.closed);
   });
 
-  it("day can be fianlized only by shop manager or admin", async () => {
+  it("day can be finalized only by shop manager or admin", async () => {
     const storage = new InMemoryStorage();
     // POSs
     const POS1 = EIDFac.makePOSID();
@@ -441,7 +468,7 @@ describe("[orders]", () => {
 
     // Users/Callers
     const shopManagerCaller = new Caller(
-        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1, POS2 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -450,34 +477,26 @@ describe("[orders]", () => {
     const today = Day.fromDate(new Date());
 
     // Assuming we have some closed day
-    await storage.insertOrderForDay(today, POS1, {status : DayStatus.closed, items : []});
-    await storage.insertOrderForDay(today, POS2, {status : DayStatus.closed, items : []});
+    await orders.openDay(storage, shopManagerCaller, today, POS1);
+    await orders.closeDay(storage, staffCaller, today, POS1);
 
     // ProdStaff user can't finalize the day.
     await expect(orders.finalizeDay(storage, staffCaller, today, POS1))
         .to.be.rejectedWith(NotAllowedError);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.closed});
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.closed);
 
     // Can be finalized by shop manager
     await orders.finalizeDay(storage, shopManagerCaller, today, POS1);
-    assert.containSubset(await orders.getDay(storage, shopManagerCaller, today, POS1),
-                         {status : DayStatus.finalized});
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS1)).status,
+                 DayStatus.finalized);
 
-    // make it closed back
-    storage.updateOrderForDay(today, POS1,
-                              (day) => {return { items: day.items, status: DayStatus.closed }});
-
-    // Can be finalized by admin
-    await orders.finalizeDay(storage, shopManagerCaller, today, POS1);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.finalized});
-
-    // Cannot finalize POS2
-    await expect(orders.finalizeDay(storage, shopManagerCaller, today, POS2))
-        .to.be.rejectedWith(NotAllowedError);
-    assert.containSubset(await orders.getDay(storage, adminCaller, today, POS2),
-                         {status : DayStatus.closed});
+    // The same expectations for admin.
+    await orders.openDay(storage, shopManagerCaller, today, POS2);
+    await orders.closeDay(storage, staffCaller, today, POS2);
+    await orders.finalizeDay(storage, adminCaller, today, POS2);
+    assert.equal((await orders.getDay(storage, shopManagerCaller, today, POS2)).status,
+                 DayStatus.finalized);
   });
 
   it("change day allowed for shop managers for their POS or admins/staff", async () => {
@@ -647,6 +666,46 @@ describe("[orders]", () => {
         .to.be.rejectedWith(NotFoundError, "POS");
   });
 
+  it("should not allow change item with unexsiting good", async () => {
+    const storage = new InMemoryStorage();
+    const POS1 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+    const shopManagerCaller = new Caller(
+        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+
+    const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
+    const good2ID = await createGood(storage, adminCaller, "Булочка", "шт");
+
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS1);
+    await expect(orders.changeDay(storage, shopManagerCaller, Day.today(), POS1, {
+      items : [ {goodID : EIDFac.makeGoodID(), ordered : 10} ]
+    })).to.be.rejectedWith(InvalidOperationError, "not available in order");
+  });
+
   // TODO: good coverege of function changes for changing items, detecting conflicts,
   // concurrency issues, audit, notifications.
+
+  it("playground for doc events", async () => {
+    const good1 = EIDFac.makeGoodID();
+    const good2 = EIDFac.makeGoodID();
+
+    const POS1 = EIDFac.makePOSID();
+
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    const day = DayAggregate.create(POS1, adminCaller, Day.today(), [ good1, good2 ]);
+    day.editDay(adminCaller, [ {good : good1, amount : 3} ]);
+    day.editDay(adminCaller, [ {good : good1, amount : 12}, {good : good2, amount : 50} ]);
+    day.closeDay(adminCaller);
+    day.finalizeDay(adminCaller);
+
+    const storage = new InMemoryStorage();
+    await orders.saveDayAggregate(storage, day);
+
+    const loadedDay = await orders.loadDayAggregate(storage, Day.today(), POS1);
+  });
 });
