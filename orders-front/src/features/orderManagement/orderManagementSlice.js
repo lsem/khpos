@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import moment from "moment";
-import axios from "axios";
+import api from "../../api";
 
 import orderStatuses from "../../constants/orderStatuses";
 
@@ -39,81 +39,78 @@ const {
   setOrderError,
 } = orderManagementSlice.actions;
 
-//helpers
-const extractError = (e) => {
-  return e.response.data || e;
-};
-
 //thunks
-export const thunkApiGetDay = (date, posId) => (dispatch) => {
+export const thunkApiGetDay = (date, posId) => async (dispatch) => {
   dispatch(apiGetDay());
 
-  axios
-    .get(`/dayorder/${posId}?day=${moment(date).format("YYYY-MM-DD")}`)
-    .then((response) => {
-      if (response.data.status === orderStatuses.NOT_OPENED) {
-        dispatch(thunkChangeDayStatus(date, posId, "open"));
-      } else {
-        dispatch(
-          setOrder({
-            ...response.data,
-            items: response.data.items.map((i) => ({
-              ...i,
-              category: "fake",
-              count: i.ordered,
-            })),
-            avaliableActions: [
-              { id: "open", name: "Відкрите" },
-              { id: "close", name: "Закрите" },
-              { id: "finalize", name: "Прийняте" },
-            ],
-          })
-        );
-      }
-    })
-    .catch((e) => {
+  try {
+    const data = await api
+      .get(`dayorder/${posId}?day=${moment(date).format("YYYY-MM-DD")}`)
+      .json();
+
+    if (data.status === orderStatuses.NOT_OPENED) {
+      dispatch(thunkChangeDayStatus(date, posId, "open"));
+    } else {
       dispatch(
-        setOrderError(
-          `Не вдалося отримати замовлення з сервера: ${extractError(e)}`
-        )
+        setOrder({
+          ...data,
+          items: data.items.map((i) => ({
+            ...i,
+            category: "fake",
+            count: i.ordered,
+          })),
+          avaliableActions: [
+            { id: "open", name: "Відкрите" },
+            { id: "close", name: "Закрите" },
+            { id: "finalize", name: "Прийняте" },
+          ],
+        })
       );
-    });
+    }
+  } catch (e) {
+    dispatch(
+      setOrderError(
+        `Не вдалося отримати замовлення з сервера: ${await e.response.text()}`
+      )
+    );
+  }
 };
 
-export const thunkChangeDayStatus = (date, posId, status) => (dispatch) => {
+export const thunkChangeDayStatus = (date, posId, status) => async (
+  dispatch
+) => {
   dispatch(apiChangeDayStatus());
 
-  axios
-    .post(
-      `/dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`
-    )
-    .then(() => {
-      dispatch(thunkApiGetDay(date, posId));
-    })
-    .catch((e) => {
-      dispatch(
-        setOrderError(
-          `Не вдалося змінити статус замовлення: ${extractError(e)}`
-        )
-      );
-    });
+  try {
+    await api.post(
+      `dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`
+    );
+    dispatch(thunkApiGetDay(date, posId));
+  } catch (e) {
+    dispatch(
+      setOrderError(
+        `Не вдалося змінити статус замовлення: ${await e.response.text()}`
+      )
+    );
+  }
 };
 
-export const thunkApiPatchDay = (date, posId, items) => (dispatch) => {
+export const thunkApiPatchDay = (date, posId, items) => async (dispatch) => {
   dispatch(apiPatchDay());
 
-  axios
-    .patch(`/dayorder/${posId}?day=${moment(date).format("YYYY-MM-DD")}`, {
-      items: items.map((i) => ({ goodID: i.goodID, ordered: i.count })),
-    })
-    .then(() => {
-      dispatch(thunkApiGetDay(date, posId));
-    })
-    .catch((e) => {
-      dispatch(
-        setOrderError(`Не вдалося зберегти замовлення: ${extractError(e)}`)
-      );
-    });
+  try {
+    await api.patch(
+      `dayorder/${posId}?day=${moment(date).format("YYYY-MM-DD")}`,
+      {
+        json: {
+          items: items.map((i) => ({ goodID: i.goodID, ordered: i.count })),
+        },
+      }
+    );
+    dispatch(thunkApiGetDay(date, posId));
+  } catch (e) {
+    setOrderError(`Не вдалося зберегти замовлення: ${await e.response.text()}`);
+  }
 };
 
 export default orderManagementSlice.reducer;

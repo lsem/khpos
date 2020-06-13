@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import axios from "axios";
+import api from "../../api";
 
 export const posSlice = createSlice({
   name: "pos",
@@ -27,19 +27,18 @@ export const posSlice = createSlice({
 const { getPosFromApi, setPos, setPosError } = posSlice.actions;
 
 //thunks
-export const thunkGetPosFromApi = () => (dispatch) => {
+export const thunkGetPosFromApi = () => async (dispatch) => {
   dispatch(getPosFromApi());
 
-  axios
-    .get("/pos")
-    .then((response) => {
-      dispatch(setPos(response.data));
-    })
-    .catch((e) => {
-      dispatch(
-        setPosError(`Не вдалося отримати точки продажу з сервера: ${e}`)
-      );
-    });
+  try {
+    dispatch(setPos(await api.get("pos").json()));
+  } catch (e) {
+    dispatch(
+      setPosError(
+        `Не вдалося отримати точки продажу з сервера: ${await e.response.text()}`
+      )
+    );
+  }
 };
 
 export default posSlice.reducer;
