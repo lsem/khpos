@@ -111,16 +111,24 @@ export async function getOrdersForDate(storage: AbstractStorage,
 async function viewModelForDay(storage: AbstractStorage,
                                dayAggregate: DayAggregate): Promise<DayViewModel> {
   type OneItem = DayViewModel['items'][0];
-  const viewItems = await Promise.all(
-      _.map(dayAggregate.items, async(item: {good: EID, amount: number}): Promise<OneItem> => {
-        const good = await storage.getGoodByID(item.good);
+  type OneHistoryItem = OneItem['history'][0];
+  const viewItems = await Promise.all(_.map(dayAggregate.items, async(item): Promise<OneItem> => {
+    const good = await storage.getGoodByID(item.good);
+    return {
+      goodID : item.good,
+      goodName : good.name,
+      ordered : item.amount,
+      units : good.units,
+      status : item.status,
+      history : await Promise.all(_.map(item.history, async(change): Promise<OneHistoryItem> => {
         return {
-          goodID : item.good,
-          goodName : good.name,
-          ordered : item.amount,
-          units : good.units
-        };
-      }));
+          count: change.amount, diff: change.diff, userID: change.madeBy,
+              userName: (await storage.getUser(change.madeBy)).userIdName,
+              whenTS: change.whenTS.toISOString()
+        }
+      }))
+    };
+  }));
   return {status : dayAggregate.status, items : viewItems};
 }
 
@@ -181,6 +189,7 @@ export async function finalizeDay(storage: AbstractStorage, caller: Caller, day:
 
 export async function changeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID,
                                 changeViewModel: ChangeDayViewModel): Promise<void> {
+  // todo: missing test, POS id may not exist
   const dayAggregate = await loadDayAggregateRemapNotFound(
       storage, day, posID, new InvalidOperationError(`day must be openned to change it`));
   type OneItemT = ChangeDayViewModel['items'][0];
@@ -230,7 +239,7 @@ export interface DayChange {
 // Day edited keeps bulk chanbges but not individial change since
 // this seems to be more natural and enables to undo entire (bulk) change operation.
 export class DayEdited extends DayEvent {
-  constructor(public changes: DayChange[]) { super(EventType.DayEdited); }
+  constructor(public userID: EID, public changes: DayChange[]) { super(EventType.DayEdited); }
 }
 
 export class DayEditApproved extends DayEvent {
@@ -275,11 +284,28 @@ interface Dict<T> {
 
 type EventHandlerFn = (e: DayEvent) => void;
 
+// Represents change events for individual item.
+interface ItemChangeEvent {
+  diff: number;
+  amount: number;
+  madeBy: EID;
+  whenTS: Date;
+}
+
+type ItemStatus = 'Default'|'RequestedEditAfterClose'|'ApprovedAll'|'ApprovedSome';
+
+interface Item {
+  good: EID;
+  amount: number;
+  history: ItemChangeEvent[];
+  status: ItemStatus
+}
+
 export class DayAggregate {
   version: number = 0;
   map: Dict<EventHandlerFn> = {};
   public status: DayStatus = DayStatus.not_opened;
-  items: Record<EID, {good : EID, amount: number}> = {};
+  items: Record<EID, Item> = {};
   posID: EID = "";
   public uncommittedEvents: DayEvent[] = [];
   day: Day = Day.invalid();
@@ -335,7 +361,7 @@ export class DayAggregate {
 
   onOpened(e: DayOpened) {
     for (let x of e.goods) {
-      this.items[x] = {good : x, amount : 0};
+      this.items[x] = {good : x, amount : 0, history : [], status : 'Default'};
     }
     this.status = DayStatus.openned;
   }
@@ -343,8 +369,17 @@ export class DayAggregate {
   onFinalized(e: DayFinalized) { this.status = DayStatus.finalized; }
   onEdited(e: DayEdited) {
     for (let change of e.changes) {
+      this.items[change.good].history.push({
+        diff : change.amount - this.items[change.good].amount,
+        amount : change.amount,
+        madeBy : e.userID,
+        whenTS : new Date()
+      });
       this.items[change.good].good = change.good;
       this.items[change.good].amount = change.amount;
+      if (this.status == DayStatus.closed) {
+        this.items[change.good].status = 'RequestedEditAfterClose'
+      }
     }
   }
   //#endregion
@@ -399,17 +434,23 @@ export class DayAggregate {
       throw new NotAllowedError("to change day");
     }
 
-    if (this.status !== DayStatus.openned) {
-      throw new InvalidOperationError("cannot change status in non-openned status");
-    }
-
-    for (let change of changes) {
-      if (!_.find(Object.keys(this.items), _.matches(change.good))) {
-        throw new InvalidOperationError(
-            `Attempt to change item ${change.good} that is not available in order`);
+    const ensureChangesReferenceExistingGoods = () => {
+      for (let change of changes) {
+        if (!_.find(Object.keys(this.items), _.matches(change.good))) {
+          throw new InvalidOperationError(
+              `Attempt to change item ${change.good} that is not available in order`);
+        }
       }
-    }
+    };
 
-    this.raise(new DayEdited(changes));
+    if (this.status == DayStatus.openned || this.status == DayStatus.closed) {
+      ensureChangesReferenceExistingGoods();
+      this.raise(new DayEdited(caller.ID, changes));
+      // todo: do we need to raise special event like ChangeToClosedDay to be able to catch it
+      // and notify interested parties?
+      // that there are changes to the order.
+    } else {
+      throw new InvalidOperationError("cannot change status in non-openned and non-closed status");
+    }
   }
 }

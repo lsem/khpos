@@ -1,18 +1,30 @@
 import {assert, expect} from "chai";
 import _ from "lodash";
+import {AbstractStorage} from "storage/AbstractStorage";
 import {InMemoryStorage} from "storage/InMemStorage";
 import {Caller} from "types/Caller";
 import {Day, EID, EIDFac} from "types/core_types";
-import {DayStatus, POSModel} from "types/domain_types";
+import {DayStatus} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
+import util from 'util';
 
 import {InvalidOperationError, NotAllowedError, NotFoundError} from "./errors";
 import {createGood} from "./goods";
 import * as orders from "./orders";
 import {DayAggregate} from "./orders";
 import * as pos from "./pos";
+import * as users from "./users";
 
 const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
+
+async function createUserAsCallerWithPermissions(storage: AbstractStorage,
+                                                 permissions: UserPermissions) {
+  const adminCaller =
+      new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+  return new Caller(await users.createUser(storage, adminCaller, "Наташа", permissions,
+                                           "Наталія Менеджерівна", "+380978763443"),
+                    permissions);
+}
 
 describe("[orders]", () => {
   it("validates input dates", async () => {
@@ -140,8 +152,14 @@ describe("[orders]", () => {
     const POS = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS, {posID : POS, posIDName : "Чупринки"});
 
-    const natashaTheUser = new Caller(EIDFac.makeUserID(),
-                                      new UserPermissions(PermissionFlags.IsShopManager, [ POS ]));
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    const natashaPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS ]);
+    const NatashaCaller =
+        new Caller(await users.createUser(storage, adminCaller, "Наташа", natashaPermissions,
+                                          "Наталія Менеджерівна", "+380978763443"),
+                   natashaPermissions);
 
     const sharlotteID = EIDFac.makeGoodID();
     await storage.insertGood(
@@ -157,19 +175,19 @@ describe("[orders]", () => {
     // Open day corresponds to similar button on UI.
     // await orders.openDay(storage, natashaTheUser, today, POS);
 
-    await orders.openDay(storage, natashaTheUser, today, POS);
+    await orders.openDay(storage, NatashaCaller, today, POS);
 
-    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+    assert.containSubset(await orders.getDay(storage, NatashaCaller, today, POS), {
       items : [
         {goodID : sharlotteID, goodName : "Шарлотка", ordered : 0},
         {goodID : panforteID, goodName : "Панфорте", ordered : 0}
       ]
     });
 
-    await orders.changeDay(storage, natashaTheUser, today, POS,
+    await orders.changeDay(storage, NatashaCaller, today, POS,
                            {items : [ {goodID : panforteID, ordered : 5} ]});
 
-    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+    assert.containSubset(await orders.getDay(storage, NatashaCaller, today, POS), {
       items : [
         {goodID : sharlotteID, goodName : "Шарлотка", ordered : 0},
         {goodID : panforteID, goodName : "Панфорте", ordered : 5}
@@ -177,15 +195,19 @@ describe("[orders]", () => {
     });
 
     await orders.changeDay(
-        storage, natashaTheUser, today, POS,
+        storage, NatashaCaller, today, POS,
         {items : [ {goodID : panforteID, ordered : 2}, {goodID : sharlotteID, ordered : 1} ]});
 
-    assert.containSubset(await orders.getDay(storage, natashaTheUser, today, POS), {
+    assert.containSubset(await orders.getDay(storage, NatashaCaller, today, POS), {
       items : [
         {goodID : sharlotteID, goodName : "Шарлотка", ordered : 1},
         {goodID : panforteID, goodName : "Панфорте", ordered : 2}
       ]
     });
+
+    // todo: add test for this.
+    // console.log('dump',
+    //             util.inspect(await orders.getDay(storage, NatashaCaller, today, POS), false, null));
   });
 
   it("should apply operations only to specified POS", async () => {
@@ -504,13 +526,28 @@ describe("[orders]", () => {
     // POSs
     const POS1 = await pos.createPOS(storage, "Чупринки");
 
-    // Users/Callers
-    const shopManagerCaller = new Caller(
-        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
-    const adminCaller =
+    const globalAdminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
-    const staffCaller =
-        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsProdStaff, []));
+
+    const shopManagerUser = await users.createUser(
+        storage, globalAdminCaller, "ShopMan",
+        new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]), "Shop Manager", "911");
+
+    const staffUser = await users.createUser(storage, globalAdminCaller, "ProdStaff",
+                                             new UserPermissions(PermissionFlags.IsProdStaff, []),
+                                             "Prod Stuff", "911");
+    const adminUser = await users.createUser(storage, globalAdminCaller, "BakeryAdmin",
+                                             new UserPermissions(PermissionFlags.Admin, []),
+                                             "Bakery Administrator", "911");
+
+    const asCaller = async (storage: AbstractStorage, userID: EID) => {
+      const user = await users.getUser(storage, globalAdminCaller, userID);
+      return new Caller(userID, user.permissions);
+    };
+
+    const shopManagerCaller = await asCaller(storage, shopManagerUser);
+    const adminCaller = await asCaller(storage, adminUser);
+    const staffCaller = await asCaller(storage, staffUser);
     const otherCaller =
         new Caller(EIDFac.makeUserID(),
                    new UserPermissions(~(PermissionFlags.IsShopManager |
@@ -549,15 +586,15 @@ describe("[orders]", () => {
                          {items : [ {goodID : good1ID, ordered : 5} ]});
   });
 
-  it("should allow changing only opened day", async () => {
+  it("should allow changing only opened day or closed day", async () => {
     const storage = new InMemoryStorage();
     // POSs
     const POS1 = EIDFac.makePOSID();
     await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
 
     // Users/Callers
-    const shopManagerCaller = new Caller(
-        EIDFac.makeUserID(), new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
+    const shopManagerCaller = await createUserAsCallerWithPermissions(
+        storage, new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]));
     const adminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
     const staffCaller =
@@ -584,22 +621,21 @@ describe("[orders]", () => {
 
     await orders.closeDay(storage, staffCaller, today, POS1);
 
-    // Changing closed is not allowed (yet)
-    await expect(orders.changeDay(storage, shopManagerCaller, today, POS1, {
-      items : [ {goodID : good1ID, ordered : 20} ]
-    })).to.be.rejectedWith(InvalidOperationError);
+    // Changing closed is handled a bit differently but for this test we just check it is allowed.
+    await orders.changeDay(storage, shopManagerCaller, today, POS1,
+                           {items : [ {goodID : good1ID, ordered : 20} ]});
     assert.containSubset(await orders.getDay(storage, adminCaller, today, POS1),
-                         {status : DayStatus.closed, items : [ {goodID : good1ID, ordered : 10} ]});
+                         {status : DayStatus.closed, items : [ {goodID : good1ID, ordered : 20} ]});
 
     await orders.finalizeDay(storage, shopManagerCaller, today, POS1);
 
     // Changing finalized day is not allowed
     await expect(orders.changeDay(storage, shopManagerCaller, today, POS1, {
-      items : [ {goodID : good1ID, ordered : 20} ]
+      items : [ {goodID : good1ID, ordered : 30} ]
     })).to.be.rejectedWith(InvalidOperationError);
     assert.containSubset(
         await orders.getDay(storage, adminCaller, today, POS1),
-        {status : DayStatus.finalized, items : [ {goodID : good1ID, ordered : 10} ]});
+        {status : DayStatus.finalized, items : [ {goodID : good1ID, ordered : 20} ]});
   });
 
   it("opening past days or days from too far future not alowed", async () => {
@@ -685,6 +721,114 @@ describe("[orders]", () => {
     })).to.be.rejectedWith(InvalidOperationError, "not available in order");
   });
 
+  it("changing days tests", async () => {
+    // todo: add more fine grained tests.
+    const storage = new InMemoryStorage();
+    const POS1 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
+    const shopManagerCaller =
+        new Caller(await users.createUser(storage, adminCaller, "Наташа", shopManagerPermissions,
+                                          "Наталія Менеджерівна", "+380978763443"),
+                   shopManagerPermissions);
+
+    const bakeryAdminCaller =
+        new Caller(await users.createUser(storage, adminCaller, "ГалинаС",
+                                          new UserPermissions(PermissionFlags.Admin, []),
+                                          "Галина Степанівна", "+380978763441"),
+                   new UserPermissions(PermissionFlags.Admin, []));
+
+    const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
+    const good2ID = await createGood(storage, adminCaller, "Булочка", "шт");
+
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS1);
+
+    await orders.changeDay(storage, shopManagerCaller, Day.today(), POS1,
+                           {items : [ {goodID : good1ID, ordered : 10} ]});
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.openned,
+      items : [ {
+        goodID : good1ID,
+        goodName : "Шарлотка по Франківськи",
+        units : "шт",
+        ordered : 10,
+        status : 'Default',
+        history : [ {count : 10, diff : 10, userID : shopManagerCaller.ID, userName : "Наташа"} ]
+      } ]
+    });
+
+    // Second edit (by bakery admin, who decided to make adjustments).
+    await orders.changeDay(
+        storage, bakeryAdminCaller, Day.today(), POS1,
+        {items : [ {goodID : good1ID, ordered : 5}, {goodID : good2ID, ordered : 7} ]});
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.openned,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 5,
+          status : 'Default',
+          history : [
+            {count : 10, diff : 10, userID : shopManagerCaller.ID, userName : "Наташа"},
+            {count : 5, diff : -5, userID : bakeryAdminCaller.ID, userName : "ГалинаС"}
+          ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 7,
+          status : 'Default',
+          history : [ {count : 7, diff : +7, userID : bakeryAdminCaller.ID, userName : "ГалинаС"} ]
+        }
+      ]
+    });
+
+    // Edit after close.
+    await orders.closeDay(storage, adminCaller, Day.today(), POS1);
+
+    await orders.changeDay(
+        storage, shopManagerCaller, Day.today(), POS1,
+        {items : [ {goodID : good1ID, ordered : 30}, {goodID : good2ID, ordered : 0} ]});
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.closed,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 30,
+          status : 'RequestedEditAfterClose',
+          history : [
+            {count : 10, diff : 10, userID : shopManagerCaller.ID, userName : "Наташа"},
+            {count : 5, diff : -5, userID : bakeryAdminCaller.ID, userName : "ГалинаС"},
+            {count : 30, diff : +25, userID : shopManagerCaller.ID, userName : "Наташа"}
+          ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 0,
+          status : 'RequestedEditAfterClose',
+          history : [
+            {count : 7, diff : +7, userID : bakeryAdminCaller.ID, userName : "ГалинаС"},
+            {count : 0, diff : -7, userID : shopManagerCaller.ID, userName : "Наташа"}
+          ]
+        }
+      ]
+    });
+  });
+
   // TODO: good coverege of function changes for changing items, detecting conflicts,
   // concurrency issues, audit, notifications.
 
@@ -700,6 +844,7 @@ describe("[orders]", () => {
     const day = DayAggregate.create(POS1, adminCaller, Day.today(), [ good1, good2 ]);
     day.editDay(adminCaller, [ {good : good1, amount : 3} ]);
     day.editDay(adminCaller, [ {good : good1, amount : 12}, {good : good2, amount : 50} ]);
+    day.editDay(adminCaller, [ {good : good1, amount : 8} ]);
     day.closeDay(adminCaller);
     day.finalizeDay(adminCaller);
 
@@ -707,5 +852,7 @@ describe("[orders]", () => {
     await orders.saveDayAggregate(storage, day);
 
     const loadedDay = await orders.loadDayAggregate(storage, Day.today(), POS1);
+
+    //console.log("\nloadedDay", util.inspect(loadedDay.items, false, null));
   });
 });
