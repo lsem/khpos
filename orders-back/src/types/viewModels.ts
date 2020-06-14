@@ -47,3 +47,12 @@ export const ChangeDayViewModelSchema = joi.object().keys({
               }))
               .required()
 });
+
+export const ConfirmChangeViewModelSchema = joi.object().keys({
+  items : joi.array()
+              .items(joi.object().keys({
+                goodID : TypedUUIDSchema('GOO').required(),
+                ordered : joi.number().integer().required()
+              }))
+              .required()
+});

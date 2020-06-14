@@ -15,7 +15,7 @@ export async function createPOS(storage: AbstractStorage, posIDName: string): Pr
     throw new AlreadyExistsError();
   }
   const newPOSID = EIDFac.makePOSID();
-  storage.insertPointOfSale(newPOSID, {
+  await storage.insertPointOfSale(newPOSID, {
     posIDName : posIDName,
     posID : newPOSID,
   });

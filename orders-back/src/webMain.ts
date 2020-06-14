@@ -1,4 +1,5 @@
 import * as errors from "app/errors";
+import {createUser} from "app/users";
 import {registerOrdersHandlers} from "appweb/ordersHandlers";
 import {registerPOSHandlers} from "appweb/posHandlers";
 import cors from "cors";
@@ -7,7 +8,9 @@ import * as http from 'http';
 import morgan from "morgan";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {InMemoryStorage} from "storage/InMemStorage";
+import {Caller} from "types/Caller";
 import {EIDFac} from "types/core_types";
+import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 export interface Components {
   storage: AbstractStorage;
@@ -52,53 +55,74 @@ function errorHandler(err: any, req: express.Request, res: express.Response,
   res.status(mapErrorToHTTP(err)).send(err.message);
 }
 
-function populateSampleGoods(storage: AbstractStorage) {
-  const addGood = (name: string, units: string) => {
+const GlobalAdminCaller =
+    new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+let SampleAdminUserID: string;
+
+async function populateSampleEntities(storage: AbstractStorage) {
+  SampleAdminUserID = await createUser(storage, GlobalAdminCaller, "Роман",
+                                       new UserPermissions(PermissionFlags.Admin, []),
+                                       "Роман Антонович", "+380959113456");
+
+  const addPOS = async (
+      name: string,
+      pid: string) => { await storage.insertPointOfSale(pid, {posID : pid, posIDName : name}); };
+
+  await addPOS("Чупринки", "POS-a8b69a9c-9c85-48d5-a8f0-9d213b1ee866");
+  await addPOS("ЮЛипи", "POS-4f224ac9-620e-4a78-bbe2-8978e4e41cac");
+  await addPOS("Стрийська", "POS-8ed2405f-e973-4c14-aa57-f96d23852858");
+
+  const addGood = async (name: string, units: string) => {
     const gid = EIDFac.makeGoodID();
-    storage.insertGood(gid,
-                       {id : gid, name : name, units : units, available : true, removed : false});
+    await storage.insertGood(
+        gid, {id : gid, name : name, units : units, available : true, removed : false});
   };
-  addGood("Домашній хліб", "шт");
-  addGood("Жорновий хліб", "шт");
-  addGood("Буряковий", "шт");
-  addGood("Заварний", "шт");
-  addGood("Культовий", "шт");
-  addGood("Хліб Бріош", "шт");
-  addGood("Хліб Французький", "шт");
-  addGood("Цільнозерновий", "шт");
-  addGood("Чіабата класична", "шт");
-  addGood("Вишневий пиріг", "шт");
-  addGood("Кекс гарбузовий", "шт");
-  addGood("Мафін шоколад", "шт");
-  addGood("Мафін ягідний", "шт");
-  addGood("Сирник", "шт");
-  addGood("Смородиновий тарт", "шт");
-  addGood("Тарт чорнич.", "шт");
-  addGood("Фінський чорнич.", "шт");
-  addGood("Тартал. з лим. курд.", "шт");
-  addGood("Чіа з манго", "шт");
-  addGood("Чіа смузі апельсинов.", "шт");
-  addGood("Круасан пустий", "шт");
-  addGood("Круасан мигдалевий", "шт");
-  addGood("Начинка вишня", "шт");
-  addGood("Шоколадне печиво", "шт");
-  addGood("Кокосові хмаринки", "шт");
-  addGood("Моршинська сл.г. 0,33", "шт");
-  addGood("Пакети паперові середні", "шт");
-  addGood("Конт. квадр. малий", "шт");
-  addGood("Кава", "уп");
+  await addGood("Домашній хліб", "шт");
+  await addGood("Жорновий хліб", "шт");
+  await addGood("Буряковий", "шт");
+  await addGood("Заварний", "шт");
+  await addGood("Культовий", "шт");
+  await addGood("Хліб Бріош", "шт");
+  await addGood("Хліб Французький", "шт");
+  await addGood("Цільнозерновий", "шт");
+  await addGood("Чіабата класична", "шт");
+  await addGood("Вишневий пиріг", "шт");
+  await addGood("Кекс гарбузовий", "шт");
+  await addGood("Мафін шоколад", "шт");
+  await addGood("Мафін ягідний", "шт");
+  await addGood("Сирник", "шт");
+  await addGood("Смородиновий тарт", "шт");
+  await addGood("Тарт чорнич.", "шт");
+  await addGood("Фінський чорнич.", "шт");
+  await addGood("Тартал. з лим. курд.", "шт");
+  await addGood("Чіа з манго", "шт");
+  await addGood("Чіа смузі апельсинов.", "шт");
+  await addGood("Круасан пустий", "шт");
+  await addGood("Круасан мигдалевий", "шт");
+  await addGood("Начинка вишня", "шт");
+  await addGood("Шоколадне печиво", "шт");
+  await addGood("Кокосові хмаринки", "шт");
+  await addGood("Моршинська сл.г. 0,33", "шт");
+  await addGood("Пакети паперові середні", "шт");
+  await addGood("Конт. квадр. малий", "шт");
+  await addGood("Кава", "уп");
 }
 
-if (require.main === module) {
+async function main() {
   const storage = new InMemoryStorage();
-  populateSampleGoods(storage);
+  await populateSampleEntities(storage)
   const app = express();
   app.use(cors());
   app.use(morgan(":date[iso] :method :url :status :response-time[digits] ms"));
   app.use(express.json());
   registerPOSHandlers(app, {storage : storage});
-  registerOrdersHandlers(app, {storage : storage});
+  registerOrdersHandlers(app, {storage : storage}, SampleAdminUserID);
   app.use(errorHandler);
   const server = http.createServer(app);
   server.listen(5500, () => console.log(`is running at http://localhost:5500`));
+}
+
+if (require.main === module) {
+  main();
 }

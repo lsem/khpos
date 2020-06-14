@@ -5,15 +5,26 @@ import express from "express";
 import {Caller} from "types/Caller";
 import {Day, EIDFac} from "types/core_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
-import {ChangeDayViewModel, ChangeDayViewModelSchema} from 'types/viewModels';
+import {
+  ChangeDayViewModel,
+  ChangeDayViewModelSchema,
+  ConfirmChangeViewModel,
+  ConfirmChangeViewModelSchema
+} from 'types/viewModels';
 import {Components, handlerWrapper} from "webMain";
 
-export function registerOrdersHandlers(expressApp: express.Application, c: Components) {
+let AdminCaller: Caller;
+
+// todo: get rid of this userID thing.
+export function registerOrdersHandlers(expressApp: express.Application, c: Components,
+                                       userID: string) {
+  AdminCaller = new Caller(userID, new UserPermissions(PermissionFlags.Admin, []));
   expressApp.get("/dayorder/:pos/", handlerWrapper(handleGetOrderForDay, c));
   expressApp.patch("/dayorder/:pos/", handlerWrapper(handlePatchOrderForDay, c));
   expressApp.post("/dayorder/:pos/open", handlerWrapper(handlePostOpenDay, c));
   expressApp.post("/dayorder/:pos/close", handlerWrapper(handlePostCloseDay, c));
   expressApp.post("/dayorder/:pos/finalize", handlerWrapper(handlePostFinalizeDay, c));
+  expressApp.post("/dayorder/:pos/confirmChange", handlerWrapper(handlePostConfirmChange, c));
 }
 
 function parseDate(value: string) {
@@ -26,8 +37,6 @@ function parseDate(value: string) {
   }
   return new Date(parsed)
 }
-
-const AdminCaller = new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
 function idParam(v: string) { return EIDFac.fromExisting(v); }
 
@@ -72,5 +81,15 @@ export async function handlePostFinalizeDay(c: Components, req: express.Request,
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
   await orders.finalizeDay(c.storage, AdminCaller, day, posID);
+  res.send(200);
+}
+
+export async function handlePostConfirmChange(c: Components, req: express.Request,
+                                              res: express.Response) {
+  const posID = idParam(req.params.pos);
+  const day = dayParam(req.query.day);
+  const confirmViewModel =
+      deserialize<ConfirmChangeViewModel>(req.body, ConfirmChangeViewModelSchema);
+  await orders.confirmChanges(c.storage, AdminCaller, day, posID, confirmViewModel);
   res.send(200);
 }
