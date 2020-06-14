@@ -164,53 +164,25 @@ export async function openDay(storage: AbstractStorage, caller: Caller, day: Day
 }
 
 export async function closeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID) {
-  // Call to POS to verify this POS exists
   await storage.getPointOfSale(posID);
-
-  let dayAggregate;
-  try {
-    dayAggregate = await loadDayAggregate(storage, day, posID);
-  } catch (e) {
-    if (e instanceof NotFoundError) {
-      throw new InvalidOperationError(`day must be openned to close it`);
-    } else {
-      throw e;
-    }
-  }
-
+  const dayAggregate = await loadDayAggregateRemapNotFound(
+      storage, day, posID, new InvalidOperationError(`day must be openned to close it`));
   dayAggregate.closeDay(caller);
   await saveDayAggregate(storage, dayAggregate);
 }
 
 export async function finalizeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID) {
   await storage.getPointOfSale(posID);
-  let dayAggregate;
-  try {
-    dayAggregate = await loadDayAggregate(storage, day, posID);
-  } catch (e) {
-    if (e instanceof NotFoundError) {
-      throw new InvalidOperationError(`day must be openned to finalize it`);
-    } else {
-      throw e;
-    }
-  }
-
+  const dayAggregate = await loadDayAggregateRemapNotFound(
+      storage, day, posID, new InvalidOperationError(`day must be openned to finalize it`));
   dayAggregate.finalizeDay(caller);
   await saveDayAggregate(storage, dayAggregate);
 }
 
 export async function changeDay(storage: AbstractStorage, caller: Caller, day: Day, posID: EID,
                                 changeViewModel: ChangeDayViewModel): Promise<void> {
-  let dayAggregate;
-  try {
-    dayAggregate = await loadDayAggregate(storage, day, posID);
-  } catch (e) {
-    if (e instanceof NotFoundError) {
-      throw new InvalidOperationError(`day must be openned to change it`);
-    } else {
-      throw e;
-    }
-  }
+  const dayAggregate = await loadDayAggregateRemapNotFound(
+      storage, day, posID, new InvalidOperationError(`day must be openned to change it`));
   type OneItemT = ChangeDayViewModel['items'][0];
   const internalChanges = changeViewModel.items.map(
       (x: OneItemT): DayChange => {return { good: x.goodID, amount: x.ordered }});
@@ -282,6 +254,19 @@ export async function saveDayAggregate(storage: AbstractStorage, aggregate: DayA
   const expectedVersion = aggregate.version - aggregate.uncommittedEvents.length;
   const streamID = `${aggregate.day.val.toString()}-${aggregate.posID}`;
   await storage.appendDayEvents(streamID, expectedVersion, aggregate.uncommittedEvents);
+}
+
+async function loadDayAggregateRemapNotFound(storage: AbstractStorage, day: Day, posID: EID,
+                                             error: Error) {
+  try {
+    return await loadDayAggregate(storage, day, posID);
+  } catch (e) {
+    if (e instanceof NotFoundError) {
+      throw error;
+    } else {
+      throw e;
+    }
+  }
 }
 
 interface Dict<T> {
