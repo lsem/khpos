@@ -21,20 +21,21 @@ export interface POSCollectionViewModel {
   items: ReadonlyArray<SinglePOSViewModel>;
 }
 
-
-type DayViewModelStatus = 'Default'|'RequestedEditAfterClose'|'ApprovedAll'|'ApprovedSome';
+type DayViewModelStatus = 'Default'|'RequestedEditAfterClose'|'ConfirmedAll'|'ConfirmedSome';
 export interface DayViewModel {
   // TODO: do not use daystatus but remap it since on this depends client.
   status: DayStatus;
-  items: ReadonlyArray<{
-    goodID : EID; goodName : string; ordered : number;
-    units : string,
-    status: DayViewModelStatus
-    history: Array<{diff : number, count: number, userID: EID, userName: string, whenTS: string}>
+  items: ReadonlyArray <
+      {goodID : EID; goodName : string; ordered : number; units : string, status: DayViewModelStatus
+    history: Array<{kind: string, diff : number, count: number, userID: EID, userName: string, whenTS: string}>
   }>;
 }
 
 export interface ChangeDayViewModel {
+  items: ReadonlyArray<{goodID : EID; ordered : number;}>
+}
+
+export interface ConfirmChangeViewModel {
   items: ReadonlyArray<{goodID : EID; ordered : number;}>
 }
 

@@ -13,7 +13,7 @@ import {
   OrderModelItem
 } from "types/domain_types";
 import {PermissionFlags} from "types/UserPermissions";
-import {ChangeDayViewModel, DayViewModel} from "types/viewModels";
+import {ChangeDayViewModel, ConfirmChangeViewModel, DayViewModel} from "types/viewModels";
 
 import {AbstractStorage} from "../storage/AbstractStorage";
 import * as schemas from "../types/schemas";
@@ -122,7 +122,7 @@ async function viewModelForDay(storage: AbstractStorage,
       status : item.status,
       history : await Promise.all(_.map(item.history, async(change): Promise<OneHistoryItem> => {
         return {
-          count: change.amount, diff: change.diff, userID: change.madeBy,
+          kind: change.kind, count: change.amount, diff: change.diff, userID: change.madeBy,
               userName: (await storage.getUser(change.madeBy)).userIdName,
               whenTS: change.whenTS.toISOString()
         }
@@ -199,6 +199,17 @@ export async function changeDay(storage: AbstractStorage, caller: Caller, day: D
   await saveDayAggregate(storage, dayAggregate);
 }
 
+export async function confirmChanges(storage: AbstractStorage, caller: Caller, day: Day, posID: EID,
+                                     changeViewModel: ConfirmChangeViewModel) {
+  const dayAggregate = await loadDayAggregateRemapNotFound(
+      storage, day, posID, new InvalidOperationError(`day must be openned to change it`));
+  type OneItemT = ChangeDayViewModel['items'][0];
+  const confirmChanges = changeViewModel.items.map(
+      (x: OneItemT): DayChangeConfirmation => {return { good: x.goodID, amount: x.ordered }});
+  dayAggregate.confirmDayChanges(caller, confirmChanges);
+  await saveDayAggregate(storage, dayAggregate);
+}
+
 // Returns grouped summary for all pos.
 export async function getTotalGoodsForDay() {}
 
@@ -208,7 +219,7 @@ export enum EventType {
   DayClosed,
   DayFinalized,
   DayEdited,
-  DayEditApproved,
+  DayEditConfirmed,
   DayEditRejected
 }
 
@@ -236,14 +247,24 @@ export interface DayChange {
   good: EID, amount: number
 }
 
+export interface DayChangeConfirmation {
+  good: EID, amount: number
+}
+
 // Day edited keeps bulk chanbges but not individial change since
 // this seems to be more natural and enables to undo entire (bulk) change operation.
 export class DayEdited extends DayEvent {
   constructor(public userID: EID, public changes: DayChange[]) { super(EventType.DayEdited); }
 }
 
+export class DayEditsConfirmed extends DayEvent {
+  constructor(public userID: EID, public changes: DayChangeConfirmation[]) {
+    super(EventType.DayEditConfirmed);
+  }
+}
+
 export class DayEditApproved extends DayEvent {
-  constructor() { super(EventType.DayEditApproved); }
+  constructor() { super(EventType.DayEditConfirmed); }
 }
 
 export class DayEditRejected extends DayEvent {
@@ -285,14 +306,16 @@ interface Dict<T> {
 type EventHandlerFn = (e: DayEvent) => void;
 
 // Represents change events for individual item.
+type ItemChangeEventKind = 'Change'|'Confirm'; // tip: can be modeled in polymorphic way if needed.
 interface ItemChangeEvent {
+  kind: ItemChangeEventKind;
   diff: number;
   amount: number;
   madeBy: EID;
   whenTS: Date;
 }
 
-type ItemStatus = 'Default'|'RequestedEditAfterClose'|'ApprovedAll'|'ApprovedSome';
+type ItemStatus = 'Default'|'RequestedEditAfterClose'|'ConfirmedAll'|'ConfirmedSome';
 
 interface Item {
   good: EID;
@@ -341,6 +364,8 @@ export class DayAggregate {
     this.map[EventType.DayClosed.toString()] = (e) => this.onClosed(e as DayClosed);
     this.map[EventType.DayFinalized.toString()] = (e) => this.onFinalized(e as DayFinalized);
     this.map[EventType.DayEdited.toString()] = (e) => this.onEdited(e as DayEdited);
+    this.map[EventType.DayEditConfirmed.toString()] = (e) =>
+        this.onDayEditsConfirmed(e as DayEditsConfirmed);
   }
 
   apply(e: DayEvent) {
@@ -370,6 +395,7 @@ export class DayAggregate {
   onEdited(e: DayEdited) {
     for (let change of e.changes) {
       this.items[change.good].history.push({
+        kind : 'Change',
         diff : change.amount - this.items[change.good].amount,
         amount : change.amount,
         madeBy : e.userID,
@@ -380,6 +406,24 @@ export class DayAggregate {
       if (this.status == DayStatus.closed) {
         this.items[change.good].status = 'RequestedEditAfterClose'
       }
+    }
+  }
+  onDayEditsConfirmed(e: DayEditsConfirmed) {
+    for (let change of e.changes) {
+      const item = this.items[change.good];
+      if (item.amount == change.amount) {
+        this.items[change.good].status = 'ConfirmedAll';
+      } else {
+        this.items[change.good].status = 'ConfirmedSome';
+      }
+      // todo: we can push entry into history but this requires a bit of chamges.
+      this.items[change.good].history.push({
+        kind : 'Confirm',
+        diff : change.amount - this.items[change.good].amount,
+        amount : change.amount,
+        madeBy : e.userID,
+        whenTS : new Date()
+      });
     }
   }
   //#endregion
@@ -452,5 +496,34 @@ export class DayAggregate {
     } else {
       throw new InvalidOperationError("cannot change status in non-openned and non-closed status");
     }
+  }
+
+  confirmDayChanges(caller: Caller, changes: DayChangeConfirmation[]) {
+    if (!isAdmin(caller) && !((caller.Permissions.mask & PermissionFlags.IsProdStaff) > 0)) {
+      throw new NotAllowedError("to confirm changes");
+    }
+
+    // confirmations supposed to be relevant only for closed days.
+    if (this.status != DayStatus.closed) {
+      throw new InvalidOperationError("confirm relevant only for closed days");
+    }
+
+    // Ensure changes reference existing goods
+    for (let change of changes) {
+      // todo: use the same technique as below
+      if (!_.find(Object.keys(this.items), _.matches(change.good))) {
+        throw new InvalidOperationError(
+            `Attempt to change item ${change.good} that is not available in order`);
+      }
+
+      console.assert(this.items[change.good]);
+      if (this.items[change.good].status != 'RequestedEditAfterClose') {
+        throw new InvalidOperationError(`Attempt to confirm item ${
+            change.good} that has status different from RequestedEditAfterClose. Actual status: ${
+            this.items[change.good].status}`)
+      }
+    }
+
+    this.raise(new DayEditsConfirmed(caller.ID, changes));
   }
 }

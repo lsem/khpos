@@ -207,7 +207,8 @@ describe("[orders]", () => {
 
     // todo: add test for this.
     // console.log('dump',
-    //             util.inspect(await orders.getDay(storage, NatashaCaller, today, POS), false, null));
+    //             util.inspect(await orders.getDay(storage, NatashaCaller, today, POS), false,
+    //             null));
   });
 
   it("should apply operations only to specified POS", async () => {
@@ -829,6 +830,178 @@ describe("[orders]", () => {
     });
   });
 
+  it("confirm changes basic test", async () => {
+    const storage = new InMemoryStorage();
+    const POS1 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
+    const shopManagerCaller =
+        new Caller(await users.createUser(storage, adminCaller, "Наташа", shopManagerPermissions,
+                                          "Наталія Менеджерівна", "+380978763443"),
+                   shopManagerPermissions);
+
+    const bakeryAdminCaller =
+        new Caller(await users.createUser(storage, adminCaller, "ГалинаС",
+                                          new UserPermissions(PermissionFlags.Admin, []),
+                                          "Галина Степанівна", "+380978763441"),
+                   new UserPermissions(PermissionFlags.Admin, []));
+
+    const prodStaffCaller =
+        new Caller(await users.createUser(storage, adminCaller, "Романа",
+                                          new UserPermissions(PermissionFlags.IsProdStaff, []),
+                                          "Романа Романівна", "+380978763440"),
+                   new UserPermissions(PermissionFlags.IsProdStaff, []));
+
+    const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
+    const good2ID = await createGood(storage, adminCaller, "Булочка", "шт");
+
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS1);
+
+    await orders.changeDay(
+        storage, shopManagerCaller, Day.today(), POS1,
+        {items : [ {goodID : good1ID, ordered : 10}, {goodID : good2ID, ordered : 5} ]});
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.openned,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 10,
+          status : 'Default',
+          history : [ {
+            kind : 'Change',
+            count : 10,
+            diff : 10,
+            userID : shopManagerCaller.ID,
+            userName : "Наташа"
+          } ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 5,
+          status : 'Default',
+          history : [ {
+            kind : 'Change',
+            count : 5,
+            diff : 5,
+            userID : shopManagerCaller.ID,
+            userName : "Наташа"
+          } ]
+        }
+      ]
+    });
+
+    await orders.closeDay(storage, prodStaffCaller, Day.today(), POS1);
+
+    await orders.changeDay(storage, shopManagerCaller, Day.today(), POS1,
+                           {items : [ {goodID : good1ID, ordered : 20} ]});
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.closed,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 20,
+          status : 'RequestedEditAfterClose',
+          history : [
+            {
+              kind : 'Change',
+              count : 10,
+              diff : 10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Change',
+              count : 20,
+              diff : +10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            }
+          ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 5,
+          status : 'Default',
+          history : [ {
+            kind : 'Change',
+            count : 5,
+            diff : 5,
+            userID : shopManagerCaller.ID,
+            userName : "Наташа"
+          } ]
+        }
+      ]
+    });
+
+    await orders.confirmChanges(storage, prodStaffCaller, Day.today(), POS1, {
+      items : [ {goodID : good1ID, ordered : 20} ] // confirm all 20
+    });
+
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.closed,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 20,
+          status : 'ConfirmedAll',
+          history : [
+            {
+              kind : 'Change',
+              count : 10,
+              diff : 10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Change',
+              count : 20,
+              diff : +10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Confirm',
+              count : 20,
+              diff : 0, // all confirmed
+              userID : prodStaffCaller.ID,
+              userName : "Романа"
+            }
+          ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 5,
+          status : 'Default',
+          history : [ {
+            kind : 'Change',
+            count : 5,
+            diff : 5,
+            userID : shopManagerCaller.ID,
+            userName : "Наташа"
+          }]
+        }
+      ]
+    });
+  });
+
   // TODO: good coverege of function changes for changing items, detecting conflicts,
   // concurrency issues, audit, notifications.
 
@@ -853,6 +1026,6 @@ describe("[orders]", () => {
 
     const loadedDay = await orders.loadDayAggregate(storage, Day.today(), POS1);
 
-    //console.log("\nloadedDay", util.inspect(loadedDay.items, false, null));
+    // console.log("\nloadedDay", util.inspect(loadedDay.items, false, null));
   });
 });
