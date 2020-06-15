@@ -2,6 +2,8 @@ import React from "react";
 import { Fab } from "@material-ui/core";
 import { Check, MoreVert } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import { useHistory, useRouteMatch } from "react-router-dom";
+import { orderManagementRoutes } from "../../constants/routes";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,8 +24,9 @@ export default function Fabs({
   categoriesMenu,
   userMadeChanges,
   handleItemsMenuButtonClick,
-  handleShowSummaryClick,
 }) {
+  const history = useHistory();
+  const { url } = useRouteMatch();
   const classes = useStyles();
 
   return (
@@ -34,7 +37,7 @@ export default function Fabs({
         </Fab>
       )}
       {!userMadeChanges ? null : (
-        <Fab color="primary" onClick={handleShowSummaryClick}>
+        <Fab color="primary" onClick={() => {history.push(`${url}/${orderManagementRoutes.summary}`);}}>
           <Check />
         </Fab>
       )}

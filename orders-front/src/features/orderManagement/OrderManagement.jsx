@@ -1,31 +1,16 @@
 //#region IMPORTS
 import React from "react";
-import { Prompt } from "react-router-dom";
-import { connect } from "react-redux";
-import { useHistory, useRouteMatch } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import routes, { orderManagementRoutes } from "../../constants/routes";
 import {
-  TextField,
-  Fab,
-  Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
-  Button,
-  CircularProgress,
-  FormControlLabel,
-  Checkbox,
-  Divider,
-  Paper,
-  Menu,
-  Box,
-  Snackbar,
-  SnackbarContent,
-  MenuItem,
-  InputAdornment,
-} from "@material-ui/core";
-import { Check, MoreVert, ArrowDropDown, Search } from "@material-ui/icons";
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Prompt,
+  useRouteMatch,
+} from "react-router-dom";
+import { connect } from "react-redux";
+import { makeStyles } from "@material-ui/core/styles";
+import { Typography, CircularProgress } from "@material-ui/core";
 import moment from "moment";
 import _ from "lodash";
 import {
@@ -33,11 +18,16 @@ import {
   thunkApiPatchDay,
   thunkChangeDayStatus,
 } from "./orderManagementSlice";
-import PrintView from "./PrintView";
 import orderStatuses from "../../constants/orderStatuses";
 import { useMessageBox } from "../messageBox/MessageBoxService";
 import ItemsTable from "./ItemsTable";
 import OptionsBar from "./OptionsBar";
+import Fabs from "./Fabs";
+import OrderMenu from "./Menu";
+import QuantityDialog from "./QuantityDialog";
+import ErrorToast from "./ErrorToast";
+import ItemLog from "./ItemLog";
+import OrderSummary from "./OrderSummary";
 //#endregion
 
 //#region STYLES
@@ -61,32 +51,13 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(6),
     color: theme.palette.text.hint,
   },
-  cellHint: {
-    color: theme.palette.text.hint,
-    marginLeft: 10,
-  },
-  itemsMenuContainer: {
-    "& label": {
-      userSelect: "none",
-      display: "block",
-      margin: "0 15px 0 5px",
-      transition: "background-color 100ms linear",
-    },
-    "& label:active": {
-      transition: "background-color 0ms linear",
-      backgroundColor: theme.palette.action.focus,
-    },
-  },
-  fab: {
-    margin: 5,
-  },
 }));
 
 //#endregion
 
 function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const classes = useStyles();
-  const theme = useTheme();
+  const { path } = useRouteMatch();
   const messageBox = useMessageBox();
 
   //#region STATE
@@ -102,7 +73,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const [anchorItemsMenu, setAnchorItemsMenu] = React.useState(null);
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
-  const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   const [userMadeChanges, setUserMadeChanges] = React.useState(false);
   const [showErrorToast, setShowErrorToast] = React.useState(false);
   const [searchString, setSearchString] = React.useState("");
@@ -275,9 +245,9 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
     }
   };
 
-  const handleShowSummaryClick = () => {
-    setShowOrderSummary(true);
-  };
+  // const handleShowSummaryClick = () => {
+  //   history.push(`${url}/${orderManagementRoutes.summary}`);
+  // };
 
   const handleItemQuantityChange = (quantity) => {
     setSelectedItem({
@@ -295,7 +265,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
         .filter((i) => i.count && i.oldCount !== i.count)
         .map((i) => ({ goodID: i.goodID, count: i.count }))
     );
-    setShowOrderSummary(false);
   };
 
   const handleChangeOrderStatus = (status) => {
@@ -319,245 +288,97 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
   //#region JSX
   return (
-    <React.Fragment>
-      <div className={classes.root}>
-        
-        <OptionsBar 
-          orderDate={orderDate}
-          pos={pos}
-          handleDateChange={handleDateChange}
-          handlePosChange={handlePosChange}
-        />
-
-        {(order && pos) && (
-          <ItemsTable 
-            orderStatus={order.status}
-            handleSort={handleTableSort}
-            handleSearch={searchHandler}
-            sorting={tableSorting}
-            items={itemsView}
-            handleItemClick={handleItemClick}
-          />
-        )}
-
-        {!pos && (
-          <Typography variant="h5" className={classes.actionHint}>
-            оберіть точку продажу
-          </Typography>
-        )}
-
-        {(pos && !order && !error) && (
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <CircularProgress style={{ margin: "30px auto" }} />
-          </div>
-        )}
-      </div>
-
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        position="fixed"
-        bottom={theme.spacing(4)}
-        right={theme.spacing(4)}
-      >
-        {!Object.keys(categoriesMenu).length ? null : (
-          <Fab
-            color="default"
-            onClick={handleItemsMenuButtonClick}
-            size="small"
-            className={classes.fab}
-          >
-            <MoreVert />
-          </Fab>
-        )}
-        {!userMadeChanges ? null : (
-          <Fab
-            color="primary"
-            onClick={handleShowSummaryClick}
-            className={classes.fab}
-          >
-            <Check />
-          </Fab>
-        )}
-      </Box>
-
-      <Menu
-        className={classes.itemsMenuContainer}
-        anchorEl={anchorItemsMenu}
-        keepMounted
-        open={Boolean(anchorItemsMenu)}
-        onClose={handleItemsMenuClose}
-        disableAutoFocusItem
-        variant="menu"
-      >
-        <MenuItem disabled>Змінити статус:</MenuItem>
-
-        {order &&
-          order.avaliableActions.map((a, i) => (
-            <MenuItem
-              key={i}
-              onClick={() => {
-                handleChangeOrderStatus(a.id);
-              }}
-            >
-              {a.name}
-            </MenuItem>
-          ))}
-
-        <Divider />
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={showZeros}
-              onChange={(e) => {
-                setShowZeros(e.target.checked);
-              }}
-              color="primary"
-            />
-          }
-          label="Показати '0'"
-        />
-
-        <Divider />
-
-        {Object.keys(categoriesMenu).map((k, i) => (
-          <FormControlLabel
-            key={i}
-            control={
-              <Checkbox
-                checked={categoriesMenu[k]}
-                onChange={(e) => {
-                  handelCategoryCheck(k, e.target.checked);
-                }}
-                color="primary"
-              />
-            }
-            label={k}
-          />
-        ))}
-      </Menu>
-
-      <Dialog
-        open={showQuantityDialog}
-        onClose={() => {
-          handleQuantityDialogClose(false);
-        }}
-        aria-labelledby="order-quantity-dialog"
-      >
-        {order && selectedItem ? (
+    <Router>
+      <Switch>
+        <Route path={`${path}`} exact>
           <React.Fragment>
-            <DialogTitle id="order-quantity-dialog">
-              {selectedItem.goodName}
-            </DialogTitle>
-            <DialogContent>
-              <Box display="flex" justifyContent="center">
-                <TextField
-                  type="number"
-                  variant="outlined"
-                  value={selectedItem.count}
-                  inputProps={{ min: 0 }}
-                  onChange={(e) => {
-                    handleItemQuantityChange(+e.target.value);
-                  }}
-                  autoFocus
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleQuantityDialogClose(true);
-                    }
-                  }}
-                  onFocus={(e) => {
-                    e.target.select();
-                  }}
+            <div className={classes.root}>
+              <OptionsBar
+                orderDate={orderDate}
+                pos={pos}
+                handleDateChange={handleDateChange}
+                handlePosChange={handlePosChange}
+              />
+
+              {order && pos && (
+                <ItemsTable
+                  orderStatus={order.status}
+                  handleSort={handleTableSort}
+                  handleSearch={searchHandler}
+                  sorting={tableSorting}
+                  items={itemsView}
+                  handleItemClick={handleItemClick}
                 />
-              </Box>
-            </DialogContent>
+              )}
+
+              {!pos && (
+                <Typography variant="h5" className={classes.actionHint}>
+                  оберіть точку продажу
+                </Typography>
+              )}
+
+              {pos && !order && !error && (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <CircularProgress style={{ margin: "30px auto" }} />
+                </div>
+              )}
+            </div>
+
+            <Fabs
+              categoriesMenu={categoriesMenu}
+              userMadeChanges={userMadeChanges}
+              handleItemsMenuButtonClick={handleItemsMenuButtonClick}
+            />
+
+            <OrderMenu
+              order={order}
+              showZeros={showZeros}
+              setShowZeros={setShowZeros}
+              categoriesMenu={categoriesMenu}
+              anchorItemsMenu={anchorItemsMenu}
+              handelCategoryCheck={handelCategoryCheck}
+              handleItemsMenuClose={handleItemsMenuClose}
+              handleChangeOrderStatus={handleChangeOrderStatus}
+            />
+
+            <QuantityDialog
+              order={order}
+              selectedItem={selectedItem}
+              showQuantityDialog={showQuantityDialog}
+              handleItemQuantityChange={handleItemQuantityChange}
+              handleQuantityDialogClose={handleQuantityDialogClose}
+            />
+
+            <Prompt
+              message={(params) => {
+                console.log(params.pathname);
+                return userMadeChanges &&
+                  !params.pathname.includes(routes.orderManagement)
+                  ? "Впевнені що не бажаєте зберегти замовлення?"
+                  : true;
+              }}
+            />
+
+            <ErrorToast
+              error={error}
+              showErrorToast={showErrorToast}
+              setShowErrorToast={setShowErrorToast}
+            />
           </React.Fragment>
-        ) : null}
-
-        <DialogActions>
-          <Button
-            onClick={() => {
-              handleQuantityDialogClose(false);
-            }}
-            color="secondary"
-          >
-            Ні
-          </Button>
-          <Button
-            onClick={() => {
-              handleQuantityDialogClose(true);
-            }}
-            color="primary"
-          >
-            Так
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {order && pos ? (
-        <Dialog
-          fullScreen
-          open={showOrderSummary}
-          onClose={() => {
-            setShowOrderSummary(false);
-          }}
-        >
-          <PrintView
+        </Route>
+        <Route path={`${path}/${orderManagementRoutes.itemLog}`} exact>
+          <ItemLog />
+        </Route>
+        <Route path={`${path}/${orderManagementRoutes.summary}`} exact>
+          <OrderSummary
+            pos={pos}
             items={items}
-            orderDate={moment(orderDate).format("DD.MM.YYYY")}
-            pos={pos.posIDName}
+            orderDate={orderDate}
+            handleSaveDayClick={handleSaveDayClick}
           />
-
-          {order.status === "closed" ? null : (
-            <Box
-              display="flex"
-              justifyContent="center"
-              displayPrint="none"
-              margin="0 0 30px 0"
-            >
-              <Button
-                onClick={() => {
-                  setShowOrderSummary(false);
-                }}
-                color="secondary"
-              >
-                Назад
-              </Button>
-              <Button onClick={handleSaveDayClick} color="primary">
-                Зберегти
-              </Button>
-            </Box>
-          )}
-        </Dialog>
-      ) : null}
-
-      <Prompt
-        when={userMadeChanges}
-        message={() => "Впевнені що не бажаєте зберегти замовлення?"}
-      />
-
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        open={showErrorToast}
-        onClose={() => {
-          setShowErrorToast(false);
-        }}
-      >
-        <SnackbarContent
-          style={{
-            backgroundColor: theme.palette.error.main,
-            textAlign: "center",
-          }}
-          message={<Typography id="client-snackbar">{error}</Typography>}
-        />
-      </Snackbar>
-    </React.Fragment>
+        </Route>
+      </Switch>
+    </Router>
   );
   //#endregion
 }

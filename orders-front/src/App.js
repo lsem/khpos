@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
-import OrderManagementRouter from "./features/orderManagement/Router";
+import OrderManagement from "./features/orderManagement/OrderManagement";
 import OrderProduction from "./features/orderProduction/OrderProduction";
 import AppMainMenu from "./features/appMainMenu/AppMainMenu";
 import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxService";
@@ -66,7 +66,7 @@ function App() {
                   exact
                 />
                 <Route path={`/${routeConsts.orderManagement}`}>
-                  <OrderManagementRouter />
+                  <OrderManagement />
                 </Route>
                 <Route path={`/${routeConsts.orderProduction}`}>
                   <OrderProduction />
