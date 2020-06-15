@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "center",
-    margin: "16px 0",
+    margin: `${theme.spacing(2)}px 0`,
   }
 }));
 

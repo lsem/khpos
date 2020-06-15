@@ -76,6 +76,10 @@ const useStyles = makeStyles((theme) => ({
     transition: "transform 100ms linear",
     transform: "rotate(-180deg)",
   },
+  cellHint: {
+    color: theme.palette.text.hint,
+    marginLeft: 10,
+  },
 }));
 
 export default function ItemsTable({
@@ -132,7 +136,6 @@ export default function ItemsTable({
         />
         {columnName === "goodName" && (
           <TextField
-            className={classes.margin}
             type="search"
             onChange={(e) => {
               handleSearch(e.target.value);
