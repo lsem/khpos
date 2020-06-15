@@ -34,11 +34,10 @@ import {
   thunkChangeDayStatus,
 } from "./orderManagementSlice";
 import PrintView from "./PrintView";
-import KhDatePicker from "../datePicker/KhDatePicker";
-import PosSelect from "../pos/PosSelect";
 import orderStatuses from "../../constants/orderStatuses";
 import { useMessageBox } from "../messageBox/MessageBoxService";
 import ItemsTable from "./ItemsTable";
+import OptionsBar from "./OptionsBar";
 //#endregion
 
 //#region STYLES
@@ -52,14 +51,6 @@ const useStyles = makeStyles((theme) => ({
   },
   unselectable: {
     userSelect: "none",
-  },
-  optionsBar: {
-    position: "relative",
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "16px 0",
   },
   formControl: {
     margin: theme.spacing(1),
@@ -327,26 +318,16 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   //#endregion
 
   //#region JSX
-  
-
-
-
   return (
     <React.Fragment>
       <div className={classes.root}>
-        <div className={classes.optionsBar}>
-          <KhDatePicker
-            value={moment(orderDate).valueOf()}
-            onChange={handleDateChange}
-            style={{ margin: 5 }}
-          />
-
-          <PosSelect
-            style={{ margin: 5 }}
-            onChange={handlePosChange}
-            value={pos}
-          />
-        </div>
+        
+        <OptionsBar 
+          orderDate={orderDate}
+          pos={pos}
+          handleDateChange={handleDateChange}
+          handlePosChange={handlePosChange}
+        />
 
         {(order && pos) && (
           <ItemsTable 
@@ -359,13 +340,13 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
           />
         )}
 
-        {pos ? null : (
+        {!pos && (
           <Typography variant="h5" className={classes.actionHint}>
             оберіть точку продажу
           </Typography>
         )}
 
-        {!(pos && !order && !error) ? null : (
+        {(pos && !order && !error) && (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <CircularProgress style={{ margin: "30px auto" }} />
           </div>
