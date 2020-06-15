@@ -2,6 +2,7 @@
 import React from "react";
 import { Prompt } from "react-router-dom";
 import { connect } from "react-redux";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   TextField,
@@ -38,6 +39,8 @@ import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
 import orderStatuses from "../../constants/orderStatuses";
 import { useMessageBox } from "../messageBox/MessageBoxService";
+import DiffBadge from "./DiffBadge";
+import { orderManagementRoutes } from "../../constants/routes";
 //#endregion
 
 //#region STYLES
@@ -155,6 +158,8 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const classes = useStyles();
   const theme = useTheme();
   const messageBox = useMessageBox();
+  const history = useHistory();
+  const { url } = useRouteMatch();
 
   //#region STATE
   const [orderDate, setOrderDate] = React.useState(
@@ -490,6 +495,17 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
                   >
                     <td>{item.goodName}</td>
                     <td className={classes.textAlignRight}>
+                      {Boolean(item.history && item.history.length) && (
+                        <DiffBadge
+                          {..._.last(item.history)}
+                          onClick={() => {
+                            history.push(
+                              `${url}/${orderManagementRoutes.itemLog}`,
+                              item
+                            );
+                          }}
+                        />
+                      )}
                       {item.count}
                       <Typography
                         variant="caption"
