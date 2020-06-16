@@ -1,46 +1,27 @@
 //#region IMPORTS
 import React from "react";
-import { Prompt } from "react-router-dom";
+import routes, { orderManagementRoutes } from "../../constants/routes";
+import { Switch, Route, Prompt, useRouteMatch } from "react-router-dom";
 import { connect } from "react-redux";
-import { useHistory, useRouteMatch } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import {
-  TextField,
-  Fab,
-  Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
-  Button,
-  CircularProgress,
-  FormControlLabel,
-  Checkbox,
-  Divider,
-  Paper,
-  Menu,
-  Box,
-  Snackbar,
-  SnackbarContent,
-  MenuItem,
-  InputAdornment,
-} from "@material-ui/core";
-import { Check, MoreVert, ArrowDropDown, Search } from "@material-ui/icons";
+import { makeStyles } from "@material-ui/core/styles";
+import { Typography, CircularProgress } from "@material-ui/core";
 import moment from "moment";
 import _ from "lodash";
-import classNames from "classnames";
 import {
   thunkApiGetDay,
   thunkApiPatchDay,
   thunkChangeDayStatus,
 } from "./orderManagementSlice";
-import PrintView from "./PrintView";
-import KhDatePicker from "../datePicker/KhDatePicker";
-import PosSelect from "../pos/PosSelect";
 import orderStatuses from "../../constants/orderStatuses";
 import { useMessageBox } from "../messageBox/MessageBoxService";
-import DiffBadge from "./DiffBadge";
-import { orderManagementRoutes } from "../../constants/routes";
+import ItemsTable from "./ItemsTable";
+import OptionsBar from "./OptionsBar";
+import Fabs from "./Fabs";
+import OrderMenu from "./Menu";
+import QuantityDialog from "./QuantityDialog";
+import ErrorToast from "./ErrorToast";
+import ItemLog from "./ItemLog";
+import OrderSummary from "./OrderSummary";
 //#endregion
 
 //#region STYLES
@@ -55,18 +36,6 @@ const useStyles = makeStyles((theme) => ({
   unselectable: {
     userSelect: "none",
   },
-  list: {
-    maxWidth: 800,
-    margin: "0 auto",
-  },
-  optionsBar: {
-    position: "relative",
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "16px 0",
-  },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 140,
@@ -76,90 +45,14 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(6),
     color: theme.palette.text.hint,
   },
-  cellHint: {
-    color: theme.palette.text.hint,
-    marginLeft: 10,
-  },
-  itemsTable: {
-    WebkitTapHighlightColor: "transparent",
-    display: "table",
-    width: "100%",
-    borderSpacing: 0,
-    cursor: "pointer",
-    tableLayout: "auto",
-    "& th": {
-      position: "sticky",
-      top: 0,
-      zIndex: 2,
-      textAlign: "left",
-      borderColor: theme.palette.divider,
-      borderStyle: "solid",
-      borderWidth: "0 0 1px 0",
-      backgroundColor: theme.palette.background.paper,
-    },
-    "& td": {
-      padding: theme.spacing(2),
-      borderColor: theme.palette.divider,
-      borderStyle: "solid",
-      borderWidth: "0 0 1px 0",
-    },
-    "& tr": {
-      transition: "background-color 100ms linear",
-      "&:nth-child(even)": {
-        backgroundColor: theme.palette.background.default,
-      },
-      "&:nth-child(odd)": {
-        backgroundColor: theme.palette.background.paper,
-      },
-      "&:active": {
-        transition: "background-color 0ms linear",
-        backgroundColor: theme.palette.action.focus,
-      },
-    },
-  },
-  textAlignRight: {
-    textAlign: "right !important",
-  },
-  itemsMenuContainer: {
-    "& label": {
-      userSelect: "none",
-      display: "block",
-      margin: "0 15px 0 5px",
-      transition: "background-color 100ms linear",
-    },
-    "& label:active": {
-      transition: "background-color 0ms linear",
-      backgroundColor: theme.palette.action.focus,
-    },
-  },
-  sortIconInvisible: {
-    transition: "transform 0ms linear",
-    transform: "rotate(-90deg)",
-    opacity: 0,
-  },
-  sortIconAsc: {
-    opacity: 1,
-    transition: "transform 100ms linear",
-    transform: "rotate(0deg)",
-  },
-  sortIconDsc: {
-    opacity: 1,
-    transition: "transform 100ms linear",
-    transform: "rotate(-180deg)",
-  },
-  fab: {
-    margin: 5,
-  },
 }));
 
 //#endregion
 
 function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const classes = useStyles();
-  const theme = useTheme();
+  const { path } = useRouteMatch();
   const messageBox = useMessageBox();
-  const history = useHistory();
-  const { url } = useRouteMatch();
 
   //#region STATE
   const [orderDate, setOrderDate] = React.useState(
@@ -174,7 +67,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const [anchorItemsMenu, setAnchorItemsMenu] = React.useState(null);
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
-  const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   const [userMadeChanges, setUserMadeChanges] = React.useState(false);
   const [showErrorToast, setShowErrorToast] = React.useState(false);
   const [searchString, setSearchString] = React.useState("");
@@ -347,9 +239,9 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
     }
   };
 
-  const handleShowSummaryClick = () => {
-    setShowOrderSummary(true);
-  };
+  // const handleShowSummaryClick = () => {
+  //   history.push(`${url}/${orderManagementRoutes.summary}`);
+  // };
 
   const handleItemQuantityChange = (quantity) => {
     setSelectedItem({
@@ -367,7 +259,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
         .filter((i) => i.count && i.oldCount !== i.count)
         .map((i) => ({ goodID: i.goodID, count: i.count }))
     );
-    setShowOrderSummary(false);
   };
 
   const handleChangeOrderStatus = (status) => {
@@ -390,355 +281,95 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   //#endregion
 
   //#region JSX
-  const generateTableHeader = (columnName, justifyContent, content) => {
-    return (
-      <Box
-        display="flex"
-        alignItems="center"
-        bgcolor="transparent"
-        padding={2}
-        justifyContent={justifyContent}
-      >
-        <span
-          onClick={() => {
-            handleTableSort(columnName);
-          }}
-        >
-          {content}
-        </span>
-        <ArrowDropDown
-          className={classNames({
-            [classes.sortIconInvisible]: true,
-            [classes.sortIconAsc]:
-              tableSorting &&
-              tableSorting.column === columnName &&
-              tableSorting.order === "ASC",
-            [classes.sortIconDsc]:
-              tableSorting &&
-              tableSorting.column === columnName &&
-              tableSorting.order === "DSC",
-          })}
-        />
-        {columnName === "goodName" && (
-          <TextField
-            className={classes.margin}
-            type="search"
-            onChange={(e) => {
-              searchHandler(e.target.value);
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="disabled" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
-      </Box>
-    );
-  };
-
-  const calcCountCoumnHederFromOrderStatus = () => {
-    switch (order.status) {
-      case orderStatuses.OPENED:
-        return "Замовити";
-      case orderStatuses.CLOSED:
-        return "Замовлено";
-      default:
-        return "Прийнято";
-    }
-  };
-
   return (
-    <React.Fragment>
-      <div className={classes.root}>
-        <div className={classes.optionsBar}>
-          <KhDatePicker
-            value={moment(orderDate).valueOf()}
-            onChange={handleDateChange}
-            style={{ margin: 5 }}
-          />
-
-          <PosSelect
-            style={{ margin: 5 }}
-            onChange={handlePosChange}
-            value={pos}
-          />
-        </div>
-
-        {!(order && pos) ? null : (
-          <Paper className={classes.list}>
-            <table
-              className={classNames(classes.itemsTable, classes.unselectable)}
-            >
-              <tbody>
-                <tr>
-                  <th>
-                    {generateTableHeader("goodName", "flex-start", "Товари")}
-                  </th>
-                  <th>
-                    {generateTableHeader(
-                      "count",
-                      "flex-end",
-                      calcCountCoumnHederFromOrderStatus()
-                    )}
-                  </th>
-                </tr>
-
-                {itemsView.map((item, i) => (
-                  <tr
-                    key={i}
-                    onClick={() => {
-                      handleItemClick(item);
-                    }}
-                  >
-                    <td>{item.goodName}</td>
-                    <td className={classes.textAlignRight}>
-                      {Boolean(item.history && item.history.length) && (
-                        <DiffBadge
-                          {..._.last(item.history)}
-                          onClick={() => {
-                            history.push(
-                              `${url}/${orderManagementRoutes.itemLog}`,
-                              item
-                            );
-                          }}
-                        />
-                      )}
-                      {item.count}
-                      <Typography
-                        variant="caption"
-                        className={classes.cellHint}
-                      >
-                        {item.units}
-                      </Typography>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Paper>
-        )}
-
-        {pos ? null : (
-          <Typography variant="h5" className={classes.actionHint}>
-            оберіть точку продажу
-          </Typography>
-        )}
-
-        {!(pos && !order && !error) ? null : (
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <CircularProgress style={{ margin: "30px auto" }} />
-          </div>
-        )}
-      </div>
-
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        position="fixed"
-        bottom={theme.spacing(4)}
-        right={theme.spacing(4)}
-      >
-        {!Object.keys(categoriesMenu).length ? null : (
-          <Fab
-            color="default"
-            onClick={handleItemsMenuButtonClick}
-            size="small"
-            className={classes.fab}
-          >
-            <MoreVert />
-          </Fab>
-        )}
-        {!userMadeChanges ? null : (
-          <Fab
-            color="primary"
-            onClick={handleShowSummaryClick}
-            className={classes.fab}
-          >
-            <Check />
-          </Fab>
-        )}
-      </Box>
-
-      <Menu
-        className={classes.itemsMenuContainer}
-        anchorEl={anchorItemsMenu}
-        keepMounted
-        open={Boolean(anchorItemsMenu)}
-        onClose={handleItemsMenuClose}
-        disableAutoFocusItem
-        variant="menu"
-      >
-        <MenuItem disabled>Змінити статус:</MenuItem>
-
-        {order &&
-          order.avaliableActions.map((a, i) => (
-            <MenuItem
-              key={i}
-              onClick={() => {
-                handleChangeOrderStatus(a.id);
-              }}
-            >
-              {a.name}
-            </MenuItem>
-          ))}
-
-        <Divider />
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={showZeros}
-              onChange={(e) => {
-                setShowZeros(e.target.checked);
-              }}
-              color="primary"
+    <Switch>
+      <Route exact path={`${path}/${orderManagementRoutes.itemLog}`}>
+        <ItemLog />
+      </Route>
+      <Route exact path={`${path}/${orderManagementRoutes.summary}`}>
+        <OrderSummary
+          pos={pos}
+          items={items}
+          orderDate={orderDate}
+          handleSaveDayClick={handleSaveDayClick}
+        />
+      </Route>
+      <Route path={`${path}`}>
+        <React.Fragment>
+          <div className={classes.root}>
+            <OptionsBar
+              orderDate={orderDate}
+              pos={pos}
+              handleDateChange={handleDateChange}
+              handlePosChange={handlePosChange}
             />
-          }
-          label="Показати '0'"
-        />
 
-        <Divider />
-
-        {Object.keys(categoriesMenu).map((k, i) => (
-          <FormControlLabel
-            key={i}
-            control={
-              <Checkbox
-                checked={categoriesMenu[k]}
-                onChange={(e) => {
-                  handelCategoryCheck(k, e.target.checked);
-                }}
-                color="primary"
+            {order && pos && (
+              <ItemsTable
+                orderStatus={order.status}
+                handleSort={handleTableSort}
+                handleSearch={searchHandler}
+                sorting={tableSorting}
+                items={itemsView}
+                handleItemClick={handleItemClick}
               />
-            }
-            label={k}
-          />
-        ))}
-      </Menu>
+            )}
 
-      <Dialog
-        open={showQuantityDialog}
-        onClose={() => {
-          handleQuantityDialogClose(false);
-        }}
-        aria-labelledby="order-quantity-dialog"
-      >
-        {order && selectedItem ? (
-          <React.Fragment>
-            <DialogTitle id="order-quantity-dialog">
-              {selectedItem.goodName}
-            </DialogTitle>
-            <DialogContent>
-              <Box display="flex" justifyContent="center">
-                <TextField
-                  type="number"
-                  variant="outlined"
-                  value={selectedItem.count}
-                  inputProps={{ min: 0 }}
-                  onChange={(e) => {
-                    handleItemQuantityChange(+e.target.value);
-                  }}
-                  autoFocus
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleQuantityDialogClose(true);
-                    }
-                  }}
-                  onFocus={(e) => {
-                    e.target.select();
-                  }}
-                />
-              </Box>
-            </DialogContent>
-          </React.Fragment>
-        ) : null}
+            {!pos && (
+              <Typography variant="h5" className={classes.actionHint}>
+                оберіть точку продажу
+              </Typography>
+            )}
 
-        <DialogActions>
-          <Button
-            onClick={() => {
-              handleQuantityDialogClose(false);
-            }}
-            color="secondary"
-          >
-            Ні
-          </Button>
-          <Button
-            onClick={() => {
-              handleQuantityDialogClose(true);
-            }}
-            color="primary"
-          >
-            Так
-          </Button>
-        </DialogActions>
-      </Dialog>
+            {pos && !order && !error && (
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress style={{ margin: "30px auto" }} />
+              </div>
+            )}
+          </div>
 
-      {order && pos ? (
-        <Dialog
-          fullScreen
-          open={showOrderSummary}
-          onClose={() => {
-            setShowOrderSummary(false);
-          }}
-        >
-          <PrintView
-            items={items}
-            orderDate={moment(orderDate).format("DD.MM.YYYY")}
-            pos={pos.posIDName}
+          <Fabs
+            categoriesMenu={categoriesMenu}
+            userMadeChanges={userMadeChanges}
+            handleItemsMenuButtonClick={handleItemsMenuButtonClick}
           />
 
-          {order.status === "closed" ? null : (
-            <Box
-              display="flex"
-              justifyContent="center"
-              displayPrint="none"
-              margin="0 0 30px 0"
-            >
-              <Button
-                onClick={() => {
-                  setShowOrderSummary(false);
-                }}
-                color="secondary"
-              >
-                Назад
-              </Button>
-              <Button onClick={handleSaveDayClick} color="primary">
-                Зберегти
-              </Button>
-            </Box>
-          )}
-        </Dialog>
-      ) : null}
+          <OrderMenu
+            order={order}
+            showZeros={showZeros}
+            setShowZeros={setShowZeros}
+            categoriesMenu={categoriesMenu}
+            anchorItemsMenu={anchorItemsMenu}
+            handelCategoryCheck={handelCategoryCheck}
+            handleItemsMenuClose={handleItemsMenuClose}
+            handleChangeOrderStatus={handleChangeOrderStatus}
+          />
 
-      <Prompt
-        when={userMadeChanges}
-        message={() => "Впевнені що не бажаєте зберегти замовлення?"}
-      />
+          <QuantityDialog
+            order={order}
+            selectedItem={selectedItem}
+            showQuantityDialog={showQuantityDialog}
+            handleItemQuantityChange={handleItemQuantityChange}
+            handleQuantityDialogClose={handleQuantityDialogClose}
+          />
 
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        open={showErrorToast}
-        onClose={() => {
-          setShowErrorToast(false);
-        }}
-      >
-        <SnackbarContent
-          style={{
-            backgroundColor: theme.palette.error.main,
-            textAlign: "center",
-          }}
-          message={<Typography id="client-snackbar">{error}</Typography>}
-        />
-      </Snackbar>
-    </React.Fragment>
+          <ErrorToast
+            error={error}
+            showErrorToast={showErrorToast}
+            setShowErrorToast={setShowErrorToast}
+          />
+
+          <Prompt
+            message={(params) => {
+              return userMadeChanges &&
+                !params.pathname.includes(routes.orderManagement)
+                ? "Впевнені що не бажаєте зберегти замовлення?"
+                : true;
+            }}
+          />
+        </React.Fragment>
+      </Route>
+    </Switch>
   );
   //#endregion
 }

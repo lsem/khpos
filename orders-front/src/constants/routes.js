@@ -4,5 +4,6 @@ export default Object.freeze({
 });
 
 export const orderManagementRoutes = Object.freeze({
-  itemLog: "item-history"
+  itemLog: "item-history",
+  summary: "order-summary"
 })
