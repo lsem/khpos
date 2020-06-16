@@ -1,13 +1,7 @@
 //#region IMPORTS
 import React from "react";
 import routes, { orderManagementRoutes } from "../../constants/routes";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Prompt,
-  useRouteMatch,
-} from "react-router-dom";
+import { Switch, Route, Prompt, useRouteMatch } from "react-router-dom";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, CircularProgress } from "@material-ui/core";
@@ -288,97 +282,94 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
   //#region JSX
   return (
-    <Router>
-      <Switch>
-        <Route path={`${path}`} exact>
-          <React.Fragment>
-            <div className={classes.root}>
-              <OptionsBar
-                orderDate={orderDate}
-                pos={pos}
-                handleDateChange={handleDateChange}
-                handlePosChange={handlePosChange}
+    <Switch>
+      <Route exact path={`${path}/${orderManagementRoutes.itemLog}`}>
+        <ItemLog />
+      </Route>
+      <Route exact path={`${path}/${orderManagementRoutes.summary}`}>
+        <OrderSummary
+          pos={pos}
+          items={items}
+          orderDate={orderDate}
+          handleSaveDayClick={handleSaveDayClick}
+        />
+      </Route>
+      <Route path={`${path}`}>
+        <React.Fragment>
+          <div className={classes.root}>
+            <OptionsBar
+              orderDate={orderDate}
+              pos={pos}
+              handleDateChange={handleDateChange}
+              handlePosChange={handlePosChange}
+            />
+
+            {order && pos && (
+              <ItemsTable
+                orderStatus={order.status}
+                handleSort={handleTableSort}
+                handleSearch={searchHandler}
+                sorting={tableSorting}
+                items={itemsView}
+                handleItemClick={handleItemClick}
               />
+            )}
 
-              {order && pos && (
-                <ItemsTable
-                  orderStatus={order.status}
-                  handleSort={handleTableSort}
-                  handleSearch={searchHandler}
-                  sorting={tableSorting}
-                  items={itemsView}
-                  handleItemClick={handleItemClick}
-                />
-              )}
+            {!pos && (
+              <Typography variant="h5" className={classes.actionHint}>
+                оберіть точку продажу
+              </Typography>
+            )}
 
-              {!pos && (
-                <Typography variant="h5" className={classes.actionHint}>
-                  оберіть точку продажу
-                </Typography>
-              )}
+            {pos && !order && !error && (
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress style={{ margin: "30px auto" }} />
+              </div>
+            )}
+          </div>
 
-              {pos && !order && !error && (
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <CircularProgress style={{ margin: "30px auto" }} />
-                </div>
-              )}
-            </div>
-
-            <Fabs
-              categoriesMenu={categoriesMenu}
-              userMadeChanges={userMadeChanges}
-              handleItemsMenuButtonClick={handleItemsMenuButtonClick}
-            />
-
-            <OrderMenu
-              order={order}
-              showZeros={showZeros}
-              setShowZeros={setShowZeros}
-              categoriesMenu={categoriesMenu}
-              anchorItemsMenu={anchorItemsMenu}
-              handelCategoryCheck={handelCategoryCheck}
-              handleItemsMenuClose={handleItemsMenuClose}
-              handleChangeOrderStatus={handleChangeOrderStatus}
-            />
-
-            <QuantityDialog
-              order={order}
-              selectedItem={selectedItem}
-              showQuantityDialog={showQuantityDialog}
-              handleItemQuantityChange={handleItemQuantityChange}
-              handleQuantityDialogClose={handleQuantityDialogClose}
-            />
-
-            <Prompt
-              message={(params) => {
-                console.log(params.pathname);
-                return userMadeChanges &&
-                  !params.pathname.includes(routes.orderManagement)
-                  ? "Впевнені що не бажаєте зберегти замовлення?"
-                  : true;
-              }}
-            />
-
-            <ErrorToast
-              error={error}
-              showErrorToast={showErrorToast}
-              setShowErrorToast={setShowErrorToast}
-            />
-          </React.Fragment>
-        </Route>
-        <Route path={`${path}/${orderManagementRoutes.itemLog}`} exact>
-          <ItemLog />
-        </Route>
-        <Route path={`${path}/${orderManagementRoutes.summary}`} exact>
-          <OrderSummary
-            pos={pos}
-            items={items}
-            orderDate={orderDate}
-            handleSaveDayClick={handleSaveDayClick}
+          <Fabs
+            categoriesMenu={categoriesMenu}
+            userMadeChanges={userMadeChanges}
+            handleItemsMenuButtonClick={handleItemsMenuButtonClick}
           />
-        </Route>
-      </Switch>
-    </Router>
+
+          <OrderMenu
+            order={order}
+            showZeros={showZeros}
+            setShowZeros={setShowZeros}
+            categoriesMenu={categoriesMenu}
+            anchorItemsMenu={anchorItemsMenu}
+            handelCategoryCheck={handelCategoryCheck}
+            handleItemsMenuClose={handleItemsMenuClose}
+            handleChangeOrderStatus={handleChangeOrderStatus}
+          />
+
+          <QuantityDialog
+            order={order}
+            selectedItem={selectedItem}
+            showQuantityDialog={showQuantityDialog}
+            handleItemQuantityChange={handleItemQuantityChange}
+            handleQuantityDialogClose={handleQuantityDialogClose}
+          />
+
+          <ErrorToast
+            error={error}
+            showErrorToast={showErrorToast}
+            setShowErrorToast={setShowErrorToast}
+          />
+
+          <Prompt
+            message={(params) => {
+              return userMadeChanges &&
+                !params.pathname.includes(routes.orderManagement)
+                ? "Впевнені що не бажаєте зберегти замовлення?"
+                : true;
+            }}
+          />
+        </React.Fragment>
+      </Route>
+    </Switch>
   );
   //#endregion
 }

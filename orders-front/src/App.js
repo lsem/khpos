@@ -2,12 +2,7 @@ import React from "react";
 //import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from "react-router-dom";
+import { Switch, Route, Redirect } from "react-router-dom";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
 import OrderManagement from "./features/orderManagement/OrderManagement";
@@ -38,46 +33,40 @@ function App() {
   const [showMenuDrawer, setShowMenuDrawer] = React.useState(false);
 
   return (
-    <Router>
-      <MessageBoxServiceProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <header id="header">
-            <ApplicationBar
-              openMenuDrawer={() => {
-                setShowMenuDrawer(true);
+    <MessageBoxServiceProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <header id="header">
+          <ApplicationBar
+            openMenuDrawer={() => {
+              setShowMenuDrawer(true);
+            }}
+          />
+        </header>
+        <main id="main">
+          <nav id="main-menu">
+            <AppMainMenu
+              showDrawer={showMenuDrawer}
+              closeDrawer={() => {
+                setShowMenuDrawer(false);
               }}
             />
-          </header>
-          <main id="main">
-            <nav id="main-menu">
-              <AppMainMenu
-                showDrawer={showMenuDrawer}
-                closeDrawer={() => {
-                  setShowMenuDrawer(false);
-                }}
-              />
-            </nav>
-            <section id="main-content">
-              <Switch>
-                <Redirect
-                  from="/"
-                  to={`/${routeConsts.orderManagement}`}
-                  exact
-                />
-                <Route path={`/${routeConsts.orderManagement}`}>
-                  <OrderManagement />
-                </Route>
-                <Route path={`/${routeConsts.orderProduction}`}>
-                  <OrderProduction />
-                </Route>
-              </Switch>
-            </section>
-          </main>
-          <footer id="footer"></footer>
-        </ThemeProvider>
-      </MessageBoxServiceProvider>
-    </Router>
+          </nav>
+          <section id="main-content">
+            <Switch>
+              <Route path={`/${routeConsts.orderManagement}`}>
+                <OrderManagement />
+              </Route>
+              <Route path={`/${routeConsts.orderProduction}`}>
+                <OrderProduction />
+              </Route>
+              <Redirect exact from="/" to={`/${routeConsts.orderManagement}`} />
+            </Switch>
+          </section>
+        </main>
+        <footer id="footer"></footer>
+      </ThemeProvider>
+    </MessageBoxServiceProvider>
   );
 }
 
