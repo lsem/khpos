@@ -239,10 +239,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
     }
   };
 
-  // const handleShowSummaryClick = () => {
-  //   history.push(`${url}/${orderManagementRoutes.summary}`);
-  // };
-
   const handleItemQuantityChange = (quantity) => {
     setSelectedItem({
       ...selectedItem,
