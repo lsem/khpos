@@ -39,8 +39,8 @@ function ItemDetails() {
           </tr>
         </thead>
         <tbody>
-          {item.details.map((d) => (
-            <tr>
+          {item.details.map((d, i) => (
+            <tr key={i}>
               <td>{d.posIDName}</td>
               <td>
                 {d.count} {item.units}
