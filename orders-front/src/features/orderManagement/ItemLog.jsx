@@ -1,7 +1,7 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
 import moment from "moment";
 import itemLogColumnNames from "../../constants/itemLogColumnNames";
 import ItemLogActionKinds from "../../constants/ItemLogActionKinds";
@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     paddingTop: theme.spacing(2),
     "&>*": {
-      marginTop: theme.spacing(1),
+      marginTop: theme.spacing(2),
     },
     "&>table": {
       backgroundColor: theme.palette.background.paper,
@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 function ItemLog() {
   const classes = useStyles();
   const location = useLocation();
+  const history = useHistory();
   const item = location.state;
 
   const numToStr = (num) => {
@@ -45,8 +46,8 @@ function ItemLog() {
 
   return (
     <div className={classes.root}>
-      <Typography variant="h6">Історія замовлення "{item.goodName}"</Typography>
       <Typography variant="h6">
+        Історія замовлення "{item.goodName}"{" "}
         {moment(item.history[0].whenTS).format("DD.MM.YYYY")}
       </Typography>
 
@@ -72,6 +73,16 @@ function ItemLog() {
           ))}
         </tbody>
       </table>
+
+      <Button
+        variant="outlined"
+        onClick={() => {
+          history.goBack();
+        }}
+        color="secondary"
+      >
+        Назад
+      </Button>
     </div>
   );
 }
