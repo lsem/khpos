@@ -109,7 +109,11 @@ export const thunkApiPatchDay = (date, posId, items) => async (dispatch) => {
     );
     dispatch(thunkApiGetDay(date, posId));
   } catch (e) {
-    setOrderError(`Не вдалося зберегти замовлення: ${await e.response.text()}`);
+    dispatch(
+      setOrderError(
+        `Не вдалося зберегти замовлення: ${await e.response.text()}`
+      )
+    );
   }
 };
 
