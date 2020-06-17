@@ -61,8 +61,8 @@ function ItemLog() {
           </tr>
         </thead>
         <tbody>
-          {item.history.map((a) => (
-            <tr>
+          {item.history.map((a, i) => (
+            <tr key={i}>
               <td>{ItemLogActionKinds[a.kind]}</td>
               <td>{a.count}</td>
               <td>{numToStr(a.diff)}</td>
