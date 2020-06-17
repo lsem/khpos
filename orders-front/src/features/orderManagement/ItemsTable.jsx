@@ -1,5 +1,4 @@
 import React from "react";
-import _ from "lodash";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import classNames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
@@ -10,11 +9,10 @@ import {
   Box,
   InputAdornment,
 } from "@material-ui/core";
-import { ArrowDropDown, Search } from "@material-ui/icons";
+import { ArrowDropDown, Search, History } from "@material-ui/icons";
 
 import orderStatuses from "../../constants/orderStatuses";
 import { orderManagementRoutes } from "../../constants/routes";
-import DiffBadge from "./DiffBadge";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,6 +41,10 @@ const useStyles = makeStyles((theme) => ({
       borderColor: theme.palette.divider,
       borderStyle: "solid",
       borderWidth: "0 0 1px 0",
+      "&>svg": {
+        verticalAlign: "middle",
+        margin: "-3px 10px 0 0",
+      },
     },
     "& tr": {
       transition: "background-color 100ms linear",
@@ -177,10 +179,11 @@ export default function ItemsTable({
             >
               <td>{item.goodName}</td>
               <td className={classes.textAlignRight}>
-                {Boolean(item.history && item.history.length) && (
-                  <DiffBadge
-                    {..._.last(item.history)}
-                    onClick={() => {
+                {!!item.history.length && (
+                  <History
+                    color="disabled"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       history.push(
                         `${url}/${orderManagementRoutes.itemLog}`,
                         item
