@@ -60,6 +60,12 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
+  aster: {
+    display: "inline-block",
+    verticalAlign: "top",
+    marginTop: "-.5em",
+    marginBottom: ".5em",
+  },
   textAlignRight: {
     textAlign: "right !important",
   },
@@ -192,6 +198,9 @@ export default function ItemsTable({
                   />
                 )}
                 {item.count}
+                {item.status !== "Default" && (
+                  <span className={classes.aster}>*</span>
+                )}
                 <Typography variant="caption" className={classes.cellHint}>
                   {item.units}
                 </Typography>
