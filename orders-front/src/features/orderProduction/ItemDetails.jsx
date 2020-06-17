@@ -1,5 +1,7 @@
 import React from "react";
+import { useLocation, useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,8 +22,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ItemDetails({ item }) {
+function ItemDetails() {
   const classes = useStyles();
+  const location = useLocation();
+  const history = useHistory();
+  const item = location.state;
 
   return (
     <div className={classes.root}>
@@ -44,6 +49,16 @@ function ItemDetails({ item }) {
           ))}
         </tbody>
       </table>
+
+      <Button
+        variant="outlined"
+        onClick={() => {
+          history.goBack();
+        }}
+        color="secondary"
+      >
+        Назад
+      </Button>
     </div>
   );
 }
