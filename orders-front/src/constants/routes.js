@@ -1,6 +1,7 @@
 export default Object.freeze({
   orderManagement: "order-management",
   orderProduction: "order-production",
+  login: "login",
 });
 
 export const orderManagementRoutes = Object.freeze({
