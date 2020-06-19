@@ -10,7 +10,8 @@ import OrderProduction from "./features/orderProduction/OrderProduction";
 import AppMainMenu from "./features/appMainMenu/AppMainMenu";
 import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxService";
 import routeConsts from "./constants/routes";
-import Login from './features/auth/Login';
+import Login from "./features/auth/Login";
+import ErrorToast from "./features/errors/ErrorToast";
 
 function App() {
   //const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -69,6 +70,7 @@ function App() {
           </section>
         </main>
         <footer id="footer"></footer>
+        <ErrorToast />
       </ThemeProvider>
     </MessageBoxServiceProvider>
   );

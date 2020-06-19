@@ -19,7 +19,6 @@ import OptionsBar from "./OptionsBar";
 import Fabs from "./Fabs";
 import OrderMenu from "./Menu";
 import QuantityDialog from "./QuantityDialog";
-import ErrorToast from "./ErrorToast";
 import ItemLog from "./ItemLog";
 import OrderSummary from "./OrderSummary";
 //#endregion
@@ -68,7 +67,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const [showZeros, setShowZeros] = React.useState(true);
   const [tableSorting, setTableSorting] = React.useState(null);
   const [userMadeChanges, setUserMadeChanges] = React.useState(false);
-  const [showErrorToast, setShowErrorToast] = React.useState(false);
   const [searchString, setSearchString] = React.useState("");
   //#endregion
 
@@ -140,10 +138,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
       return object;
     });
   }, [items, showZeros]);
-
-  React.useEffect(() => {
-    error && setShowErrorToast(true);
-  }, [error]);
   //#endregion
 
   //#region UI HANDLERS
@@ -349,12 +343,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
             handleQuantityDialogClose={handleQuantityDialogClose}
           />
 
-          <ErrorToast
-            error={error}
-            showErrorToast={showErrorToast}
-            setShowErrorToast={setShowErrorToast}
-          />
-
           <Prompt
             message={(params) => {
               return userMadeChanges &&
@@ -372,7 +360,6 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
 const mapStateToProps = (state) => ({
   order: state.orderManagement.order,
-  error: state.orderManagement.errorMessage,
 });
 
 const mapDispatchToProps = (dispatch) => ({

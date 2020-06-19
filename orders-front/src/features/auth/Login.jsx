@@ -4,7 +4,6 @@ import { MailOutline, Lock } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { thunkApiLogin } from "./authSlice";
-import ErrorToast from "./../orderManagement/ErrorToast";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,16 +32,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login({
-  loggedIn, error, apiLogin
-}) {
+function Login({ loggedIn, apiLogin }) {
   const classes = useStyles();
 
   const [email, setEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
   const [emailIsValid, setEmailIsValid] = React.useState(true);
   const [passIsValid, setPassIsValid] = React.useState(true);
-  const [showErrorToast, setShowErrorToast] = React.useState(false);
 
   const validateEmail = (str) => {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -57,10 +53,6 @@ function Login({
     e.preventDefault();
     apiLogin(email, pass);
   };
-
-  React.useEffect(() => {
-    error && setShowErrorToast(true);
-  }, [error])
 
   return (
     <>
@@ -115,14 +107,12 @@ function Login({
           </Button>
         </form>
       </div>
-      <ErrorToast showErrorToast={showErrorToast} setShowErrorToast={setShowErrorToast} error={error}/>
     </>
   );
 }
 
 const mapStateToProps = (state) => ({
   loggedIn: state.auth.authenticated,
-  error: state.auth.errorMessage,
 });
 
 const mapDispatchToProps = (dispatch) => ({
