@@ -10,6 +10,7 @@ import OrderProduction from "./features/orderProduction/OrderProduction";
 import AppMainMenu from "./features/appMainMenu/AppMainMenu";
 import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxService";
 import routeConsts from "./constants/routes";
+import Login from './features/auth/Login';
 
 function App() {
   //const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -54,6 +55,9 @@ function App() {
           </nav>
           <section id="main-content">
             <Switch>
+              <Route path={`/${routeConsts.login}`}>
+                <Login />
+              </Route>
               <Route path={`/${routeConsts.orderManagement}`}>
                 <OrderManagement />
               </Route>
