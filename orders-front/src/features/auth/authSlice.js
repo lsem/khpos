@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import api from "../../api";
+import { setError } from "../errors/errorSlice";
 
 export const authSlice = createSlice({
   name: "auth",
   initialState: {
     token: null,
     authenticated: false,
-    errorMessage: null,
   },
   reducers: {
     apiLogin: () => {},
@@ -15,18 +15,12 @@ export const authSlice = createSlice({
     setAuth: (state, action) => {
       state.authenticated = action.payload.authenticated;
       state.token = action.payload.token;
-      state.errorMessage = null;
-    },
-    setAuthError: (state, action) => {
-      state.authenticated = false;
-      state.token = null;
-      state.errorMessage = action.payload;
     },
   },
 });
 
 //actions
-const { apiLogin, apiLogout, setAuth, setAuthError } = authSlice.actions;
+const { apiLogin, apiLogout, setAuth } = authSlice.actions;
 
 //thunks
 export const thunkApiLogin = (email, pass) => async (dispatch) => {
@@ -36,7 +30,7 @@ export const thunkApiLogin = (email, pass) => async (dispatch) => {
     dispatch(setAuth(await (await api.post("auth", { email, pass })).json()));
   } catch (e) {
     dispatch(
-      setAuthError(
+      setError(
         `Не вдалося автентифікуватись на сервері: ${await e.response.text()}`
       )
     );
@@ -49,7 +43,7 @@ export const thunkApiLogout = () => async (dispatch) => {
   try {
     dispatch(setAuth(await (await api.post("auth")).json()));
   } catch (e) {
-    dispatch(setAuthError(`${await e.response.text()}`));
+    dispatch(setError(`${await e.response.text()}`));
   }
 };
 

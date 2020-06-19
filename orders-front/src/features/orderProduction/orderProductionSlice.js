@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import moment from "moment";
 
+import { setError } from "../errors/errorSlice";
 //temp samples
 import orderProduction from "../../samples/orderProduction.json";
 
@@ -8,7 +9,6 @@ export const orderProductionSlice = createSlice({
   name: "orderProduction",
   initialState: {
     aggregated: null,
-    errorMessage: null,
   },
   reducers: {
     getAggregatedFromApi: (state) => {
@@ -18,18 +18,10 @@ export const orderProductionSlice = createSlice({
       state.aggregated = action.payload;
       state.errorMessage = null;
     },
-    setAggregatedError: (state, action) => {
-      state.aggregated = null;
-      state.errorMessage = action.payload;
-    },
   },
 });
 
-const {
-  getAggregatedFromApi,
-  setAggregated,
-  setAggregatedError,
-} = orderProductionSlice.actions;
+const { getAggregatedFromApi, setAggregated } = orderProductionSlice.actions;
 
 //thunks
 export const thunkGetAggregatedFromApi = (date) => (dispatch) => {
@@ -41,12 +33,10 @@ export const thunkGetAggregatedFromApi = (date) => (dispatch) => {
       const aggregated = JSON.parse(JSON.stringify(orderProduction));
       aggregated.date = moment().valueOf();
 
-      dispatch(
-        setAggregated(aggregated)
-      );
+      dispatch(setAggregated(aggregated));
     })
     .catch((e) => {
-      dispatch(setAggregatedError(`Не вдалося отримати замовлення з сервера: ${e}`));
+      dispatch(setError(`Не вдалося отримати замовлення з сервера: ${e}`));
     });
 };
 

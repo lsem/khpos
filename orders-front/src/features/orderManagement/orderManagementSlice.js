@@ -3,29 +3,19 @@ import moment from "moment";
 import api from "../../api";
 
 import orderStatuses from "../../constants/orderStatuses";
+import { setError } from "../errors/errorSlice";
 
 export const orderManagementSlice = createSlice({
   name: "orderManagement",
   initialState: {
     order: null,
-    errorMessage: null,
   },
   reducers: {
-    apiGetDay: (state) => {
-      state.errorMessage = null;
-    },
-    apiChangeDayStatus: (state) => {
-      state.errorMessage = null;
-    },
-    apiPatchDay: (state) => {
-      state.errorMessage = null;
-    },
+    apiGetDay: () => {},
+    apiChangeDayStatus: () => {},
+    apiPatchDay: () => {},
     setOrder: (state, action) => {
       state.order = action.payload;
-      state.errorMessage = null;
-    },
-    setOrderError: (state, action) => {
-      state.errorMessage = action.payload;
     },
   },
 });
@@ -36,7 +26,6 @@ const {
   apiChangeDayStatus,
   apiPatchDay,
   setOrder,
-  setOrderError,
 } = orderManagementSlice.actions;
 
 //thunks
@@ -69,7 +58,7 @@ export const thunkApiGetDay = (date, posId) => async (dispatch) => {
     }
   } catch (e) {
     dispatch(
-      setOrderError(
+      setError(
         `Не вдалося отримати замовлення з сервера: ${await e.response.text()}`
       )
     );
@@ -88,7 +77,7 @@ export const thunkChangeDayStatus = (date, posId, status) => async (
     dispatch(thunkApiGetDay(date, posId));
   } catch (e) {
     dispatch(
-      setOrderError(
+      setError(
         `Не вдалося змінити статус замовлення: ${await e.response.text()}`
       )
     );
@@ -110,9 +99,7 @@ export const thunkApiPatchDay = (date, posId, items) => async (dispatch) => {
     dispatch(thunkApiGetDay(date, posId));
   } catch (e) {
     dispatch(
-      setOrderError(
-        `Не вдалося зберегти замовлення: ${await e.response.text()}`
-      )
+      setError(`Не вдалося зберегти замовлення: ${await e.response.text()}`)
     );
   }
 };
