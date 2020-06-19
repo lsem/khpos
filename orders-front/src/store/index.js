@@ -3,6 +3,7 @@ import orderManagement from "../features/orderManagement/orderManagementSlice";
 import orderProduction from "../features/orderProduction/orderProductionSlice";
 import auth from "../features/auth/authSlice";
 import pos from "../features/pos/posSlice";
+import error from "../features/errors/errorSlice";
 
 export default configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export default configureStore({
     orderProduction,
     pos,
     auth,
+    error
   },
 });
