@@ -8,7 +8,10 @@ import {
   Button,
   useMediaQuery,
 } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
+import { Menu as MenuIcon, AccountCircle } from "@material-ui/icons";
+import { NavLink } from "react-router-dom";
+import { connect } from "react-redux";
+import routes from "../../constants/routes";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ApplicationBar({ openMenuDrawer }) {
+function ApplicationBar({ openMenuDrawer, loggedIn }) {
   const classes = useStyles();
   const theme = useTheme();
   const matchesSmall = useMediaQuery(theme.breakpoints.down("xs"));
@@ -43,8 +46,29 @@ export default function ApplicationBar({ openMenuDrawer }) {
         <Typography variant="h6" className={classes.title}>
           KH Orders
         </Typography>
-        <Button color="inherit">Login</Button>
+        {loggedIn ? (
+          <Button color="inherit" startIcon={<AccountCircle />}>
+            Вийти
+          </Button>
+        ) : (
+          <Button
+            color="inherit"
+            startIcon={<AccountCircle />}
+            component={NavLink}
+            to={`${routes.login}`}
+          >
+            Увійти
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );
 }
+
+const mapStateToProps = (state) => ({
+  loggedIn: state.auth.authenticated,
+});
+
+const mapDispatchToProps = (dispatch) => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ApplicationBar);
