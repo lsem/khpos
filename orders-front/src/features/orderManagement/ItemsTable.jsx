@@ -37,13 +37,27 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.background.paper,
     },
     "& td": {
-      padding: theme.spacing(2),
       borderColor: theme.palette.divider,
       borderStyle: "solid",
       borderWidth: "0 0 1px 0",
       "&>svg": {
         verticalAlign: "middle",
-        margin: "-3px 10px 0 0",
+        margin: 0,
+      },
+      "&:nth-child(1)": {
+        padding: theme.spacing(2),
+      },
+      "&:nth-child(2)": {
+        padding: 0,
+        width: "1%",
+        whiteSpace: "nowrap",
+        textAlign: "right",
+      },
+      "&:nth-child(3)": {
+        paddingRight: theme.spacing(2),
+        width: "1%",
+        whiteSpace: "nowrap",
+        textAlign: "right",
       },
     },
     "& tr": {
@@ -167,7 +181,7 @@ export default function ItemsTable({
         <tbody>
           <tr>
             <th>{generateTableHeader("goodName", "flex-start", "Товари")}</th>
-            <th>
+            <th colSpan={2} className={classNames.nostretch}>
               {generateTableHeader(
                 "count",
                 "flex-end",
@@ -184,7 +198,8 @@ export default function ItemsTable({
               }}
             >
               <td>{item.goodName}</td>
-              <td className={classes.textAlignRight}>
+
+              <td>
                 {!!item.history.length && (
                   <History
                     color="disabled"
@@ -197,6 +212,9 @@ export default function ItemsTable({
                     }}
                   />
                 )}
+              </td>
+
+              <td>
                 {item.count}
                 {item.status !== "Default" && (
                   <span className={classes.aster}>*</span>
