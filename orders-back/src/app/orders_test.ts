@@ -1039,7 +1039,6 @@ describe("[orders]", () => {
               userID : prodStaffCaller.ID,
               userName : "Романа"
             },
-            ,
             {
               kind : 'Change',
               count : 50,
@@ -1050,7 +1049,7 @@ describe("[orders]", () => {
             {
               kind : 'Confirm',
               count : 30,
-              diff : -20, // all confirmed
+              diff : -20, // not all confirmed
               userID : prodStaffCaller.ID,
               userName : "Романа"
             }
