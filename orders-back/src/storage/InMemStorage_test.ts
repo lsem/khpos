@@ -22,7 +22,9 @@ describe("[inmem.users]", () => {
       userIdName : 'sem',
       userFullName : 'Semen',
       telNumber : '',
-      permissions : AnyUserPermissions
+      permissions : AnyUserPermissions,
+      isActive : true,
+      passwordHash : 'somehash'
     });
 
     // lets pretedend we get this id somewhere from client
@@ -32,7 +34,9 @@ describe("[inmem.users]", () => {
       userIdName : 'sem',
       userFullName : 'Semen',
       telNumber : '',
-      permissions : AnyUserPermissions
+      permissions : AnyUserPermissions,
+      isActive : true,
+      passwordHash : 'somehash'
     });
   });
 
@@ -45,7 +49,9 @@ describe("[inmem.users]", () => {
       userIdName : 'sem',
       userFullName : 'Semen',
       telNumber : '',
-      permissions : initial
+      permissions : initial,
+      isActive : true,
+      passwordHash : 'somehash'
     });
 
     const resource = EIDFac.makePOSID();

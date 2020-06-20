@@ -56,3 +56,45 @@ export const ConfirmChangeViewModelSchema = joi.object().keys({
               }))
               .required()
 });
+
+//#region User Views
+export interface UsersViewModel {
+  items: ReadonlyArray<{
+    userID : EID; userIdName : string; userFullName : string; telNumber : string;
+    useRole : UserRoleSymbolicRepr;
+  }>
+}
+
+export type UserRoleSymbolicRepr = 'Admin'|'ProdStuff'|'ShopManager';
+
+export interface CreateUserViewModel {
+  userIdName: string;
+  userFullName: string;
+  telNumber: string;
+  role: UserRoleSymbolicRepr;
+  password: string;
+}
+
+export const CreateUserViewModelSchema = joi.object().keys({
+  userIdName : joi.string().regex(new RegExp(`^[a-zA-Z_]+[0-9]*$`)).required(),
+  userFullName : joi.string().required(),
+  telNumber : joi.string().optional(),
+  role : joi.symbol()
+             .map({
+               'ProdStuff' : Symbol('ProdStuff'),
+               'ShopManager' : Symbol('ShopManager'),
+               'Admin' : Symbol('Admin')
+             })
+             .required(),
+  password : joi.string().required()
+});
+
+export interface LoginUserViewModel {
+  userIDName: string;
+  password: string;
+}
+
+export const LoginUserViewModelSchema =
+    joi.object().keys({userIDName : joi.string().required(), password : joi.string().required()});
+
+//#endregion

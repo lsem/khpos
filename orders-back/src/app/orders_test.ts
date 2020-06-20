@@ -7,22 +7,29 @@ import {Day, EID, EIDFac} from "types/core_types";
 import {DayStatus} from "types/domain_types";
 import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 import util from 'util';
-
 import {InvalidOperationError, NotAllowedError, NotFoundError} from "./errors";
 import {createGood} from "./goods";
 import * as orders from "./orders";
 import {DayAggregate} from "./orders";
+import {TestPasswordService} from "./password_service";
 import * as pos from "./pos";
 import * as users from "./users";
 
 const AnyUserPermissions = new UserPermissions(PermissionFlags.None, []);
 
+async function createUser_nopass(storage: AbstractStorage, caller: Caller, userIDName: string,
+                                 userPermissions: UserPermissions, userFullName: string,
+                                 telNumber: string): Promise<EID> {
+  return await users.createUser(storage, new TestPasswordService(), caller, userIDName,
+                                userPermissions, '', userFullName, telNumber);
+}
+
 async function createUserAsCallerWithPermissions(storage: AbstractStorage,
                                                  permissions: UserPermissions) {
   const adminCaller =
       new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
-  return new Caller(await users.createUser(storage, adminCaller, "Наташа", permissions,
-                                           "Наталія Менеджерівна", "+380978763443"),
+  return new Caller(await createUser_nopass(storage, adminCaller, "Наташа", permissions,
+                                            "Наталія Менеджерівна", "+380978763443"),
                     permissions);
 }
 
@@ -57,13 +64,16 @@ describe("[orders]", () => {
     });
 
     // Create some user User1.
+    // todo: do not use storage for inserting data but use users API.
     const user1ID = EIDFac.makeUserID();
     storage.insertUser(user1ID, {
       userID : user1ID,
       userIdName : "nat",
       userFullName : "Наталія Панфорте",
       telNumber : "",
-      permissions : AnyUserPermissions
+      permissions : AnyUserPermissions,
+      isActive : true,
+      passwordHash : ''
     });
 
     // Create some POS where user nat works.
@@ -74,13 +84,16 @@ describe("[orders]", () => {
     });
 
     // Create another User2.
+    // todo: do not use storage for inserting data but use users API.
     const user2ID = EIDFac.makeUserID();
     storage.insertUser(user2ID, {
       userID : user2ID,
       userIdName : "nat",
       userFullName : "Зоя Маріуполь",
       telNumber : "",
-      permissions : AnyUserPermissions
+      permissions : AnyUserPermissions,
+      isActive : true,
+      passwordHash : ''
     });
 
     // Create another POS where zoya works.
@@ -157,7 +170,7 @@ describe("[orders]", () => {
 
     const natashaPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS ]);
     const NatashaCaller =
-        new Caller(await users.createUser(storage, adminCaller, "Наташа", natashaPermissions,
+        new Caller(await createUser_nopass(storage, adminCaller, "Наташа", natashaPermissions,
                                           "Наталія Менеджерівна", "+380978763443"),
                    natashaPermissions);
 
@@ -530,14 +543,14 @@ describe("[orders]", () => {
     const globalAdminCaller =
         new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
-    const shopManagerUser = await users.createUser(
+    const shopManagerUser = await createUser_nopass(
         storage, globalAdminCaller, "ShopMan",
         new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]), "Shop Manager", "911");
 
-    const staffUser = await users.createUser(storage, globalAdminCaller, "ProdStaff",
+    const staffUser = await createUser_nopass(storage, globalAdminCaller, "ProdStaff",
                                              new UserPermissions(PermissionFlags.IsProdStaff, []),
                                              "Prod Stuff", "911");
-    const adminUser = await users.createUser(storage, globalAdminCaller, "BakeryAdmin",
+    const adminUser = await createUser_nopass(storage, globalAdminCaller, "BakeryAdmin",
                                              new UserPermissions(PermissionFlags.Admin, []),
                                              "Bakery Administrator", "911");
 
@@ -733,12 +746,12 @@ describe("[orders]", () => {
 
     const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
     const shopManagerCaller =
-        new Caller(await users.createUser(storage, adminCaller, "Наташа", shopManagerPermissions,
+        new Caller(await createUser_nopass(storage, adminCaller, "Наташа", shopManagerPermissions,
                                           "Наталія Менеджерівна", "+380978763443"),
                    shopManagerPermissions);
 
     const bakeryAdminCaller =
-        new Caller(await users.createUser(storage, adminCaller, "ГалинаС",
+        new Caller(await createUser_nopass(storage, adminCaller, "ГалинаС",
                                           new UserPermissions(PermissionFlags.Admin, []),
                                           "Галина Степанівна", "+380978763441"),
                    new UserPermissions(PermissionFlags.Admin, []));
@@ -840,18 +853,18 @@ describe("[orders]", () => {
 
     const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
     const shopManagerCaller =
-        new Caller(await users.createUser(storage, adminCaller, "Наташа", shopManagerPermissions,
+        new Caller(await createUser_nopass(storage, adminCaller, "Наташа", shopManagerPermissions,
                                           "Наталія Менеджерівна", "+380978763443"),
                    shopManagerPermissions);
 
     const bakeryAdminCaller =
-        new Caller(await users.createUser(storage, adminCaller, "ГалинаС",
+        new Caller(await createUser_nopass(storage, adminCaller, "ГалинаС",
                                           new UserPermissions(PermissionFlags.Admin, []),
                                           "Галина Степанівна", "+380978763441"),
                    new UserPermissions(PermissionFlags.Admin, []));
 
     const prodStaffCaller =
-        new Caller(await users.createUser(storage, adminCaller, "Романа",
+        new Caller(await createUser_nopass(storage, adminCaller, "Романа",
                                           new UserPermissions(PermissionFlags.IsProdStaff, []),
                                           "Романа Романівна", "+380978763440"),
                    new UserPermissions(PermissionFlags.IsProdStaff, []));
@@ -996,14 +1009,14 @@ describe("[orders]", () => {
             diff : 5,
             userID : shopManagerCaller.ID,
             userName : "Наташа"
-          }]
+          } ]
         }
       ]
     });
 
     // Test for case when prod staff confirms not all.
     await orders.changeDay(storage, shopManagerCaller, Day.today(), POS1,
-    {items : [ {goodID : good1ID, ordered : 50} ]});
+                           {items : [ {goodID : good1ID, ordered : 50} ]});
 
     await orders.confirmChanges(storage, prodStaffCaller, Day.today(), POS1, {
       items : [ {goodID : good1ID, ordered : 30} ] // confirm ony 30 of 50
@@ -1067,11 +1080,10 @@ describe("[orders]", () => {
             diff : 5,
             userID : shopManagerCaller.ID,
             userName : "Наташа"
-          }]
+          } ]
         }
       ]
     });
-
   });
 
   // TODO: good coverege of function changes for changing items, detecting conflicts,

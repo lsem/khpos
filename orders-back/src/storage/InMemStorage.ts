@@ -98,8 +98,7 @@ class InMemoryStorage implements AbstractStorage {
 
   async getUser(userID: EID): Promise<UserModel> {
     if (!this.users.has(userID)) {
-      // todo: fix this
-      throw new Error('User does not exist');
+      throw new NotFoundError(`User ${userID} not found`);
     }
     // todo: return clone! add test!
     return this.users.get(userID)!;

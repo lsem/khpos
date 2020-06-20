@@ -1,7 +1,10 @@
 import * as errors from "app/errors";
+import {BcryptPasswordService, IPasswordService} from "app/password_service";
+import {ITokenizationService, JWTTokenizationService} from "app/tokenization_service";
 import {createUser} from "app/users";
 import {registerOrdersHandlers} from "appweb/ordersHandlers";
 import {registerPOSHandlers} from "appweb/posHandlers";
+import {registerUsersHandlers} from "appweb/userHandlers";
 import cors from "cors";
 import express from "express";
 import * as http from 'http';
@@ -14,6 +17,8 @@ import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 
 export interface Components {
   storage: AbstractStorage;
+  passwordService: IPasswordService;
+  tokenizationService: ITokenizationService;
 }
 
 export type HandlerFn = (c: Components, req: express.Request, res: express.Response) =>
@@ -39,6 +44,8 @@ export function mapErrorToHTTP(err: Error): number {
     return 400;
   } else if (err instanceof errors.AlreadyExistsError) {
     return 409;
+  } else if (err instanceof errors.InvalidCredentialsError) {
+    return 401;
   } else if (err instanceof errors.NotAllowedError) {
     return 401;
   } else if (err instanceof errors.NeedsAdminError) {
@@ -61,9 +68,9 @@ const GlobalAdminCaller =
 let SampleAdminUserID: string;
 
 async function populateSampleEntities(storage: AbstractStorage) {
-  SampleAdminUserID = await createUser(storage, GlobalAdminCaller, "Роман",
-                                       new UserPermissions(PermissionFlags.Admin, []),
-                                       "Роман Антонович", "+380959113456");
+  SampleAdminUserID = await createUser(storage, new BcryptPasswordService(), GlobalAdminCaller,
+                                       "Роман", new UserPermissions(PermissionFlags.Admin, []),
+                                       "secret", "Роман Антонович", "+380959113456");
 
   const addPOS = async (
       name: string,
@@ -116,8 +123,14 @@ async function main() {
   app.use(cors());
   app.use(morgan(":date[iso] :method :url :status :response-time[digits] ms"));
   app.use(express.json());
-  registerPOSHandlers(app, {storage : storage});
-  registerOrdersHandlers(app, {storage : storage}, SampleAdminUserID);
+  const components = {
+    storage : storage,
+    passwordService : new BcryptPasswordService(),
+    tokenizationService : new JWTTokenizationService()
+  };
+  registerPOSHandlers(app, components);
+  registerOrdersHandlers(app, components, SampleAdminUserID);
+  registerUsersHandlers(app, components);
   app.use(errorHandler);
   const server = http.createServer(app);
   server.listen(5500, () => console.log(`is running at http://localhost:5500`));

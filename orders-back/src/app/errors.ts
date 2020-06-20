@@ -4,6 +4,10 @@ export class AuthorizationError extends Error {
   constructor(what: string = "") { super(`AuthorizationError: ${what}`); }
 }
 
+export class InvalidCredentialsError extends Error {
+  constructor() { super(`InvalidCredentialsError`); }
+};
+
 export class NeedsAdminError extends AuthorizationError {
   constructor() { super('NeedsAdminError'); }
 }

@@ -13,6 +13,8 @@ interface UserModel {
   userFullName: string;
   telNumber: string;
   permissions: UserPermissions;
+  passwordHash: string;
+  isActive: boolean;
 }
 
 interface OrderModelItem {
