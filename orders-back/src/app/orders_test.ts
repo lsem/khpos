@@ -1000,6 +1000,79 @@ describe("[orders]", () => {
         }
       ]
     });
+
+    // Test for case when prod staff confirms not all.
+    await orders.changeDay(storage, shopManagerCaller, Day.today(), POS1,
+    {items : [ {goodID : good1ID, ordered : 50} ]});
+
+    await orders.confirmChanges(storage, prodStaffCaller, Day.today(), POS1, {
+      items : [ {goodID : good1ID, ordered : 30} ] // confirm ony 30 of 50
+    });
+    assert.containSubset(await orders.getDay(storage, shopManagerCaller, Day.today(), POS1), {
+      status : DayStatus.closed,
+      items : [
+        {
+          goodID : good1ID,
+          goodName : "Шарлотка по Франківськи",
+          units : "шт",
+          ordered : 30,
+          status : 'ConfirmedSome',
+          history : [
+            {
+              kind : 'Change',
+              count : 10,
+              diff : 10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Change',
+              count : 20,
+              diff : +10,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Confirm',
+              count : 20,
+              diff : 0, // all confirmed
+              userID : prodStaffCaller.ID,
+              userName : "Романа"
+            },
+            ,
+            {
+              kind : 'Change',
+              count : 50,
+              diff : +30,
+              userID : shopManagerCaller.ID,
+              userName : "Наташа"
+            },
+            {
+              kind : 'Confirm',
+              count : 30,
+              diff : -20, // all confirmed
+              userID : prodStaffCaller.ID,
+              userName : "Романа"
+            }
+          ]
+        },
+        {
+          goodID : good2ID,
+          goodName : "Булочка",
+          units : "шт",
+          ordered : 5,
+          status : 'Default',
+          history : [ {
+            kind : 'Change',
+            count : 5,
+            diff : 5,
+            userID : shopManagerCaller.ID,
+            userName : "Наташа"
+          }]
+        }
+      ]
+    });
+
   });
 
   // TODO: good coverege of function changes for changing items, detecting conflicts,

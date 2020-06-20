@@ -424,6 +424,7 @@ export class DayAggregate {
         madeBy : e.userID,
         whenTS : new Date()
       });
+      this.items[change.good].amount = change.amount;
     }
   }
   //#endregion
