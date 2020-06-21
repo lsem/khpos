@@ -21,6 +21,17 @@ export interface POSCollectionViewModel {
   items: ReadonlyArray<SinglePOSViewModel>;
 }
 
+export interface DayTotalViewModelItem {
+  goodID: EID;
+  goodName: string;
+  units: string;
+  ordered: number;
+}
+
+export interface DayTotalViewModel {
+  items: DayTotalViewModelItem[];
+}
+
 type DayViewModelStatus = 'Default'|'RequestedEditAfterClose'|'ConfirmedAll'|'ConfirmedSome';
 export interface DayViewModel {
   // TODO: do not use daystatus but remap it since on this depends client.
@@ -94,7 +105,6 @@ export interface LoginUserViewModel {
 
 export const LoginUserViewModelSchema =
     joi.object().keys({userIDName : joi.string().required(), password : joi.string().required()});
-
 
 export interface UserLoggedInViewModel {
   role: UserRoleSymbolicRepr;

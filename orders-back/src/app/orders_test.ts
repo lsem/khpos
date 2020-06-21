@@ -171,7 +171,7 @@ describe("[orders]", () => {
     const natashaPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS ]);
     const NatashaCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "Наташа", natashaPermissions,
-                                          "Наталія Менеджерівна", "+380978763443"),
+                                           "Наталія Менеджерівна", "+380978763443"),
                    natashaPermissions);
 
     const sharlotteID = EIDFac.makeGoodID();
@@ -548,11 +548,11 @@ describe("[orders]", () => {
         new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]), "Shop Manager", "911");
 
     const staffUser = await createUser_nopass(storage, globalAdminCaller, "ProdStaff",
-                                             new UserPermissions(PermissionFlags.IsProdStaff, []),
-                                             "Prod Stuff", "911");
+                                              new UserPermissions(PermissionFlags.IsProdStaff, []),
+                                              "Prod Stuff", "911");
     const adminUser = await createUser_nopass(storage, globalAdminCaller, "BakeryAdmin",
-                                             new UserPermissions(PermissionFlags.Admin, []),
-                                             "Bakery Administrator", "911");
+                                              new UserPermissions(PermissionFlags.Admin, []),
+                                              "Bakery Administrator", "911");
 
     const asCaller = async (storage: AbstractStorage, userID: EID) => {
       const user = await users.getUser(storage, globalAdminCaller, userID);
@@ -747,13 +747,13 @@ describe("[orders]", () => {
     const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
     const shopManagerCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "Наташа", shopManagerPermissions,
-                                          "Наталія Менеджерівна", "+380978763443"),
+                                           "Наталія Менеджерівна", "+380978763443"),
                    shopManagerPermissions);
 
     const bakeryAdminCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "ГалинаС",
-                                          new UserPermissions(PermissionFlags.Admin, []),
-                                          "Галина Степанівна", "+380978763441"),
+                                           new UserPermissions(PermissionFlags.Admin, []),
+                                           "Галина Степанівна", "+380978763441"),
                    new UserPermissions(PermissionFlags.Admin, []));
 
     const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
@@ -854,19 +854,19 @@ describe("[orders]", () => {
     const shopManagerPermissions = new UserPermissions(PermissionFlags.IsShopManager, [ POS1 ]);
     const shopManagerCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "Наташа", shopManagerPermissions,
-                                          "Наталія Менеджерівна", "+380978763443"),
+                                           "Наталія Менеджерівна", "+380978763443"),
                    shopManagerPermissions);
 
     const bakeryAdminCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "ГалинаС",
-                                          new UserPermissions(PermissionFlags.Admin, []),
-                                          "Галина Степанівна", "+380978763441"),
+                                           new UserPermissions(PermissionFlags.Admin, []),
+                                           "Галина Степанівна", "+380978763441"),
                    new UserPermissions(PermissionFlags.Admin, []));
 
     const prodStaffCaller =
         new Caller(await createUser_nopass(storage, adminCaller, "Романа",
-                                          new UserPermissions(PermissionFlags.IsProdStaff, []),
-                                          "Романа Романівна", "+380978763440"),
+                                           new UserPermissions(PermissionFlags.IsProdStaff, []),
+                                           "Романа Романівна", "+380978763440"),
                    new UserPermissions(PermissionFlags.IsProdStaff, []));
 
     const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
@@ -1084,6 +1084,59 @@ describe("[orders]", () => {
         }
       ]
     });
+  });
+
+  it("get day total basic test", async () => {
+    // todo: add more fine grained tests.
+    const storage = new InMemoryStorage();
+    const POS1 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS1, {posID : POS1, posIDName : "Чупринки"});
+
+    const POS2 = EIDFac.makePOSID();
+    await storage.insertPointOfSale(POS2, {posID : POS2, posIDName : "Стрийська"});
+
+    const adminCaller =
+        new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
+
+    const shopManagerPermissions =
+        new UserPermissions(PermissionFlags.IsShopManager, [ POS1, POS2 ]);
+    const shopManagerCaller =
+        new Caller(await createUser_nopass(storage, adminCaller, "Наташа", shopManagerPermissions,
+                                           "Наталія Менеджерівна", "+380978763443"),
+                   shopManagerPermissions);
+
+    const bakeryAdminCaller =
+        new Caller(await createUser_nopass(storage, adminCaller, "ГалинаС",
+                                           new UserPermissions(PermissionFlags.Admin, []),
+                                           "Галина Степанівна", "+380978763441"),
+                   new UserPermissions(PermissionFlags.Admin, []));
+
+    const good1ID = await createGood(storage, adminCaller, "Шарлотка по Франківськи", "шт");
+    const good2ID = await createGood(storage, adminCaller, "Булочка", "шт");
+
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS1);
+
+    await orders.changeDay(storage, shopManagerCaller, Day.today(), POS1,
+                           {items : [ {goodID : good1ID, ordered : 10} ]});
+
+    await orders.openDay(storage, shopManagerCaller, Day.today(), POS2);
+    await orders.changeDay(
+        storage, shopManagerCaller, Day.today(), POS2,
+        {items : [ {goodID : good1ID, ordered : 30}, {goodID : good2ID, ordered : 5} ]});
+
+    const totals = await orders.getTotalForDay(storage, bakeryAdminCaller, Day.today());
+    assert.deepEqual(totals, {
+      items : [
+        {goodID : good1ID, goodName : 'Шарлотка по Франківськи', units : 'шт', ordered : 40},
+        {goodID : good2ID, goodName : 'Булочка', units : 'шт', ordered : 5}
+      ]
+    });
+
+    // todo: make it separate test as it is not basic from this point
+    // test that totals for non-opened days ignored.
+    assert.deepEqual(
+        await orders.getTotalForDay(storage, bakeryAdminCaller, new Day(Day.today().val + 1)),
+        {items : []});
   });
 
   // TODO: good coverege of function changes for changing items, detecting conflicts,
