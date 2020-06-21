@@ -92,5 +92,5 @@ export async function handlePostConfirmChange(c: Components, req: express.Reques
 export async function handleGetDayTotal(c: Components, req: express.Request,
                                         res: express.Response) {
   const day = dayParam(req.query.day);
-  res.json(await orders.getTotalForDay(c.storage, req.caller, day));
+  res.json(await orders.queryTotalForDay(c.storage, req.caller, day));
 }

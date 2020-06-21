@@ -1124,7 +1124,7 @@ describe("[orders]", () => {
         storage, shopManagerCaller, Day.today(), POS2,
         {items : [ {goodID : good1ID, ordered : 30}, {goodID : good2ID, ordered : 5} ]});
 
-    const totals = await orders.getTotalForDay(storage, bakeryAdminCaller, Day.today());
+    const totals = await orders.queryTotalForDay(storage, bakeryAdminCaller, Day.today());
     assert.deepEqual(totals, {
       items : [
         {goodID : good1ID, goodName : 'Шарлотка по Франківськи', units : 'шт', ordered : 40},
@@ -1135,7 +1135,7 @@ describe("[orders]", () => {
     // todo: make it separate test as it is not basic from this point
     // test that totals for non-opened days ignored.
     assert.deepEqual(
-        await orders.getTotalForDay(storage, bakeryAdminCaller, new Day(Day.today().val + 1)),
+        await orders.queryTotalForDay(storage, bakeryAdminCaller, new Day(Day.today().val + 1)),
         {items : []});
   });
 

@@ -115,18 +115,20 @@ export async function getOrdersForDate(storage: AbstractStorage,
   return result;
 }
 
-export async function getTotalForDay(storage: AbstractStorage, caller: Caller,
-                                     day: Day): Promise<DayTotalViewModel> {
+export async function queryTotalForDay(storage: AbstractStorage, caller: Caller,
+                                       day: Day): Promise<DayTotalViewModel> {
 
   // todo: write test for permissions check
   if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
-    throw new NotAllowedError(`closing day ${day.val}`);
+    throw new NotAllowedError(`getting total for day ${day.val}`);
   }
 
   // todo: handle non-opened day, must be already closed.
+  // what if some are closed while others are not? may be we shouuld enforce or give warning,
+  // that not all days are closed?
 
   const poss = await storage.getAllPointsOfSale()
-  const dayAggregates = await Promise.all(_.map(poss, async(pos): Promise<DayAggregateItem[]> => {
+  const allDayItems = await Promise.all(_.map(poss, async(pos): Promise<DayAggregateItem[]> => {
     try {
       const dayAggregate = await loadDayAggregate(storage, day, pos.posID);
       return _.values(dayAggregate.items);
@@ -141,17 +143,17 @@ export async function getTotalForDay(storage: AbstractStorage, caller: Caller,
   }));
 
   const totals: Dict<DayTotalViewModelItem> = {};
-  for (let agg of dayAggregates) {
-    for (let x of agg) {
-      if (!totals[x.good]) {
-        const good = await storage.getGoodByID(x.good); // todo: check if it is parallel
-        totals[x.good] = {goodID : x.good, goodName : good.name, units : good.units, ordered : 0};
+  for (let dayItems of allDayItems) {
+    for (let dayItem of dayItems) {
+      if (!totals[dayItem.good]) {
+        const good = await storage.getGoodByID(dayItem.good); // todo: check if it is parallel
+        totals[dayItem.good] =
+            {goodID : dayItem.good, goodName : good.name, units : good.units, ordered : 0};
       }
-      totals[x.good].ordered += x.amount;
+      totals[dayItem.good].ordered += dayItem.amount;
     }
   }
-  const items: DayTotalViewModelItem[] = _.values(totals);
-  return {items : items};
+  return {items : _.values(totals)};
 }
 
 async function viewModelForDay(storage: AbstractStorage,
