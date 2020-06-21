@@ -23,10 +23,8 @@ export function registerUsersHandlers(expressApp: express.Application, c: Compon
 }
 // todo: add change user, get user.
 
-const AdminCaller = new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
-
 export async function handleGetUsers(c: Components, req: express.Request, res: express.Response) {
-  res.json(await users.queryUsers(c.storage, AdminCaller));
+  res.json(await users.queryUsers(c.storage, req.caller));
 }
 
 export async function handlePostUser(c: Components, req: express.Request, res: express.Response) {
@@ -44,7 +42,7 @@ export async function handlePostUser(c: Components, req: express.Request, res: e
     }
   })();
 
-  const userID = await users.createUser(c.storage, c.passwordService, AdminCaller,
+  const userID = await users.createUser(c.storage, c.passwordService, req.caller,
                                         viewModel.userIdName, permissions, viewModel.password,
                                         viewModel.userFullName, viewModel.telNumber);
   res.status(201).location('/users/' + userID).send();

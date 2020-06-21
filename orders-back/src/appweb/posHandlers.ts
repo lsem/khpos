@@ -1,9 +1,7 @@
 import * as pos from "app/pos";
 import {deserialize, serialize} from "app/serialize";
 import express from "express";
-import {Caller} from "types/Caller";
 import {EIDFac} from "types/core_types";
-import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 import {CreatePOSViewModel, CreatePOSViewModelSchema} from "types/viewModels";
 import {Components, handlerWrapper} from "webMain";
 
@@ -13,16 +11,15 @@ export function registerPOSHandlers(expressApp: express.Application, c: Componen
   expressApp.post("/pos", handlerWrapper(handlePostPOS, c));
 }
 
-const AdminCaller = new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
-
 export async function handleGetPOS(c: Components, req: express.Request, res: express.Response) {
-  const allPOS = await pos.queryAllPOS(c.storage, AdminCaller);
+  const allPOS = await pos.queryAllPOS(c.storage, req.caller);
   res.json(allPOS);
 }
 
 export async function handleGetSinglePOS(c: Components, req: express.Request,
                                          res: express.Response) {
   // todo: missing caller!
+  console.warn('Caller not used for getPOSByID');
   const posID = EIDFac.fromExisting(req.params.id);
   res.json(await pos.getPOSByID(c.storage, posID));
 }
@@ -30,6 +27,7 @@ export async function handleGetSinglePOS(c: Components, req: express.Request,
 export async function handlePostPOS(c: Components, req: express.Request, res: express.Response) {
   const viewModel = deserialize<CreatePOSViewModel>(req.body, CreatePOSViewModelSchema);
   // todo: missing caller!
+  console.warn('Caller not used for getPOSByID');
   const id = await pos.createPOS(c.storage, viewModel.posIDName);
   res.status(201).location('/pos/' + id).send();
 }

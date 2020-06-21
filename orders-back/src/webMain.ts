@@ -1,6 +1,6 @@
 import * as errors from "app/errors";
 import {BcryptPasswordService, IPasswordService} from "app/password_service";
-import {ITokenizationService, JWTTokenizationService} from "app/tokenization_service";
+import {ITokenizationService, JWTTokenizationService, TokenData} from "app/tokenization_service";
 import {createUser} from "app/users";
 import {registerOrdersHandlers} from "appweb/ordersHandlers";
 import {registerPOSHandlers} from "appweb/posHandlers";
@@ -8,6 +8,7 @@ import {registerUsersHandlers} from "appweb/userHandlers";
 import cors from "cors";
 import express from "express";
 import * as http from 'http';
+import {JsonWebTokenError} from "jsonwebtoken";
 import morgan from "morgan";
 import {AbstractStorage} from "storage/AbstractStorage";
 import {InMemoryStorage} from "storage/InMemStorage";
@@ -57,32 +58,72 @@ export function mapErrorToHTTP(err: Error): number {
   }
 }
 
+// We are going to extend express.Request with unpacked token.
+declare global {
+  namespace Express {
+  interface Request {
+    tokenData: TokenData;
+    caller: Caller;
+  }
+  }
+}
+type MiddlewareCallback =
+    (req: express.Request, res: express.Response, next: express.NextFunction) => void;
+function makeAuthMiddlaware(tokenizationService: ITokenizationService): MiddlewareCallback {
+  return (req, res, next) => {
+    if (req.path !== '/users/login') {
+      if (!req.headers['authorization']) {
+        throw new errors.AuthorizationError("No authorization header");
+      }
+      req.tokenData = tokenizationService.unpackToken(req.headers['authorization']);
+      req.caller =
+          new Caller(req.tokenData.id, new UserPermissions(req.tokenData.permissions.mask,
+                                                           req.tokenData.permissions.resources));
+    }
+    next();
+  };
+}
+
 function errorHandler(err: any, req: express.Request, res: express.Response,
                       next: express.NextFunction) {
   res.status(mapErrorToHTTP(err)).send(err.message);
 }
 
+// Initial seed user to init application.
 const GlobalAdminCaller =
     new Caller(EIDFac.makeUserID(), new UserPermissions(PermissionFlags.Admin, []));
 
-let SampleAdminUserID: string;
-
-async function populateSampleEntities(storage: AbstractStorage) {
-  SampleAdminUserID = await createUser(storage, new BcryptPasswordService(), GlobalAdminCaller,
-                                       "Роман", new UserPermissions(PermissionFlags.Admin, []),
-                                       "secret", "Роман Антонович", "+380959113456");
-
+async function populateSampleEntities(c: Components) {
   const addPOS = async (
       name: string,
-      pid: string) => { await storage.insertPointOfSale(pid, {posID : pid, posIDName : name}); };
+      pid: string) => { await c.storage.insertPointOfSale(pid, {posID : pid, posIDName : name}); };
 
-  await addPOS("Чупринки", "POS-a8b69a9c-9c85-48d5-a8f0-9d213b1ee866");
-  await addPOS("ЮЛипи", "POS-4f224ac9-620e-4a78-bbe2-8978e4e41cac");
-  await addPOS("Стрийська", "POS-8ed2405f-e973-4c14-aa57-f96d23852858");
+  const pos1ID = "POS-a8b69a9c-9c85-48d5-a8f0-9d213b1ee866";
+  const pos2ID = "POS-4f224ac9-620e-4a78-bbe2-8978e4e41cac";
+  const pos3ID = "POS-8ed2405f-e973-4c14-aa57-f96d23852858";
+  await addPOS("Чупринки", pos1ID);
+  await addPOS("ЮЛипи", pos2ID);
+  await addPOS("Стрийська", pos3ID);
+
+  await createUser(c.storage, c.passwordService, GlobalAdminCaller, "Роман",
+                   new UserPermissions(PermissionFlags.Admin, []), "secret", "Роман Антонович",
+                   "+380959113456");
+
+  await createUser(c.storage, c.passwordService, GlobalAdminCaller, "Наташа",
+                   new UserPermissions(PermissionFlags.IsShopManager, [ pos1ID ]), "secret2",
+                   "Наталія Овчар", "+380949113456");
+
+  await createUser(c.storage, c.passwordService, GlobalAdminCaller, "Настя",
+                   new UserPermissions(PermissionFlags.IsShopManager, [ pos2ID, pos3ID ]),
+                   "secret3", "Настя Орел", "+380925113456");
+
+  await createUser(c.storage, c.passwordService, GlobalAdminCaller, "Ігор",
+                   new UserPermissions(PermissionFlags.IsProdStaff, []), "secret4", "Ігор Цех",
+                   "+380925113456");
 
   const addGood = async (name: string, units: string) => {
     const gid = EIDFac.makeGoodID();
-    await storage.insertGood(
+    await c.storage.insertGood(
         gid, {id : gid, name : name, units : units, available : true, removed : false});
   };
   await addGood("Домашній хліб", "шт");
@@ -117,19 +158,19 @@ async function populateSampleEntities(storage: AbstractStorage) {
 }
 
 async function main() {
-  const storage = new InMemoryStorage();
-  await populateSampleEntities(storage)
+  const components = {
+    storage : new InMemoryStorage(),
+    passwordService : new BcryptPasswordService(),
+    tokenizationService : new JWTTokenizationService()
+  };
+  await populateSampleEntities(components)
   const app = express();
   app.use(cors());
   app.use(morgan(":date[iso] :method :url :status :response-time[digits] ms"));
   app.use(express.json());
-  const components = {
-    storage : storage,
-    passwordService : new BcryptPasswordService(),
-    tokenizationService : new JWTTokenizationService()
-  };
+  app.use(makeAuthMiddlaware(components.tokenizationService));
   registerPOSHandlers(app, components);
-  registerOrdersHandlers(app, components, SampleAdminUserID);
+  registerOrdersHandlers(app, components);
   registerUsersHandlers(app, components);
   app.use(errorHandler);
   const server = http.createServer(app);

@@ -1,10 +1,8 @@
 import {BadArgsError} from 'app/errors';
 import * as orders from 'app/orders';
-import {deserialize, serialize} from "app/serialize";
+import {deserialize} from "app/serialize";
 import express from "express";
-import {Caller} from "types/Caller";
 import {Day, EIDFac} from "types/core_types";
-import {PermissionFlags, UserPermissions} from "types/UserPermissions";
 import {
   ChangeDayViewModel,
   ChangeDayViewModelSchema,
@@ -13,12 +11,8 @@ import {
 } from 'types/viewModels';
 import {Components, handlerWrapper} from "webMain";
 
-let AdminCaller: Caller;
-
 // todo: get rid of this userID thing.
-export function registerOrdersHandlers(expressApp: express.Application, c: Components,
-                                       userID: string) {
-  AdminCaller = new Caller(userID, new UserPermissions(PermissionFlags.Admin, []));
+export function registerOrdersHandlers(expressApp: express.Application, c: Components) {
   expressApp.get("/dayorder/:pos/", handlerWrapper(handleGetOrderForDay, c));
   expressApp.patch("/dayorder/:pos/", handlerWrapper(handlePatchOrderForDay, c));
   expressApp.post("/dayorder/:pos/open", handlerWrapper(handlePostOpenDay, c));
@@ -47,7 +41,7 @@ export async function handleGetOrderForDay(c: Components, req: express.Request,
 
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
-  const dayView = await orders.getDay(c.storage, AdminCaller, day, posID);
+  const dayView = await orders.getDay(c.storage, req.caller, day, posID);
   res.json(dayView);
 }
 
@@ -56,7 +50,7 @@ export async function handlePatchOrderForDay(c: Components, req: express.Request
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
   const changeDayView = deserialize<ChangeDayViewModel>(req.body, ChangeDayViewModelSchema);
-  await orders.changeDay(c.storage, AdminCaller, day, posID, changeDayView);
+  await orders.changeDay(c.storage, req.caller, day, posID, changeDayView);
   res.send(200);
 }
 
@@ -64,7 +58,7 @@ export async function handlePostOpenDay(c: Components, req: express.Request,
                                         res: express.Response) {
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
-  await orders.openDay(c.storage, AdminCaller, day, posID);
+  await orders.openDay(c.storage, req.caller, day, posID);
   res.send(200);
 }
 
@@ -72,7 +66,7 @@ export async function handlePostCloseDay(c: Components, req: express.Request,
                                          res: express.Response) {
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
-  await orders.closeDay(c.storage, AdminCaller, day, posID);
+  await orders.closeDay(c.storage, req.caller, day, posID);
   res.send(200);
 }
 
@@ -80,7 +74,7 @@ export async function handlePostFinalizeDay(c: Components, req: express.Request,
                                             res: express.Response) {
   const posID = idParam(req.params.pos);
   const day = dayParam(req.query.day);
-  await orders.finalizeDay(c.storage, AdminCaller, day, posID);
+  await orders.finalizeDay(c.storage, req.caller, day, posID);
   res.send(200);
 }
 
@@ -90,6 +84,6 @@ export async function handlePostConfirmChange(c: Components, req: express.Reques
   const day = dayParam(req.query.day);
   const confirmViewModel =
       deserialize<ConfirmChangeViewModel>(req.body, ConfirmChangeViewModelSchema);
-  await orders.confirmChanges(c.storage, AdminCaller, day, posID, confirmViewModel);
+  await orders.confirmChanges(c.storage, req.caller, day, posID, confirmViewModel);
   res.send(200);
 }
