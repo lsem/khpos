@@ -66,6 +66,23 @@ describe("[inmem.users]", () => {
     assert.containSubset(await storage.getUser(id),
                          {permissions : {mask : PermissionFlags.Write, resources : [ resource ]}});
   });
+
+  it("findUserByIdName should be case insensitive", async () => {
+    const storage = new InMemoryStorage();
+    const id = EIDFac.makeUserID();
+    const initial = new UserPermissions(PermissionFlags.None, []);
+    await storage.insertUser(id, {
+      userID : id,
+      userIdName : 'sem',
+      userFullName : 'Semen',
+      telNumber : '',
+      permissions : initial,
+      isActive : true,
+      passwordHash : 'somehash'
+    });
+    assert.isObject(await storage.findUserByIdName("SeM"));
+    assert.equal((await storage.findUserByIdName("SeM"))!.userIdName, 'sem');
+  })
 });
 
 describe("[inmem.pos]",
