@@ -13,7 +13,13 @@ import {
   OrderModelItem
 } from "types/domain_types";
 import {PermissionFlags} from "types/UserPermissions";
-import {ChangeDayViewModel, ConfirmChangeViewModel, DayViewModel} from "types/viewModels";
+import {
+  ChangeDayViewModel,
+  ConfirmChangeViewModel,
+  DayTotalViewModel,
+  DayTotalViewModelItem,
+  DayViewModel
+} from "types/viewModels";
 
 import {AbstractStorage} from "../storage/AbstractStorage";
 import * as schemas from "../types/schemas";
@@ -30,6 +36,7 @@ import {
   NotAllowedError,
   NotFoundError
 } from "./errors";
+import {getAllPOS} from "./pos";
 import {UserIDSchema} from "./user_schemas";
 
 // TODO: Move to separate features.
@@ -108,6 +115,47 @@ export async function getOrdersForDate(storage: AbstractStorage,
   return result;
 }
 
+export async function queryTotalForDay(storage: AbstractStorage, caller: Caller,
+                                       day: Day): Promise<DayTotalViewModel> {
+
+  // todo: write test for permissions check
+  if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
+    throw new NotAllowedError(`getting total for day ${day.val}`);
+  }
+
+  // todo: handle non-opened day, must be already closed.
+  // what if some are closed while others are not? may be we shouuld enforce or give warning,
+  // that not all days are closed?
+
+  const poss = await storage.getAllPointsOfSale()
+  const allDayItems = await Promise.all(_.map(poss, async(pos): Promise<DayAggregateItem[]> => {
+    try {
+      const dayAggregate = await loadDayAggregate(storage, day, pos.posID);
+      return _.values(dayAggregate.items);
+    } catch (err) {
+      // day not opened, does not exist.
+      if (err instanceof NotFoundError) {
+        return [];
+      } else {
+        throw err;
+      }
+    }
+  }));
+
+  const totals: Dict<DayTotalViewModelItem> = {};
+  for (let dayItems of allDayItems) {
+    for (let dayItem of dayItems) {
+      if (!totals[dayItem.good]) {
+        const good = await storage.getGoodByID(dayItem.good); // todo: check if it is parallel
+        totals[dayItem.good] =
+            {goodID : dayItem.good, goodName : good.name, units : good.units, ordered : 0};
+      }
+      totals[dayItem.good].ordered += dayItem.amount;
+    }
+  }
+  return {items : _.values(totals)};
+}
+
 async function viewModelForDay(storage: AbstractStorage,
                                dayAggregate: DayAggregate): Promise<DayViewModel> {
   type OneItem = DayViewModel['items'][0];
@@ -150,7 +198,6 @@ export async function getDay(storage: AbstractStorage, caller: Caller, day: Day,
 
 export async function openDay(storage: AbstractStorage, caller: Caller, day: Day,
                               posID: EID): Promise<void> {
-
   // Call to POS to verify this POS exists (todo: verify if this is ok)
   await storage.getPointOfSale(posID);
 
@@ -317,7 +364,7 @@ interface ItemChangeEvent {
 
 type ItemStatus = 'Default'|'RequestedEditAfterClose'|'ConfirmedAll'|'ConfirmedSome';
 
-interface Item {
+interface DayAggregateItem {
   good: EID;
   amount: number;
   history: ItemChangeEvent[];
@@ -328,7 +375,7 @@ export class DayAggregate {
   version: number = 0;
   map: Dict<EventHandlerFn> = {};
   public status: DayStatus = DayStatus.not_opened;
-  items: Record<EID, Item> = {};
+  items: Record<EID, DayAggregateItem> = {};
   posID: EID = "";
   public uncommittedEvents: DayEvent[] = [];
   day: Day = Day.invalid();
@@ -447,7 +494,6 @@ export class DayAggregate {
   }
 
   closeDay(caller: Caller) {
-    // ...
     if (!isAdmin(caller) && (caller.Permissions.mask & PermissionFlags.IsProdStaff) == 0) {
       throw new NotAllowedError(`closing day ${this.day.val}`);
     }

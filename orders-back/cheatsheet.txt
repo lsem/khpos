@@ -1,0 +1,5 @@
+docker build -t lsem/orders-back .
+docker run -p 5500:5500 -d lsem/orders-back
+docker ps
+docker logs <container>
+docker exec -it <container id> /bin/bash

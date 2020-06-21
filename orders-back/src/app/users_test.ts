@@ -216,26 +216,24 @@ describe("[users]", () => {
                                           new UserPermissions(PermissionFlags.IsShopManager, []),
                                           "secret pass", "Ivan Motyka", "123 tel");
 
-    // Unknown user tests
-
-    await expect(users.loginUser(storage, passwordService, tokenizationService, EIDFac.makeUserID(),
-                                 "secret pass"))
-        .to.be.rejectedWith(NotFoundError, "User");
-
-    const token =
-        await users.loginUser(storage, passwordService, tokenizationService, ivanID, "secret pass");
+    const tokenAndRole =
+        await users.loginUser(storage, passwordService, tokenizationService, 'IvAn', "secret pass");
+    assert.equal(tokenAndRole.role, "ShopManager");
 
     // Negative tests
-    await expect(users.loginUser(storage, passwordService, tokenizationService, ivanID, ""))
+    await expect(
+        users.loginUser(storage, passwordService, tokenizationService, 'vasyl', "secret pass"))
+        .to.be.rejectedWith(NotFoundError, "User");
+    await expect(users.loginUser(storage, passwordService, tokenizationService, 'ivan', ""))
         .to.be.rejectedWith(InvalidCredentialsError);
     const x: any = undefined;
-    await expect(users.loginUser(storage, passwordService, tokenizationService, ivanID, x))
+    await expect(users.loginUser(storage, passwordService, tokenizationService, 'ivan', x))
         .to.be.rejectedWith(InvalidCredentialsError);
     const y: any = null;
-    await expect(users.loginUser(storage, passwordService, tokenizationService, ivanID, y))
+    await expect(users.loginUser(storage, passwordService, tokenizationService, 'ivan', y))
         .to.be.rejectedWith(InvalidCredentialsError);
     await expect(
-        users.loginUser(storage, passwordService, tokenizationService, ivanID, "secret pass1"))
+        users.loginUser(storage, passwordService, tokenizationService, 'ivan', "secret pass1"))
         .to.be.rejectedWith(InvalidCredentialsError);
   });
 

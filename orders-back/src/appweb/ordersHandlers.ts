@@ -19,6 +19,7 @@ export function registerOrdersHandlers(expressApp: express.Application, c: Compo
   expressApp.post("/dayorder/:pos/close", handlerWrapper(handlePostCloseDay, c));
   expressApp.post("/dayorder/:pos/finalize", handlerWrapper(handlePostFinalizeDay, c));
   expressApp.post("/dayorder/:pos/confirmChange", handlerWrapper(handlePostConfirmChange, c));
+  expressApp.get("/total", handlerWrapper(handleGetDayTotal, c));
 }
 
 function parseDate(value: string) {
@@ -86,4 +87,10 @@ export async function handlePostConfirmChange(c: Components, req: express.Reques
       deserialize<ConfirmChangeViewModel>(req.body, ConfirmChangeViewModelSchema);
   await orders.confirmChanges(c.storage, req.caller, day, posID, confirmViewModel);
   res.send(200);
+}
+
+export async function handleGetDayTotal(c: Components, req: express.Request,
+                                        res: express.Response) {
+  const day = dayParam(req.query.day);
+  res.json(await orders.queryTotalForDay(c.storage, req.caller, day));
 }

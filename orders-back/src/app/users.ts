@@ -7,7 +7,12 @@ import {UserModel, UserRoleSymbolicRepr} from 'types/domain_types';
 import {PermissionFlags, UserPermissions} from 'types/UserPermissions';
 import {UserLoggedInViewModel, UsersViewModel} from 'types/viewModels';
 
-import {BadArgsError, InvalidCredentialsError, InvalidOperationError} from './errors';
+import {
+  BadArgsError,
+  InvalidCredentialsError,
+  InvalidOperationError,
+  NotFoundError
+} from './errors';
 import {BcryptPasswordService, IPasswordService, TestPasswordService} from './password_service';
 import {ITokenizationService} from './tokenization_service';
 
@@ -21,9 +26,14 @@ export async function setUserPassword(storage: AbstractStorage, passwordService:
 }
 
 export async function loginUser(storage: AbstractStorage, passwordService: IPasswordService,
-                                tokenizationService: ITokenizationService, userID: EID,
+                                tokenizationService: ITokenizationService, userIDName: string,
                                 password: string): Promise<UserLoggedInViewModel> {
-  const user = await storage.getUser(userID);
+  const mayBeUser = await storage.findUserByIdName(userIDName);
+  if (!mayBeUser) {
+    throw new NotFoundError(`User with idname ${userIDName} not found`);
+  }
+
+  const user = mayBeUser!;
 
   if (!user.isActive) {
     throw new InvalidOperationError("User must be active to log into the system");

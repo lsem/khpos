@@ -50,23 +50,10 @@ export async function handlePostUser(c: Components, req: express.Request, res: e
 
 export async function handlePostUserLogin(c: Components, req: express.Request,
                                           res: express.Response) {
-
-  // to log into the system, we expect that client sent login info: userId and password.
-  // we look up into the database for password hash and compare it with hashed
-  // value of user password. if they match, we generate new token which holds
-  // user permissions as payload and
-
   const viewModel = deserialize<LoginUserViewModel>(req.body, LoginUserViewModelSchema);
 
-  // find user by name.
-  // todo: consider refactoring to make storage raise exception for this case.
-  const mayBeUser = await c.storage.findUserByIdName(viewModel.userIDName);
-  if (!mayBeUser) {
-    throw new NotFoundError(`User with idname ${viewModel.userIDName} not found`);
-  }
-
   const tokenAndRole = await users.loginUser(c.storage, c.passwordService, c.tokenizationService,
-                                             mayBeUser!.userID, viewModel.password);
+                                             viewModel.userIDName, viewModel.password);
 
   res.json(tokenAndRole);
 }
