@@ -12,6 +12,7 @@ import { Menu as MenuIcon, AccountCircle } from "@material-ui/icons";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import routes from "../../constants/routes";
+import { resetAuth } from "../auth/authSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ApplicationBar({ openMenuDrawer, loggedIn }) {
+function ApplicationBar({ openMenuDrawer, loggedIn, logOut }) {
   const classes = useStyles();
   const theme = useTheme();
   const matchesSmall = useMediaQuery(theme.breakpoints.down("xs"));
@@ -47,7 +48,11 @@ function ApplicationBar({ openMenuDrawer, loggedIn }) {
           KH Orders
         </Typography>
         {loggedIn ? (
-          <Button color="inherit" startIcon={<AccountCircle />}>
+          <Button
+            color="inherit"
+            startIcon={<AccountCircle />}
+            onClick={logOut}
+          >
             Вийти
           </Button>
         ) : (
@@ -66,9 +71,13 @@ function ApplicationBar({ openMenuDrawer, loggedIn }) {
 }
 
 const mapStateToProps = (state) => ({
-  loggedIn: state.auth.authenticated,
+  loggedIn: state.auth.loggedIn,
 });
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = (dispatch) => ({
+  logOut: () => {
+    dispatch(resetAuth());
+  },
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(ApplicationBar);

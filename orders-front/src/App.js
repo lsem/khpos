@@ -2,7 +2,8 @@ import React from "react";
 //import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route, Redirect, useHistory } from "react-router-dom";
+import { connect } from "react-redux";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
 import OrderManagement from "./features/orderManagement/OrderManagement";
@@ -12,19 +13,21 @@ import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxServi
 import routeConsts from "./constants/routes";
 import Login from "./features/auth/Login";
 import ErrorToast from "./features/errors/ErrorToast";
+import { thunkApiSubscribeAuthEvents } from "./features/auth/authSlice";
+import routes from "./constants/routes";
 
-function App() {
-  //const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+function App({ isLoggedIn, subscribeApiAuthEvents }) {
+  const history = useHistory();
 
-  // const theme = React.useMemo(
-  //   () =>
-  //     createMuiTheme({
-  //       palette: {
-  //         type: prefersDarkMode ? "dark" : "light",
-  //       },
-  //     }),
-  //   [prefersDarkMode]
-  // );
+  React.useEffect(() => {
+    subscribeApiAuthEvents();
+  }, [subscribeApiAuthEvents]);
+
+  React.useEffect(() => {
+    if (!isLoggedIn) {
+      history.push(`/${routes.login}`);
+    }
+  }, [isLoggedIn, history]);
 
   const theme = createMuiTheme({
     palette: {
@@ -76,4 +79,14 @@ function App() {
   );
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  isLoggedIn: state.auth.loggedIn,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  subscribeApiAuthEvents: () => {
+    dispatch(thunkApiSubscribeAuthEvents());
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

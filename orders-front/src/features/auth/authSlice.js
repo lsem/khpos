@@ -6,45 +6,60 @@ import { setError } from "../errors/errorSlice";
 export const authSlice = createSlice({
   name: "auth",
   initialState: {
+    loggedIn: false,
     token: null,
-    authenticated: false,
+    role: null,
   },
   reducers: {
     apiLogin: () => {},
-    apiLogout: () => {},
     setAuth: (state, action) => {
-      state.authenticated = action.payload.authenticated;
+      state.loggedIn = true;
       state.token = action.payload.token;
+      state.role = action.payload.role;
+    },
+    resetAuth: (state) => {
+      state.loggedIn = false;
+      state.token = null;
+      state.role = null;
     },
   },
 });
 
 //actions
-const { apiLogin, apiLogout, setAuth } = authSlice.actions;
+export const { apiLogin, setAuth, resetAuth } = authSlice.actions;
 
 //thunks
-export const thunkApiLogin = (email, pass) => async (dispatch) => {
+export const thunkApiLogin = (userIDName, password) => async (dispatch) => {
   dispatch(apiLogin());
 
   try {
-    dispatch(setAuth(await (await api.post("auth", { email, pass })).json()));
-  } catch (e) {
-    dispatch(
-      setError(
-        `Не вдалося автентифікуватись на сервері: ${await e.response.text()}`
-      )
+    const authInfo = await api
+      .post("users/login", { json: { userIDName, password } })
+      .json();
+    localStorage.setItem(
+      "auth-info",
+      JSON.stringify({ ...authInfo, userIDName })
     );
+    dispatch(setAuth(authInfo));
+  } catch (e) {
+    if (e.response) {
+      dispatch(
+        setError(
+          `Не вдалося автентифікуватись на сервері: ${await e.response.text()}`
+        )
+      );
+    } else {
+      dispatch(
+        setError(`Не вдалося автентифікуватись на сервері: ${e.message}`)
+      );
+    }
   }
 };
 
-export const thunkApiLogout = () => async (dispatch) => {
-  dispatch(apiLogout());
-
-  try {
-    dispatch(setAuth(await (await api.post("auth")).json()));
-  } catch (e) {
-    dispatch(setError(`${await e.response.text()}`));
-  }
+export const thunkApiSubscribeAuthEvents = () => async (dispatch) => {
+  api.on("404", () => {
+    dispatch(resetAuth());
+  });
 };
 
 export default authSlice.reducer;

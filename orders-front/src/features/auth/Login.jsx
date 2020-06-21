@@ -32,26 +32,26 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login({ loggedIn, apiLogin }) {
+function Login({ apiLogin }) {
   const classes = useStyles();
 
-  const [email, setEmail] = React.useState("");
+  const [userOrEmail, setUserOrEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
-  const [emailIsValid, setEmailIsValid] = React.useState(true);
+  const [userOrEmailIsValid, setUserOrEmailIsValid] = React.useState(true);
   const [passIsValid, setPassIsValid] = React.useState(true);
 
-  const validateEmail = (str) => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(str).toLowerCase());
-  };
+  // const validateEmail = (str) => {
+  //   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  //   return re.test(String(str).toLowerCase());
+  // };
 
   const handleEmailBlur = () => {
-    setEmailIsValid(validateEmail(email));
+    setUserOrEmailIsValid(!!userOrEmail);
   };
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    apiLogin(email, pass);
+    apiLogin(userOrEmail, pass);
   };
 
   return (
@@ -59,17 +59,18 @@ function Login({ loggedIn, apiLogin }) {
       <div className={classes.root}>
         <form className={classes.loginForm} onSubmit={handleFormSubmit}>
           <TextField
-            error={!emailIsValid}
-            helperText={emailIsValid ? "" : "невірний e-mail"}
-            value={email}
+            error={!userOrEmailIsValid}
+            helperText={userOrEmailIsValid ? "" : "невірний e-mail"}
+            value={userOrEmail}
             onChange={(e) => {
-              setEmail(e.target.value);
+              setUserOrEmail(e.target.value);
+              setUserOrEmailIsValid(!!e.target.value);
             }}
             onBlur={handleEmailBlur}
             autoFocus
             variant="outlined"
-            label="e-mail"
-            type="email"
+            label="користувач"
+            type="text"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -101,7 +102,7 @@ function Login({ loggedIn, apiLogin }) {
           <Button
             type="submit"
             color="primary"
-            disabled={!(!!email && !!pass && emailIsValid && passIsValid)}
+            disabled={!(!!userOrEmail && !!pass && userOrEmailIsValid && passIsValid)}
           >
             Увійти
           </Button>
@@ -111,8 +112,7 @@ function Login({ loggedIn, apiLogin }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  loggedIn: state.auth.authenticated,
+const mapStateToProps = () => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
