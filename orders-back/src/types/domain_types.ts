@@ -22,6 +22,8 @@ interface OrderModelItem {
   count: number;
 }
 
+export type UserRoleSymbolicRepr = 'Admin'|'ProdStuff'|'ShopManager';
+
 interface OrderModel {
   whoPlaced: EID;
   toDate: Date;

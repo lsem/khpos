@@ -1,7 +1,7 @@
 import * as joi from "joi";
 
 import {EID} from "./core_types";
-import {DayStatus} from "./domain_types";
+import {DayStatus, UserRoleSymbolicRepr} from "./domain_types";
 import {TypedUUIDSchema} from "./schemas";
 
 export interface CreatePOSViewModel {
@@ -65,8 +65,6 @@ export interface UsersViewModel {
   }>
 }
 
-export type UserRoleSymbolicRepr = 'Admin'|'ProdStuff'|'ShopManager';
-
 export interface CreateUserViewModel {
   userIdName: string;
   userFullName: string;
@@ -97,4 +95,9 @@ export interface LoginUserViewModel {
 export const LoginUserViewModelSchema =
     joi.object().keys({userIDName : joi.string().required(), password : joi.string().required()});
 
+
+export interface UserLoggedInViewModel {
+  role: UserRoleSymbolicRepr;
+  token: string;
+}
 //#endregion

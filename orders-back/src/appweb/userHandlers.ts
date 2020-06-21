@@ -65,10 +65,10 @@ export async function handlePostUserLogin(c: Components, req: express.Request,
     throw new NotFoundError(`User with idname ${viewModel.userIDName} not found`);
   }
 
-  const token = await users.loginUser(c.storage, c.passwordService, c.tokenizationService,
-                                      mayBeUser!.userID, viewModel.password);
+  const tokenAndRole = await users.loginUser(c.storage, c.passwordService, c.tokenizationService,
+                                             mayBeUser!.userID, viewModel.password);
 
-  res.json({token : token});
+  res.json(tokenAndRole);
 }
 
 export async function handlePostUserDisable(c: Components, req: express.Request,

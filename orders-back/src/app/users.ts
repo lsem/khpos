@@ -3,9 +3,9 @@ import {assert} from 'joi';
 import {AbstractStorage} from 'storage/AbstractStorage';
 import {Caller} from 'types/Caller';
 import {EID, EIDFac} from 'types/core_types';
-import {UserModel} from 'types/domain_types';
+import {UserModel, UserRoleSymbolicRepr} from 'types/domain_types';
 import {PermissionFlags, UserPermissions} from 'types/UserPermissions';
-import {UserRoleSymbolicRepr, UsersViewModel} from 'types/viewModels';
+import {UserLoggedInViewModel, UsersViewModel} from 'types/viewModels';
 
 import {BadArgsError, InvalidCredentialsError, InvalidOperationError} from './errors';
 import {BcryptPasswordService, IPasswordService, TestPasswordService} from './password_service';
@@ -22,7 +22,7 @@ export async function setUserPassword(storage: AbstractStorage, passwordService:
 
 export async function loginUser(storage: AbstractStorage, passwordService: IPasswordService,
                                 tokenizationService: ITokenizationService, userID: EID,
-                                password: string): Promise<string> {
+                                password: string): Promise<UserLoggedInViewModel> {
   const user = await storage.getUser(userID);
 
   if (!user.isActive) {
@@ -35,7 +35,10 @@ export async function loginUser(storage: AbstractStorage, passwordService: IPass
 
   // todo: invalidate old tokens of this user.
 
-  return tokenizationService.makeToken(user.userID, user.permissions);
+  return {
+    role : mapPermissionsToRole(user.permissions),
+    token : tokenizationService.makeToken(user.userID, user.permissions)
+  };
 }
 
 // todo: add email.
