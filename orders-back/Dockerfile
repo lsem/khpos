@@ -8,4 +8,6 @@ RUN ls -l
 RUN ./tests_unit.sh
 RUN ./build.sh
 EXPOSE 5500
-CMD [ "bash", "./serve.sh" ]
+ENV NODE_PATH ./build/src/
+CMD ["node", "./build/src/webMain.js"]
+
