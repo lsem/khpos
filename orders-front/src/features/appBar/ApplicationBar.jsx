@@ -7,9 +7,11 @@ import {
   Typography,
   Button,
   useMediaQuery,
+  Menu,
+  MenuItem,
 } from "@material-ui/core";
 import { Menu as MenuIcon, AccountCircle } from "@material-ui/icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import routes from "../../constants/routes";
 import { resetAuth } from "../auth/authSlice";
@@ -26,10 +28,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ApplicationBar({ openMenuDrawer, loggedIn, logOut }) {
+function ApplicationBar({ openMenuDrawer, loggedIn, logOut, userName }) {
   const classes = useStyles();
   const theme = useTheme();
   const matchesSmall = useMediaQuery(theme.breakpoints.down("xs"));
+  const history = useHistory();
+
+  const [anchorUserMenu, setAnchorUserMenu] = React.useState(null);
 
   return (
     <AppBar position="static">
@@ -51,9 +56,13 @@ function ApplicationBar({ openMenuDrawer, loggedIn, logOut }) {
           <Button
             color="inherit"
             startIcon={<AccountCircle />}
-            onClick={logOut}
+            aria-controls="user-menu"
+            aria-haspopup="true"
+            onClick={(e) => {
+              setAnchorUserMenu(e.currentTarget);
+            }}
           >
-            Вийти
+            {userName}
           </Button>
         ) : (
           <Button
@@ -66,12 +75,32 @@ function ApplicationBar({ openMenuDrawer, loggedIn, logOut }) {
           </Button>
         )}
       </Toolbar>
+
+      <Menu
+        id="user-menu"
+        anchorEl={anchorUserMenu}
+        keepMounted
+        open={!!anchorUserMenu}
+        onClose={() => {
+          setAnchorUserMenu(null);
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setAnchorUserMenu(null);
+            history.push(routes.logout);
+          }}
+        >
+          Вийти
+        </MenuItem>
+      </Menu>
     </AppBar>
   );
 }
 
 const mapStateToProps = (state) => ({
   loggedIn: state.auth.loggedIn,
+  userName: state.auth.userName,
 });
 
 const mapDispatchToProps = (dispatch) => ({
