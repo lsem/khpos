@@ -1,9 +1,10 @@
 import React from "react";
 import { TextField, Button, InputAdornment } from "@material-ui/core";
-import { MailOutline, Lock } from "@material-ui/icons";
+import { AccountCircle, Lock } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { thunkApiLogin } from "./authSlice";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,13 +33,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login({ apiLogin }) {
+function Login({ apiLogin, loggedIn }) {
   const classes = useStyles();
+  const history = useHistory();
 
   const [userOrEmail, setUserOrEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
   const [userOrEmailIsValid, setUserOrEmailIsValid] = React.useState(true);
   const [passIsValid, setPassIsValid] = React.useState(true);
+
+  React.useEffect(() => {
+    loggedIn && history.push("/");
+  }, [loggedIn, history]);
 
   // const validateEmail = (str) => {
   //   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -60,7 +66,7 @@ function Login({ apiLogin }) {
         <form className={classes.loginForm} onSubmit={handleFormSubmit}>
           <TextField
             error={!userOrEmailIsValid}
-            helperText={userOrEmailIsValid ? "" : "невірний e-mail"}
+            helperText={userOrEmailIsValid ? "" : "ім'я не може бути порожнім"}
             value={userOrEmail}
             onChange={(e) => {
               setUserOrEmail(e.target.value);
@@ -69,12 +75,12 @@ function Login({ apiLogin }) {
             onBlur={handleEmailBlur}
             autoFocus
             variant="outlined"
-            label="користувач"
+            label="ім'я"
             type="text"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <MailOutline />
+                  <AccountCircle />
                 </InputAdornment>
               ),
             }}
@@ -82,7 +88,7 @@ function Login({ apiLogin }) {
           <TextField
             error={!passIsValid}
             variant="outlined"
-            helperText={passIsValid ? "" : "пароль не може бути порожній"}
+            helperText={passIsValid ? "" : "пароль не може бути порожнім"}
             value={pass}
             onChange={(e) => {
               setPass(e.target.value);
@@ -112,7 +118,8 @@ function Login({ apiLogin }) {
   );
 }
 
-const mapStateToProps = () => ({
+const mapStateToProps = (state) => ({
+  loggedIn: state.auth.loggedIn
 });
 
 const mapDispatchToProps = (dispatch) => ({
