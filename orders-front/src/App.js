@@ -2,7 +2,7 @@ import React from "react";
 //import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { Switch, Route, Redirect, useHistory } from "react-router-dom";
+import { Switch, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
@@ -13,21 +13,18 @@ import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxServi
 import routeConsts from "./constants/routes";
 import Login from "./features/auth/Login";
 import ErrorToast from "./features/errors/ErrorToast";
-import { thunkApiSubscribeAuthEvents } from "./features/auth/authSlice";
-import routes from "./constants/routes";
+import {
+  thunkApiSubscribeAuthEvents,
+  thunkRestoreAuthInfo,
+} from "./features/auth/authSlice";
+import ProtectedRoute from "./features/auth/ProtectedRoute";
+import Logout from './features/auth/Logout';
 
-function App({ isLoggedIn, subscribeApiAuthEvents }) {
-  const history = useHistory();
-
+function App({ subscribeApiAuthEvents, restoreAuthInfo }) {
   React.useEffect(() => {
     subscribeApiAuthEvents();
-  }, [subscribeApiAuthEvents]);
-
-  React.useEffect(() => {
-    if (!isLoggedIn) {
-      history.push(`/${routes.login}`);
-    }
-  }, [isLoggedIn, history]);
+    restoreAuthInfo();
+  }, [subscribeApiAuthEvents, restoreAuthInfo]);
 
   const theme = createMuiTheme({
     palette: {
@@ -62,12 +59,15 @@ function App({ isLoggedIn, subscribeApiAuthEvents }) {
               <Route path={`/${routeConsts.login}`}>
                 <Login />
               </Route>
-              <Route path={`/${routeConsts.orderManagement}`}>
+              <Route path={`/${routeConsts.logout}`}>
+                <Logout />
+              </Route>
+              <ProtectedRoute path={`/${routeConsts.orderManagement}`}>
                 <OrderManagement />
-              </Route>
-              <Route path={`/${routeConsts.orderProduction}`}>
+              </ProtectedRoute>
+              <ProtectedRoute path={`/${routeConsts.orderProduction}`}>
                 <OrderProduction />
-              </Route>
+              </ProtectedRoute>
               <Redirect exact from="/" to={`/${routeConsts.orderManagement}`} />
             </Switch>
           </section>
@@ -79,13 +79,14 @@ function App({ isLoggedIn, subscribeApiAuthEvents }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  isLoggedIn: state.auth.loggedIn,
-});
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = (dispatch) => ({
   subscribeApiAuthEvents: () => {
     dispatch(thunkApiSubscribeAuthEvents());
+  },
+  restoreAuthInfo: () => {
+    dispatch(thunkRestoreAuthInfo());
   },
 });
 
