@@ -7,6 +7,7 @@ export const authSlice = createSlice({
   name: "auth",
   initialState: {
     loggedIn: false,
+    userName: null,
     token: null,
     role: null,
   },
@@ -14,11 +15,13 @@ export const authSlice = createSlice({
     apiLogin: () => {},
     setAuth: (state, action) => {
       state.loggedIn = true;
+      state.userName = action.payload.userIDName;
       state.token = action.payload.token;
       state.role = action.payload.role;
     },
     resetAuth: (state) => {
       state.loggedIn = false;
+      state.userName = null;
       state.token = null;
       state.role = null;
     },
@@ -40,7 +43,7 @@ export const thunkApiLogin = (userIDName, password) => async (dispatch) => {
       "auth-info",
       JSON.stringify({ ...authInfo, userIDName })
     );
-    dispatch(setAuth(authInfo));
+    dispatch(setAuth({ ...authInfo, userIDName }));
   } catch (e) {
     if (e.response) {
       dispatch(
@@ -57,9 +60,14 @@ export const thunkApiLogin = (userIDName, password) => async (dispatch) => {
 };
 
 export const thunkApiSubscribeAuthEvents = () => async (dispatch) => {
-  api.on("404", () => {
+  api.on("401", () => {
     dispatch(resetAuth());
   });
+};
+
+export const thunkRestoreAuthInfo = () => async (dispatch) => {
+  const authInfo = JSON.parse(localStorage.getItem("auth-info"));
+  authInfo && dispatch(setAuth(authInfo));
 };
 
 export default authSlice.reducer;
