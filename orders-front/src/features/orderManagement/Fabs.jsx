@@ -24,6 +24,7 @@ export default function Fabs({
   categoriesMenu,
   userMadeChanges,
   handleItemsMenuButtonClick,
+  order,
 }) {
   const history = useHistory();
   const { url } = useRouteMatch();
@@ -31,13 +32,25 @@ export default function Fabs({
 
   return (
     <div className={classes.root}>
-      {!Object.keys(categoriesMenu).length ? null : (
-        <Fab color="default" onClick={handleItemsMenuButtonClick} size="small">
-          <MoreVert />
-        </Fab>
-      )}
+      {
+        //Object.keys(categoriesMenu).length &&
+        order && !!order.avaliableActions.length && (
+          <Fab
+            color="default"
+            onClick={handleItemsMenuButtonClick}
+            size="small"
+          >
+            <MoreVert />
+          </Fab>
+        )
+      }
       {!userMadeChanges ? null : (
-        <Fab color="primary" onClick={() => {history.push(`${url}/${orderManagementRoutes.summary}`);}}>
+        <Fab
+          color="primary"
+          onClick={() => {
+            history.push(`${url}/${orderManagementRoutes.summary}`);
+          }}
+        >
           <Check />
         </Fab>
       )}

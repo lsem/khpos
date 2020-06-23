@@ -341,6 +341,7 @@ function OrderManagement({
           </div>
 
           <Fabs
+            order={order}
             categoriesMenu={categoriesMenu}
             userMadeChanges={userMadeChanges}
             handleItemsMenuButtonClick={handleItemsMenuButtonClick}

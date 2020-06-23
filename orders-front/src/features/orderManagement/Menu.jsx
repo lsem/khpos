@@ -1,9 +1,9 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  FormControlLabel,
-  Checkbox,
-  Divider,
+  //FormControlLabel,
+  //Checkbox,
+  //Divider,
   Menu,
   MenuItem,
 } from "@material-ui/core";
@@ -25,11 +25,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function OrderMenu({
   order,
-  showZeros,
+  //showZeros,
   setShowZeros,
-  categoriesMenu,
+  //categoriesMenu,
   anchorItemsMenu,
-  handelCategoryCheck,
+  //handelCategoryCheck,
   handleItemsMenuClose,
   handleChangeOrderStatus,
 }) {
@@ -57,7 +57,7 @@ export default function OrderMenu({
           </MenuItem>
         ))}
 
-      <Divider />
+      {/* <Divider />
 
       <FormControlLabel
         control={
@@ -88,7 +88,7 @@ export default function OrderMenu({
           }
           label={k}
         />
-      ))}
+      ))} */}
     </Menu>
   );
 }
