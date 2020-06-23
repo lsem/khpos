@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import api from "../../api";
 import { setError } from "../errors/errorSlice";
+import extractResponseError from "../../helpers/extractResponseError";
 
 export const authSlice = createSlice({
   name: "auth",
@@ -45,17 +46,11 @@ export const thunkApiLogin = (userIDName, password) => async (dispatch) => {
     );
     dispatch(setAuth({ ...authInfo, userIDName }));
   } catch (e) {
-    if (e.response) {
-      dispatch(
-        setError(
-          `Не вдалося автентифікуватись на сервері: ${await e.response.text()}`
-        )
-      );
-    } else {
-      dispatch(
-        setError(`Не вдалося автентифікуватись на сервері: ${e.message}`)
-      );
-    }
+    dispatch(
+      setError(
+        await extractResponseError("Не вдалося автентифікуватись на сервері", e)
+      )
+    );
   }
 };
 

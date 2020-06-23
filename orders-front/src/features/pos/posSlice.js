@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import api from "../../api";
 import { setError } from "../errors/errorSlice";
+import extractResponseError from "../../helpers/extractResponseError";
 
 export const posSlice = createSlice({
   name: "pos",
@@ -33,7 +34,10 @@ export const thunkGetPosFromApi = () => async (dispatch) => {
   } catch (e) {
     dispatch(
       setError(
-        `Не вдалося отримати точки продажу з сервера: ${await e.response.text()}`
+        await extractResponseError(
+          "Не вдалося отримати точки продажу з сервера",
+          e
+        )
       )
     );
   }

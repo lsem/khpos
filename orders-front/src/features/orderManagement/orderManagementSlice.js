@@ -4,6 +4,7 @@ import api from "../../api";
 
 import orderStatuses from "../../constants/orderStatuses";
 import { setError } from "../errors/errorSlice";
+import extractResponseError from "../../helpers/extractResponseError";
 
 export const orderManagementSlice = createSlice({
   name: "orderManagement",
@@ -59,7 +60,10 @@ export const thunkApiGetDayByPos = (date, posId) => async (dispatch) => {
   } catch (e) {
     dispatch(
       setError(
-        `Не вдалося отримати замовлення з сервера: ${await e.response.text()}`
+        await extractResponseError(
+          "Не вдалося отримати замовлення з сервера",
+          e
+        )
       )
     );
   }
@@ -87,7 +91,10 @@ export const thunkApiGetDayAllPos = (date) => async (dispatch) => {
   } catch (e) {
     dispatch(
       setError(
-        `Не вдалося отримати замовлення з сервера: ${await e.response.text()}`
+        await extractResponseError(
+          "Не вдалося отримати замовлення з сервера",
+          e
+        )
       )
     );
   }
@@ -106,7 +113,7 @@ export const thunkChangeDayStatus = (date, posId, status) => async (
   } catch (e) {
     dispatch(
       setError(
-        `Не вдалося змінити статус замовлення: ${await e.response.text()}`
+        await extractResponseError("Не вдалося змінити статус замовлення", e)
       )
     );
   }
@@ -126,9 +133,7 @@ export const thunkApiPatchDay = (date, posId, items) => async (dispatch) => {
     );
     dispatch(thunkApiGetDayByPos(date, posId));
   } catch (e) {
-    dispatch(
-      setError(`Не вдалося зберегти замовлення: ${await e.response.text()}`)
-    );
+    dispatch(await extractResponseError("Не вдалося зберегти замовлення", e));
   }
 };
 
