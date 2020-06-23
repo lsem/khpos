@@ -29,7 +29,7 @@ const {
 } = orderManagementSlice.actions;
 
 //thunks
-export const thunkApiGetDay = (date, posId) => async (dispatch) => {
+export const thunkApiGetDayByPos = (date, posId) => async (dispatch) => {
   dispatch(apiGetDay());
 
   try {
@@ -65,6 +65,34 @@ export const thunkApiGetDay = (date, posId) => async (dispatch) => {
   }
 };
 
+export const thunkApiGetDayAllPos = (date) => async (dispatch) => {
+  dispatch(apiGetDay());
+
+  try {
+    const data = await api
+      .get(`total?day=${moment(date).format("YYYY-MM-DD")}`)
+      .json();
+
+    dispatch(
+      setOrder({
+        ...data,
+        items: data.items.map((i) => ({
+          ...i,
+          category: "fake",
+          count: i.ordered,
+        })),
+        avaliableActions: [],
+      })
+    );
+  } catch (e) {
+    dispatch(
+      setError(
+        `Не вдалося отримати замовлення з сервера: ${await e.response.text()}`
+      )
+    );
+  }
+};
+
 export const thunkChangeDayStatus = (date, posId, status) => async (
   dispatch
 ) => {
@@ -74,7 +102,7 @@ export const thunkChangeDayStatus = (date, posId, status) => async (
     await api.post(
       `dayorder/${posId}/${status}?day=${moment(date).format("YYYY-MM-DD")}`
     );
-    dispatch(thunkApiGetDay(date, posId));
+    dispatch(thunkApiGetDayByPos(date, posId));
   } catch (e) {
     dispatch(
       setError(
@@ -96,7 +124,7 @@ export const thunkApiPatchDay = (date, posId, items) => async (dispatch) => {
         },
       }
     );
-    dispatch(thunkApiGetDay(date, posId));
+    dispatch(thunkApiGetDayByPos(date, posId));
   } catch (e) {
     dispatch(
       setError(`Не вдалося зберегти замовлення: ${await e.response.text()}`)
