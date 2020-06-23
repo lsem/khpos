@@ -45,8 +45,6 @@ export default function OrderMenu({
       disableAutoFocusItem
       variant="menu"
     >
-      <MenuItem disabled>Змінити статус:</MenuItem>
-
       {order &&
         order.avaliableActions.map((a, i) => (
           <MenuItem

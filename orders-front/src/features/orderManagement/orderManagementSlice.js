@@ -50,9 +50,8 @@ export const thunkApiGetDayByPos = (date, posId) => async (dispatch) => {
             count: i.ordered,
           })),
           avaliableActions: [
-            { id: "open", name: "Відкрите" },
-            { id: "close", name: "Закрите" },
-            { id: "finalize", name: "Прийняте" },
+            { id: "close", name: "Закрити" },
+            { id: "finalize", name: "Прийняти" },
           ],
         })
       );
