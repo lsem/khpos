@@ -19,7 +19,6 @@ function PosSelect({
   variant,
   size,
   addAll,
-  allSelectedByDefault,
   style,
   value,
 }) {
@@ -34,15 +33,15 @@ function PosSelect({
   React.useEffect(() => {
     if (!posItems) return;
     if (addAll) {
-      const allPos = { posID: AllPosId, posIDName: "ВСІ" };
-      setItemsView([allPos, ...posItems]);
-      if (allSelectedByDefault) {
-        onChange && onChange(allPos);
+      const allPosItem = { posID: AllPosId, posIDName: "ВСІ" };
+      setItemsView([allPosItem, ...posItems]);
+      if (!value) {
+        onChange && onChange(allPosItem.posID, allPosItem.posIDName);
       }
     } else {
       setItemsView([...posItems]);
     }
-  }, [posItems, addAll, allSelectedByDefault, onChange]);
+  }, [posItems, addAll, value, onChange]);
 
   React.useEffect(() => {
     setAnchorPosMenu(null);
@@ -58,7 +57,9 @@ function PosSelect({
           setAnchorPosMenu(e.currentTarget);
         }}
       >
-        {value ? value.posIDName : "Точка продажу.."}
+        {value
+          ? itemsView.find((i) => i.posID === value).posIDName
+          : "Точка продажу.."}
         <ArrowDropDown style={{ margin: "0 -10px 0 10px" }} />
       </Button>
       <Menu
@@ -75,12 +76,11 @@ function PosSelect({
         variant="menu"
       >
         {itemsView
-          ? itemsView.map((p, i) => (
+          ? itemsView.map((p) => (
               <MenuItem
-                key={i}
-                value={p.posID}
+                key={p.posID}
                 onClick={() => {
-                  onChange && onChange(p);
+                  onChange && onChange(p.posID, p.posIDName);
                 }}
               >
                 {p.posIDName}

@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import KhDatePicker from "../datePicker/KhDatePicker";
 import PosSelect from "../pos/PosSelect";
+import userRoles from "../../constants/userRoles";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -13,16 +14,21 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     margin: `${theme.spacing(2)}px 0`,
-  }
+  },
 }));
 
 function OptionsBar({
   orderDate,
-  pos,
+  posId,
   handleDateChange,
-  handlePosChange
+  handlePosChange,
+  userRole,
 }) {
   const classes = useStyles();
+
+  const canAccessAllPos = (role) => {
+    return [userRoles.admin, userRoles.prodStaff].includes(role);
+  };
 
   return (
     <div className={classes.root}>
@@ -32,7 +38,12 @@ function OptionsBar({
         style={{ margin: 5 }}
       />
 
-      <PosSelect style={{ margin: 5 }} onChange={handlePosChange} value={pos} />
+      <PosSelect
+        style={{ margin: 5 }}
+        onChange={handlePosChange}
+        value={posId}
+        addAll={canAccessAllPos(userRole)}
+      />
     </div>
   );
 }

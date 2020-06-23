@@ -8,7 +8,7 @@ import { Typography, CircularProgress } from "@material-ui/core";
 import moment from "moment";
 import _ from "lodash";
 import {
-  thunkApiGetDay,
+  thunkApiGetDayByPos,
   thunkApiPatchDay,
   thunkChangeDayStatus,
 } from "./orderManagementSlice";
@@ -21,6 +21,8 @@ import OrderMenu from "./Menu";
 import QuantityDialog from "./QuantityDialog";
 import ItemLog from "./ItemLog";
 import OrderSummary from "./OrderSummary";
+import { thunkApiGetDayAllPos } from "./orderManagementSlice";
+import { AllPosId } from "../pos/PosSelect";
 //#endregion
 
 //#region STYLES
@@ -48,7 +50,15 @@ const useStyles = makeStyles((theme) => ({
 
 //#endregion
 
-function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
+function OrderManagement({
+  getDay,
+  saveDay,
+  changeDayStatus,
+  order,
+  error,
+  userRole,
+  getDayAllPos,
+}) {
   const classes = useStyles();
   const { path } = useRouteMatch();
   const messageBox = useMessageBox();
@@ -57,7 +67,8 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const [orderDate, setOrderDate] = React.useState(
     moment().add(1, "days").valueOf()
   );
-  const [pos, setPos] = React.useState(null);
+  const [posId, setPosId] = React.useState(null);
+  const [posName, setPosName] = React.useState(null);
   const [showQuantityDialog, setShowQuantityDialog] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [categoriesMenu, setCategoriesMenu] = React.useState({});
@@ -72,8 +83,14 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
   //#region EFFECTS
   React.useEffect(() => {
-    if (pos) getDay(moment(orderDate).valueOf(), pos.posID);
-  }, [orderDate, pos, getDay]);
+    if (!posId) return;
+
+    if (posId === AllPosId) {
+      getDayAllPos(moment(orderDate).valueOf())
+    } else {
+      getDay(moment(orderDate).valueOf(), posId);
+    }
+  }, [orderDate, posId, getDay, getDayAllPos]);
 
   React.useEffect(() => {
     if (order) {
@@ -165,7 +182,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
     }
   };
 
-  const handlePosChange = (newPos) => {
+  const handlePosChange = (newPosId, newPosName) => {
     if (userMadeChanges) {
       messageBox({
         variant: "prompt",
@@ -174,11 +191,13 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
         description: "В замовленні є незбережені зміни. Відхилити?",
       })
         .then(() => {
-          setPos(newPos);
+          setPosId(newPosId);
+          setPosName(newPosName);
         })
         .catch(() => {});
     } else {
-      setPos(newPos);
+      setPosId(newPosId);
+      setPosName(newPosName);
     }
   };
 
@@ -198,7 +217,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   };
 
   const handleItemClick = (item) => {
-    if (order.status !== orderStatuses.FINALIZED) {
+    if (order.status !== orderStatuses.FINALIZED && posId !== AllPosId) {
       setSelectedItem({ ...item });
       setShowQuantityDialog(true);
     }
@@ -244,7 +263,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
   const handleSaveDayClick = () => {
     saveDay(
       orderDate,
-      pos.posID,
+      posId,
       items
         .filter((i) => i.count && i.oldCount !== i.count)
         .map((i) => ({ goodID: i.goodID, count: i.count }))
@@ -260,11 +279,11 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
         description: "В замовленні є незбережені зміни. Відхилити?",
       })
         .then(() => {
-          changeDayStatus(orderDate, pos.posID, status);
+          changeDayStatus(orderDate, posId, status);
         })
         .catch(() => {});
     } else {
-      changeDayStatus(orderDate, pos.posID, status);
+      changeDayStatus(orderDate, posId, status);
     }
     setAnchorItemsMenu(null);
   };
@@ -278,7 +297,7 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
       </Route>
       <Route exact path={`${path}/${orderManagementRoutes.summary}`}>
         <OrderSummary
-          pos={pos}
+          pos={posName}
           items={items}
           orderDate={orderDate}
           handleSaveDayClick={handleSaveDayClick}
@@ -289,12 +308,13 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
           <div className={classes.root}>
             <OptionsBar
               orderDate={orderDate}
-              pos={pos}
+              posId={posId}
               handleDateChange={handleDateChange}
               handlePosChange={handlePosChange}
+              userRole={userRole}
             />
 
-            {order && pos && (
+            {order && posId && (
               <ItemsTable
                 orderStatus={order.status}
                 handleSort={handleTableSort}
@@ -305,13 +325,13 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
               />
             )}
 
-            {!pos && (
+            {!posId && (
               <Typography variant="h5" className={classes.actionHint}>
                 оберіть точку продажу
               </Typography>
             )}
 
-            {pos && !order && !error && (
+            {posId && !order && !error && (
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <CircularProgress style={{ margin: "30px auto" }} />
               </div>
@@ -360,13 +380,20 @@ function OrderManagement({ getDay, saveDay, changeDayStatus, order, error }) {
 
 const mapStateToProps = (state) => ({
   order: state.orderManagement.order,
+  userRole: state.auth.role,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getDay: (date, posID) => {
-    dispatch(thunkApiGetDay(date, posID));
+    dispatch(thunkApiGetDayByPos(date, posID));
+  },
+  getDayAllPos: (date) => {
+    dispatch(thunkApiGetDayAllPos(date));
   },
   saveDay: (date, posID, items) => {
+    dispatch(thunkApiPatchDay(date, posID, items));
+  },
+  getAll: (date, posID, items) => {
     dispatch(thunkApiPatchDay(date, posID, items));
   },
   changeDayStatus: (date, posID, status) => {

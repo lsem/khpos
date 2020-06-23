@@ -200,7 +200,7 @@ export default function ItemsTable({
               <td>{item.goodName}</td>
 
               <td>
-                {!!item.history.length && (
+                {!!item.history && !!item.history.length && (
                   <History
                     color="disabled"
                     onClick={(e) => {
@@ -216,7 +216,7 @@ export default function ItemsTable({
 
               <td>
                 {item.count}
-                {item.status !== "Default" && (
+                {item.status && item.status !== "Default" && (
                   <span className={classes.aster}>*</span>
                 )}
                 <Typography variant="caption" className={classes.cellHint}>
