@@ -58,7 +58,7 @@ function PosSelect({
         }}
       >
         {value
-          ? itemsView.find((i) => i.posID === value).posIDName
+          ? itemsView && itemsView.find((i) => i.posID === value).posIDName
           : "Точка продажу.."}
         <ArrowDropDown style={{ margin: "0 -10px 0 10px" }} />
       </Button>
