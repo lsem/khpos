@@ -86,7 +86,7 @@ function OrderManagement({
     if (!posId) return;
 
     if (posId === AllPosId) {
-      getDayAllPos(moment(orderDate).valueOf())
+      getDayAllPos(moment(orderDate).valueOf());
     } else {
       getDay(moment(orderDate).valueOf(), posId);
     }
@@ -100,11 +100,13 @@ function OrderManagement({
           oldCount: i.count,
         }))
       );
-      setShowZeros(order.status === orderStatuses.OPENED);
+      setShowZeros(
+        order.status !== orderStatuses.FINALIZED && posId !== AllPosId
+      );
       setTableSorting(null);
       setUserMadeChanges(false);
     }
-  }, [order]);
+  }, [order, posId]);
 
   React.useEffect(() => {
     const itemsViewFromItems = items.filter(
