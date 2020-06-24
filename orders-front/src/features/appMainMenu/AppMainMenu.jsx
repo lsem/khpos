@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 import routeConsts from "../../constants/routes";
-import { Assignment, Build } from "@material-ui/icons";
+import { Assignment } from "@material-ui/icons";
 
 const drawerWidth = 240;
 
@@ -46,21 +46,6 @@ function AppMainMenu({ showDrawer, closeDrawer }) {
           <Assignment />
         </ListItemIcon>
         <ListItemText primary={"Замовлення"} />
-      </ListItem>
-      <Divider />
-      <ListItem
-        button
-        component={NavLink}
-        to={`/${routeConsts.orderProduction}`}
-        activeClassName="Mui-selected"
-        onClick={() => {
-          closeDrawer();
-        }}
-      >
-        <ListItemIcon style={{minWidth: 36}}>
-          <Build />
-        </ListItemIcon>
-        <ListItemText primary={"Виробництво"} />
       </ListItem>
       <Divider />
     </List>

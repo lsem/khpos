@@ -7,7 +7,6 @@ import { connect } from "react-redux";
 
 import ApplicationBar from "./features/appBar/ApplicationBar";
 import OrderManagement from "./features/orderManagement/OrderManagement";
-import OrderProduction from "./features/orderProduction/OrderProduction";
 import AppMainMenu from "./features/appMainMenu/AppMainMenu";
 import { MessageBoxServiceProvider } from "./features/messageBox/MessageBoxService";
 import routeConsts from "./constants/routes";
@@ -64,9 +63,6 @@ function App({ subscribeApiAuthEvents, restoreAuthInfo }) {
               </Route>
               <ProtectedRoute path={`/${routeConsts.orderManagement}`}>
                 <OrderManagement />
-              </ProtectedRoute>
-              <ProtectedRoute path={`/${routeConsts.orderProduction}`}>
-                <OrderProduction />
               </ProtectedRoute>
               <Redirect exact from="/" to={`/${routeConsts.orderManagement}`} />
             </Switch>
