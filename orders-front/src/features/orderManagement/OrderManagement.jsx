@@ -5,6 +5,8 @@ import { Switch, Route, Prompt, useRouteMatch } from "react-router-dom";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, CircularProgress } from "@material-ui/core";
+import green from "@material-ui/core/colors/green";
+import orange from "@material-ui/core/colors/orange";
 import moment from "moment";
 import _ from "lodash";
 import {
@@ -23,16 +25,31 @@ import ItemLog from "./ItemLog";
 import OrderSummary from "./OrderSummary";
 import { thunkApiGetDayAllPos } from "./orderManagementSlice";
 import { AllPosId } from "../pos/PosSelect";
+import classNames from "classnames";
 //#endregion
 
 //#region STYLES
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: "0 16px",
+    boxSizing: "border-box",
+    margin: 0,
+    minHeight: "100%",
+    paddingTop: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
     [theme.breakpoints.down("xs")]: {
-      margin: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
     },
+    transition: "background-color 0.2s",
+    backgroundColor: theme.palette.background.default,
+  },
+  bgGreen: {
+    backgroundColor: green[100],
+  },
+  bgOrange: {
+    backgroundColor: orange[100],
   },
   unselectable: {
     userSelect: "none",
@@ -307,7 +324,16 @@ function OrderManagement({
       </Route>
       <Route path={`${path}`}>
         <React.Fragment>
-          <div className={classes.root}>
+          <div
+            className={classNames(classes.root, {
+              [classes.bgGreen]: !!(
+                order && order.status === orderStatuses.OPENED
+              ),
+              [classes.bgOrange]: !!(
+                order && order.status === orderStatuses.CLOSED
+              ),
+            })}
+          >
             <OptionsBar
               orderDate={orderDate}
               posId={posId}
