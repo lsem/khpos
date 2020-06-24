@@ -8,12 +8,11 @@ import userRoles from "../../constants/userRoles";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position: "relative",
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "center",
-    margin: `${theme.spacing(2)}px 0`,
+    marginBottom: theme.spacing(2),
   },
 }));
 

@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
       },
       "&:nth-child(3)": {
         paddingRight: theme.spacing(2),
+        paddingLeft: theme.spacing(1),
         width: "1%",
         whiteSpace: "nowrap",
         textAlign: "right",
