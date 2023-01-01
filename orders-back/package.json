@@ -48,7 +48,7 @@
     "source-map": "^0.7.3",
     "source-map-support": "^0.5.19",
     "ts-mocha": "^7.0.0",
-    "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths": "^3.10.1",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3"
   }
